@@ -1,0 +1,13 @@
+/.vs
+/Server/x64 
+*.exe 
+*.ilk 
+*.pdb 
+*.log 
+*.pch 
+*.idb 
+*.tlog 
+*.lastbuildstate 
+*.suo 
+*.db 
+
