@@ -32,6 +32,12 @@ public:
 
 	void Update(float elapsedTime);
 
+	void Foward(float elapsedTimer);
+	void Backward(float elapsedTimer);
+	void Left(float elapsedTimer);
+	void Right(float elapsedTimer);
+	void updateFront();
+
 	void AddForce(float x, float y, float z, float elapsedTime);
 
 private:
@@ -43,6 +49,7 @@ private:
 	XMFLOAT3 m_forceX;
 	float m_mass = 0.f;
 	float m_yaw;
+	float m_speed;
 
 	// 타입(캐릭터인지, 몬스터인지, 총알인지)
 	int m_type = TYPE_DEFAULT;
