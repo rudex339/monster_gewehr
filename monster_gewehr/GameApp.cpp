@@ -1,4 +1,5 @@
 #include "common/d3dUtil.h"
+#include "RenderSysyem.h"
 #include "GameApp.h"
 
 GameApp::GameApp(HINSTANCE hInstance)
@@ -8,6 +9,7 @@ GameApp::GameApp(HINSTANCE hInstance)
 
 GameApp::~GameApp()
 {
+	world->destroyWorld();
 }
 
 bool GameApp::Initialize()
@@ -15,7 +17,7 @@ bool GameApp::Initialize()
 	if (!D3DApp::Initialize())
 		return false;
 	
-	//BuildObjects();
+	BuildObjects();
 
 	return true;
 }
@@ -27,21 +29,11 @@ void GameApp::OnResize()
 
 void GameApp::Update(const GameTimer& gt)
 {
+	
 
-}
-
-
-void GameApp::Draw(const GameTimer& gt)
-{
-	// Reuse the memory associated with command recording.
-	// We can only reset when the associated command lists have finished execution on the GPU.
 	ThrowIfFailed(mDirectCmdListAlloc->Reset());
-
-	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
-	// Reusing the command list reuses memory.
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 
-	// Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
@@ -55,6 +47,8 @@ void GameApp::Draw(const GameTimer& gt)
 
 	// Specify the buffers we are going to render to.
 	mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
+
+	world->tick(gt.DeltaTime());
 
 	// Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -75,6 +69,20 @@ void GameApp::Draw(const GameTimer& gt)
 	// done for simplicity.  Later we will show how to organize our rendering code
 	// so we do not have to wait per frame.
 	FlushCommandQueue();
+}
+
+
+void GameApp::Draw(const GameTimer& gt)
+{
+	
+}
+
+void GameApp::BuildObjects()
+{
+	world = ECS::World::createWorld();
+
+	ECS::EntitySystem* renderSystem = world->registerSystem(new RenderSystem(mCommandList.Get()));
+
 }
 
 
