@@ -128,13 +128,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CAPObject.cpp" />
-    <ClCompile Include="CAPObjectMgr.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="protocol.h" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CAPGlobal.h" />
     <ClInclude Include="CAPObject.h" />
-    <ClInclude Include="CAPObjectMgr.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -21,7 +21,10 @@
     <ClCompile Include="CAPObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="CAPObjectMgr.cpp">
+    <ClCompile Include="protocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -30,12 +33,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="CAPObject.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CAPGlobal.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CAPObjectMgr.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

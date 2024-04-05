@@ -1,4 +1,5 @@
 #pragma once
+// tcp/ip용 헤더들
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
 
 #include <winsock2.h> // 윈속2 메인 헤더
@@ -11,42 +12,70 @@
 
 #pragma comment(lib, "ws2_32") // ws2_32.lib 링크
 
-// 소켓 함수 오류 출력 후 종료
-void err_quit(const char* msg)
+// directx 12 헤더
+#pragma commet(lib, "d3d12.lib");
+#include <DirectXMath.h>
+#include <DirectXPackedVector.h>
+#include <DirectXColors.h>
+#include <DirectXCollision.h>
+
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <mutex>
+#include "protocol.h"
+
+using namespace DirectX;
+using namespace DirectX::PackedVector;
+
+namespace Vector3
 {
-	LPVOID lpMsgBuf;
-	FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, WSAGetLastError(),
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(char*)&lpMsgBuf, 0, NULL);
-	MessageBoxA(NULL, (const char*)lpMsgBuf, msg, MB_ICONERROR);
-	LocalFree(lpMsgBuf);
-	exit(1);
+	inline XMFLOAT3 Add(const XMFLOAT3& f1, const XMFLOAT3& f2)
+	{
+		XMFLOAT3 result;
+		XMStoreFloat3(&result, XMLoadFloat3(&f1) + XMLoadFloat3(&f2));
+		return result;
+	}
+
+	inline XMFLOAT3 Sub(const XMFLOAT3& f1, const XMFLOAT3& f2)
+	{
+		XMFLOAT3 result;
+		XMStoreFloat3(&result, XMLoadFloat3(&f1) - XMLoadFloat3(&f2));
+		return result;
+	}
+
+	inline XMFLOAT3 Mul(const XMFLOAT3& f1, const XMFLOAT3& f2)
+	{
+		XMFLOAT3 result;
+		XMStoreFloat3(&result, XMLoadFloat3(&f1) * XMLoadFloat3(&f2));
+		return result;
+	}
+
+	inline float Dot(const XMFLOAT3& f1, const XMFLOAT3& f2)
+	{
+		XMFLOAT3 result;
+		XMStoreFloat3(&result, XMVector3Dot(XMLoadFloat3(&f1), XMLoadFloat3(&f2)));
+		return result.x;
+	}
+
+	inline XMFLOAT3 Cross(const XMFLOAT3& f1, const XMFLOAT3& f2)
+	{
+		XMFLOAT3 result;
+		XMStoreFloat3(&result, XMVector3Cross(XMLoadFloat3(&f1), XMLoadFloat3(&f2)));
+		return result;
+	}
+
+	inline XMFLOAT3 Normalize(const XMFLOAT3& f)
+	{
+		XMFLOAT3 result;
+		XMStoreFloat3(&result, XMVector3Normalize(XMLoadFloat3(&f)));
+		return result;
+	}
+
+
 }
 
-// 소켓 함수 오류 출력
-void err_display(const char* msg)
-{
-	LPVOID lpMsgBuf;
-	FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, WSAGetLastError(),
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(char*)&lpMsgBuf, 0, NULL);
-	printf("[%s] %s\n", msg, (char*)lpMsgBuf);
-	LocalFree(lpMsgBuf);
-}
-
-// 소켓 함수 오류 출력
-void err_display(int errcode)
-{
-	LPVOID lpMsgBuf;
-	FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, errcode,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(char*)&lpMsgBuf, 0, NULL);
-	printf("[오류] %s\n", (char*)lpMsgBuf);
-	LocalFree(lpMsgBuf);
-}
+void err_quit(const char* msg);
+void err_display(const char* msg);
+void err_display(int errnum);
