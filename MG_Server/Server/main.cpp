@@ -1,11 +1,4 @@
-#include "stdafx.h"
-
-#define SERVERPORT 9234
-#define BUFSIZE 50
-
-
-DWORD WINAPI Calculate(LPVOID arg);			// 자동차 정보 취합 및 충돌체크
-DWORD WINAPI ProcessClient(LPVOID arg);		// 클라이언트와 송수신
+#include "main.h"
 
 int main(int argc, char* argv[])
 {
@@ -20,9 +13,9 @@ int main(int argc, char* argv[])
 	if (listen_sock == INVALID_SOCKET) err_quit("socket()");
 
 	// 리시브 타임아웃
-	/*DWORD optval = 10;
+	DWORD optval = 10;
 	retval = setsockopt(listen_sock, SOL_SOCKET, SO_RCVTIMEO,
-		(const char*)&optval, sizeof(optval));*/
+		(const char*)&optval, sizeof(optval));
 
 	// nagle off
 	/*DWORD optval2 = 1;
@@ -34,7 +27,7 @@ int main(int argc, char* argv[])
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serveraddr.sin_port = htons(SERVERPORT);
+	serveraddr.sin_port = htons(SERVER_PORT);
 	retval = bind(listen_sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	if (retval == SOCKET_ERROR) err_quit("bind()");
 
@@ -78,12 +71,12 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	struct sockaddr_in clientaddr;
 	char addr[INET_ADDRSTRLEN];
 	int addrlen;
-
+	int id = 0;
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
 	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
-
+	players[id].SetSocket(client_sock);
 	while (1) {
 
 	}

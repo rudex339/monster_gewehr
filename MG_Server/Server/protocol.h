@@ -8,9 +8,17 @@ constexpr int MAX_CLIENT = 10;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
-struct PLAYER_DATA
+struct SC_PLAYER_DATA
 {
 	int id;
-	float x, y, z;
+	float x;
+	float y;
+	float z;
+	float yaw;
 
+	float hp;
+	float m_max_hp;
+
+	char wepon;
+	char armor;
 };

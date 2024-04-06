@@ -24,6 +24,7 @@
 #include <fstream>
 #include <string>
 #include <mutex>
+#include <array>
 #include "protocol.h"
 
 using namespace DirectX;
