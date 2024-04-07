@@ -32,8 +32,15 @@ Player::Player()
 	m_armor = 0;
 }
 
-void Player::Recv_Player_move()
+void Player::Recv_Player_Data()
 {
 	int retval = recv(m_socket, (char*)&sc_player_data, sizeof(sc_player_data), 0);
 
 }
+
+void Player::Send_Player_Data(SC_PLAYER_DATA& player_data)
+{
+	int retval = send(m_socket, (char*)&player_data, sizeof(player_data), 0);
+}
+
+

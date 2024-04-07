@@ -31,6 +31,7 @@ class Player : public CAPObject
 public:
 	Player();
 	~Player();
+	void Player_Init(int id);
 
 	void SetSocket(SOCKET& sock) { m_socket = sock; }
 	void SetName(std::wstring name) { m_name = name; }
@@ -45,7 +46,10 @@ public:
 	void SetWepon(char wepon) { m_wepon = wepon; }
 	void SetArmor(char armor) { m_armor = armor; }
 
-	void Recv_Player_move();
+	SC_PLAYER_DATA& GetPlayerData() { return sc_player_data; }
+
+	void Recv_Player_Data();
+	void Send_Player_Data(SC_PLAYER_DATA& player_data);
 
 protected:
 	SOCKET m_socket;

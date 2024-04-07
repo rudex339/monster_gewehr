@@ -78,7 +78,11 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
 	players[id].SetSocket(client_sock);
 	while (1) {
+		players[id].Recv_Player_Data();
 
+		for (auto& player : players) {
+			players[id].Send_Player_Data(player.GetPlayerData());
+		}
 	}
 
 	// 클라이언트 접속 종료시 자동차 정보 초기화
