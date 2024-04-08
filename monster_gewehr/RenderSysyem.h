@@ -5,24 +5,44 @@ ECS_TYPE_IMPLEMENTATION;
 
 using namespace ECS;
 
+////////////////////////////////////////////////////////////////////////////////
+
 struct ModelInfo {
 	ModelInfo() {}
 	std::string ModelTag;
 };
 
 
-class Object {
+class Object {//다음 목표
 private:
+	Object* m_pParent = NULL;
+	Object* m_pChild = NULL;
+	Object* m_pSibling = NULL;
 public:
 	std::string ShaderTag;
-
+	
+	int count_resource{ 0 };
 	void setResource() {};
+	void render() {};
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
 class Shader {
 private:
 public:
 	void prepareShader() {};
 };
+
+
+Shader* ShaderBuild(std::string ShaderName) {
+	//std::unique_ptr<shader> shader_ptr
+	//return std::move(shader_ptr)
+	return NULL;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 
 class RenderSystem :public ECS::EntitySystem
 {
@@ -35,11 +55,11 @@ public:
 	virtual void tick(World* world, float deltaTime);	
 
 	void addObject(std::string model_name, char* model_root);
-
-private:
 	void buildObject(ID3D12Device* pd3dDevice);
+private:
+	
 	void render(Object* p_object);
-
+	void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int resources);
 private:
 
 	std::unordered_map<std::string, std::unique_ptr<Shader>> m_ShaderList;

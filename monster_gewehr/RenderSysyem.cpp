@@ -9,6 +9,38 @@ RenderSystem::RenderSystem(ID3D12GraphicsCommandList* commandList)
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 }
 
+void RenderSystem::configure(World* world)
+{
+	
+}
+
+void RenderSystem::unconfigure( World* world)
+{
+	//object release
+}
+
+void RenderSystem::tick(World* world, float deltaTime)
+{
+	if (mRootSignature.Get()) mCommandList.Get()->SetGraphicsRootSignature(mRootSignature.Get());
+	if (m_pd3dCbvSrvDescriptorHeap.Get()) mCommandList.Get()->SetDescriptorHeaps(1, m_pd3dCbvSrvDescriptorHeap.GetAddressOf());
+
+    world->each<ModelInfo>([&](ECS::Entity* ent, ECS::ComponentHandle<ModelInfo> modelinfo) -> void {
+        auto it = m_ObjectList.find(modelinfo->ModelTag);
+        if (it != m_ObjectList.end()) {
+            render(m_ObjectList[modelinfo->ModelTag].get());
+        }
+        });
+}
+
+void RenderSystem::addObject(std::string model_name, char* model_root)
+{
+
+    std::unique_ptr<Object> loadObject;
+
+
+    m_ObjectList[model_name] = std::move(loadObject);
+}
+
 void RenderSystem::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[10];
@@ -196,51 +228,48 @@ void RenderSystem::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
 
-void RenderSystem::configure(World* world)
+void RenderSystem::CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int resources)
 {
-	
-}
+	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
+	d3dDescriptorHeapDesc.NumDescriptors = resources; //CBVs + SRVs 
+	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	d3dDescriptorHeapDesc.NodeMask = 0;
+	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dCbvSrvDescriptorHeap);
 
-void RenderSystem::unconfigure( World* world)
-{
-	//object release
-}
-
-void RenderSystem::tick(World* world, float deltaTime)
-{
-	if (mRootSignature.Get()) mCommandList.Get()->SetGraphicsRootSignature(mRootSignature.Get());
-	if (m_pd3dCbvSrvDescriptorHeap.Get()) mCommandList.Get()->SetDescriptorHeaps(1, m_pd3dCbvSrvDescriptorHeap.GetAddressOf());
-
-    world->each<ModelInfo>([&](ECS::Entity* ent, ECS::ComponentHandle<ModelInfo> modelinfo) -> void {
-        auto it = m_ObjectList.find(modelinfo->ModelTag);
-        if (it != m_ObjectList.end()) {
-            render(m_ObjectList[modelinfo->ModelTag].get());
-        }
-        });
-}
-
-void RenderSystem::addObject(std::string model_name, char* model_root)
-{
-
-    std::unique_ptr<Object> loadObject;
-
-
-    m_ObjectList[model_name] = std::move(loadObject);
+	m_d3dCbvCPUDescriptorNextHandle = m_d3dCbvCPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_d3dCbvGPUDescriptorNextHandle = m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	m_d3dSrvCPUDescriptorNextHandle.ptr = m_d3dSrvCPUDescriptorStartHandle.ptr = m_d3dCbvCPUDescriptorStartHandle.ptr;
+	m_d3dSrvGPUDescriptorNextHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr = m_d3dCbvGPUDescriptorStartHandle.ptr;
 }
 
 void RenderSystem::buildObject(ID3D12Device* pd3dDevice)
 {
+	int count_resource = 0;
 	CreateGraphicsRootSignature(pd3dDevice);
 	for (auto object = m_ObjectList.begin(); object != m_ObjectList.end(); ++object) {
-		object->second->setResource();
+		count_resource += object->second->count_resource;
 	}
-	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,72);
-	//shader make
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, count_resource);
+
+	//BuildDefaultLightsAndMaterials();
+	// 
+	
 
 	for (auto object = m_ObjectList.begin(); object != m_ObjectList.end(); ++object) {
 		object->second->setResource();
+		std::string shader_name = object->second->ShaderTag;
+		if (m_ShaderList.find(shader_name) == m_ShaderList.end()) {
+			std::unique_ptr<Shader>tmp(ShaderBuild(shader_name));
+			m_ShaderList.insert({ shader_name, std::move(tmp)});
+			
+		}
 	}
+	//shader make
+	//CreateShaderVariables(pd3dDevice);
 }
+
+
 
 void RenderSystem::render(Object* p_object)
 {
@@ -251,6 +280,8 @@ void RenderSystem::render(Object* p_object)
 		cur_Shader = p_object->ShaderTag;
 	}
 	//오브젝트 출력
-
+	p_object->render();
 	//
 }
+
+

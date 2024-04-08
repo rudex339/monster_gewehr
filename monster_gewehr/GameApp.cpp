@@ -79,10 +79,18 @@ void GameApp::Draw(const GameTimer& gt)
 
 void GameApp::BuildObjects()
 {
+	mCommandList.Get()->Reset(mDirectCmdListAlloc.Get(), NULL);
+
 	world = ECS::World::createWorld();
 
-	ECS::EntitySystem* renderSystem = world->registerSystem(new RenderSystem(mCommandList.Get()));
+	auto renderSystem = new RenderSystem(mCommandList.Get());
+	world->registerSystem(renderSystem);
 
+	//renderSystem->addObject("¸ðµ¨ ÀÌ¸§","¸ðµ¨ °æ·Î");
+
+	renderSystem->buildObject(md3dDevice.Get());
+
+	mTimer.Reset();
 }
 
 
