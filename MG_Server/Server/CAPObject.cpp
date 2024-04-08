@@ -32,15 +32,33 @@ Player::Player()
 	m_armor = 0;
 }
 
-void Player::Recv_Player_Data()
+void Player::Player_Init(int id)
 {
-	int retval = recv(m_socket, (char*)&sc_player_data, sizeof(sc_player_data), 0);
-
+	m_id = id;
+	m_hp = 100;
+	m_max_hp = 100;
 }
 
-void Player::Send_Player_Data(SC_PLAYER_DATA& player_data)
+void Player::SetSendBuf(void* buf, size_t size)
 {
-	int retval = send(m_socket, (char*)&player_data, sizeof(player_data), 0);
+	ZeroMemory(m_send_buf, sizeof(m_send_buf));
+	char* c = reinterpret_cast<char*>(buf);
+	memcpy(m_send_buf, c, size);
+}
+
+void Player::Recv_Player_Data()
+{
+
+	int retval = recv(m_socket, (char*)&cs_player_data, sizeof(cs_player_data), 0);
+	m_position.x = cs_player_data.x;
+	m_position.y = cs_player_data.y;
+	m_position.z = cs_player_data.z;
+	m_yaw = cs_player_data.yaw;
+}
+
+void Player::Send_Player_Data(void* buf, size_t size)
+{
+	int retval = send(m_socket, (char*)buf, size, 0);
 }
 
 

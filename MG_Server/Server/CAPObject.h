@@ -30,7 +30,7 @@ class Player : public CAPObject
 {
 public:
 	Player();
-	~Player();
+	~Player() = default; ;
 	void Player_Init(int id);
 
 	void SetSocket(SOCKET& sock) { m_socket = sock; }
@@ -46,14 +46,20 @@ public:
 	void SetWepon(char wepon) { m_wepon = wepon; }
 	void SetArmor(char armor) { m_armor = armor; }
 
-	SC_PLAYER_DATA& GetPlayerData() { return sc_player_data; }
+	SC_PLAYER_DATA& GetPlayerData();
+
+	void SetSendBuf(void* buf, size_t size);
 
 	void Recv_Player_Data();
-	void Send_Player_Data(SC_PLAYER_DATA& player_data);
+	void Send_Player_Data(void* buf, size_t size);
 
+	char m_send_buf[BUF_SIZE];
 protected:
 	SOCKET m_socket;
 	SC_PLAYER_DATA sc_player_data;
+	CS_PLAYER_DATA cs_player_data;
+
+	
 
 	std::wstring m_name;
 

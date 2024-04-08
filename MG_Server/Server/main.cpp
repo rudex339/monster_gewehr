@@ -71,7 +71,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	struct sockaddr_in clientaddr;
 	char addr[INET_ADDRSTRLEN];
 	int addrlen;
-	int id = 0;
+	int id = global_id++;
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
 	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
@@ -81,7 +81,16 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		players[id].Recv_Player_Data();
 
 		for (auto& player : players) {
-			players[id].Send_Player_Data(player.GetPlayerData());
+			SC_PLAYER_DATA sendpk;
+			sendpk.size = sizeof(SC_PLAYER_DATA);
+			sendpk.type = SC_PACKET_PLAYER_DATA;
+			sendpk.id = player.GetID();
+			sendpk.x = player.GetPosition().x;
+			sendpk.y = player.GetPosition().y;
+			sendpk.z = player.GetPosition().z;
+			sendpk.yaw = player.GetYaw();
+			//players[id].SetSendBuf(&sendpk, sendpk.size);
+			players[id].Send_Player_Data(&sendpk, sendpk.size);
 		}
 	}
 

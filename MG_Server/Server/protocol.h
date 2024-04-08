@@ -8,17 +8,28 @@ constexpr int MAX_CLIENT = 10;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
+// 패킷 타입 서버->클라
+constexpr char SC_PACKET_PLAYER_DATA = 2;
+
 struct SC_PLAYER_DATA
 {
-	int id;
-	float x;
-	float y;
-	float z;
-	float yaw;
+	UCHAR size;
+	UCHAR type;
+	INT id;
+	FLOAT x;
+	FLOAT y;
+	FLOAT z;
+	FLOAT yaw;
+};
 
-	float hp;
-	float m_max_hp;
 
-	char wepon;
-	char armor;
+struct CS_PLAYER_DATA
+{
+	UCHAR size;
+	UCHAR type;
+	INT id;
+	FLOAT x;
+	FLOAT y;
+	FLOAT z;
+	FLOAT yaw;
 };
