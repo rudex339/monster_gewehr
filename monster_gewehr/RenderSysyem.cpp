@@ -231,7 +231,7 @@ void RenderSystem::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 void RenderSystem::CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int resources)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
-	d3dDescriptorHeapDesc.NumDescriptors = resources; //CBVs + SRVs 
+	d3dDescriptorHeapDesc.NumDescriptors = 1; //CBVs + SRVs 
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -284,4 +284,8 @@ void RenderSystem::render(Object* p_object)
 	//
 }
 
-
+Shader* ShaderBuild(std::string ShaderName) {
+	//std::unique_ptr<shader> shader_ptr
+	//return std::move(shader_ptr)
+	return NULL;
+}

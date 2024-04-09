@@ -16,9 +16,14 @@ bool GameApp::Initialize()
 {
 	if (!D3DApp::Initialize())
 		return false;
-	
+	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+
 	BuildObjects();
 
+	ThrowIfFailed(mCommandList->Close());
+	ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+	FlushCommandQueue();
 	return true;
 }
 
@@ -79,7 +84,6 @@ void GameApp::Draw(const GameTimer& gt)
 
 void GameApp::BuildObjects()
 {
-	mCommandList.Get()->Reset(mDirectCmdListAlloc.Get(), NULL);
 
 	world = ECS::World::createWorld();
 

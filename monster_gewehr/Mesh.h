@@ -127,7 +127,7 @@ struct SkinnedMesh : public Mesh {
 	int								m_nSkinningBones = 0;
 
 	char(*m_ppstrSkinningBoneNames)[64]; //[m_nSkinningBones]
-	//CGameObject** m_ppSkinningBoneFrameCaches = NULL; //[m_nSkinningBones]/이건 오브젝트의 본 프레임을 찾는데 필요한거 
+	Object** m_ppSkinningBoneFrameCaches = NULL; //[m_nSkinningBones]/이건 오브젝트의 본 프레임을 찾는데 필요한거 
 
 	XMFLOAT4X4* m_pxmf4x4BindPoseBoneOffsets = NULL; //[m_nSkinningBones], Transposed
 

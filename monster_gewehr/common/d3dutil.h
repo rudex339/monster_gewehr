@@ -32,12 +32,19 @@
 
 #include "ECS.h"
 
+ECS_TYPE_IMPLEMENTATION;
+
+using namespace ECS;
 
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
+#define ANIMATION_TYPE_ONCE				0
+#define ANIMATION_TYPE_LOOP				1
+#define ANIMATION_TYPE_PINGPONG			2
 
+#define ANIMATION_CALLBACK_EPSILON		0.00165f
 
 extern const int gNumFrameResources;
 

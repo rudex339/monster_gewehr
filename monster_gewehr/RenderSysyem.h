@@ -1,9 +1,6 @@
 #pragma once
 #include <map>
-
-ECS_TYPE_IMPLEMENTATION;
-
-using namespace ECS;
+#include "Object.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -12,19 +9,6 @@ struct ModelInfo {
 	std::string ModelTag;
 };
 
-
-class Object {//다음 목표
-private:
-	Object* m_pParent = NULL;
-	Object* m_pChild = NULL;
-	Object* m_pSibling = NULL;
-public:
-	std::string ShaderTag;
-	
-	int count_resource{ 0 };
-	void setResource() {};
-	void render() {};
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,11 +19,7 @@ public:
 };
 
 
-Shader* ShaderBuild(std::string ShaderName) {
-	//std::unique_ptr<shader> shader_ptr
-	//return std::move(shader_ptr)
-	return NULL;
-};
+Shader* ShaderBuild(std::string ShaderName);;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -74,14 +54,14 @@ protected:
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_pd3dCbvSrvDescriptorHeap;
 
-	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dCbvCPUDescriptorStartHandle;
-	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorStartHandle;
-	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorStartHandle;
-	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dCbvCPUDescriptorStartHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorStartHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorStartHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
 
-	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dCbvCPUDescriptorNextHandle;
-	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorNextHandle;
-	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
-	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dCbvCPUDescriptorNextHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorNextHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
 };
 
