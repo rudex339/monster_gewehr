@@ -4,6 +4,9 @@
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
+using namespace ECS;
+
+
 
 
 class GameApp : public D3DApp
@@ -20,5 +23,11 @@ private:
     virtual void OnResize()override;
     virtual void Update(const GameTimer& gt)override;
     virtual void Draw(const GameTimer& gt)override;
+
+    void BuildObjects();
+
+protected:
+    ECS::World* world = nullptr;
+
 };
 
