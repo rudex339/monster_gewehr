@@ -41,11 +41,10 @@ int main(int argc, char* argv[])
 	int addrlen;
 	HANDLE hThread;
 
-	hThread = CreateThread(NULL, 0, Calculate,
-		0, 0, NULL);
 
 	while (1) {
 		addrlen = sizeof(clientaddr);
+
 		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
 		if (client_sock == INVALID_SOCKET) {
 			err_display("accept()");

@@ -9,23 +9,23 @@ public:
 	CAPObject();
 	~CAPObject() = default;	
 
-	void SetPostion(const XMFLOAT3& pos) { m_position = pos; }
+	void SetPostion(const DirectX::XMFLOAT3& pos) { m_position = pos; }
 	void SetPostion(float x, float y, float z);
 	void SetYaw(float yaw) { m_yaw = yaw; }
 	void SetID(int id)	{ m_id = id; }
 
-	XMFLOAT3 GetPosition() { return m_position; }
-	XMFLOAT3 GetVelocity() { return m_velocity; }
+	DirectX::XMFLOAT3 GetPosition() { return m_position; }
+	DirectX::XMFLOAT3 GetVelocity() { return m_velocity; }
 	FLOAT GetYaw() { return m_yaw; }
 	int GetID() { return m_id; }
 	PLAYER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw }; }
 
 protected:
 	
-	XMFLOAT3 m_position;
-	XMFLOAT3 m_velocity;
+	DirectX::XMFLOAT3 m_position;
+	DirectX::XMFLOAT3 m_velocity;
 	FLOAT m_yaw;
-	BoundingOrientedBox m_bounding_box;
+	DirectX::BoundingOrientedBox m_bounding_box;
 	CHAR m_id;
 };
 

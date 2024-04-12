@@ -17,17 +17,18 @@ constexpr char SC_PACKET_PLAYER_DATA = 2;
 #pragma pack(push,1)
 struct PLAYER_DATA
 {
+	
 	CHAR id = -1;
-	XMFLOAT3 pos;
-	XMFLOAT3 vel;
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
 };
 
 struct MONSTER_DATA
 {
 	CHAR id;
-	XMFLOAT3 pos;
-	XMFLOAT3 vel;
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
 };
 
@@ -44,8 +45,8 @@ struct CS_LOGIN_PACKET
 struct CS_PLAYER_PACKET
 {
 	CHAR id;
-	XMFLOAT3 pos;
-	XMFLOAT3 vel;
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
 };
 

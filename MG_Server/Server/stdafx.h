@@ -29,7 +29,6 @@
 #include "protocol.h"
 
 using namespace DirectX;
-using namespace DirectX::PackedVector;
 
 namespace Vector3
 {
