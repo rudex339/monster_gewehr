@@ -32,31 +32,70 @@ Player::Player()
 	m_armor = 0;
 }
 
-void Player::Player_Init(int id)
+Player::Player(int id, SOCKET socket)
 {
 	m_id = id;
+	m_socket = socket;
 	m_hp = 100;
 	m_max_hp = 100;
+	m_atk = 50;
+	m_def = 50;
+
+	m_ammo = 0;
+	m_mag = 0;
+
+	m_wepon = 0;
+	m_armor = 0;
+}
+
+
+void Player::SetAtkByWeapon(char weapon)
+{
+	switch (weapon)
+	{
+	case SHOT_GUN:
+		m_atk = 100;
+		break;
+	case ASSAULT_RIFLE:
+		m_atk = 30;
+		break;
+	case SNIPER:
+		m_atk = 100;
+		break;	
+	}
 }
 
 void Player::SetSendBuf(void* buf, size_t size)
 {
-	ZeroMemory(m_send_buf, sizeof(m_send_buf));
+	/*ZeroMemory(m_send_buf, sizeof(m_send_buf));
 	char* c = reinterpret_cast<char*>(buf);
-	memcpy(m_send_buf, c, size);
+	memcpy(m_send_buf, c, size);*/
 }
 
-void Player::Recv_Player_Data()
+void Player::RecvLogin()
 {
-
-	int retval = recv(m_socket, (char*)&cs_player_data, sizeof(cs_player_data), 0);
-	m_position.x = cs_player_data.x;
-	m_position.y = cs_player_data.y;
-	m_position.z = cs_player_data.z;
-	m_yaw = cs_player_data.yaw;
+	CS_LOGIN_PACKET lp;
+	int retval = recv(m_socket, (char*)&lp, sizeof(CS_LOGIN_PACKET), 0);
+	m_name = lp.name;
+	m_wepon = lp.wepon;
+	SetAtkByWeapon(m_wepon);
 }
 
-void Player::Send_Player_Data(void* buf, size_t size)
+void Player::SendLogin()
+{
+	
+}
+
+void Player::RecvPlayerData()
+{
+	int retval = recv(m_socket, (char*)&cs_player_data, sizeof(cs_player_data), 0);
+	m_position = cs_player_data.pos;
+	m_velocity = cs_player_data.vel;
+	m_yaw = cs_player_data.yaw;
+	m_id = cs_player_data.id;
+}
+
+void Player::SendPlayerData(void* buf, size_t size)
 {
 	int retval = send(m_socket, (char*)buf, size, 0);
 }

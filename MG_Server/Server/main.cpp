@@ -41,6 +41,9 @@ int main(int argc, char* argv[])
 	int addrlen;
 	HANDLE hThread;
 
+	hThread = CreateThread(NULL, 0, Calculate,
+		0, 0, NULL);
+
 	while (1) {
 		addrlen = sizeof(clientaddr);
 		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
@@ -72,26 +75,28 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	char addr[INET_ADDRSTRLEN];
 	int addrlen;
 	int id = global_id++;
+	int room_id = 0;
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
 	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
-	players[id].SetSocket(client_sock);
-	while (1) {
-		players[id].Recv_Player_Data();
 
-		for (auto& player : players) {
-			SC_PLAYER_DATA sendpk;
-			sendpk.size = sizeof(SC_PLAYER_DATA);
-			sendpk.type = SC_PACKET_PLAYER_DATA;
-			sendpk.id = player.GetID();
-			sendpk.x = player.GetPosition().x;
-			sendpk.y = player.GetPosition().y;
-			sendpk.z = player.GetPosition().z;
-			sendpk.yaw = player.GetYaw();
-			//players[id].SetSendBuf(&sendpk, sendpk.size);
-			players[id].Send_Player_Data(&sendpk, sendpk.size);
+	players.try_emplace(id, id, client_sock);
+	for (int i = 0; i < MAX_CLIENT_ROOM; ++i) {
+		if (send_players.players[i].id == -1) {
+			room_id = i;
+			send_players.players[i] = players[id].GetData();
 		}
+	}
+
+	players[id].SendPlayerData(&send_players, sizeof(send_players));
+
+	players[id].RecvLogin();
+	
+	while (1) {
+		players[id].RecvPlayerData();
+		send_players.players[room_id] = players[id].GetData();
+		players[id].SendPlayerData(&send_players, sizeof(send_players));
 	}
 
 	// 클라이언트 접속 종료시 자동차 정보 초기화

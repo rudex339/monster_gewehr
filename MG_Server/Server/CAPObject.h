@@ -15,15 +15,18 @@ public:
 	void SetID(int id)	{ m_id = id; }
 
 	XMFLOAT3 GetPosition() { return m_position; }
+	XMFLOAT3 GetVelocity() { return m_velocity; }
 	FLOAT GetYaw() { return m_yaw; }
 	int GetID() { return m_id; }
+	PLAYER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw }; }
 
 protected:
 	
 	XMFLOAT3 m_position;
-	float m_yaw;
+	XMFLOAT3 m_velocity;
+	FLOAT m_yaw;
 	BoundingOrientedBox m_bounding_box;
-	int m_id;
+	CHAR m_id;
 };
 
 class Player : public CAPObject
@@ -31,10 +34,10 @@ class Player : public CAPObject
 public:
 	Player();
 	~Player() = default; ;
-	void Player_Init(int id);
+	Player(int id, SOCKET socket);
 
 	void SetSocket(SOCKET& sock) { m_socket = sock; }
-	void SetName(std::wstring name) { m_name = name; }
+	void SetName(std::string name) { m_name = name; }
 	void SetLock() { m_lock.lock(); }
 	void SetUnLock() { m_lock.unlock(); }
 	void SetHp(float hp) { m_hp = hp; }
@@ -45,36 +48,40 @@ public:
 	void SetMag(float mag) { m_mag = mag; }
 	void SetWepon(char wepon) { m_wepon = wepon; }
 	void SetArmor(char armor) { m_armor = armor; }
+	void SetAtkByWeapon(char aromor);
 
-	SC_PLAYER_DATA& GetPlayerData();
 
 	void SetSendBuf(void* buf, size_t size);
 
-	void Recv_Player_Data();
-	void Send_Player_Data(void* buf, size_t size);
+	void RecvLogin();
+	void SendLogin();
 
-	char m_send_buf[BUF_SIZE];
+	void RecvPlayerData();
+	void SendPlayerData(void* buf, size_t size);
+
+	//char m_send_buf[BUF_SIZE];
+	char m_recv_buf[BUF_SIZE];
 protected:
 	SOCKET m_socket;
-	SC_PLAYER_DATA sc_player_data;
-	CS_PLAYER_DATA cs_player_data;
+	SC_PLAYER_PACKET sc_player_data;
+	CS_PLAYER_PACKET cs_player_data;
 
 	
 
-	std::wstring m_name;
+	std::string m_name;
 
 	std::mutex m_lock;
 
-	float m_hp;
-	float m_max_hp;
-	float m_atk;
-	float m_def;
+	FLOAT m_hp;
+	FLOAT m_max_hp;
+	FLOAT m_atk;
+	FLOAT m_def;
 
-	float m_ammo;	// ÇöÀç ÃÑÇÕ ÃÑ¾Ë(¼ÒÁöÁß Åº¾à)
-	float m_mag;	// ÇöÀç ÅºÃ¢¿¡ µé¾îÀÖ´Â Åº¾à
+	FLOAT m_ammo;	// ÇöÀç ÃÑÇÕ ÃÑ¾Ë(¼ÒÁöÁß Åº¾à)
+	FLOAT m_mag;	// ÇöÀç ÅºÃ¢¿¡ µé¾îÀÖ´Â Åº¾à
 
-	char m_wepon;
-	char m_armor;
+	CHAR m_wepon;
+	CHAR m_armor;
 
 
 };

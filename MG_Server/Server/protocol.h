@@ -8,28 +8,61 @@ constexpr int MAX_CLIENT = 10;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
-// 패킷 타입 서버->클라
+constexpr char SHOT_GUN = 1;
+constexpr char ASSAULT_RIFLE = 2;
+constexpr char SNIPER = 3;
+
 constexpr char SC_PACKET_PLAYER_DATA = 2;
 
-struct SC_PLAYER_DATA
+#pragma pack(push,1)
+struct PLAYER_DATA
 {
-	UCHAR size;
-	UCHAR type;
-	INT id;
-	FLOAT x;
-	FLOAT y;
-	FLOAT z;
+	CHAR id = -1;
+	XMFLOAT3 pos;
+	XMFLOAT3 vel;
 	FLOAT yaw;
 };
 
+struct MONSTER_DATA
+{
+	CHAR id;
+	XMFLOAT3 pos;
+	XMFLOAT3 vel;
+	FLOAT yaw;
+};
 
-struct CS_PLAYER_DATA
+// 클라 -> 서버
+
+struct CS_LOGIN_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	INT id;
-	FLOAT x;
-	FLOAT y;
-	FLOAT z;
+	CHAR name[15];
+	CHAR wepon;
+};
+
+struct CS_PLAYER_PACKET
+{
+	CHAR id;
+	XMFLOAT3 pos;
+	XMFLOAT3 vel;
 	FLOAT yaw;
 };
+
+// 패킷 타입 서버->클라
+
+struct SC_PLAYER_PACKET
+{
+	PLAYER_DATA players[MAX_CLIENT_ROOM];
+	
+};
+
+
+struct SC_OBJECT_PACKET
+{
+	PLAYER_DATA players[MAX_CLIENT_ROOM];
+	MONSTER_DATA monster;
+};
+#pragma pack (pop)
+
+
