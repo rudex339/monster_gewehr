@@ -14,6 +14,8 @@ constexpr char SNIPER = 3;
 
 constexpr char SC_PACKET_PLAYER_DATA = 2;
 
+enum class S_STATE{SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME};
+
 #pragma pack(push,1)
 struct PLAYER_DATA
 {
@@ -22,6 +24,7 @@ struct PLAYER_DATA
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
+	CHAR wepon;
 };
 
 struct MONSTER_DATA
@@ -30,6 +33,7 @@ struct MONSTER_DATA
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
+	CHAR animaition;
 };
 
 // 클라 -> 서버
@@ -50,12 +54,30 @@ struct CS_PLAYER_PACKET
 	FLOAT yaw;
 };
 
+struct CS_LOBBY_PACKET
+{
+	CHAR type;
+};
+
+struct CS_SHOP_PACKET
+{
+	CHAR type;
+	CHAR item;
+};
+
+struct CS_ROOM_PACKET
+{
+	CHAR type;
+	CHAR room_name[15];
+	INT room_num;
+
+};
+
 // 패킷 타입 서버->클라
 
 struct SC_PLAYER_PACKET
 {
-	PLAYER_DATA players[MAX_CLIENT_ROOM];
-	
+	PLAYER_DATA players[MAX_CLIENT_ROOM];	
 };
 
 

@@ -18,7 +18,7 @@ public:
 	DirectX::XMFLOAT3 GetVelocity() { return m_velocity; }
 	FLOAT GetYaw() { return m_yaw; }
 	int GetID() { return m_id; }
-	PLAYER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw }; }
+	
 
 protected:
 	
@@ -53,11 +53,13 @@ public:
 
 	void SetSendBuf(void* buf, size_t size);
 
+	PLAYER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw, m_wepon }; }
+
 	void RecvLogin();
 	void SendLogin();
 
 	void RecvPlayerData();
-	void SendPlayerData(void* buf, size_t size);
+	int SendPlayerData(void* buf, size_t size);
 
 	//char m_send_buf[BUF_SIZE];
 	char m_recv_buf[BUF_SIZE];

@@ -73,8 +73,10 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	struct sockaddr_in clientaddr;
 	char addr[INET_ADDRSTRLEN];
 	int addrlen;
+	// 이후 아이디는 데이터베이스 연동후에 고유 아이디를 배정하고 사용할 예정
 	int id = global_id++;
-	int room_id = 0;
+	int room_id = -1;
+	S_STATE state = S_STATE::IN_GAME;
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
 	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
@@ -88,18 +90,25 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		}
 	}
 
-	players[id].SendPlayerData(&send_players, sizeof(send_players));
-
 	players[id].RecvLogin();
+
+	players[id].SendPlayerData(&send_players, sizeof(send_players));
 	
 	while (1) {
-		players[id].RecvPlayerData();
-		send_players.players[room_id] = players[id].GetData();
-		players[id].SendPlayerData(&send_players, sizeof(send_players));
+		if (state == S_STATE::IN_GAME) {
+			players[id].RecvPlayerData();
+			send_players.players[room_id] = players[id].GetData();
+			int retval = players[id].SendPlayerData(&send_players, sizeof(send_players));
+			if (retval == SOCKET_ERROR) {
+				err_display("send()");
+				break;
+			}
+		}
 	}
 
 	// 클라이언트 접속 종료시 자동차 정보 초기화
-
+	players[id].SetID(-1);
+	send_players.players[room_id].id = -1;
 
 	// 소켓 닫기
 	closesocket(client_sock);

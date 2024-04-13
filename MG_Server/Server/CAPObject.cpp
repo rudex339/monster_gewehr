@@ -95,9 +95,10 @@ void Player::RecvPlayerData()
 	m_id = cs_player_data.id;
 }
 
-void Player::SendPlayerData(void* buf, size_t size)
+int Player::SendPlayerData(void* buf, size_t size)
 {
 	int retval = send(m_socket, (char*)buf, size, 0);
+	return retval;
 }
 
 
