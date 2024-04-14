@@ -42,12 +42,13 @@ int main(int argc, char* argv[])
 	HANDLE hThread;
 
 
+
 	while (1) {
 		addrlen = sizeof(clientaddr);
 
 		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
 		if (client_sock == INVALID_SOCKET) {
-			err_display("accept()");
+			
 			break;
 		}
 
@@ -95,6 +96,16 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	players[id].SendPlayerData(&send_players, sizeof(send_players));
 	
 	while (1) {
+		if (state == S_STATE::SHOP) { 
+			// item정보는 처음 login을 했을때 플레이어 데이터 보내줄때 보내줄거임
+			// 지금은 인게임 테스트가 먼저다 보니 인게임 데이터를 바로 보냄
+			int retval = players[id].RecvItemData();
+			if (retval == SOCKET_ERROR)
+				if (WSAGetLastError() == WSAETIMEDOUT)
+					continue;
+			players[id].SendItemData();
+			
+		}
 		if (state == S_STATE::IN_GAME) {
 			players[id].RecvPlayerData();
 			send_players.players[room_id] = players[id].GetData();

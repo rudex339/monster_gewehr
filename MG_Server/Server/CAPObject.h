@@ -58,6 +58,9 @@ public:
 	void RecvLogin();
 	void SendLogin();
 
+	int RecvItemData();
+	void SendItemData();
+
 	void RecvPlayerData();
 	int SendPlayerData(void* buf, size_t size);
 
@@ -68,7 +71,7 @@ protected:
 	SC_PLAYER_PACKET sc_player_data;
 	CS_PLAYER_PACKET cs_player_data;
 
-	
+	ITEM_DATA items;
 
 	std::string m_name;
 

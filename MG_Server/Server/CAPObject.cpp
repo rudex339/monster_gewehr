@@ -86,6 +86,23 @@ void Player::SendLogin()
 	
 }
 
+int Player::RecvItemData()
+{
+	CS_SHOP_PACKET shop;
+	int retval = recv(m_socket, (char*)&shop, sizeof(shop), 0);
+	if (shop.type == 1) {
+		// 여기에 아이템 구매한것
+	}
+	else {
+		// 여기에 아이템 판매한것
+	}
+	return retval;
+}
+
+void Player::SendItemData()
+{
+}
+
 void Player::RecvPlayerData()
 {
 	int retval = recv(m_socket, (char*)&cs_player_data, sizeof(cs_player_data), 0);

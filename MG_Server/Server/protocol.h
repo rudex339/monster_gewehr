@@ -14,7 +14,7 @@ constexpr char SNIPER = 3;
 
 constexpr char SC_PACKET_PLAYER_DATA = 2;
 
-enum class S_STATE{SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME};
+enum class S_STATE{LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME};
 
 #pragma pack(push,1)
 struct PLAYER_DATA
@@ -36,6 +36,16 @@ struct MONSTER_DATA
 	CHAR animaition;
 };
 
+struct ITEM_DATA
+{
+	SHORT bandage;
+	SHORT firstaidkit;
+	SHORT Adrenaline;
+	SHORT grenade;
+	SHORT flashbang;
+
+};
+
 // 클라 -> 서버
 
 struct CS_LOGIN_PACKET
@@ -54,6 +64,8 @@ struct CS_PLAYER_PACKET
 	FLOAT yaw;
 };
 
+
+// 로비상태에서 상점이나, 게임방에 들어갔을때 보낼 패킷을 나눠둠
 struct CS_LOBBY_PACKET
 {
 	CHAR type;
@@ -63,6 +75,7 @@ struct CS_SHOP_PACKET
 {
 	CHAR type;
 	CHAR item;
+	SHORT amount;
 };
 
 struct CS_ROOM_PACKET
@@ -71,6 +84,15 @@ struct CS_ROOM_PACKET
 	CHAR room_name[15];
 	INT room_num;
 
+};
+
+// 이건 하나의 패킷으로 타입만으로 구별해서 보내는법(괜히 쓸데없이 패킷이 커짐)
+struct CS_LOBBY_PACKET2
+{
+	CHAR type;
+	CHAR item;
+	CHAR room_name[15];
+	INT room_num;
 };
 
 // 패킷 타입 서버->클라
