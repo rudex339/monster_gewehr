@@ -26,6 +26,8 @@
 #include <mutex>
 #include <array>
 #include <unordered_map>
+#include <locale.h>
+#include <format>
 #include "protocol.h"
 
 using namespace DirectX;
