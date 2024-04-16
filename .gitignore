@@ -1,5 +1,8 @@
 /.vs
-/Server/x64 
+/Server/x64
+/Server/.vs
+/monster_gewhr/x64
+/x64
 *.exe 
 *.ilk 
 *.pdb 
