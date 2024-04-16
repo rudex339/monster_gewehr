@@ -521,7 +521,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(30.0f);
+	m_GameTimer.Tick(60.0f);
 	
 	ProcessInput();
 

@@ -13,4 +13,13 @@
 *.lastbuildstate 
 *.suo 
 *.db 
+*.raw
+*.png
+*.jpg
+*.dds
+*.wav
+*.tif
+*.bin
+*.cs
+*.obj
 

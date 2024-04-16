@@ -138,6 +138,7 @@
     <ClInclude Include="monster_gewehr.h" />
     <ClInclude Include="MeshModel.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="Render_Sysytem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ObjectManager.h" />
