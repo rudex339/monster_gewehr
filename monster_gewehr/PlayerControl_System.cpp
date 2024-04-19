@@ -41,11 +41,13 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				m_Pawn->get<Rotation_Component>();
 			ComponentHandle<EulerAngle_Component> eulerangle =
 				m_Pawn->get<EulerAngle_Component>();
+			ComponentHandle<Camera_Component> camera =
+				m_Pawn->get<Camera_Component>();
 
 			rotation->mfYaw += cxDelta;
 			rotation->changeRotation(rotation->mfPitch,
 				rotation->mfYaw, rotation->mfRoll);
-
+			//camera->m_pCamera->Rotate(0.f,cxDelta, 0.f);
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&eulerangle->m_xmf3Up),
 				XMConvertToRadians(cxDelta));
 			eulerangle->m_xmf3Look = Vector3::TransformNormal(eulerangle->m_xmf3Look, xmmtxRotate);
@@ -54,6 +56,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			eulerangle->m_xmf3Look = Vector3::Normalize(eulerangle->m_xmf3Look);
 			eulerangle->m_xmf3Right = Vector3::CrossProduct(eulerangle->m_xmf3Up, eulerangle->m_xmf3Look, true);
 			eulerangle->m_xmf3Up = Vector3::CrossProduct(eulerangle->m_xmf3Look, eulerangle->m_xmf3Right, true);
+
+
 		}
 		else {
 			//´Ô rotation ¾øÀ½ ¤µ¤¡
@@ -70,6 +74,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		//	m_Pawn->get<Velocity_Component>();
 		ComponentHandle<Position_Component> position =
 			m_Pawn->get<Position_Component>();
+		ComponentHandle<Camera_Component> camera =
+			m_Pawn->get<Camera_Component>();
 
 		float speed = 12.25f * deltaTime;
 
@@ -92,9 +98,14 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 		position->Position = Vector3::Add(position->Position, xmf3Shift);
 
-		position->m_xmf4x4World._41 += xm_Velocity.x;
-		position->m_xmf4x4World._42 += xm_Velocity.y;
-		position->m_xmf4x4World._43 += xm_Velocity.z;
+		//position->m_xmf4x4World._41 += xm_Velocity.x;
+		//position->m_xmf4x4World._42 += xm_Velocity.y;
+		//position->m_xmf4x4World._43 += xm_Velocity.z;
+
+		//XMFLOAT3 camera_pos = position->Position;
+		//camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, -30.f);
+		//camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Up, 10.f);
+		//camera->m_pCamera->SetPosition(camera_pos);
 	}
 	//if(m_Pawn->has())
 }

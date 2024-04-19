@@ -111,9 +111,6 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_ModelList.insert({ "Ethan",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL) });
-	m_ModelList.insert({ "Solder",
-		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
-		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL) });
 	
 	m_nHierarchicalGameObjects = 0;
 

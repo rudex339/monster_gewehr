@@ -436,7 +436,7 @@ void CGameFramework::BuildObjects()
 
 	ent = m_pWorld->create();
 	AddPlayerEntity(ent, m_pd3dDevice, m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Solder"),
+		m_pObjectManager->Get_ModelInfo("Angrybot"),
 		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 		0.f, 0.f, 0.f,
 		6.0f, 6.0f, 6.0f,
