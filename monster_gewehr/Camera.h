@@ -100,6 +100,7 @@ public:
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt) { }
+	virtual void SetLookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up) { }
 };
 
 class CSpaceShipCamera : public CCamera
@@ -128,6 +129,7 @@ public:
 
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& vLookAt);
+	virtual void SetLookAt(XMFLOAT3& vLookAt, XMFLOAT3& xmf3Up);
 };
 
 struct Camera_Component {

@@ -109,7 +109,9 @@ Entity* AddAnimationMeshObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12Grap
 //moveable
 
 struct Velocity_Component {
-	XMFLOAT3 m_velocity;
+	XMFLOAT3 m_velocity = XMFLOAT3(1.0f, 0.0f, 0.0f);
+
+	Velocity_Component() = default;
 };
 
 struct EulerAngle_Component {

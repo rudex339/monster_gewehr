@@ -8,6 +8,7 @@
 #include "Player_Entity.h"
 #include "Render_Sysytem.h"
 #include "PlayerControl_System.h"
+#include "move_System.h"
 
 
 CGameFramework::CGameFramework()
@@ -332,7 +333,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				case VK_F1:
 				case VK_F2:
 				case VK_F3:
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+					//m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 					break;
 				case VK_F9:
 					ChangeSwapChainState();
@@ -442,15 +443,19 @@ void CGameFramework::BuildObjects()
 		6.0f, 6.0f, 6.0f,
 		2);
 	ent->get<AnimationController_Component>();
-
+	ent->assign<Velocity_Component>();
 	ent->assign<EulerAngle_Component>();
 
 	CCamera* temp = new CThirdPersonCamera(m_pCamera);
+	
 	temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
-	ent->assign<Camera_Component>(temp);
+	auto camera = ent->assign<Camera_Component>(temp);
+	camera->m_pCamera->SetPosition(XMFLOAT3(310.0f, 
+		m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f)+10.f, 600.0f - 30.f));
 
 	auto PlayerControlSystem = m_pWorld->registerSystem(new PlayerControl_System(ent));
 
+	m_pWorld->registerSystem(new Move_System());
 
 
 #ifdef _WITH_TERRAIN_PLAYER
@@ -462,9 +467,9 @@ void CGameFramework::BuildObjects()
 #endif
 
 	m_pObjectManager->m_pPlayer = m_pPlayer = pPlayer;
-	m_pCamera = m_pPlayer->GetCamera();
+	//m_pCamera = m_pPlayer->GetCamera();
 
-	//m_pWorld->emit<SetCamera_Event>({ m_pCamera });
+	m_pWorld->emit<SetCamera_Event>({ camera->m_pCamera });
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
