@@ -1,7 +1,9 @@
 #pragma once
 #include "Timer.h"
-#include "Player.h"
-#include "ObjectManager.h"
+
+
+class ObjectManager;
+class CCamera;
 
 struct SetCamera_Event {
 	CCamera* pCamera;
@@ -27,14 +29,3 @@ public:
 	void SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
-
-class Animate_Sysytem : public EntitySystem
-{
-private:
-public:
-
-	Animate_Sysytem() = default;
-	virtual void configure(class World* world);
-	virtual void unconfigure(class World* world);
-	virtual void tick(class World* world, float deltaTime);
-};

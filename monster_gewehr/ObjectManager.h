@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Shader.h"
-#include "Player.h"
+#include "Render_Sysytem.h"
 
 #define MAX_LIGHTS						16 
 
@@ -122,46 +122,3 @@ public:
 };
 
 
-struct Model_Component {
-	CLoadedModelInfo* m_MeshModel;
-
-	Model_Component() = default;
-	Model_Component(CLoadedModelInfo* MeshModel)
-		:m_MeshModel(MeshModel) {}
-};
-
-struct AnimationController_Component {
-	CAnimationController* m_AnimationController;
-
-	AnimationController_Component() = default;
-	AnimationController_Component(CAnimationController* AnimationController)
-		:m_AnimationController(AnimationController) {}
-};
-
-struct Position_Component {
-	XMFLOAT4X4 m_xmf4x4World;
-
-
-	Position_Component() : m_xmf4x4World(Matrix4x4::Identity()) {}
-	Position_Component(float x, float y, float z) {
-		m_xmf4x4World = Matrix4x4::Identity();
-
-		m_xmf4x4World._41 = x;
-		m_xmf4x4World._42 = y;
-		m_xmf4x4World._43 = z;
-	}
-};
-
-struct Rotation_Component {
-	XMFLOAT4X4 m_xmf4x4World;
-
-
-	Rotation_Component() : m_xmf4x4World(Matrix4x4::Identity()) {}
-	Rotation_Component(float x, float y, float z) {
-		m_xmf4x4World = Matrix4x4::Identity();
-
-		m_xmf4x4World._41 = x;
-		m_xmf4x4World._42 = y;
-		m_xmf4x4World._43 = z;
-	}
-};

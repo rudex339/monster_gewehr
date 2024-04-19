@@ -26,7 +26,7 @@ CCamera::CCamera(CCamera *pCamera)
 {
 	if (pCamera)
 	{
-		*this = *pCamera;
+		//*this = *pCamera;
 	}
 	else
 	{

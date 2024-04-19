@@ -384,6 +384,8 @@ public:
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
+	virtual void Render( XMFLOAT4X4 m_xmf4x4World, XMMATRIX mtxRotate, XMMATRIX mtxScale,
+		ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	virtual void OnLateUpdate() { }
 
