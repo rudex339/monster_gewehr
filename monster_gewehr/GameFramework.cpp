@@ -294,27 +294,27 @@ void CGameFramework::ChangeSwapChainState()
 
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	if (m_pObjectManager) m_pObjectManager->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
-			if (m_pWorld) { m_pWorld->emit< CaptureHWND_Event>({ true }); 
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		if (m_pWorld) {
+			m_pWorld->emit< CaptureHWND_Event>({ true });
 			m_pWorld->emit<CursorPos_Event>({ m_ptOldCursorPos });
-			}
-			break;
-		case WM_LBUTTONUP:
-			break;
-		case WM_RBUTTONUP:
-			::ReleaseCapture();
-			if (m_pWorld)m_pWorld->emit< CaptureHWND_Event>({ false });
-			break;
-		case WM_MOUSEMOVE:
-			break;
-		default:
-			break;
+		}
+		break;
+	case WM_LBUTTONUP:
+		break;
+	case WM_RBUTTONUP:
+		::ReleaseCapture();
+		if (m_pWorld)m_pWorld->emit< CaptureHWND_Event>({ false });
+		break;
+	case WM_MOUSEMOVE:
+		break;
+	default:
+		break;
 	}
 }
 
@@ -460,17 +460,6 @@ void CGameFramework::BuildObjects()
 	m_pWorld->registerSystem(new Sever_System());
 
 
-#ifdef _WITH_TERRAIN_PLAYER
-	CTerrainPlayer *pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pObjectManager->GetGraphicsRootSignature(), m_pObjectManager->m_pTerrain);
-
-#else
-	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
-	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
-#endif
-
-	m_pObjectManager->m_pPlayer = m_pPlayer = pPlayer;
-	//m_pCamera = m_pPlayer->GetCamera();
-
 	m_pWorld->emit<SetCamera_Event>({ camera->m_pCamera });
 
 	m_pd3dCommandList->Close();
@@ -498,56 +487,10 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
-	UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pObjectManager) bProcessedByScene = m_pObjectManager->ProcessInput(pKeysBuffer);
-	if (!bProcessedByScene)
-	{
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			//SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-
-		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
-
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			if (cxDelta || cyDelta)
-			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-				cout << m_pPlayer->GetYaw() << endl;
-				Send();
-			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 12.25f, true);
-			
-		}
-	}
-	//cout << "업데이트 실행됨" << endl;
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObjects()
 {
-	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
-
-	if (m_pObjectManager) m_pObjectManager->AnimateObjects(fTimeElapsed);
-
-	m_pPlayer->Animate(fTimeElapsed);
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -650,8 +593,7 @@ void CGameFramework::FrameAdvance()
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
-	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(DEBUG)"));
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
@@ -682,15 +624,4 @@ void CGameFramework::InitServer()
 	PLAYER_DATA ply;
 	recv(g_socket, (char*)&ply, sizeof(ply), 0);
 	cout << (int)ply.id << endl;
-}
-
-void CGameFramework::Send()
-{
-	CS_PLAYER_PACKET packet;
-	packet.id = 0;
-	packet.pos = m_pPlayer->GetPosition();
-	packet.vel = m_pPlayer->GetVelocity();
-	packet.yaw = m_pPlayer->GetYaw();
-
-	send(g_socket, (char*)&packet, sizeof(packet), 0);
 }
