@@ -13,11 +13,13 @@ public:
 	void SetPostion(float x, float y, float z);
 	void SetYaw(float yaw) { m_yaw = yaw; }
 	void SetID(int id)	{ m_id = id; }
+	void SetRoomID(int id) { m_room_id = id; }
 
 	DirectX::XMFLOAT3 GetPosition() { return m_position; }
 	DirectX::XMFLOAT3 GetVelocity() { return m_velocity; }
 	FLOAT GetYaw() { return m_yaw; }
-	int GetID() { return m_id; }
+	CHAR GetID() { return m_id; }
+	CHAR GetRoomID() { return m_room_id; }
 	
 
 protected:
@@ -27,6 +29,7 @@ protected:
 	FLOAT m_yaw;
 	DirectX::BoundingOrientedBox m_bounding_box;
 	CHAR m_id;
+	CHAR m_room_id;
 };
 
 class Player : public CAPObject
@@ -53,7 +56,7 @@ public:
 
 	void SetSendBuf(void* buf, size_t size);
 
-	PLAYER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw, m_wepon }; }
+	PLAYER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_wepon }; }
 
 	void RecvLogin();
 	void SendLogin();

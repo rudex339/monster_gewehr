@@ -76,8 +76,8 @@ void Player::RecvLogin()
 {
 	CS_LOGIN_PACKET lp;
 	int retval = recv(m_socket, (char*)&lp, sizeof(CS_LOGIN_PACKET), 0);
-	m_name = lp.name;
-	m_wepon = lp.wepon;
+	m_name = lp.id;
+	m_wepon = lp.weapon;
 	SetAtkByWeapon(m_wepon);
 }
 

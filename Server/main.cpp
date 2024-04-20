@@ -41,14 +41,17 @@ int main(int argc, char* argv[])
 	int addrlen;
 	HANDLE hThread;
 
+	for (int i = 0; i < MAX_CLIENT_ROOM; ++i) {
+		send_players.players[i].id = -1;
+		std::cout << (int)send_players.players[i].id << " 넣어짐" << std::endl;
+	}
 
 
 	while (1) {
 		addrlen = sizeof(clientaddr);
 
 		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
-		if (client_sock == INVALID_SOCKET) {
-			
+		if (client_sock == INVALID_SOCKET) {			
 			break;
 		}
 
@@ -65,6 +68,8 @@ int main(int argc, char* argv[])
 		else { CloseHandle(hThread); }
 
 	}
+
+	closesocket(listen_sock);
 }
 
 DWORD WINAPI ProcessClient(LPVOID arg)
@@ -87,14 +92,25 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	for (int i = 0; i < MAX_CLIENT_ROOM; ++i) {
 		if (send_players.players[i].id == -1) {
 			room_id = i;
+			players[id].SetRoomID(i);
 			send_players.players[i] = players[id].GetData();
+			break;
 		}
 	}
 
 	players[id].RecvLogin();
 
-	players[id].SendPlayerData(&send_players, sizeof(send_players));
+	PLAYER_DATA ply = players[id].GetData();
 	
+	send(client_sock, (char*)&ply, sizeof(ply), 0);
+	//players[id].SendPlayerData(&send_players, sizeof(send_players));
+
+	constexpr int MAX_FAME = 60;
+	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FAME>>;
+	using ms = std::chrono::duration<float, std::milli>;
+	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
+	
+	frame fps{}, frame_count{};
 	while (1) {
 		if (state == S_STATE::SHOP) { 
 			// item정보는 처음 login을 했을때 플레이어 데이터 보내줄때 보내줄거임
@@ -109,11 +125,14 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		if (state == S_STATE::IN_GAME) {
 			players[id].RecvPlayerData();
 			send_players.players[room_id] = players[id].GetData();
+			fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
+			if (fps.count() < 1) continue;
 			int retval = players[id].SendPlayerData(&send_players, sizeof(send_players));
 			if (retval == SOCKET_ERROR) {
 				err_display("send()");
 				break;
 			}
+			fps_timer = std::chrono::steady_clock::now();
 		}
 	}
 

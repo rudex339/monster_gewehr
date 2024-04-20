@@ -149,6 +149,9 @@
     <ClCompile Include="PlayerControl_System.cpp">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="..\Server\protocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="monster_gewehr.rc">

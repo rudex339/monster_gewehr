@@ -481,6 +481,9 @@ void CGameFramework::BuildObjects()
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
+#ifdef USE_NETWORK
+	InitServer();
+#endif
 }
 
 void CGameFramework::ReleaseObjects()
@@ -571,7 +574,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(30.0f);
+	m_GameTimer.Tick(60.0f);
 	
 	ProcessInput();
 
@@ -646,3 +649,31 @@ void CGameFramework::FrameAdvance()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
+void CGameFramework::InitServer()
+{
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2, 2), &wsa);
+
+	g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
+
+	ZeroMemory(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(SERVER_PORT);
+	inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
+
+	connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	
+	CS_LOGIN_PACKET lp;
+	int weapon = 0;
+	cout << "이름 입력" << endl;
+	cin >> lp.name;
+	cout << "무기 입력" << endl;
+	cin >> weapon;
+	lp.weapon = weapon;
+	int retval = send(g_socket, (char*)&lp, sizeof(lp), 0);
+	cout << "서버 접속 완료" << endl;
+
+	PLAYER_DATA ply;
+	recv(g_socket, (char*)&ply, sizeof(ply), 0);
+	cout << (int)ply.id << endl;
+}

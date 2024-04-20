@@ -20,7 +20,7 @@ enum class S_STATE{LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME};
 struct PLAYER_DATA
 {
 	
-	CHAR id = -1;
+	CHAR id;
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
@@ -50,10 +50,10 @@ struct ITEM_DATA
 
 struct CS_LOGIN_PACKET
 {
-	UCHAR size;
-	UCHAR type;
-	CHAR name[15];
-	CHAR wepon;
+	//UCHAR size;
+	//UCHAR type;
+	CHAR id[20];
+	CHAR weapon;
 };
 
 struct CS_PLAYER_PACKET
@@ -96,6 +96,11 @@ struct CS_LOBBY_PACKET2
 };
 
 // 패킷 타입 서버->클라
+
+struct SC_LOGIN_OK_PACKET
+{
+	CHAR is_true;
+};
 
 struct SC_PLAYER_PACKET
 {
