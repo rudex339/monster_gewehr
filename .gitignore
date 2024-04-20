@@ -3,6 +3,10 @@
 /Server/.vs
 /monster_gewhr/x64
 /x64
+/monster_gewhr/Model/
+/monster_gewhr/Skybox/
+/monster_gewhr/Terrain/
+/monster_gewhr/Sound/
 *.exe 
 *.ilk 
 *.pdb 
