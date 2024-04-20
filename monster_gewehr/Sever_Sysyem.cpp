@@ -7,6 +7,11 @@ void Sever_System::configure(World* world)
 	world->subscribe<PacketSend_Event>(this);
 }
 
+void Sever_System::tick(World* world, float deltaTime)
+{
+
+}
+
 void Sever_System::receive(World* world, const PacketSend_Event& event)
 {
 	CS_PLAYER_PACKET pk;

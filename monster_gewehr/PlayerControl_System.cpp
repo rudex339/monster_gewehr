@@ -56,10 +56,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		if (m_Pawn->has<Rotation_Component>() && 
 			m_Pawn->has<EulerAngle_Component>()) {
 			
-
-			rotation->mfYaw += cxDelta;
-			rotation->changeRotation(rotation->mfPitch,
-				rotation->mfYaw, rotation->mfRoll);
+			velocity->m_velRotate.x += cxDelta;
+			//velocity->m_velRotate.y += cyDelta;
 			
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_PEulerAngle.m_xmf3Up),
 				XMConvertToRadians(cxDelta));
@@ -102,7 +100,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 	UCHAR pKeysBuffer[256];
 	if (GetKeyboardState(pKeysBuffer)) {
 
-		float speed = 500.25f * deltaTime;
+		float speed = 50.25f * deltaTime;
 
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 		if (pKeysBuffer[0x57] & 0xF0) {
@@ -121,36 +119,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		}
 		
 		
-		velocity->m_velocity = Vector3::Add(velocity->m_velocity, xmf3Shift);
-
-		
-
-		//position->m_xmf4x4World._41 += xm_Velocity.x;
-		//position->m_xmf4x4World._42 += xm_Velocity.y;
-		//position->m_xmf4x4World._43 += xm_Velocity.z;
-
-		
-
-		
-		
-	}
-	
-
-	if (cxDelta || cyDelta || velocity->m_velocity.x != 0|| velocity->m_velocity.y != 0||velocity->m_velocity.z != 0) {
-		position->Position = Vector3::Add(position->Position, velocity->m_velocity);
-		velocity->m_velocity = XMFLOAT3(0, 0, 0);
-#ifdef USE_NETWORK
-		world->emit<PacketSend_Event>({ 0,position->Position, velocity->m_velocity , rotation->mfYaw, 0 });
-#endif
-
-		XMFLOAT3 LockPos = XMFLOAT3(position->Position.x, position->Position.y + 10.f, position->Position.z);
-
-		XMFLOAT3 camera_pos = position->Position;
-		camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, -30.f);
-		camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Up, 20.f);
-		camera->m_pCamera->SetPosition(camera_pos);
-		camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
-		camera->m_pCamera->RegenerateViewMatrix();
+		velocity->m_velocity = Vector3::Add(velocity->m_velocity, xmf3Shift);		
 	}
 	
 }

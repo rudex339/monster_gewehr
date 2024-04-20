@@ -54,6 +54,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
+
+
+
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
 	CreateDepthStencilView();
@@ -436,26 +439,23 @@ void CGameFramework::BuildObjects()
 		10.f, 10.f, 10.f,
 		1);
 
-	ent = m_pWorld->create();
-	AddPlayerEntity(ent, m_pd3dDevice, m_pd3dCommandList,
+	m_pPlayer = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice, m_pd3dCommandList,
 		m_pObjectManager->Get_ModelInfo("Angrybot"),
 		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 		0.f, 0.f, 0.f,
 		6.0f, 6.0f, 6.0f,
 		2);
-	ent->get<AnimationController_Component>();
-	ent->assign<Velocity_Component>();
-	ent->assign<EulerAngle_Component>();
-
-	CCamera* temp = new CThirdPersonCamera(m_pCamera);
 	
+
+	CCamera* temp = new CThirdPersonCamera(m_pCamera);	
 	temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
-	auto camera = ent->assign<Camera_Component>(temp);
+
+	ComponentHandle<Camera_Component> camera = m_pPlayer->assign<Camera_Component>(temp);
 	camera->m_pCamera->SetPosition(XMFLOAT3(310.0f, 
 		m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f)+10.f, 600.0f - 30.f));
 
-	auto PlayerControlSystem = m_pWorld->registerSystem(new PlayerControl_System(ent));
 
+	m_pWorld->registerSystem(new PlayerControl_System(m_pPlayer));
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
 
@@ -469,7 +469,6 @@ void CGameFramework::BuildObjects()
 	WaitForGpuComplete();
 
 	if (m_pObjectManager) m_pObjectManager->ReleaseUploadBuffers();
-	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
 #ifdef USE_NETWORK
@@ -479,7 +478,6 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {
-	if (m_pPlayer) m_pPlayer->Release();
 
 	if (m_pObjectManager) m_pObjectManager->ReleaseObjects();
 	if (m_pObjectManager) delete m_pObjectManager;
@@ -555,11 +553,8 @@ void CGameFramework::FrameAdvance()
 
 	//render system
 	m_pWorld->tick(m_GameTimer.GetTimeElapsed());
-
-#ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-#endif
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+
 
 	////////////////
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -624,4 +619,7 @@ void CGameFramework::InitServer()
 	PLAYER_DATA ply;
 	recv(g_socket, (char*)&ply, sizeof(ply), 0);
 	cout << (int)ply.id << endl;
+
+	ComponentHandle<player_Component> Data = m_pPlayer->get<player_Component>();
+	Data->id = (int)ply.id;
 }

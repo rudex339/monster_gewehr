@@ -2,6 +2,7 @@
 #include "Render_Sysytem.h"
 #include "Object_Entity.h"
 #include "ObjectManager.h"
+#include "Player_Entity.h"
 
 
 Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -57,6 +58,12 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 		ComponentHandle<Rotation_Component> rotation,
 		ComponentHandle<Scale_Component> Scale
 		) -> void {
+
+			if (ent->has<player_Component>()) {
+				ComponentHandle<player_Component> data = ent->get<player_Component>();
+				if (data->id == -1)
+					return;
+		}
 		AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel->m_pModelRootObject);
 		Model->m_MeshModel->m_pModelRootObject->Animate(deltaTime);
 

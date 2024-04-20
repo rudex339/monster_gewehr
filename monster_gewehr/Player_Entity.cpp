@@ -12,8 +12,9 @@ Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		rx, ry, rz,
 		sx, sy, sz,
 		n_animation);
-	CCamera* temp = new CCamera();
-	ent->assign<Camera_Component>(new CCamera());
+	ent->assign<Velocity_Component>();
+	ent->assign<EulerAngle_Component>();
+	ent->assign<player_Component>();
 
 	return ent;
 }

@@ -82,8 +82,10 @@ private:
 
 	World						*m_pWorld = NULL;
 
-	ObjectManager						*m_pObjectManager = NULL;
-	CPlayer						*m_pPlayer = NULL;
+	ObjectManager				*m_pObjectManager = NULL;
+
+	Entity						*m_pPlayer = NULL;
+
 	CCamera						*m_pCamera = NULL;
 
 	POINT						m_ptOldCursorPos;
