@@ -2,6 +2,7 @@
 #include "PlayerControl_System.h"
 #include "Object_Entity.h"
 #include "Render_Sysytem.h"
+#include "Sever_Sysyem.h"
 
 
 PlayerControl_System::PlayerControl_System(Entity* Pawn) :m_Pawn(Pawn)
@@ -132,11 +133,20 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, -30.f);
 		camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Up, 20.f);
 		camera->m_pCamera->SetPosition(camera_pos);
+
+		
 		
 	}
 	XMFLOAT3 LockPos = XMFLOAT3(position->Position.x, position->Position.y+10.f, position->Position.z);
 	camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
 	camera->m_pCamera->RegenerateViewMatrix();
+
+	if (cxDelta || cyDelta || velocity->m_velocity.x != 0|| velocity->m_velocity.y != 0||velocity->m_velocity.z != 0) {
+		position->Position = Vector3::Add(position->Position, velocity->m_velocity);
+		velocity->m_velocity = XMFLOAT3(0, 0, 0);
+
+		world->emit<PacketSend_Event>({ 0,position->Position, velocity->m_velocity , rotation->mfYaw, 0 });
+	}
 
 }
 

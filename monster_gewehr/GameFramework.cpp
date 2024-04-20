@@ -9,6 +9,7 @@
 #include "Render_Sysytem.h"
 #include "PlayerControl_System.h"
 #include "move_System.h"
+#include "Sever_Sysyem.h"
 
 
 CGameFramework::CGameFramework()
@@ -456,6 +457,7 @@ void CGameFramework::BuildObjects()
 	auto PlayerControlSystem = m_pWorld->registerSystem(new PlayerControl_System(ent));
 
 	m_pWorld->registerSystem(new Move_System());
+	m_pWorld->registerSystem(new Sever_System());
 
 
 #ifdef _WITH_TERRAIN_PLAYER
