@@ -139,9 +139,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 	if (cxDelta || cyDelta || velocity->m_velocity.x != 0|| velocity->m_velocity.y != 0||velocity->m_velocity.z != 0) {
 		position->Position = Vector3::Add(position->Position, velocity->m_velocity);
 		velocity->m_velocity = XMFLOAT3(0, 0, 0);
-#ifdef USE_NETWORK
+
 		world->emit<PacketSend_Event>({ 0,position->Position, velocity->m_velocity , rotation->mfYaw, 0 });
-#endif
 
 		XMFLOAT3 LockPos = XMFLOAT3(position->Position.x, position->Position.y + 10.f, position->Position.z);
 

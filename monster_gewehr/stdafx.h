@@ -85,7 +85,7 @@ extern HINSTANCE						ghAppInstance;
 #define FRAME_BUFFER_WIDTH				1280
 #define FRAME_BUFFER_HEIGHT				720
 
-//#define USE_NETWORK
+#define USE_NETWORK
 
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
