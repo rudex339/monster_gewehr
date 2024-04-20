@@ -528,10 +528,14 @@ void CGameFramework::ProcessInput()
 					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				cout << m_pPlayer->GetYaw() << endl;
+				Send();
 			}
 			if (dwDirection) m_pPlayer->Move(dwDirection, 12.25f, true);
+			
 		}
 	}
+	//cout << "업데이트 실행됨" << endl;
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
@@ -676,4 +680,15 @@ void CGameFramework::InitServer()
 	PLAYER_DATA ply;
 	recv(g_socket, (char*)&ply, sizeof(ply), 0);
 	cout << (int)ply.id << endl;
+}
+
+void CGameFramework::Send()
+{
+	CS_PLAYER_PACKET packet;
+	packet.id = 0;
+	packet.pos = m_pPlayer->GetPosition();
+	packet.vel = m_pPlayer->GetVelocity();
+	packet.yaw = m_pPlayer->GetYaw();
+
+	send(g_socket, (char*)&packet, sizeof(packet), 0);
 }
