@@ -79,7 +79,7 @@ private:
 
 	World						*m_pWorld = NULL;
 
-	ObjectManager						*m_pScene = NULL;
+	ObjectManager						*m_pObjectManager = NULL;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
 

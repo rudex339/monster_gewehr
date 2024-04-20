@@ -137,8 +137,11 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="monster_gewehr.h" />
     <ClInclude Include="MeshModel.h" />
+    <ClInclude Include="move_System.h" />
+    <ClInclude Include="Object_Entity.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="protocol.h" />
+    <ClInclude Include="PlayerControl_System.h" />
+    <ClInclude Include="Player_Entity.h" />
     <ClInclude Include="Render_Sysytem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ObjectManager.h" />
@@ -155,7 +158,11 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="monster_gewehr.cpp" />
     <ClCompile Include="MeshModel.cpp" />
+    <ClCompile Include="move_System.cpp" />
+    <ClCompile Include="Object_Entity.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerControl_System.cpp" />
+    <ClCompile Include="Player_Entity.cpp" />
     <ClCompile Include="Render_Sysytem.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="Shader.cpp" />

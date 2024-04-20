@@ -857,6 +857,41 @@ void GameObjectModel::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
+void GameObjectModel::Render(XMFLOAT4X4 Pos, XMMATRIX Rotate, XMMATRIX Scale,
+	ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pMesh)
+	{
+		XMFLOAT4X4 xmf4x4World = m_xmf4x4World;
+		xmf4x4World = Matrix4x4::Multiply(Scale, xmf4x4World);
+		xmf4x4World = Matrix4x4::Multiply(Rotate, xmf4x4World);
+		xmf4x4World = Matrix4x4::Add(Pos, xmf4x4World);
+
+
+
+		UpdateShaderVariable(pd3dCommandList, &xmf4x4World);
+
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				if (m_ppMaterials[i])
+				{
+					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				}
+
+				m_pMesh->Render(pd3dCommandList, i);
+			}
+		}
+	}
+
+	if (m_pSibling) m_pSibling->Render(Pos, Rotate, Scale, pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(Pos, Rotate, Scale, pd3dCommandList, pCamera);
+}
+
 void GameObjectModel::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }

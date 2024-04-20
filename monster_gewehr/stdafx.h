@@ -36,23 +36,6 @@ using namespace std;
 #include "ECS.h"
 using namespace ECS;
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
-
-#include <winsock2.h> // 윈속2 메인 헤더
-#include <ws2tcpip.h> // 윈속2 확장 헤더
-
-#include <stdio.h> // printf(), ...
-#include <string.h> // strncpy(), ...
-
-#pragma comment(lib, "ws2_32") // ws2_32.lib 링크
-
-#include <iostream>
-#include <string>
-#include <mutex>
-#include <array>
-#include <unordered_map>
-#include "protocol.h"
-
 //#include <Mmsystem.h>
 
 #ifdef _DEBUG
@@ -393,7 +376,3 @@ namespace Plane
 		return(xmf4Result);
 	}
 }
-
-void err_quit(const char* msg);
-void err_display(const char* msg);
-void err_display(int errnum);

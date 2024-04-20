@@ -13,33 +13,30 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{92a6cd42-da13-4b69-8610-fb1ae891a721}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\HeaderFile">
+      <UniqueIdentifier>{4d54d8ea-1363-4af8-be1a-58cc2a9e5af3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="system">
+      <UniqueIdentifier>{fb30d795-8442-429b-8a11-37a17372077d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="system\HeaderFile">
+      <UniqueIdentifier>{6eade029-11ad-4997-a35d-708160c9ccb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="component">
+      <UniqueIdentifier>{ac8684d3-0bf2-40a3-b542-f5a45a667558}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="component\HeaderFile">
+      <UniqueIdentifier>{47d63dbf-92db-4f00-a123-8199ff61b13d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="targetver.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="monster_gewehr.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="DDSTextureLoader12.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GameFramework.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshModel.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
@@ -51,64 +48,106 @@
     <ClInclude Include="Shader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="Camera.h">
+      <Filter>Common\HeaderFile</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="d3dx12.h">
+      <Filter>Common\HeaderFile</Filter>
     </ClInclude>
-    <ClInclude Include="WICTextureLoader12.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Render_Sysytem.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>Common\HeaderFile</Filter>
     </ClInclude>
     <ClInclude Include="ECS.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Common\HeaderFile</Filter>
     </ClInclude>
-    <ClInclude Include="protocol.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="Mesh.h">
+      <Filter>Common\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshModel.h">
+      <Filter>Common\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Common\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>Common\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Common\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Common\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Common\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Render_Sysytem.h">
+      <Filter>system\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Player_Entity.h">
+      <Filter>component\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Object_Entity.h">
+      <Filter>component\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="move_System.h">
+      <Filter>system\HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerControl_System.h">
+      <Filter>system\HeaderFile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="monster_gewehr.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="DDSTextureLoader12.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="GameFramework.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshModel.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshModel.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Render_Sysytem.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="Object_Entity.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="Player_Entity.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="move_System.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerControl_System.cpp">
+      <Filter>system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

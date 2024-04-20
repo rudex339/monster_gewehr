@@ -3,8 +3,13 @@
 //-----------------------------------------------------------------------------
 
 #include "stdafx.h"
-#include "Render_Sysytem.h"
 #include "GameFramework.h"
+#include "Object_Entity.h"
+#include "Player_Entity.h"
+#include "Render_Sysytem.h"
+#include "PlayerControl_System.h"
+#include "move_System.h"
+
 
 CGameFramework::CGameFramework()
 {
@@ -29,12 +34,12 @@ CGameFramework::CGameFramework()
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
 	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
 
-	m_pScene = NULL;
+	m_pObjectManager = NULL;
 	m_pPlayer = NULL;
 
 	m_pWorld = World::createWorld();
 
-	_tcscpy_s(m_pszFrameRate, _T("MonsterGewehr ("));
+	_tcscpy_s(m_pszFrameRate, _T("MonsterGewehr ( "));
 }
 
 CGameFramework::~CGameFramework()
@@ -288,17 +293,22 @@ void CGameFramework::ChangeSwapChainState()
 
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	if (m_pObjectManager) m_pObjectManager->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
+			if (m_pWorld) { m_pWorld->emit< CaptureHWND_Event>({ true }); 
+			m_pWorld->emit<CursorPos_Event>({ m_ptOldCursorPos });
+			}
 			break;
 		case WM_LBUTTONUP:
+			break;
 		case WM_RBUTTONUP:
 			::ReleaseCapture();
+			if (m_pWorld)m_pWorld->emit< CaptureHWND_Event>({ false });
 			break;
 		case WM_MOUSEMOVE:
 			break;
@@ -309,7 +319,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	if (m_pObjectManager) m_pObjectManager->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
 		case WM_KEYUP:
@@ -323,7 +333,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				case VK_F1:
 				case VK_F2:
 				case VK_F3:
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+					//m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 					break;
 				case VK_F9:
 					ChangeSwapChainState();
@@ -372,6 +382,8 @@ void CGameFramework::OnDestroy()
 
 	::CloseHandle(m_hFenceEvent);
 
+	m_pWorld->destroyWorld();
+
 	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
 	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
 
@@ -403,23 +415,61 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	m_pScene = new ObjectManager();
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	m_pObjectManager = new ObjectManager();
+	if (m_pObjectManager) m_pObjectManager->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 
-	EntitySystem* RenderSystem = m_pWorld->registerSystem(new Render_Sysytem(m_pScene, m_pd3dCommandList));
+	auto RenderSystem = m_pWorld->registerSystem(
+		new Render_Sysytem(m_pObjectManager, m_pd3dCommandList));
 
+	auto ent = m_pWorld->create();
+	ent->assign<Terrain_Component>(m_pObjectManager->m_pTerrain, "default");
+
+	ent = m_pWorld->create();
+	ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
+
+	AddAnimationMeshObject(m_pWorld->create(), m_pd3dDevice, m_pd3dCommandList,
+		m_pObjectManager->Get_ModelInfo("Angrybot"),
+		410.0f, m_pObjectManager->m_pTerrain->GetHeight(410.0f, 735.0f), 735.0f,
+		0.f, 90.f, 0.f,
+		10.f, 10.f, 10.f,
+		1);
+
+	ent = m_pWorld->create();
+	AddPlayerEntity(ent, m_pd3dDevice, m_pd3dCommandList,
+		m_pObjectManager->Get_ModelInfo("Angrybot"),
+		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+		0.f, 0.f, 0.f,
+		6.0f, 6.0f, 6.0f,
+		2);
+	ent->get<AnimationController_Component>();
+	ent->assign<Velocity_Component>();
+	ent->assign<EulerAngle_Component>();
+
+	CCamera* temp = new CThirdPersonCamera(m_pCamera);
+	
+	temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
+	auto camera = ent->assign<Camera_Component>(temp);
+	camera->m_pCamera->SetPosition(XMFLOAT3(310.0f, 
+		m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f)+10.f, 600.0f - 30.f));
+
+	auto PlayerControlSystem = m_pWorld->registerSystem(new PlayerControl_System(ent));
+
+	m_pWorld->registerSystem(new Move_System());
 
 
 #ifdef _WITH_TERRAIN_PLAYER
-	CTerrainPlayer *pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+	CTerrainPlayer *pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pObjectManager->GetGraphicsRootSignature(), m_pObjectManager->m_pTerrain);
+
 #else
 	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
 	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
 #endif
 
-	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-	m_pCamera = m_pPlayer->GetCamera();
+	m_pObjectManager->m_pPlayer = m_pPlayer = pPlayer;
+	//m_pCamera = m_pPlayer->GetCamera();
+
+	m_pWorld->emit<SetCamera_Event>({ camera->m_pCamera });
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -427,7 +477,7 @@ void CGameFramework::BuildObjects()
 
 	WaitForGpuComplete();
 
-	if (m_pScene) m_pScene->ReleaseUploadBuffers();
+	if (m_pObjectManager) m_pObjectManager->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
@@ -437,15 +487,15 @@ void CGameFramework::ReleaseObjects()
 {
 	if (m_pPlayer) m_pPlayer->Release();
 
-	if (m_pScene) m_pScene->ReleaseObjects();
-	if (m_pScene) delete m_pScene;
+	if (m_pObjectManager) m_pObjectManager->ReleaseObjects();
+	if (m_pObjectManager) delete m_pObjectManager;
 }
 
 void CGameFramework::ProcessInput()
 {
-	static UCHAR pKeysBuffer[256];
+	UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	if (GetKeyboardState(pKeysBuffer) && m_pObjectManager) bProcessedByScene = m_pObjectManager->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
 		float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -456,7 +506,7 @@ void CGameFramework::ProcessInput()
 			GetCursorPos(&ptCursorPos);
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+			//SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
 		DWORD dwDirection = 0;
@@ -486,7 +536,7 @@ void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
+	if (m_pObjectManager) m_pObjectManager->AnimateObjects(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
 }
@@ -521,7 +571,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(60.0f);
+	m_GameTimer.Tick(30.0f);
 	
 	ProcessInput();
 
@@ -551,10 +601,8 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-	///////////// 이부분을 render system으로 대체함
+	//render system
 	m_pWorld->tick(m_GameTimer.GetTimeElapsed());
-
-	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
