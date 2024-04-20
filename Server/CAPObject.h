@@ -72,7 +72,7 @@ public:
 protected:
 	SOCKET m_socket;
 	SC_PLAYER_PACKET sc_player_data;
-	CS_PLAYER_PACKET cs_player_data;
+	
 
 	ITEM_DATA items;
 

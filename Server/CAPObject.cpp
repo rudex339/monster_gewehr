@@ -105,6 +105,7 @@ void Player::SendItemData()
 
 void Player::RecvPlayerData()
 {
+	CS_PLAYER_PACKET cs_player_data;
 	int retval = recv(m_socket, (char*)&cs_player_data, sizeof(cs_player_data), 0);
 	if (retval == SOCKET_ERROR) {
 		return;
@@ -113,6 +114,7 @@ void Player::RecvPlayerData()
 	m_velocity = cs_player_data.vel;
 	m_yaw = cs_player_data.yaw;
 	m_id = cs_player_data.id;
+	std::cout << m_position.x << " " << m_position.y << " " << m_position.z << std::endl;
 	std::cout << m_yaw << std::endl;
 }
 
