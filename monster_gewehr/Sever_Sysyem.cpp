@@ -13,7 +13,10 @@ void Sever_System::tick(World* world, float deltaTime)
 {
 	SC_PLAYER_PACKET pk;	
 
-	recv(g_socket, (char*)&pk, sizeof(pk), 0);
+	int retval = recv(g_socket, (char*)&pk, sizeof(pk), 0);
+	if (retval <= 0) {
+		return;
+	}
 	cout << pk.players[0].yaw << endl;
 		
 	world->each<player_Component, Position_Component, Rotation_Component>(
@@ -27,9 +30,9 @@ void Sever_System::tick(World* world, float deltaTime)
 					if (!ent->has<Camera_Component>()) {
 						Player->id = pk.players[i].id;
 						Position->Position = pk.players[i].pos;
-						Rotation->mfYaw = pk.players[i].yaw;						
-						pk.players[i].id = -1;
+						Rotation->mfYaw = pk.players[i].yaw;							
 					}
+					pk.players[i].id = -1;
 				}
 			}
 		});
@@ -43,7 +46,7 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	pk.vel = event.vel;
 	pk.yaw = event.yaw;
 
-	//cout << (int)pk.id << endl;
+	//cout << (int)pk.id << evnet.pos << endl;
 
 	send(g_socket, (char*)&pk, sizeof(pk), 0);
 }

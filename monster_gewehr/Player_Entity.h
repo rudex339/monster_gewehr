@@ -10,7 +10,7 @@ Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 struct player_Component {
 
-	INT id = 1;
+	INT id = -1;
 
 	UINT cur_State;
 	UINT pre_State;

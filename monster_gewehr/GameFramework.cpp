@@ -601,7 +601,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(144.0f);
+	m_GameTimer.Tick(120.0f);
 	
 	ProcessInput();
 
@@ -715,6 +715,9 @@ void CGameFramework::InitServer()
 
 	connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	
+	unsigned long noblock = 1;
+	ioctlsocket(g_socket, FIONBIO, &noblock);
+
 	CS_LOGIN_PACKET lp;
 	int weapon = 0;
 	cout << "이름 입력" << endl;
@@ -726,10 +729,18 @@ void CGameFramework::InitServer()
 	cout << "서버 접속 완료" << endl;
 
 	PLAYER_DATA ply;
-	recv(g_socket, (char*)&ply, sizeof(ply), 0);
-	cout << (int)ply.id << endl;
+	while (1) {
+		int retval = recv(g_socket, (char*)&ply, sizeof(ply), 0);
+		if (retval > 0) {
+			break;
+		}
+		else {
+			cout << "못받음" << endl;
+		}
+	}
+	//cout << (int)ply.id << endl;
 
 	ComponentHandle<player_Component> Data = m_pPlayer->get<player_Component>();
 	Data->id = (int)ply.id;
-	cout << Data->id << endl;
+	//cout << Data->id << endl;
 }

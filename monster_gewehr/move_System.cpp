@@ -20,10 +20,12 @@ void Move_System::tick(World* world, float deltaTime)
     });
     world->each<Velocity_Component,
         Position_Component,
-    Rotation_Component>(
+    Rotation_Component,
+        player_Component>(
             [&](Entity* ent, ComponentHandle<Velocity_Component> velocity,
                 ComponentHandle<Position_Component> position,
-                ComponentHandle<Rotation_Component> rotation) -> void {
+                ComponentHandle<Rotation_Component> rotation,
+                ComponentHandle<player_Component> p) -> void {
 
                     position->Position = Vector3::Add(position->Position, velocity->m_velocity);                   
 

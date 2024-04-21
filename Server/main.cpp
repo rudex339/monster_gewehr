@@ -105,7 +105,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	send(client_sock, (char*)&ply, sizeof(ply), 0);
 	//players[id].SendPlayerData(&send_players, sizeof(send_players));
 
-	constexpr int MAX_FAME = 10;
+	constexpr int MAX_FAME = 120;
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FAME>>;
 	using ms = std::chrono::duration<float, std::milli>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
@@ -133,7 +133,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 				err_display("send()");
 				break;
 			}
-			//fps_timer = std::chrono::steady_clock::now();
+			fps_timer = std::chrono::steady_clock::now();
 		}
 	}
 
