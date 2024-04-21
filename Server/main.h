@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "CAPObject.h"
 
-DWORD WINAPI ProcessClient(LPVOID arg);
+void ProcessClient(SOCKET sock);
 
 std::unordered_map<INT, Player> players;
 SC_PLAYER_PACKET send_players;

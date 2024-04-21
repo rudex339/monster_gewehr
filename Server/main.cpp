@@ -61,21 +61,23 @@ int main(int argc, char* argv[])
 		printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
 			addr, ntohs(clientaddr.sin_port));
 
-		hThread = CreateThread(NULL, 0, ProcessClient,
-			(LPVOID)client_sock, 0, NULL);
+		/*hThread = CreateThread(NULL, 0, ProcessClient,
+			(LPVOID)client_sock, 0, NULL);*/
+		std::thread hThread{ &ProcessClient, client_sock };
+		hThread.detach();
 
-		if (hThread == NULL) { closesocket(client_sock); }
-		else { CloseHandle(hThread); }
+		/*if (hThread == NULL) { closesocket(client_sock); }
+		else { CloseHandle(hThread); }*/
 
 	}
 
 	closesocket(listen_sock);
 }
 
-DWORD WINAPI ProcessClient(LPVOID arg)
+void ProcessClient(SOCKET sock)
 {
 	int retval;
-	SOCKET client_sock = (SOCKET)arg;
+	SOCKET client_sock = sock;
 	struct sockaddr_in clientaddr;
 	char addr[INET_ADDRSTRLEN];
 	int addrlen;
@@ -145,5 +147,5 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	closesocket(client_sock);
 	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
 		addr, ntohs(clientaddr.sin_port));
-	return 0;
+	return;
 }
