@@ -601,7 +601,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(60.0f);
+	m_GameTimer.Tick(144.0f);
 	
 	ProcessInput();
 
@@ -718,7 +718,7 @@ void CGameFramework::InitServer()
 	CS_LOGIN_PACKET lp;
 	int weapon = 0;
 	cout << "이름 입력" << endl;
-	cin >> lp.name;
+	cin >> lp.id;
 	cout << "무기 입력" << endl;
 	cin >> weapon;
 	lp.weapon = weapon;
@@ -731,4 +731,5 @@ void CGameFramework::InitServer()
 
 	ComponentHandle<player_Component> Data = m_pPlayer->get<player_Component>();
 	Data->id = (int)ply.id;
+	cout << Data->id << endl;
 }

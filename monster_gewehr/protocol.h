@@ -14,11 +14,11 @@ constexpr char SNIPER = 3;
 
 constexpr char SC_PACKET_PLAYER_DATA = 2;
 
-enum class S_STATE{LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME};
+enum class S_STATE { LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME };
 
 #pragma pack(push,1)
 struct PLAYER_DATA
-{	
+{
 	CHAR id;
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
@@ -49,9 +49,9 @@ struct ITEM_DATA
 
 struct CS_LOGIN_PACKET
 {
-	UCHAR size;
-	UCHAR type;
-	CHAR name[15];
+	//UCHAR size;
+	//UCHAR type;
+	CHAR id[20];
 	CHAR weapon;
 };
 
@@ -96,9 +96,14 @@ struct CS_LOBBY_PACKET2
 
 // 패킷 타입 서버->클라
 
+struct SC_LOGIN_OK_PACKET
+{
+	CHAR is_true;
+};
+
 struct SC_PLAYER_PACKET
 {
-	PLAYER_DATA players[MAX_CLIENT_ROOM];	
+	PLAYER_DATA players[MAX_CLIENT_ROOM];
 };
 
 

@@ -45,7 +45,7 @@ void Move_System::tick(World* world, float deltaTime)
 
 #ifdef USE_NETWORK
                         if(ent->has<player_Component>())
-                            world->emit<PacketSend_Event>({ 0,position->Position, velocity->m_velocity , rotation->mfYaw, 0 });
+                            world->emit<PacketSend_Event>({ (CHAR)ent->get<player_Component>()->id, position->Position, velocity->m_velocity , rotation->mfYaw, 0});
 #endif
                     }
                     velocity->m_velocity = XMFLOAT3(0, 0, 0);

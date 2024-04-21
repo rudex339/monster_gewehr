@@ -75,7 +75,16 @@ void Player::SetSendBuf(void* buf, size_t size)
 void Player::RecvLogin()
 {
 	CS_LOGIN_PACKET lp;
-	int retval = recv(m_socket, (char*)&lp, sizeof(CS_LOGIN_PACKET), 0);
+	while (1) {
+		int retval = recv(m_socket, (char*)&lp, sizeof(CS_LOGIN_PACKET), 0);
+		if (retval == SOCKET_ERROR) {
+			if (WSAGetLastError() == WSAETIMEDOUT)
+				continue;
+		}
+		else {
+			break;
+		}
+	}
 	m_name = lp.id;
 	m_wepon = lp.weapon;
 	SetAtkByWeapon(m_wepon);
@@ -114,7 +123,7 @@ void Player::RecvPlayerData()
 	m_velocity = cs_player_data.vel;
 	m_yaw = cs_player_data.yaw;
 	m_id = cs_player_data.id;
-	std::cout << m_id << "idÀÓ" << m_position.x << " " << m_position.y << " " << m_position.z << std::endl;
+	//std::cout << (int)m_id << "idÀÓ " << m_position.x << " " << m_position.y << " " << m_position.z << std::endl;
 	//std::cout << m_yaw << std::endl;
 }
 
