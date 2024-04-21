@@ -518,6 +518,19 @@ void CGameFramework::BuildObjects()
 		6.0f, 6.0f, 6.0f,
 		2);
 
+	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+		m_pObjectManager->Get_ModelInfo("Angrybot"),
+		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+		0.f, 0.f, 0.f,
+		6.0f, 6.0f, 6.0f,
+		2);
+	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+		m_pObjectManager->Get_ModelInfo("Angrybot"),
+		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+		0.f, 0.f, 0.f,
+		6.0f, 6.0f, 6.0f,
+		2);
+
 
 	CCamera* temp = new CThirdPersonCamera(m_pCamera);	
 	temp->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList);
