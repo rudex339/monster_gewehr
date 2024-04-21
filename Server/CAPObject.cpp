@@ -2,7 +2,7 @@
 
 CAPObject::CAPObject()
 {
-	m_position = { 0.f, 0.f, 0.f };
+	m_position = { 0.f, 1000.f, 0.f };
 	m_yaw = 0.f;
 	m_id = -1;
 }
@@ -114,8 +114,8 @@ void Player::RecvPlayerData()
 	m_velocity = cs_player_data.vel;
 	m_yaw = cs_player_data.yaw;
 	m_id = cs_player_data.id;
-	std::cout << m_position.x << " " << m_position.y << " " << m_position.z << std::endl;
-	std::cout << m_yaw << std::endl;
+	std::cout << m_id << "idÀÓ" << m_position.x << " " << m_position.y << " " << m_position.z << std::endl;
+	//std::cout << m_yaw << std::endl;
 }
 
 int Player::SendPlayerData(void* buf, size_t size)

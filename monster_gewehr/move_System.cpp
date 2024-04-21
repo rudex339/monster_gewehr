@@ -2,6 +2,7 @@
 #include "move_System.h"
 #include "Object_Entity.h"
 #include "Player_Entity.h"
+#include "Sever_Sysyem.h"
 
 void Move_System::configure(World* world)
 {

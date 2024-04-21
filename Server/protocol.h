@@ -18,8 +18,7 @@ enum class S_STATE{LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME};
 
 #pragma pack(push,1)
 struct PLAYER_DATA
-{
-	
+{	
 	CHAR id;
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
