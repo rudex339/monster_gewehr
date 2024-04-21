@@ -41,6 +41,12 @@ using namespace std;
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+
+#include <d3d11on12.h>
+//	#include <d2d1.h>
+#include <d2d1_3.h>
+#include <dwrite_3.h>
+
 #include "ECS.h"
 using namespace ECS;
 
@@ -92,6 +98,11 @@ extern HINSTANCE						ghAppInstance;
 #pragma comment(lib, "dxgi.lib")
 
 #pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "dwrite.lib")
+//#include <d2d1_3.h>
+//#include <dwrite_3.h>
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 

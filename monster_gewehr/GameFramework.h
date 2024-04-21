@@ -19,6 +19,9 @@ public:
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
 
+	void CreateD3D11On12Device();
+	void CreateD2DDevice();
+
 	void CreateRtvAndDsvDescriptorHeaps();
 
 	void CreateRenderTargetViews();
@@ -52,7 +55,7 @@ private:
         
 	IDXGIFactory4				*m_pdxgiFactory = NULL;
 	IDXGISwapChain3				*m_pdxgiSwapChain = NULL;
-	ID3D12Device				*m_pd3dDevice = NULL;
+	ComPtr<ID3D12Device>				m_pd3dDevice;
 
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
@@ -66,13 +69,27 @@ private:
 	ID3D12Resource				*m_pd3dDepthStencilBuffer = NULL;
 	ID3D12DescriptorHeap		*m_pd3dDsvDescriptorHeap = NULL;
 
-	ID3D12CommandAllocator		*m_pd3dCommandAllocator = NULL;
-	ID3D12CommandQueue			*m_pd3dCommandQueue = NULL;
+	ComPtr<ID3D12CommandAllocator>		m_pd3dCommandAllocator = NULL;
+	ComPtr <ID3D12CommandQueue>		m_pd3dCommandQueue;
 	ID3D12GraphicsCommandList	*m_pd3dCommandList = NULL;
 
 	ID3D12Fence					*m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
+
+	// Direct3D11on12
+	ComPtr<ID3D11On12Device> m_d3d11On12Device;
+	ComPtr<ID3D11DeviceContext> m_d3d11DeviceContext;
+	ComPtr<ID3D11Resource> m_wrappedBackBuffers[m_nSwapChainBuffers];
+
+	// Direct2D
+	ComPtr<ID2D1Factory3> m_d2dFactory;
+	ComPtr<ID2D1Device2> m_d2dDevice;
+	ComPtr<ID2D1DeviceContext2> m_d2dDeviceContext;
+	ComPtr<ID2D1Bitmap1> m_d2dRenderTargets[m_nSwapChainBuffers];
+
+	// DirectWrite
+	ComPtr<IDWriteFactory5>	m_dwriteFactory;
 
 #if defined(_DEBUG)
 	ID3D12Debug					*m_pd3dDebugController;
