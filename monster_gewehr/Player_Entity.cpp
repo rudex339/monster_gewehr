@@ -18,3 +18,10 @@ Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	return ent;
 }
+
+ControllAngle_Component::ControllAngle_Component(float R_x, float R_y, float R_z, float L_x, float L_y, float L_z, float U_x, float U_y, float U_z)
+{
+	m_xmf3Right = XMFLOAT3(R_x, R_y, R_z);
+	m_xmf3Look = XMFLOAT3(L_x, L_y, L_z);
+	m_xmf3Up = XMFLOAT3(U_x, U_y, U_z);
+}

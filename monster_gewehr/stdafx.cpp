@@ -12,7 +12,8 @@ UINT gnRtvDescriptorIncrementSize = 0;
 UINT gnDsvDescriptorIncrementSize = 0;
 
 SOCKET g_socket{}; // 통신을 위한 소켓
-string SERVER_IP{ "127.0.0.1" };	// 서버 아이피
+//string SERVER_IP{ "183.101.111.3" };	// 서버 아이피
+string SERVER_IP{ "127.0.0.1" };
 SOCKADDR_IN server_addr;
 
 // 소켓 함수 오류 출력 후 종료

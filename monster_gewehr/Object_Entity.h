@@ -32,10 +32,23 @@ struct Model_Component {
 struct AnimationController_Component {
 	CAnimationController* m_AnimationController;
 
+	UINT cur_State;
+	UINT next_State;
+
 	AnimationController_Component() = default;
-	AnimationController_Component(CAnimationController* AnimationController)
-		:m_AnimationController(AnimationController) {}
+	AnimationController_Component(CAnimationController* AnimationController,
+		UINT curState)
+		:m_AnimationController(AnimationController), cur_State(curState), next_State(MAXDWORD){}
 };
+
+struct State_Component {
+	UINT state=0;
+
+	State_Component() = default;
+};
+
+
+
 
 struct Position_Component {
 	XMFLOAT4X4 m_xmf4x4World;
@@ -103,7 +116,12 @@ Entity* AddAnimationMeshObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12Grap
 	float sx, float sy, float sz,
 	int n_animation);
 
-
+Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	CLoadedModelInfo* model,
+	float x, float y, float z,
+	float rx, float ry, float rz,
+	float sx, float sy, float sz,
+	int n_animation);
 
 //----------------------------------------------------------------------------------------------
 //moveable

@@ -100,18 +100,9 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
 		_T("Terrain/unity_city.raw"), 513,513, xmf3Scale, xmf4Color);//2
 
-	m_ModelList.insert({"Angrybot",
+	m_ModelList.insert({"Soldier",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
-		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Angrybot.bin", NULL) });
-	m_ModelList.insert({ "Monster",
-		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
-		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Monster.bin", NULL) });
-	m_ModelList.insert({ "Humanoid",
-		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
-		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Humanoid.bin", NULL) });
-	m_ModelList.insert({ "Ethan",
-		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
-		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL) });
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL) });
 	
 	m_nHierarchicalGameObjects = 0;
 
@@ -133,6 +124,10 @@ void ObjectManager::ReleaseObjects()
 			m_ppShaders[i]->Release();
 		}
 		delete[] m_ppShaders;
+	}
+
+	for (auto obj : m_ModelList) {
+		obj.second->m_pModelRootObject->Release();
 	}
 
 	if (m_pTerrain) delete m_pTerrain;

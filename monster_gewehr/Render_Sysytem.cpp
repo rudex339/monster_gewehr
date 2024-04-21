@@ -64,6 +64,7 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 				if (data->id == -1)
 					return;
 		}
+
 		AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel->m_pModelRootObject);
 		Model->m_MeshModel->m_pModelRootObject->Animate(deltaTime);
 
@@ -82,7 +83,7 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 
 		Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
 
-		AnimationController->m_AnimationController->UpdateShaderVariables(m_pd3dCommandList);
+		AnimationController->m_AnimationController->UpdateShaderVariables();
 
 		Model->m_MeshModel->m_pModelRootObject->Render(
 			m_pd3dCommandList, m_pCamera);

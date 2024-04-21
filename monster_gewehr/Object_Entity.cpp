@@ -10,7 +10,7 @@ Entity* AddAnimationMeshObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12Grap
 {
 	ent->assign<Model_Component>(model, model->m_pModelRootObject->m_pstrFrameName);
 	auto controller = ent->assign<AnimationController_Component>(
-		new CAnimationController(pd3dDevice, pd3dCommandList, n_animation, model));
+		new CAnimationController(pd3dDevice, pd3dCommandList, n_animation, model),0);
 	for (int i = 0; i < n_animation; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		controller->m_AnimationController->SetTrackEnable(i, false);
@@ -21,6 +21,20 @@ Entity* AddAnimationMeshObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12Grap
 	ent->assign<Scale_Component>(sx, sy, sz);
 	return ent;
 }
+
+Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	CLoadedModelInfo* model,
+	float x, float y, float z,
+	float rx, float ry, float rz,
+	float sx, float sy, float sz,
+	int n_animation)
+{
+	AddAnimationMeshObject(ent, pd3dDevice, pd3dCommandList, model, x, y, z,rx, ry, rz,	sx, sy, sz,	n_animation);
+
+	return ent;
+}
+
+
 
 EulerAngle_Component::EulerAngle_Component(float R_x, float R_y, float R_z, float L_x, float L_y, float L_z, float U_x, float U_y, float U_z)
 {

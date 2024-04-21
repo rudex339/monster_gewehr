@@ -17,7 +17,6 @@ void Sever_System::tick(World* world, float deltaTime)
 	if (retval <= 0) {
 		return;
 	}
-	cout << pk.players[0].yaw << endl;
 		
 	world->each<player_Component, Position_Component, Rotation_Component>(
 		[&](Entity* ent,

@@ -22,7 +22,6 @@ private:
 	POINT m_OldCursorPos;
 	bool Capture = false;
 
-	PlayerController_Angle m_PEulerAngle;
 public:
 	PlayerControl_System() = default;
 	PlayerControl_System(Entity* Pawn);
