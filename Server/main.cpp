@@ -125,8 +125,11 @@ void ProcessClient(SOCKET sock)
 			
 		}
 		if (state == S_STATE::IN_GAME) {
+			build_bt(&souleater);
+			run_bt(&souleater);
 			players[id].RecvPlayerData();
 			send_players.players[room_id] = players[id].GetData();
+			send_players.monster = souleater.GetData();
 			std::cout << room_id << "¹øÂ°ÀÇ : " << send_players.players[room_id].yaw << std::endl;
 			fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 			if (fps.count() < 1) continue;

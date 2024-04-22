@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "BehaviorTree.h"
 
 
 class CAPObject
@@ -71,7 +72,7 @@ public:
 	char m_recv_buf[BUF_SIZE];
 protected:
 	SOCKET m_socket;
-	SC_PLAYER_PACKET sc_player_data;
+	SC_OBJECT_PACKET sc_player_data;
 	
 
 	ITEM_DATA items;
@@ -90,7 +91,39 @@ protected:
 
 	CHAR m_wepon;
 	CHAR m_armor;
-
-
 };
 
+class Monster : public CAPObject
+{
+public:
+	Monster();
+	~Monster() = default; 
+
+	void SetHp(float hp) { m_hp = hp; }
+	void SetMaxHp(float max_hp) { m_max_hp = max_hp; }
+	void SetRAHp(float runaway_hp) { m_runaway_hp = runaway_hp; }	
+	void SetAtk(float atk) { m_atk = atk; }
+	void SetDef(float def) { m_def = def; }
+
+	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_animation }; }
+
+
+	void BuildBT(BehaviorTree node) { root = node; }
+	void RunBT() { root.run(); }
+
+
+protected:
+	bool isUserArrround[MAX_CLIENT_ROOM];
+
+	FLOAT m_hp;
+	FLOAT m_max_hp;
+	FLOAT m_runaway_hp;
+	FLOAT m_atk;
+	FLOAT m_def;
+	CHAR m_animation;
+
+	BehaviorTree root;
+};
+
+void build_bt(Monster* monster);
+void run_bt(Monster* monster);

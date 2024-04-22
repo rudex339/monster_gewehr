@@ -4,6 +4,8 @@
 #include <vector>
 #include <functional>
 
+#define PrintNodes
+
 class Node {
 public:
     virtual void reset() = 0;
@@ -28,7 +30,7 @@ public:
     }
 
     void print() {
-        root->print();
+        //root->print();
     }
 };
 
@@ -65,10 +67,12 @@ public:
     }
 
     void print() override {
+#ifdef PrintNode
         std::cout << "선택 노드: " << name << std::endl;
         for (Node* child : children) {
             child->print();
         }
+#endif
     }
 
 private:
@@ -107,10 +111,12 @@ public:
     }
 
     void print() override {
+#ifdef PrintNode
         std::cout << "순차 노드: " << name << std::endl;
         for (Node* child : children) {
             child->print();
         }
+#endif
     }
 
 private:
@@ -144,7 +150,9 @@ public:
     }
 
     void print() override {
+#ifdef PrintNode
         std::cout << "리프 노드: " << name << std::endl;
+#endif
     }
 
 };

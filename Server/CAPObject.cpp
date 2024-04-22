@@ -133,4 +133,66 @@ int Player::SendPlayerData(void* buf, size_t size)
 	return retval;
 }
 
+Monster::Monster()
+{
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		isUserArrround[i] = false;
+	}
+	m_max_hp = 1000;
+	m_hp = m_max_hp;
+	m_runaway_hp = 990; // m_max_hp * 0.9;
+	m_atk = 0;
+	m_def = 0;
+
+	m_position.x = 1014.f;
+	m_position.y = 1024.f;
+	m_position.z = 1429.f;
+}
+
+//-------------------------------------------------------------------------------------------------
+// Monster AI (Behavior Tree)
+//-------------------------------------------------------------------------------------------------
+
+enum MonsterState { idle_state, fight_state, runaway_state};
+enum MonsterAnimation {idle_ani, growl_ani, walk_ani, flyup_ani, flying_ani, landing_ani, bite_ani, dash_ani, hit_ani, die_ani, sleep_ani};
+
+// test behavior (just move)
+Leaf		move_to_node;
+
+
+
+int move_to(Monster* monster) 
+{
+	monster->SetPostion(monster->GetPosition().x + 0.02f, monster->GetPosition().y, monster->GetPosition().z + 0.02f);
+	return BehaviorTree::SUCCESS;
+}
+
+void build_bt(Monster* monster)
+{
+	move_to_node = Leaf("Move", std::bind(move_to, monster));
+
+	monster->BuildBT(&move_to_node);
+}
+
+void run_bt(Monster* monster)
+{
+	monster->RunBT();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

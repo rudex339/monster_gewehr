@@ -2,7 +2,6 @@
 #include "Sever_Sysyem.h"
 #include "Player_Entity.h"
 #include "Object_Entity.h"
-#include "Monster_Entity.h"
 
 
 void Sever_System::configure(World* world)
@@ -28,8 +27,11 @@ void Sever_System::tick(World* world, float deltaTime)
 			if (Player->id == 5) {
 				Position->Position = pk.monster.pos;
 				Rotation->mfYaw = pk.monster.yaw;
+				cout << pk.monster.pos.x << " tprtjklsdadfjlk" << pk.monster.pos.z << endl;
 				return;
 			}
+			
+
 			for (int i = 0; i < MAX_CLIENT_ROOM; ++i) {
 				if (pk.players[i].id != -1 && (Player->id == pk.players[i].id || Player->id == -1)) {
 					if (!ent->has<Camera_Component>()) {
