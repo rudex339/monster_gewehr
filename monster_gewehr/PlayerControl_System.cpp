@@ -128,11 +128,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					eulerangle->m_xmf3Look = Vector3::Normalize(eulerangle->m_xmf3Look);
 					eulerangle->m_xmf3Up = Vector3::CrossProduct(eulerangle->m_xmf3Look, eulerangle->m_xmf3Right, true);
 					eulerangle->m_xmf3Right = Vector3::CrossProduct(eulerangle->m_xmf3Up, eulerangle->m_xmf3Look, true);
-				}
-			
-
-			
-			
+				}			
 		}
 		else {
 			//´Ô rotation ¾øÀ½ ¤µ¤¡

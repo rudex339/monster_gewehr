@@ -2,6 +2,7 @@
 #include "Sever_Sysyem.h"
 #include "Player_Entity.h"
 #include "Object_Entity.h"
+#include "Monster_Entity.h"
 
 
 void Sever_System::configure(World* world)
@@ -11,7 +12,7 @@ void Sever_System::configure(World* world)
 
 void Sever_System::tick(World* world, float deltaTime)
 {
-	SC_PLAYER_PACKET pk;	
+	SC_OBJECT_PACKET pk;	
 
 	int retval = recv(g_socket, (char*)&pk, sizeof(pk), 0);
 	if (retval <= 0) {
@@ -24,6 +25,11 @@ void Sever_System::tick(World* world, float deltaTime)
 			ComponentHandle<Position_Component> Position,
 			ComponentHandle<Rotation_Component> Rotation)->
 		void {
+			if (Player->id == 5) {
+				Position->Position = pk.monster.pos;
+				Rotation->mfYaw = pk.monster.yaw;
+				return;
+			}
 			for (int i = 0; i < MAX_CLIENT_ROOM; ++i) {
 				if (pk.players[i].id != -1 && (Player->id == pk.players[i].id || Player->id == -1)) {
 					if (!ent->has<Camera_Component>()) {

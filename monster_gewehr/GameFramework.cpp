@@ -495,12 +495,15 @@ void CGameFramework::BuildObjects()
 	ent = m_pWorld->create();
 	ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
-	AddAnimationMeshObject(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	ent = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
 		m_pObjectManager->Get_ModelInfo("Souleater"),
 		1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 		0.f, 90.f, 0.f,
-		10.f, 10.f, 10.f,
+		20.f, 20.f, 20.f,
 		1);
+	auto monster_id = ent->get<player_Component>();
+	monster_id->id = 5;
+
 
 	m_pPlayer = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
 		m_pObjectManager->Get_ModelInfo("Soldier"),
