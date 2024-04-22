@@ -7,11 +7,13 @@
 #include "GameFramework.h"
 #include "Object_Entity.h"
 #include "Player_Entity.h"
+//---------------------------------//
 #include "Render_Sysytem.h"
 #include "PlayerControl_System.h"
 #include "move_System.h"
 #include "Sever_Sysyem.h"
-
+#include "Animate_System.h"
+//---------------------------------//
 
 CGameFramework::CGameFramework()
 {
@@ -487,10 +489,6 @@ void CGameFramework::BuildObjects()
 	m_pObjectManager = new ObjectManager();
 	if (m_pObjectManager) m_pObjectManager->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList);
 
-
-	auto RenderSystem = m_pWorld->registerSystem(
-		new Render_Sysytem(m_pObjectManager, m_pd3dCommandList));
-
 	auto ent = m_pWorld->create();
 	ent->assign<Terrain_Component>(m_pObjectManager->m_pTerrain, "default");
 
@@ -498,51 +496,56 @@ void CGameFramework::BuildObjects()
 	ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
 	AddAnimationMeshObject(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Angrybot"),
-		410.0f, m_pObjectManager->m_pTerrain->GetHeight(410.0f, 735.0f), 735.0f,
+		m_pObjectManager->Get_ModelInfo("Souleater"),
+		1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 		0.f, 90.f, 0.f,
 		10.f, 10.f, 10.f,
 		1);
 
 	m_pPlayer = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Angrybot"),
-		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+		m_pObjectManager->Get_ModelInfo("Soldier"),
+		1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 		0.f, 0.f, 0.f,
 		6.0f, 6.0f, 6.0f,
-		2);
-	
-	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Angrybot"),
-		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
-		0.f, 0.f, 0.f,
-		6.0f, 6.0f, 6.0f,
-		2);
+		3);
+	m_pPlayer->assign<ControllAngle_Component>();
+
 
 	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Angrybot"),
+		m_pObjectManager->Get_ModelInfo("Soldier"),
 		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 		0.f, 0.f, 0.f,
 		6.0f, 6.0f, 6.0f,
-		2);
+		3);
+
 	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Angrybot"),
+		m_pObjectManager->Get_ModelInfo("Soldier"),
 		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 		0.f, 0.f, 0.f,
 		6.0f, 6.0f, 6.0f,
-		2);
+		3);
+	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+		m_pObjectManager->Get_ModelInfo("Soldier"),
+		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+		0.f, 0.f, 0.f,
+		6.0f, 6.0f, 6.0f,
+		3);
 
 
 	CCamera* temp = new CThirdPersonCamera(m_pCamera);	
 	temp->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList);
-
 	ComponentHandle<Camera_Component> camera = m_pPlayer->assign<Camera_Component>(temp);
 	camera->m_pCamera->SetPosition(XMFLOAT3(310.0f, 
 		m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f)+10.f, 600.0f - 30.f));
 
 
+
+	//set System
 	m_pWorld->registerSystem(new PlayerControl_System(m_pPlayer));
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
+	m_pWorld->registerSystem(new Animate_System());
+	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dCommandList));
 
 
 	m_pWorld->emit<SetCamera_Event>({ camera->m_pCamera });
