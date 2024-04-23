@@ -30,7 +30,7 @@ void Move_System::tick(World* world, float deltaTime)
                 ComponentHandle<player_Component> p) -> void {
                     XMFLOAT3 next_pos = Vector3::Add(position->Position, velocity->m_velocity);
                     
-                    if ((m_Terrain->m_pTerrain->GetHeight(next_pos.x, next_pos.z)- next_pos.y) < 50.f) {
+                    if ((m_Terrain->m_pTerrain->GetHeight(next_pos.x, next_pos.z)- next_pos.y) < 2.f) {
                         next_pos.y = m_Terrain->m_pTerrain->GetHeight(next_pos.x, next_pos.z);
                         position->Position = next_pos;
                     }
