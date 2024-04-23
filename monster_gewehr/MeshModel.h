@@ -441,7 +441,7 @@ public:
 	static GameObjectModel *LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, GameObjectModel *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
 
 	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader);
-
+	static CLoadedModelInfo *LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader);
 	static void PrintFrameInfo(GameObjectModel *pGameObject, GameObjectModel *pParent);
 };
 

@@ -500,7 +500,7 @@ void CGameFramework::BuildObjects()
 		1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 		0.f, 90.f, 0.f,
 		20.f, 20.f, 20.f,
-		1);
+		2);
 	auto monster_id = ent->get<player_Component>();
 	monster_id->id = 5;
 	

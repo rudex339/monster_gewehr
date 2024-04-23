@@ -108,7 +108,9 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/souleater.bin", NULL) });
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//load scene object
-
+	m_ModelList.insert({ "Souleater",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/BP_building60_SM_broken_wall6_StaticMeshComponent0.bin", NULL) });
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
