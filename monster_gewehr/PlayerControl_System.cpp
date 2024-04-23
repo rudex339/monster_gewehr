@@ -114,7 +114,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 			float a = XMVectorGetX(DirectX::XMVector3Dot(XMLoadFloat3(& eulerangle->m_xmf3Right),
 				DirectX::XMVector3Cross(XMLoadFloat3(&controllangle->m_xmf3Look), XMLoadFloat3(&Vector3::TransformNormal(eulerangle->m_xmf3Look, xmmtxRotate)))));
-			cout << a << endl;
+			//cout << a << endl;
 
 			xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&controllangle->m_xmf3Right),
 				XMConvertToRadians(cyDelta));

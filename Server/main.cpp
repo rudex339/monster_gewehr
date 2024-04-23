@@ -130,7 +130,7 @@ void ProcessClient(SOCKET sock)
 			players[id].RecvPlayerData();
 			send_players.players[room_id] = players[id].GetData();
 			send_players.monster = souleater.GetData();
-			//std::cout << room_id << "¹øÂ°ÀÇ : " << send_players.players[room_id].yaw << std::endl;
+			//std::cout << send_players.monster.pos.y << std::endl;
 			fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 			if (fps.count() < 1) continue;
 			int retval = players[id].SendPlayerData(&send_players, sizeof(send_players));

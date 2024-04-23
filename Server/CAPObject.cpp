@@ -7,7 +7,7 @@
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<double> urd(-80.0, 80.0);
-std::uniform_int_distribution<int> rand_runaway_point(0, RUNAWAY_POINT);
+std::uniform_int_distribution<int> rand_runaway_point(0, RUNAWAY_POINT-1);
 
 
 CAPObject::CAPObject()
@@ -163,8 +163,8 @@ Monster::Monster()
 	}
 
 	turnning_speed = 0.1f;
-	move_speed = 0.01f;
-	fly_up_speed = 0.5f;
+	move_speed = 0.1f;
+	fly_up_speed = 0.05f;
 
 	m_yaw = 0.0f;
 
@@ -202,6 +202,7 @@ void Monster::Foward(float elapsedTimer)
 {
 	m_position.x += m_front.x * move_speed * elapsedTime;
 	m_position.z += m_front.z * move_speed * elapsedTime;
+	
 
 	updateFront();
 }
@@ -217,6 +218,7 @@ void Monster::Back(float elapsedTimer)
 void Monster::Left(float elapsedTimer)
 {
 	m_yaw += turnning_speed * elapsedTime;
+	std::cout << m_position.x << std::endl;
 
 	updateFront();
 }
@@ -322,6 +324,7 @@ int move_to(Monster* monster)
 		else {
 			monster->Right(monster->GetElapsedTime());
 		}
+		monster->Foward(monster->GetElapsedTime());
 		return BehaviorTree::RUNNING;
 	}
 

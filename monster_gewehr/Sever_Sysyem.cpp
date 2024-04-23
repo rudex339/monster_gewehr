@@ -17,7 +17,7 @@ void Sever_System::tick(World* world, float deltaTime)
 	if (retval <= 0) {
 		return;
 	}
-		
+	cout << pk.monster.pos.x << endl;
 	world->each<player_Component, Position_Component, Rotation_Component,AnimationController_Component>(
 		[&](Entity* ent,
 			ComponentHandle<player_Component> Player,
@@ -28,7 +28,7 @@ void Sever_System::tick(World* world, float deltaTime)
 			if (Player->id == 5) {
 				Position->Position = pk.monster.pos;
 				Rotation->mfYaw = pk.monster.yaw;
-				cout << pk.monster.pos.x << " tprtjklsdadfjlk" << pk.monster.pos.z << endl;
+				
 				return;
 			}
 			
