@@ -495,7 +495,7 @@ void CGameFramework::BuildObjects()
 	ent = m_pWorld->create();
 	ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
-	ent = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	ent = AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
 		m_pObjectManager->Get_ModelInfo("Souleater"),
 		1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 		0.f, 90.f, 0.f,
@@ -503,6 +503,7 @@ void CGameFramework::BuildObjects()
 		1);
 	auto monster_id = ent->get<player_Component>();
 	monster_id->id = 5;
+	
 
 
 	m_pPlayer = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
@@ -514,20 +515,20 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->assign<ControllAngle_Component>();
 
 
-	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
 		m_pObjectManager->Get_ModelInfo("Soldier"),
 		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 		0.f, 0.f, 0.f,
 		6.0f, 6.0f, 6.0f,
 		3);
 
-	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
 		m_pObjectManager->Get_ModelInfo("Soldier"),
 		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 		0.f, 0.f, 0.f,
 		6.0f, 6.0f, 6.0f,
 		3);
-	AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
 		m_pObjectManager->Get_ModelInfo("Soldier"),
 		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 		0.f, 0.f, 0.f,

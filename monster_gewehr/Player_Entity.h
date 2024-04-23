@@ -18,12 +18,20 @@ Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	float sx, float sy, float sz,
 	int n_animation);
 
+Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	CLoadedModelInfo* model,
+	float x, float y, float z, 
+	float rx, float ry, float rz, 
+	float sx, float sy, float sz, 
+	int n_animation);
+
 struct player_Component {
 
 	INT id = -1;
 
 	player_Component() = default;
 };
+
 
 struct ControllAngle_Component {
 	XMFLOAT3 m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
