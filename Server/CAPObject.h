@@ -73,7 +73,6 @@ public:
 protected:
 	SOCKET m_socket;
 	SC_OBJECT_PACKET sc_player_data;
-	
 
 	ITEM_DATA items;
 
@@ -99,11 +98,30 @@ public:
 	Monster();
 	~Monster() = default; 
 
+	// 이동 관련
+	float ElapsedTime();
+	FLOAT GetElapsedTime() { return elapsedTime; };
+	FLOAT GetWaitTime() { return waitTime; }
+	void SetWaitTime(FLOAT time) { waitTime = time; }
+
+	void Foward(float elapsedTimer);
+	void Back(float elapsedTimer);
+	void Left(float elapsedTimer);
+	void Right(float elapsedTimer);
+	void updateFront();
+
 	void SetHp(float hp) { m_hp = hp; }
 	void SetMaxHp(float max_hp) { m_max_hp = max_hp; }
 	void SetRAHp(float runaway_hp) { m_runaway_hp = runaway_hp; }	
 	void SetAtk(float atk) { m_atk = atk; }
 	void SetDef(float def) { m_def = def; }
+	void SetAnimation(CHAR animation) { m_animation = animation; }
+
+	void SetTargetPos(DirectX::XMFLOAT3 target_pos) { m_target_position = target_pos; }
+	XMFLOAT3 GetTargetPos() { return m_target_position; }
+
+	
+	XMFLOAT3 GetFront() { return m_front; }
 
 	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_animation }; }
 
@@ -114,6 +132,17 @@ public:
 
 protected:
 	bool isUserArrround[MAX_CLIENT_ROOM];
+
+	DirectX::XMFLOAT3 m_target_position;
+	DirectX::XMFLOAT3 m_front;
+
+	FLOAT currentTime = 0.f;
+	FLOAT elapsedTime = 0.f;
+	FLOAT prevTime = 0.f;
+	FLOAT waitTime = 0.f;
+
+	FLOAT turnning_speed;
+	FLOAT move_speed;
 
 	FLOAT m_hp;
 	FLOAT m_max_hp;

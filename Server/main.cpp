@@ -111,7 +111,8 @@ void ProcessClient(SOCKET sock)
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FAME>>;
 	using ms = std::chrono::duration<float, std::milli>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
-	
+	build_bt(&souleater);
+
 	frame fps{}, frame_count{};
 	while (1) {
 		if (state == S_STATE::SHOP) { 
@@ -125,12 +126,11 @@ void ProcessClient(SOCKET sock)
 			
 		}
 		if (state == S_STATE::IN_GAME) {
-			build_bt(&souleater);
 			run_bt(&souleater);
 			players[id].RecvPlayerData();
 			send_players.players[room_id] = players[id].GetData();
 			send_players.monster = souleater.GetData();
-			std::cout << room_id << "번째의 : " << send_players.players[room_id].yaw << std::endl;
+			//std::cout << room_id << "번째의 : " << send_players.players[room_id].yaw << std::endl;
 			fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 			if (fps.count() < 1) continue;
 			int retval = players[id].SendPlayerData(&send_players, sizeof(send_players));
