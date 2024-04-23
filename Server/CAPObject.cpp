@@ -1,9 +1,14 @@
 #include "CAPObject.h"
 #include <random>
 
+#define LAND_Y 1024.f
+#define RUNAWAY_POINT 3
+
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<double> urd(-80.0, 80.0);
+std::uniform_int_distribution<int> rand_runaway_point(0, RUNAWAY_POINT);
+
 
 CAPObject::CAPObject()
 {
@@ -148,8 +153,8 @@ float Distance(XMFLOAT3 pos1, XMFLOAT3 pos2) {
 }
 
 
-enum MonsterState { idle_state, fight_state, runaway_state};
-enum MonsterAnimation {idle_ani, growl_ani, walk_ani, flyup_ani, flying_ani, landing_ani, bite_ani, dash_ani, hit_ani, die_ani, sleep_ani};
+enum MonsterState { idle_state, fight_state, runaway_state };
+enum MonsterAnimation { idle_ani, growl_ani, walk_ani, flyup_ani, flying_ani, landing_ani, bite_ani, dash_ani, hit_ani, die_ani, sleep_ani };
 
 Monster::Monster()
 {
@@ -159,6 +164,7 @@ Monster::Monster()
 
 	turnning_speed = 0.1f;
 	move_speed = 0.01f;
+	fly_up_speed = 0.5f;
 
 	m_yaw = 0.0f;
 
@@ -195,7 +201,6 @@ float Monster::ElapsedTime()
 void Monster::Foward(float elapsedTimer)
 {
 	m_position.x += m_front.x * move_speed * elapsedTime;
-	m_position.y += m_front.y * move_speed * elapsedTime;
 	m_position.z += m_front.z * move_speed * elapsedTime;
 
 	updateFront();
@@ -204,7 +209,6 @@ void Monster::Foward(float elapsedTimer)
 void Monster::Back(float elapsedTimer)
 {
 	m_position.x -= m_front.x * move_speed * elapsedTime;
-	m_position.y -= m_front.y * move_speed * elapsedTime;
 	m_position.z -= m_front.z * move_speed * elapsedTime;
 
 	updateFront();
@@ -224,6 +228,16 @@ void Monster::Right(float elapsedTimer)
 	updateFront();
 }
 
+void Monster::Up(float elapsedTimer)
+{
+	m_position.y += fly_up_speed * elapsedTime;
+}
+
+void Monster::Down(float elapsedTimer)
+{
+	m_position.y -= fly_up_speed * elapsedTime;
+}
+
 void Monster::updateFront()
 {
 	XMVECTOR front;
@@ -241,6 +255,21 @@ Leaf		patrol_cool_time_node;
 
 Sequence	patrol_sequence;
 
+Leaf		set_runaway_location_node;
+Leaf		flyup_node;
+Leaf		runaway_node;
+Leaf		landing_node;
+Leaf		wait_node;
+
+Sequence	runaway_sequence;
+
+XMFLOAT3 runaway_point01 = XMFLOAT3(2256.0f, LAND_Y, 890.0f);
+XMFLOAT3 runaway_point02 = XMFLOAT3(2809.f, LAND_Y, 3329.f);
+XMFLOAT3 runaway_point03 = XMFLOAT3(1754.f, LAND_Y, 2795.f);
+
+XMFLOAT3 runaway_point[RUNAWAY_POINT] = { runaway_point01, runaway_point02, runaway_point03 };
+
+
 
 // patrol
 
@@ -256,9 +285,13 @@ int find_random_pos(Monster* monster)
 	return BehaviorTree::SUCCESS;
 }
 
-int move_to(Monster* monster) 
+int move_to(Monster* monster)
 {
 	monster->SetAnimation(walk_ani);
+
+	if (monster->GetPosition().y >= LAND_Y + 100.f) {
+		monster->SetAnimation(flying_ani);
+	}
 
 	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 1.0f) return BehaviorTree::SUCCESS;
 
@@ -281,7 +314,7 @@ int move_to(Monster* monster)
 	XMVECTOR angleVec = XMVector3AngleBetweenNormals(FrontVec, frontVec);
 	XMStoreFloat(&angle, angleVec);
 
-	
+
 	if (angle > 0.1f) {
 		if (isleft) {
 			monster->Left(monster->GetElapsedTime());
@@ -302,6 +335,7 @@ int move_to(Monster* monster)
 
 int wait_cool_time(Monster* monster, FLOAT cooltime)
 {
+	monster->SetAnimation(idle_ani);
 	monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
 
 	if (monster->GetWaitTime() < cooltime)
@@ -313,6 +347,51 @@ int wait_cool_time(Monster* monster, FLOAT cooltime)
 	}
 }
 
+
+// run away
+int set_runaway_location(Monster* monster)
+{
+	int point = 0;
+	while (1) {
+		point = rand_runaway_point(gen);
+		if (Distance(monster->GetPosition(), runaway_point[point]) > 300.f) {
+			monster->SetTargetPos(runaway_point[point]);
+			break;
+		}
+	}
+
+	return BehaviorTree::SUCCESS;
+}
+
+int fly_up(Monster* monster)
+{
+	monster->SetAnimation(flyup_ani);
+
+	if (monster->GetPosition().y <= 1200.f) {
+
+		monster->Up(monster->GetElapsedTime());
+		return BehaviorTree::RUNNING;
+	}
+
+	return BehaviorTree::SUCCESS;
+}
+
+int landing(Monster* monster)
+{
+	monster->SetAnimation(landing_ani);
+
+	if (monster->GetPosition().y >= LAND_Y) {
+		monster->Down(monster->GetElapsedTime());
+		return BehaviorTree::RUNNING;
+	}
+
+	XMFLOAT3 pos = monster->GetPosition();
+	pos.y = LAND_Y;
+	monster->SetPostion(pos);
+
+	return BehaviorTree::SUCCESS;
+}
+
 void build_bt(Monster* monster)
 {
 	find_random_pos_node = Leaf("Find Random Position", std::bind(find_random_pos, monster));
@@ -321,7 +400,15 @@ void build_bt(Monster* monster)
 
 	patrol_sequence = Sequence("Patrol", { &find_random_pos_node, &move_to_node, &patrol_cool_time_node });
 
-	monster->BuildBT(&patrol_sequence);
+
+	set_runaway_location_node = Leaf("Set RunAway Point", std::bind(set_runaway_location, monster));
+	flyup_node = Leaf("Fly UP", std::bind(fly_up, monster));
+	runaway_node = Leaf("Fly to Point", std::bind(move_to, monster));
+	landing_node = Leaf("Landing", std::bind(landing, monster));
+
+	runaway_sequence = Sequence("RunAway", { &set_runaway_location_node, &flyup_node, &runaway_node, &landing_node });
+
+	monster->BuildBT(&runaway_sequence);
 }
 
 void run_bt(Monster* monster)
@@ -329,21 +416,3 @@ void run_bt(Monster* monster)
 	monster->ElapsedTime();
 	monster->RunBT();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

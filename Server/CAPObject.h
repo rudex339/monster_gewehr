@@ -98,7 +98,7 @@ class Monster : public CAPObject
 {
 public:
 	Monster();
-	~Monster() = default; 
+	~Monster() = default;
 
 	// 이동 관련
 	float ElapsedTime();
@@ -110,11 +110,14 @@ public:
 	void Back(float elapsedTimer);
 	void Left(float elapsedTimer);
 	void Right(float elapsedTimer);
+	void Up(float elapsedTimer);
+	void Down(float elapsedTimer);
 	void updateFront();
+	void SetPitch(float pitch) { m_pitch = pitch; }
 
 	void SetHp(float hp) { m_hp = hp; }
 	void SetMaxHp(float max_hp) { m_max_hp = max_hp; }
-	void SetRAHp(float runaway_hp) { m_runaway_hp = runaway_hp; }	
+	void SetRAHp(float runaway_hp) { m_runaway_hp = runaway_hp; }
 	void SetAtk(float atk) { m_atk = atk; }
 	void SetDef(float def) { m_def = def; }
 	void SetAnimation(CHAR animation) { m_animation = animation; }
@@ -122,7 +125,7 @@ public:
 	void SetTargetPos(DirectX::XMFLOAT3 target_pos) { m_target_position = target_pos; }
 	XMFLOAT3 GetTargetPos() { return m_target_position; }
 
-	
+
 	XMFLOAT3 GetFront() { return m_front; }
 
 	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_animation }; }
@@ -145,6 +148,9 @@ protected:
 
 	FLOAT turnning_speed;
 	FLOAT move_speed;
+	FLOAT fly_up_speed;
+
+	FLOAT m_pitch;
 
 	FLOAT m_hp;
 	FLOAT m_max_hp;

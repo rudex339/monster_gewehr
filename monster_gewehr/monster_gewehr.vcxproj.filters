@@ -99,6 +99,9 @@
     <ClInclude Include="Sever_Sysyem.h">
       <Filter>system\HeaderFile</Filter>
     </ClInclude>
+    <ClInclude Include="Animate_System.h">
+      <Filter>system\HeaderFile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="monster_gewehr.cpp">
@@ -156,6 +159,9 @@
       <Filter>헤더 파일</Filter>
     </ClCompile>
     <ClCompile Include="Sever_Sysyem.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="Animate_System.cpp">
       <Filter>system</Filter>
     </ClCompile>
   </ItemGroup>
