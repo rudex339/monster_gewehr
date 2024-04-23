@@ -58,8 +58,10 @@ void Move_System::tick(World* world, float deltaTime)
                         camera->m_pCamera->RegenerateViewMatrix();
 
 #ifdef USE_NETWORK
-                        if(ent->has<player_Component>())
-                            world->emit<PacketSend_Event>({ (CHAR)ent->get<player_Component>()->id, position->Position, velocity->m_velocity , rotation->mfYaw, 0});
+                        if (ent->has<player_Component>()) {
+                            UINT state = ent->get<AnimationController_Component>()->cur_State;
+                            world->emit<PacketSend_Event>({ (CHAR)ent->get<player_Component>()->id, position->Position, velocity->m_velocity , rotation->mfYaw, state ,0 });
+                        }
 #endif
                     }
                     velocity->m_velocity = XMFLOAT3(0, 0, 0);

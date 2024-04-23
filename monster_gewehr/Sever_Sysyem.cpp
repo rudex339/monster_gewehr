@@ -18,11 +18,12 @@ void Sever_System::tick(World* world, float deltaTime)
 		return;
 	}
 		
-	world->each<player_Component, Position_Component, Rotation_Component>(
+	world->each<player_Component, Position_Component, Rotation_Component,AnimationController_Component>(
 		[&](Entity* ent,
 			ComponentHandle<player_Component> Player,
 			ComponentHandle<Position_Component> Position,
-			ComponentHandle<Rotation_Component> Rotation)->
+			ComponentHandle<Rotation_Component> Rotation,
+			ComponentHandle<AnimationController_Component> AnimationController)->
 		void {
 			if (Player->id == 5) {
 				Position->Position = pk.monster.pos;
@@ -37,7 +38,8 @@ void Sever_System::tick(World* world, float deltaTime)
 					if (!ent->has<Camera_Component>()) {
 						Player->id = pk.players[i].id;
 						Position->Position = pk.players[i].pos;
-						Rotation->mfYaw = pk.players[i].yaw;							
+						Rotation->mfYaw = pk.players[i].yaw;		
+						AnimationController->next_State = pk.players[i].State;
 					}
 					pk.players[i].id = -1;
 				}
@@ -52,6 +54,7 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	pk.pos = event.pos;
 	pk.vel = event.vel;
 	pk.yaw = event.yaw;
+	pk.State = event.State;
 
 	//cout << (int)pk.id << evnet.pos << endl;
 

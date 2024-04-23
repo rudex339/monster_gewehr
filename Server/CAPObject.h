@@ -57,7 +57,7 @@ public:
 
 	void SetSendBuf(void* buf, size_t size);
 
-	PLAYER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_wepon }; }
+	PLAYER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_wepon, m_state }; }
 
 	void RecvLogin();
 	void SendLogin();
@@ -80,6 +80,8 @@ protected:
 
 	std::mutex m_lock;
 
+	CHAR m_state;
+
 	FLOAT m_hp;
 	FLOAT m_max_hp;
 	FLOAT m_atk;
@@ -89,7 +91,7 @@ protected:
 	FLOAT m_mag;	// 현재 탄창에 들어있는 탄약
 
 	CHAR m_wepon;
-	CHAR m_armor;
+	CHAR m_armor;	
 };
 
 class Monster : public CAPObject

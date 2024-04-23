@@ -106,6 +106,12 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_ModelList.insert({ "Souleater",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/souleater.bin", NULL) });
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//load scene object
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	m_nHierarchicalGameObjects = 0;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

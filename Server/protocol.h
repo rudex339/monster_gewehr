@@ -24,6 +24,7 @@ struct PLAYER_DATA
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
 	CHAR wepon;
+	CHAR state;
 };
 
 struct MONSTER_DATA
@@ -61,6 +62,7 @@ struct CS_PLAYER_PACKET
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
+	CHAR state;
 };
 
 
