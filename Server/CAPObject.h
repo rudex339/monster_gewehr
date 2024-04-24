@@ -120,7 +120,18 @@ public:
 	void SetRAHp(float runaway_hp) { m_runaway_hp = runaway_hp; }
 	void SetAtk(float atk) { m_atk = atk; }
 	void SetDef(float def) { m_def = def; }
+
+	void SetUserArround(int index, bool b) { isUserArround[index] = b; }
+	bool GetUserArround(int index) { return isUserArround[index]; }
+
+
 	void SetAnimation(CHAR animation) { m_animation = animation; }
+
+	void SetState(CHAR state) { m_state = state; }
+	CHAR GetState() { return m_state; }
+
+	void SetTarget(Player* player) { m_target = player; }
+	Player* GetTarget() { return m_target; }
 
 	void SetTargetPos(DirectX::XMFLOAT3 target_pos) { m_target_position = target_pos; }
 	XMFLOAT3 GetTargetPos() { return m_target_position; }
@@ -136,10 +147,12 @@ public:
 
 
 protected:
-	bool isUserArrround[MAX_CLIENT_ROOM];
+	bool isUserArround[MAX_CLIENT_ROOM];
 
 	DirectX::XMFLOAT3 m_target_position;
 	DirectX::XMFLOAT3 m_front;
+
+	Player* m_target;
 
 	FLOAT currentTime = 0.f;
 	FLOAT elapsedTime = 0.f;
@@ -157,10 +170,12 @@ protected:
 	FLOAT m_runaway_hp;
 	FLOAT m_atk;
 	FLOAT m_def;
+
+	CHAR m_state;
 	CHAR m_animation;
 
 	BehaviorTree root;
 };
 
-void build_bt(Monster* monster);
+void build_bt(Monster* monster, std::unordered_map<INT, Player>* players);
 void run_bt(Monster* monster);
