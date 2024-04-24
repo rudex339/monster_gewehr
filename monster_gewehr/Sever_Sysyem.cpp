@@ -127,9 +127,48 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					return;
 
 			});
-
-
+		break;
 	}
+	case SC_PACKET_ADD_MONSTER: {
+		SC_ADD_MONSTER_PACKET* pk = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet);
+		
+		world->each<player_Component, Position_Component, Rotation_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
+				ComponentHandle<Rotation_Component> Rotation) ->
+			void {
+				if (Player->id == pk->id) {
+					Position->Position = pk->monster.pos;
+					Rotation->mfYaw = pk->monster.yaw;
+				}
+				else
+					return;
+
+			});
+		break;
+	}
+	case SC_PACKET_UPDATE_MONSTER:
+		SC_UPDATE_MONSTER_PACKET* pk = reinterpret_cast<SC_UPDATE_MONSTER_PACKET*>(packet);
+		
+		world->each<player_Component, Position_Component, Rotation_Component, AnimationController_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
+				ComponentHandle<Rotation_Component> Rotation,
+				ComponentHandle<AnimationController_Component> AnimationController) ->
+			void {
+				if (Player->id == pk->id) {
+					cout << pk->monster.pos.x << endl;
+					Position->Position = pk->monster.pos;
+					Rotation->mfYaw = pk->monster.yaw;
+					//AnimationController->next_State = pk->animation;
+				}
+				else
+					return;
+
+			});
+		break;
 	}
 	
 }

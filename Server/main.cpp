@@ -107,7 +107,18 @@ void ProcessClient(SOCKET sock)
 			
 		}
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			run_bt(&souleater);			
+			run_bt(&souleater);		
+			SC_UPDATE_MONSTER_PACKET monster_packet;
+			monster_packet.size = sizeof(monster_packet);
+			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
+			monster_packet.id = souleater.GetID();
+			monster_packet.monster = souleater.GetData();
+			monster_packet.animation = souleater.GetAnimation();
+
+			std::cout << monster_packet.monster.pos.x << std::endl;
+
+			players[id].DoSend(&monster_packet, monster_packet.size);
+
 		}
 		fps_timer = std::chrono::steady_clock::now();
 	}
@@ -219,6 +230,14 @@ void SendLoginInfo(int id)
 			client.second.SetState(S_STATE::LOG_OUT);
 		}
 	}
+
+	SC_ADD_MONSTER_PACKET sub_packet3;
+	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
+	sub_packet3.type = SC_PACKET_ADD_MONSTER;
+	sub_packet3.id = souleater.GetID();
+	sub_packet3.monster = souleater.GetData();
+
+	players[id].DoSend(&sub_packet3, sub_packet3.size);
 
 	players[id].SetState(S_STATE::IN_GAME);
 }

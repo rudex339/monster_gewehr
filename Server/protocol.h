@@ -168,6 +168,7 @@ struct SC_ADD_MONSTER_PACKET
 {
 	UCHAR size;
 	UCHAR type;
+	CHAR id;
 	MONSTER_DATA monster;
 };
 
@@ -175,6 +176,7 @@ struct SC_UPDATE_MONSTER_PACKET
 {
 	UCHAR size;
 	UCHAR type;
+	CHAR id;
 	MONSTER_DATA monster;
 	CHAR animation;
 };
