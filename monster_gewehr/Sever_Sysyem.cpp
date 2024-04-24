@@ -32,6 +32,12 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	//cout << (int)pk.id << evnet.pos << endl;
 	send(g_socket, (char*)&packet, packet.size, 0);
 
+	CS_CHANGE_ANIMATION_PACKET sub_packet;
+	sub_packet.size = sizeof(sub_packet);
+	sub_packet.type = CS_PACKET_CHANGE_ANIMATION;
+	sub_packet.animation = event.State;
+
+	send(g_socket, (char*)&sub_packet, sub_packet.size, 0);
 
 }
 
@@ -106,5 +112,24 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			});
 		break;
 	}
+	case SC_PACKET_CHANGE_ANIMATION: {
+		SC_CHANGE_ANIMATION_PACKET* pk = reinterpret_cast<SC_CHANGE_ANIMATION_PACKET*>(packet);
+
+		world->each<player_Component, AnimationController_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player,
+				ComponentHandle<AnimationController_Component> AnimationController)->
+			void {
+				if (Player->id == pk->id) {
+					AnimationController->next_State = pk->animation;
+				}
+				else
+					return;
+
+			});
+
+
 	}
+	}
+	
 }

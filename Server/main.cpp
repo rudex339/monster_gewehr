@@ -247,8 +247,8 @@ void SendAnimaition(int id)
 	SC_CHANGE_ANIMATION_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_CHANGE_ANIMATION;
+	packet.id = players[id].GetID();
 	packet.animation = players[id].GetAnimaition();
-
 	for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
 		if (client.second.GetState() != S_STATE::IN_GAME) continue;

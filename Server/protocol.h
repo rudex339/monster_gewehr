@@ -160,6 +160,7 @@ struct SC_CHANGE_ANIMATION_PACKET
 {
 	UCHAR size;
 	UCHAR type;
+	CHAR id;
 	CHAR animation;
 };
 
