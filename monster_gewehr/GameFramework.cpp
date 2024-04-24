@@ -556,12 +556,6 @@ void CGameFramework::BuildObjects()
 	m_pWorld->emit<SetCamera_Event>({ camera->m_pCamera });
 
 
-	
-
-
-
-
-
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -815,20 +809,30 @@ void CGameFramework::InitServer()
 	unsigned long noblock = 1;
 	ioctlsocket(g_socket, FIONBIO, &noblock);
 
-	CS_LOGIN_PACKET lp;
+	CS_LOGIN_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_LOGIN;
 	int weapon = 0;
 	cout << "이름 입력" << endl;
-	cin >> lp.id;
+	cin >> packet.name;
 	cout << "무기 입력" << endl;
 	cin >> weapon;
-	lp.weapon = weapon;
-	int retval = send(g_socket, (char*)&lp, sizeof(lp), 0);
-	cout << "서버 접속 완료" << endl;
+	packet.weapon = weapon;
+	packet.pos = m_pPlayer->get<Position_Component>()->Position;
+	packet.yaw = m_pPlayer->get<Rotation_Component>()->mfYaw;
+	packet.vel = m_pPlayer->get<Velocity_Component>()->m_velocity;
 
-	PLAYER_DATA ply;
+
+	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
+
+	SC_LOGIN_INFO_PACKET sub_packet;
 	while (1) {
-		int retval = recv(g_socket, (char*)&ply, sizeof(ply), 0);
+		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
 		if (retval > 0) {
+			if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
+				cout << "ㅈ됬어..." << endl;
+			}
+			
 			break;
 		}
 		else {
@@ -838,6 +842,7 @@ void CGameFramework::InitServer()
 	//cout << (int)ply.id << endl;
 
 	ComponentHandle<player_Component> Data = m_pPlayer->get<player_Component>();
-	Data->id = (int)ply.id;
+	Data->id = (int)sub_packet.id;
+	std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
 	//cout << Data->id << endl;
 }

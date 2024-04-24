@@ -45,7 +45,6 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	void InitServer();
-	void Send();
 
 private:
 	HINSTANCE					m_hInstance;
