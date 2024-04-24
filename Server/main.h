@@ -3,10 +3,14 @@
 #include "CAPObject.h"
 
 void ProcessClient(SOCKET sock);
+void PacketReassembly(int id, char* r_buf, size_t recv_size);
+void ProcessPacket(int id, char* p);
+void SendLoginInfo(int id);
+void SendPlayerMove(int id);
+void SendAnimaition(int id);
 
 std::unordered_map<INT, Player> players;
 Monster souleater;
 
-SC_OBJECT_PACKET send_players;
 
 int global_id = 0;

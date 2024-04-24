@@ -12,6 +12,7 @@ public:
 
 	void SetPostion(const DirectX::XMFLOAT3& pos) { m_position = pos; }
 	void SetPostion(float x, float y, float z);
+	void SetVelocity(const DirectX::XMFLOAT3& vel) { m_velocity = vel; }
 	void SetYaw(float yaw) { m_yaw = yaw; }
 	void SetID(int id)	{ m_id = id; }
 	void SetRoomID(int id) { m_room_id = id; }
@@ -41,9 +42,7 @@ public:
 	Player(int id, SOCKET socket);
 
 	void SetSocket(SOCKET& sock) { m_socket = sock; }
-	void SetName(std::string name) { m_name = name; }
-	void SetLock() { m_lock.lock(); }
-	void SetUnLock() { m_lock.unlock(); }
+	void SetName(std::string name) { m_name = name; }	
 	void SetHp(float hp) { m_hp = hp; }
 	void SetMaxHp(float max_hp) { m_max_hp = max_hp; }
 	void SetAtk(float atk) { m_atk = atk; }
@@ -53,22 +52,26 @@ public:
 	void SetWepon(char wepon) { m_wepon = wepon; }
 	void SetArmor(char armor) { m_armor = armor; }
 	void SetAtkByWeapon(char aromor);
+	void SetRemainSize(int remain_size) { m_remain_size = remain_size; }
+	void SetState(S_STATE state) { m_state = state; }
+	void SetAnimaition(char ani) { m_animation = ani; }
 
+	void Lock() { m_lock.lock(); }
+	void UnLock() { m_lock.unlock(); }
 
-	void SetSendBuf(void* buf, size_t size);
+	int GetRemainSize() { return m_remain_size; }
+	char GetWeapon() { return m_wepon; }
+	char GetAnimaition() { return m_animation; }
+	S_STATE GetState() { return m_state; }
+	std::string GetName() { return m_name; }
+	PLAYER_DATA GetPlayerData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
+	
 
-	PLAYER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_wepon, m_state }; }
+	int RecvData(char* p);
+	int DoSend(void* p, size_t size);
 
-	void RecvLogin();
-	void SendLogin();
+	void Process_Packet(char* p);
 
-	int RecvItemData();
-	void SendItemData();
-
-	void RecvPlayerData();
-	int SendPlayerData(void* buf, size_t size);
-
-	//char m_send_buf[BUF_SIZE];
 	char m_recv_buf[BUF_SIZE];
 protected:
 	SOCKET m_socket;
@@ -80,7 +83,7 @@ protected:
 
 	std::mutex m_lock;
 
-	CHAR m_state;
+	S_STATE m_state;
 
 	FLOAT m_hp;
 	FLOAT m_max_hp;
@@ -92,6 +95,9 @@ protected:
 
 	CHAR m_wepon;
 	CHAR m_armor;	
+	CHAR m_animation;
+
+	INT m_remain_size;
 };
 
 class Monster : public CAPObject
@@ -128,7 +134,7 @@ public:
 
 	XMFLOAT3 GetFront() { return m_front; }
 
-	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_animation }; }
+	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_hp }; }
 
 
 	void BuildBT(BehaviorTree node) { root = node; }
