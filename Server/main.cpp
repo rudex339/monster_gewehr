@@ -79,8 +79,6 @@ void ProcessClient(SOCKET sock)
 	
 	int id = global_id++;
 
-	char* packet {};
-
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
 	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
@@ -96,17 +94,22 @@ void ProcessClient(SOCKET sock)
 
 	frame fps{}, frame_count{};
 	while (players[id].GetState() != S_STATE::LOG_OUT) {
-		retval = players[id].RecvData(packet);
+		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
+		if (fps.count() < 1) continue;
+		retval = players[id].RecvData();
 		if (retval > 0) {
-			PacketReassembly(id, packet, retval);			
+			PacketReassembly(id, retval);			
+		}
+		else if (retval == -1) {
+			break;
+		}
+		else {
+			
 		}
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			run_bt(&souleater);
-			fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
-			if (fps.count() < 1) continue;
-
-			fps_timer = std::chrono::steady_clock::now();
+			run_bt(&souleater);			
 		}
+		fps_timer = std::chrono::steady_clock::now();
 	}
 
 	// 클라이언트 접속 종료시 자동차 정보 초기화
@@ -119,10 +122,10 @@ void ProcessClient(SOCKET sock)
 	return;
 }
 
-void PacketReassembly(int id, char* r_buf, size_t recv_size)
+void PacketReassembly(int id, size_t recv_size)
 {
 	int remain_size = recv_size + players[id].GetRemainSize();
-	char* p = r_buf;
+	char* p = players[id].m_recv_buf;
 	while (remain_size > 0) {
 		int packet_size = p[0];
 		if (packet_size <= remain_size) {
@@ -149,7 +152,6 @@ void ProcessPacket(int id, char* p)
 		players[id].SetYaw(packet->yaw);
 		players[id].SetWepon(packet->weapon);
 
-		players[id].SetState(S_STATE::IN_GAME);
 
 		SendLoginInfo(id);
 
@@ -159,7 +161,7 @@ void ProcessPacket(int id, char* p)
 		CS_PLAYER_MOVE_PACKET* packet = reinterpret_cast<CS_PLAYER_MOVE_PACKET*>(p);
 		players[id].SetPostion(packet->pos);
 		players[id].SetYaw(packet->yaw);
-
+		//std::cout << id << "에서 만큼 받아옴 " << packet->pos.x << std::endl;
 		SendPlayerMove(id);
 		break;
 	}
@@ -180,7 +182,7 @@ void SendLoginInfo(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_INFO;
 	packet.id = id;
-
+	std::cout << packet.id << std::endl;
 	retval = players[id].DoSend(&packet, packet.size);
 	if (retval == SOCKET_ERROR) {
 		players[id].SetState(S_STATE::LOG_OUT);
@@ -195,6 +197,7 @@ void SendLoginInfo(int id)
 
 	for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
+		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		retval = client.second.DoSend(&sub_packet, sub_packet.size);
 		if (retval == SOCKET_ERROR) {
 			client.second.SetState(S_STATE::LOG_OUT);
@@ -203,6 +206,7 @@ void SendLoginInfo(int id)
 
 	for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
+		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		SC_ADD_PLAYER_PACKET sub_packet2;
 		sub_packet2.size = sizeof(sub_packet2);
 		sub_packet2.type = SC_PACKET_ADD_PLAYER;
@@ -215,6 +219,8 @@ void SendLoginInfo(int id)
 			client.second.SetState(S_STATE::LOG_OUT);
 		}
 	}
+
+	players[id].SetState(S_STATE::IN_GAME);
 }
 
 void SendPlayerMove(int id)
@@ -227,6 +233,7 @@ void SendPlayerMove(int id)
 
 	for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
+		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		retval = client.second.DoSend(&packet, packet.size);
 		if (retval == SOCKET_ERROR) {
 			client.second.SetState(S_STATE::LOG_OUT);
@@ -244,6 +251,7 @@ void SendAnimaition(int id)
 
 	for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
+		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		retval = client.second.DoSend(&packet, packet.size);
 		if (retval == SOCKET_ERROR) {
 			client.second.SetState(S_STATE::LOG_OUT);

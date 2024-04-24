@@ -3,7 +3,7 @@
 #include "CAPObject.h"
 
 void ProcessClient(SOCKET sock);
-void PacketReassembly(int id, char* r_buf, size_t recv_size);
+void PacketReassembly(int id, size_t recv_size);
 void ProcessPacket(int id, char* p);
 void SendLoginInfo(int id);
 void SendPlayerMove(int id);

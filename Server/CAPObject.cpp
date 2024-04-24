@@ -61,6 +61,7 @@ Player::Player(int id, SOCKET socket)
 	m_wepon = 0;
 	m_armor = 0;
 
+	m_remain_size = 0;
 	m_state = S_STATE::LOBBY;
 }
 
@@ -83,14 +84,16 @@ void Player::SetAtkByWeapon(char weapon)
 
 
 
-int Player::RecvData(char* p)
+int Player::RecvData()
 {
 	int retval = recv(m_socket, m_recv_buf + m_remain_size, BUF_SIZE - m_remain_size, 0);
 	if (retval <= 0) {
-		return 0;
+		if (WSAGetLastError() == WSAETIMEDOUT)
+			return 0;
+		else
+			return -1;
 	}
 	else {
-		p = m_recv_buf;
 		return retval;
 		
 	}
@@ -190,7 +193,6 @@ void Monster::Back(float elapsedTimer)
 void Monster::Left(float elapsedTimer)
 {
 	m_yaw += turnning_speed * elapsedTime;
-	std::cout << m_position.x << std::endl;
 
 	updateFront();
 }

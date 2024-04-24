@@ -67,7 +67,7 @@ public:
 	PLAYER_DATA GetPlayerData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
 	
 
-	int RecvData(char* p);
+	int RecvData();
 	int DoSend(void* p, size_t size);
 
 	void Process_Packet(char* p);

@@ -75,13 +75,36 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			void {
 				if (pk->player_data.id == -1)
 					return;
-				else if(Player->id == -1) {
+				else if (Player->id == -1) {
 					Player->id = pk->player_data.id;
 					Position->Position = pk->player_data.pos;
 					Rotation->mfYaw = pk->player_data.yaw;
+					pk->player_data.id = -1;
 				}
-			});
+				else
+					return;
 
+			});
+		break;
+	}
+	case SC_PACKET_UPDATE_PLAYER: {
+		SC_UPDATE_PLAYER_PACKET* pk = reinterpret_cast<SC_UPDATE_PLAYER_PACKET*>(packet);
+
+		world->each<player_Component, Position_Component, Rotation_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
+				ComponentHandle<Rotation_Component> Rotation) ->
+			void {
+				if (Player->id == pk->player_data.id) {
+					Position->Position = pk->player_data.pos;
+					Rotation->mfYaw = pk->player_data.yaw;
+				}
+				else
+					return;
+
+			});
+		break;
 	}
 	}
 }
