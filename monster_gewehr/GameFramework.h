@@ -30,6 +30,7 @@ public:
 	void ChangeSwapChainState();
 
     void BuildObjects();
+	void BuildScene(char* pstrFileName);
     void ReleaseObjects();
 
     void ProcessInput();

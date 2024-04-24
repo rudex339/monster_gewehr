@@ -29,12 +29,12 @@ void Move_System::tick(World* world, float deltaTime)
                 ComponentHandle<Rotation_Component> rotation,
                 ComponentHandle<player_Component> p) -> void {
                     XMFLOAT3 next_pos = Vector3::Add(position->Position, velocity->m_velocity);
-                    
+                    cout << next_pos.x << "  " << next_pos.z << endl;
                     if ((m_Terrain->m_pTerrain->GetHeight(next_pos.x, next_pos.z)- next_pos.y) < 2.f) {
                         next_pos.y = m_Terrain->m_pTerrain->GetHeight(next_pos.x, next_pos.z);
                         position->Position = next_pos;
                     }
-                    
+                    cout << position->Position.y << endl;
 
                     rotation->mfYaw += velocity->m_velRotate.x;
                     rotation->mfPitch += velocity->m_velRotate.y;
@@ -51,7 +51,7 @@ void Move_System::tick(World* world, float deltaTime)
                         camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Up, 20.f);
                        
                         if (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
-                            camera_pos.y = m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) + 2.f;
+                           camera_pos.y = m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) + 2.f;
                         }
                         camera->m_pCamera->SetPosition(camera_pos);
                         camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);

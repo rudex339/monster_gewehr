@@ -1420,9 +1420,11 @@ CLoadedModelInfo* GameObjectModel::LoadGeometryFromFile(ID3D12Device* pd3dDevice
 	{
 		if (::ReadStringFromFile(pInFile, pstrToken))
 		{
-			pLoadedModel->m_pModelRootObject = GameObjectModel::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes);
-			::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
-			
+			GameObjectModel* pGameObject = new GameObjectModel();
+			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
+			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			pGameObject->SetMesh(pMesh);
+			pLoadedModel->m_pModelRootObject = pGameObject;
 		}
 		else
 		{

@@ -64,6 +64,12 @@ struct Position_Component {
 
 		Position = XMFLOAT3(x, y, z);
 	}
+	Position_Component(XMFLOAT4X4 xmf4x4World) {
+		m_xmf4x4World = xmf4x4World;
+		Position = XMFLOAT3(m_xmf4x4World._41, 
+			m_xmf4x4World._42,
+			m_xmf4x4World._43);
+	}
 };
 
 struct Rotation_Component {

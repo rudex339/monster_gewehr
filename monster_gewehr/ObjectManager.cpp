@@ -87,7 +87,7 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,23); //사용되는 텍스쳐 갯수
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,217); //사용되는 텍스쳐 갯수 
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -99,7 +99,7 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.5f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
 		_T("Terrain/unity_city.raw"), 513,513, xmf3Scale, xmf4Color);//2
-
+	//4104/330
 	m_ModelList.insert({"Soldier",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL) });
@@ -108,9 +108,147 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/souleater.bin", NULL) });
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//load scene object
-	m_ModelList.insert({ "Souleater",
-		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryFromFile
+	m_ModelList.insert({ "BP_building60_SM_broken_wall6_StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/BP_building60_SM_broken_wall6_StaticMeshComponent0.bin", NULL) });
+	m_ModelList.insert({ "BP_building60_SM_wall2_StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/BP_building60_SM_wall2_StaticMeshComponent0.bin", NULL) });
+	m_ModelList.insert({ "BP_building60_SM_window2_2_StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/BP_building60_SM_window2_2_StaticMeshComponent0.bin", NULL) });
+	m_ModelList.insert({ "BP_building60_SM_window5_StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/BP_building60_SM_window5_StaticMeshComponent0.bin", NULL) });
+	m_ModelList.insert({ "BP_building60_SM_window8_StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/BP_building60_SM_window8_StaticMeshComponent0.bin", NULL) });
+	m_ModelList.insert({ "Cube.001",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Cube.001.bin", NULL) });
+	m_ModelList.insert({ "SM_broken_concrete1",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_broken_concrete1.bin", NULL) });
+	m_ModelList.insert({ "SM_broken_concrete3",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_broken_concrete3.bin", NULL) });
+	m_ModelList.insert({ "SM_broken_wall1",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_broken_wall1.bin", NULL) });
+	m_ModelList.insert({ "SM_broken_wall3",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_broken_wall3.bin", NULL) });
+	m_ModelList.insert({ "SM_broken_wall7",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_broken_wall7.bin", NULL) });
+	m_ModelList.insert({ "SM_broken_water_tank2",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_broken_water_tank2.bin", NULL) });
+	m_ModelList.insert({ "SM_bus_stop3",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_bus_stop3.bin", NULL) });
+	m_ModelList.insert({ "SM_car1_3",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_car1_3.bin", NULL) });
+	m_ModelList.insert({ "SM_car3",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_car3.bin", NULL) });
+	m_ModelList.insert({ "SM_car4",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_car4.bin", NULL) });
+	m_ModelList.insert({ "SM_car8",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_car8.bin", NULL) });
+	m_ModelList.insert({ "SM_car10",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_car10.bin", NULL) });
+	m_ModelList.insert({ "SM_car15",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_car15.bin", NULL) });
+	m_ModelList.insert({ "SM_concrete1",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_concrete1.bin", NULL) });
+	m_ModelList.insert({ "SM_cracked_asphalt",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_cracked_asphalt.bin", NULL) });
+	m_ModelList.insert({ "SM_debris3",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_debris3.bin", NULL) });
+	m_ModelList.insert({ "SM_debris9",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_debris9.bin", NULL) });
+	m_ModelList.insert({ "SM_debris16",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_debris16.bin", NULL) });
+	m_ModelList.insert({ "SM_debris26",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_debris26.bin", NULL) });
+	m_ModelList.insert({ "SM_ground1",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_ground1.bin", NULL) });
+	m_ModelList.insert({ "SM_ground180",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_ground180.bin", NULL) });
+	m_ModelList.insert({ "SM_metal_structure4",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_metal_structure4.bin", NULL) });
+	m_ModelList.insert({ "SM_metal_structure12",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_metal_structure12.bin", NULL) });
+	m_ModelList.insert({ "SM_pillar1",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_pillar1.bin", NULL) });
+	m_ModelList.insert({ "SM_pillar9",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_pillar9.bin", NULL) });
+	m_ModelList.insert({ "SM_pillar16",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_pillar16.bin", NULL) });
+	m_ModelList.insert({ "SM_pillar18_StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_pillar18_StaticMeshComponent0.bin", NULL) });
+	m_ModelList.insert({ "SM_post6",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_post6.bin", NULL) });
+	m_ModelList.insert({ "SM_window1",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_window1.bin", NULL) });
+	m_ModelList.insert({ "SM_window2",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_window2.bin", NULL) });
+	m_ModelList.insert({ "SM_window3",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_window3.bin", NULL) });
+	m_ModelList.insert({ "SM_window4",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_window4.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor155",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor155.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor156",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor156.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor157",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor157.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor159",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor159.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor640",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor640.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor642",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor642.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor655",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor655.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshComponent0.bin", NULL) });
+	m_ModelList.insert({ "SM_pillar11_StaticMeshComponent0",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_pillar11_StaticMeshComponent0.bin", NULL) });
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
