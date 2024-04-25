@@ -11,6 +11,7 @@ std::uniform_int_distribution<int> rand_runaway_point(0, RUNAWAY_POINT-1);
 std::uniform_int_distribution<int> random_0_to_100(0, 100);
 
 
+
 CAPObject::CAPObject()
 {
 	m_position = { 0.f, 1000.f, 0.f };
@@ -144,7 +145,7 @@ Monster::Monster()
 	}
 	m_id = 5;
 
-	turnning_speed = 0.2f;
+	turnning_speed = 0.4f;
 	move_speed = 0.1f;
 	fly_up_speed = 0.05f;
 
@@ -238,16 +239,24 @@ void Monster::updateFront()
 #define		ATTENT_TIME 5000.0f
 #define		WAIT_PATROL 3000.0f
 
-//Selector	idle_selector;
-Sequence	idle_sequence;
-	Sequence	attentive_sequence;
-		Leaf		find_near_user_node;
-		Leaf		idle_to_fight_node;
-	//Leaf		choose_random_action_node;
-	Sequence	patrol_sequence;
-		Leaf		find_random_pos_node;
-		Leaf		move_to_node;
-		Leaf		patrol_cool_time_node;
+Selector	idle_selector;
+	Sequence	idle_sequence;
+		Sequence	attentive_sequence;
+			Leaf		find_near_user_node;
+			Leaf		idle_to_fight_node;
+	Leaf		choose_random_action_node;
+	Selector	choose_action_selector;
+		Selector	go_to_home_selector;
+			Leaf		check_far_node;
+			Leaf		go_to_home_node;
+			//Leaf		wait
+		Leaf		growling_node;
+		Leaf		do_nothing_node;
+		Sequence	patrol_sequence;
+			Leaf		find_random_pos_node;
+			Leaf		move_to_node;
+			Leaf		patrol_cool_time_node;
+	
 
 // fight
 Sequence	fight_sequence;
@@ -290,47 +299,6 @@ XMFLOAT3 runaway_point03 = XMFLOAT3(1754.f, LAND_Y, 2795.f);
 
 XMFLOAT3 runaway_point[RUNAWAY_POINT] = { runaway_point01, runaway_point02, runaway_point03 };
 
-
-//// idle
-
-int find_near_user(Monster* monster, std::unordered_map<INT, Player>* players, float cooltime)
-{
-	bool isTargetExist = false;
-
-	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
-		auto playerIter = players->find(i);
-		if (playerIter != players->end()) {
-			if (playerIter->second.GetID() != -1) {
-				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
-					isTargetExist = true;
-				}
-			}
-		}
-	}
-
-	if (isTargetExist) {
-		monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
-
-		if (monster->GetWaitTime() < cooltime)
-			return BehaviorTree::RUNNING;
-
-		else {
-			monster->SetWaitTime(0.0f);
-			return BehaviorTree::SUCCESS;
-		}
-	}
-
-	return BehaviorTree::FAIL;
-}
-
-int to_fight(Monster* monster, std::unordered_map<INT, Player>* players)
-{
-	monster->SetState(fight_state);
-	build_bt(monster, players);
-
-
-	return BehaviorTree::SUCCESS;
-}
 
 //fight
 int search_target(Monster* monster, std::unordered_map<INT, Player>* players)
@@ -458,12 +426,128 @@ int bite_attack(Monster* monster)
 {
 	monster->SetAnimation(bite_ani);
 	monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
-	if (monster->GetWaitTime() < 300.0f) {
+	if (monster->GetWaitTime() < 1300.0f) {
 		// 위 시간을 깨무는 애니메이션 시간으로 조정
 		return BehaviorTree::RUNNING;
 	}
 	monster->SetWaitTime(0.0f);
 	return BehaviorTree::SUCCESS;
+}
+
+//// idle
+int attent(Monster* monster, std::unordered_map<INT, Player>* players, float cooltime)
+{
+	bool isTargetExist = false;
+
+	for (int i = 0; i < MAX_CLIENT; i++) {
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			monster->SetUserArround(i, false);
+			if (playerIter->second.GetID() != -1) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
+					isTargetExist = true;
+					monster->SetUserArround(i, true);
+				}
+			}
+		}
+	}
+
+	if (isTargetExist) {
+		monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
+		if (monster->GetWaitTime() < cooltime) {
+			return BehaviorTree::RUNNING;
+		}
+		else {
+			monster->SetWaitTime(0.0f);
+			return BehaviorTree::SUCCESS;
+		}
+	}
+
+	return BehaviorTree::FAIL;
+	
+}
+
+int find_near_user(Monster* monster, std::unordered_map<INT, Player>* players, float cooltime)
+{
+	bool isTargetExist = false;
+
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			if (playerIter->second.GetID() != -1) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
+					isTargetExist = true;
+				}
+			}
+		}
+	}
+
+	if (isTargetExist) {
+		monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
+
+		if (monster->GetWaitTime() < cooltime)
+			return BehaviorTree::RUNNING;
+
+		else {
+			monster->SetWaitTime(0.0f);
+			return BehaviorTree::SUCCESS;
+		}
+	}
+
+	return BehaviorTree::FAIL;
+}
+
+int to_fight(Monster* monster, std::unordered_map<INT, Player>* players)
+{
+	monster->SetState(fight_state);
+	build_bt(monster, players);
+
+
+	return BehaviorTree::SUCCESS;
+}
+
+int choose_action(Monster* monster)
+{
+	monster->SetChoice(random_0_to_100(gen));
+
+	return BehaviorTree::SUCCESS;
+}
+
+int wait_cool_time(Monster* monster, FLOAT cooltime)
+{
+	monster->SetAnimation(idle_ani);
+	monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
+
+	if (monster->GetWaitTime() < cooltime)
+		return BehaviorTree::RUNNING;
+
+	else {
+		monster->SetWaitTime(0.0f);
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int growling(Monster* monster)
+{
+	if (monster->GetChoice() <= 10) {
+		monster->SetAnimation(growl_ani);
+		monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
+		if (monster->GetWaitTime() < 5200.0f) {
+			// 위 시간을 포효하는 애니메이션 시간으로 조정
+			return BehaviorTree::RUNNING;
+		}
+		monster->SetWaitTime(0.0f);
+		return BehaviorTree::SUCCESS;
+	}
+	return BehaviorTree::FAIL;
+}
+
+int do_nothing(Monster* monster, float time)
+{
+	if (monster->GetChoice() <= 40) {
+		wait_cool_time(monster, time);
+	}
+	return BehaviorTree::FAIL;
 }
 
 // patrol
@@ -581,19 +665,7 @@ int move_to_target(Monster* monster, std::unordered_map<INT, Player>* players)
 	return BehaviorTree::SUCCESS;
 }
 
-int wait_cool_time(Monster* monster, FLOAT cooltime)
-{
-	monster->SetAnimation(idle_ani);
-	monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
 
-	if (monster->GetWaitTime() < cooltime)
-		return BehaviorTree::RUNNING;
-
-	else {
-		monster->SetWaitTime(0.0f);
-		return BehaviorTree::SUCCESS;
-	}
-}
 
 
 // run away
@@ -642,6 +714,7 @@ int landing(Monster* monster)
 
 void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 {
+	//fight
 	set_target_node = Leaf("Set Target Position", std::bind(set_target_pos, monster));
 	charging_dash_node = Leaf("Charging Dash...", std::bind(charging_dash, monster));
 	dash_attack_node = Leaf("DASH", std::bind(dash_attack, monster));
@@ -665,13 +738,34 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 	attack_sequence = Sequence("Ready to Attack", { &fight_to_idle_selector, &choose_target_node, &move_to_target_sequence });
 
 
-	// patrol
+	//idle
+
+
+	find_near_user_node = Leaf("Search Near User", std::bind(attent, monster, players, 3000.0f));
+	idle_to_fight_node = Leaf("Change State(idle->fight)", std::bind(to_fight, monster, players));
+
+
+	attentive_sequence = Sequence("Attent Sequence", { &find_near_user_node, &idle_to_fight_node });
+
+
+	choose_random_action_node = Leaf("Choose action", std::bind(choose_action, monster));
+	
+	growling_node = Leaf("Growling", std::bind(growling, monster));
+	do_nothing_node = Leaf("Do Nothing", std::bind(do_nothing, monster, 3000.0f));
+
+	choose_action_selector = Selector("Do Action Selector", { &growling_node, &do_nothing_node, &patrol_sequence });
+
+
+
 	find_random_pos_node = Leaf("Find Random Position", std::bind(find_random_pos, monster));
 	move_to_node = Leaf("Move", std::bind(move_to, monster));
 	patrol_cool_time_node = Leaf("Wait Next Patrol", std::bind(wait_cool_time, monster, WAIT_PATROL));
 
 	patrol_sequence = Sequence("Patrol", { &find_random_pos_node, &move_to_node, &patrol_cool_time_node });
 
+	idle_sequence = Sequence("Idle", { &choose_random_action_node, &choose_action_selector });
+
+	idle_selector = Selector("", { &attentive_sequence, &idle_sequence });
 
 	// runaway
 	set_runaway_location_node = Leaf("Set RunAway Point", std::bind(set_runaway_location, monster));
@@ -682,7 +776,14 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 	runaway_sequence = Sequence("RunAway", { &set_runaway_location_node, &flyup_node, &runaway_node, &landing_node });
 
 	// root
-	monster->BuildBT(&attack_sequence);
+	if (monster->GetState() == idle_state)
+		monster->BuildBT(&idle_selector);
+
+	else if (monster->GetState() == fight_state)
+		monster->BuildBT(&attack_sequence);
+	
+	else if (monster->GetState() == runaway_state)
+		monster->BuildBT(&runaway_sequence);
 }
 
 void run_bt(Monster* monster)
