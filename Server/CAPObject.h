@@ -111,6 +111,17 @@ protected:
 	INT m_remain_size;
 };
 
+
+enum MonsterState { idle_state, fight_state, runaway_state };
+enum MonsterAnimation {
+	idle_ani,
+	growl_ani, walk_ani,
+	flyup_ani, flying_ani, landing_ani,
+	bite_ani, dash_ani,
+	hit_ani, die_ani,
+	sleep_ani
+};
+
 class Monster : public CAPObject
 {
 public:
@@ -133,8 +144,10 @@ public:
 	void SetPitch(float pitch) { m_pitch = pitch; }
 
 	void SetHp(float hp) { m_hp = hp; }
-	void SetMaxHp(float max_hp) { m_max_hp = max_hp; }
 	void SetRAHp(float runaway_hp) { m_runaway_hp = runaway_hp; }
+	float GetHp() { return m_hp; }
+	float GetRAHp() { return m_runaway_hp; }
+
 	void SetAtk(float atk) { m_atk = atk; }
 	void SetDef(float def) { m_def = def; }
 
@@ -161,7 +174,7 @@ public:
 
 	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_hp }; }
 
-	float GetHp() { return m_hp; }
+	
 
 	void BuildBT(BehaviorTree node) { root = node; }
 	void RunBT() { root.run(); }
@@ -201,4 +214,4 @@ protected:
 };
 
 void build_bt(Monster* monster, std::unordered_map<INT, Player>* players);
-void run_bt(Monster* monster);
+void run_bt(Monster* monster, std::unordered_map<INT, Player>* players);

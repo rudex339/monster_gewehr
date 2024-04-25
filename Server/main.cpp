@@ -115,7 +115,7 @@ void ProcessClient(SOCKET sock)
 			
 		}
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			run_bt(&souleater);		
+			run_bt(&souleater, &players);		
 			if (players[id].GetAnimaition() == 2) {
 				if (shoot_timer <= 0) {
 					shoot_timer = MAX_FRAME / 1;					
@@ -128,6 +128,9 @@ void ProcessClient(SOCKET sock)
 						souleater.m_lock.lock();
 						souleater.SetHp(souleater.GetHp() - 10);
 						souleater.m_lock.unlock();
+						if(souleater.GetState() == idle_state)
+							souleater.SetState(fight_state);
+						build_bt(&souleater, &players);
 					}
 					
 				}

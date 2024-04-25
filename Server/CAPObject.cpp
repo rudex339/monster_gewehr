@@ -130,13 +130,7 @@ float Distance(XMFLOAT3 pos1, XMFLOAT3 pos2) {
 }
 
 
-enum MonsterState { idle_state, fight_state, runaway_state };
-enum MonsterAnimation { idle_ani, 
-	growl_ani, walk_ani, 
-	flyup_ani, flying_ani, landing_ani, 
-	bite_ani, dash_ani, 
-	hit_ani, die_ani, 
-	sleep_ani };
+
 
 Monster::Monster()
 {
@@ -145,7 +139,7 @@ Monster::Monster()
 	}
 	m_id = 5;
 
-	turnning_speed = 0.4f;
+	turnning_speed = 0.2f;
 	move_speed = 0.1f;
 	fly_up_speed = 0.05f;
 
@@ -252,6 +246,20 @@ void Monster::updateFront()
 	XMStoreFloat3(&m_front, -normalizedFront);
 }
 
+void check_hp(Monster* monster, std::unordered_map<INT, Player>* players)
+{
+	float hp = monster->GetHp();
+
+	if (hp <= monster->GetRAHp()) {
+		monster->SetState(runaway_state);
+		if (hp >= 300.0f) {
+			monster->SetRAHp(hp * 0.5f);
+		}
+		build_bt(monster, players);
+	}
+
+}
+
 
 //// Behaviors
 
@@ -310,7 +318,7 @@ Sequence	runaway_sequence;
 	Leaf		flyup_node;
 	Leaf		runaway_node;
 	Leaf		landing_node;
-	Leaf		wait_node;
+	Leaf		runaway_to_idle_node;
 
 
 // runaway points
@@ -793,8 +801,9 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 	flyup_node = Leaf("Fly UP", std::bind(fly_up, monster));
 	runaway_node = Leaf("Fly to Point", std::bind(move_to, monster));
 	landing_node = Leaf("Landing", std::bind(landing, monster));
+	runaway_to_idle_node = Leaf("Change State(runaway->idle)", std::bind(to_idle, monster, players));
 
-	runaway_sequence = Sequence("RunAway", { &set_runaway_location_node, &flyup_node, &runaway_node, &landing_node });
+	runaway_sequence = Sequence("RunAway", { &set_runaway_location_node, &flyup_node, &runaway_node, &landing_node, &runaway_to_idle_node });
 
 	// root
 	if (monster->GetState() == idle_state)
@@ -807,8 +816,9 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 		monster->BuildBT(&runaway_sequence);
 }
 
-void run_bt(Monster* monster)
+void run_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 {
 	monster->ElapsedTime();
+	check_hp(monster, players);
 	monster->RunBT();
 }
