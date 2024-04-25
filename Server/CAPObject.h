@@ -147,6 +147,9 @@ public:
 	void SetState(CHAR state) { m_state = state; }
 	CHAR GetState() { return m_state; }
 
+	void SetChoice(CHAR choice) { m_choose = choice; }
+	CHAR GetChoice() { return m_choose; }
+
 	void SetTarget(Player* player) { m_target = player; }
 	Player* GetTarget() { return m_target; }
 
@@ -191,6 +194,8 @@ protected:
 
 	CHAR m_state;
 	CHAR m_animation;
+	
+	CHAR m_choose;
 
 	BehaviorTree root;
 };
