@@ -60,7 +60,8 @@ void Move_System::tick(World* world, float deltaTime)
 #ifdef USE_NETWORK
                         if (ent->has<player_Component>()) {
                             UINT state = ent->get<AnimationController_Component>()->cur_State;
-                            world->emit<PacketSend_Event>({ (CHAR)ent->get<player_Component>()->id, position->Position, velocity->m_velocity , rotation->mfYaw, state ,0 });
+                            world->emit<PacketSend_Event>({ (CHAR)ent->get<player_Component>()->id, position->Position, velocity->m_velocity, 
+                                rotation->mfYaw, state , camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector(),0});
                         }
 #endif
                     }

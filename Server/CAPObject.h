@@ -16,12 +16,15 @@ public:
 	void SetYaw(float yaw) { m_yaw = yaw; }
 	void SetID(int id)	{ m_id = id; }
 	void SetRoomID(int id) { m_room_id = id; }
+	void SetBoundingBox(XMFLOAT3 center) { m_bounding_box.Center = center; m_bounding_box.Center.y += 5.0f; }
+	void RotateBoundingBox(XMFLOAT4& orientaion) { m_bounding_box.Orientation = orientaion; }
 
 	DirectX::XMFLOAT3 GetPosition() { return m_position; }
 	DirectX::XMFLOAT3 GetVelocity() { return m_velocity; }
 	FLOAT GetYaw() { return m_yaw; }
 	CHAR GetID() { return m_id; }
 	CHAR GetRoomID() { return m_room_id; }
+	DirectX::BoundingOrientedBox GetBoundingBox() { return m_bounding_box; }
 	
 
 protected:
@@ -55,6 +58,8 @@ public:
 	void SetRemainSize(int remain_size) { m_remain_size = remain_size; }
 	void SetState(S_STATE state) { m_state = state; }
 	void SetAnimaition(char ani) { m_animation = ani; }
+	void SetAtkDir(const DirectX::XMFLOAT3& dir) { m_atk_dir = dir; }
+	void SetAtkPos(const DirectX::XMFLOAT3& pos) { m_atk_pos = pos; }
 
 	void Lock() { m_lock.lock(); }
 	void UnLock() { m_lock.unlock(); }
@@ -65,6 +70,8 @@ public:
 	S_STATE GetState() { return m_state; }
 	std::string GetName() { return m_name; }
 	PLAYER_DATA GetPlayerData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
+	DirectX::XMFLOAT3 GetAtkDir() { return m_atk_dir; }
+	DirectX::XMFLOAT3 GetAtkPos() { return m_atk_pos; }
 	
 
 	int RecvData();
@@ -92,6 +99,10 @@ protected:
 
 	FLOAT m_ammo;	// ÇöÀç ÃÑÇÕ ÃÑ¾Ë(¼ÒÁöÁß Åº¾à)
 	FLOAT m_mag;	// ÇöÀç ÅºÃ¢¿¡ µé¾îÀÖ´Â Åº¾à
+
+	DirectX::XMFLOAT3 m_atk_dir;
+	DirectX::XMFLOAT3 m_atk_pos;
+
 
 	CHAR m_wepon;
 	CHAR m_armor;	
@@ -147,11 +158,12 @@ public:
 
 	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_hp }; }
 
+	float GetHp() { return m_hp; }
 
 	void BuildBT(BehaviorTree node) { root = node; }
 	void RunBT() { root.run(); }
 
-
+	std::mutex m_lock;
 protected:
 	bool isUserArround[MAX_CLIENT_ROOM];
 

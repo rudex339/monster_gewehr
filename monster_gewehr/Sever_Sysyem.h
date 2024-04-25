@@ -6,6 +6,8 @@ struct PacketSend_Event {
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
 	UINT State;
+	DirectX::XMFLOAT3 c_pos;
+	DirectX::XMFLOAT3 c_dir;
 	CHAR wepon;
 };
 class Sever_System : public EntitySystem,

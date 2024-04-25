@@ -39,6 +39,17 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 
 	send(g_socket, (char*)&sub_packet, sub_packet.size, 0);
 
+	if (event.State == (UINT)SHOOT) {
+		CS_PLAYER_ATTACK_PACKET atk_packet;
+		atk_packet.size = sizeof(atk_packet);
+		atk_packet.type = CS_PACKET_PLAYER_ATTACK;
+		atk_packet.dir = event.c_dir;
+		atk_packet.pos = event.c_pos;
+		cout << atk_packet.dir.x << endl;
+
+		send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
+	}
+
 }
 
 void Sever_System::PacketReassembly(World* world, char* recv_buf, size_t recv_size)

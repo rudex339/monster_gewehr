@@ -166,6 +166,11 @@ Monster::Monster()
 
 	m_animation = idle_ani;
 	m_state = idle_state;
+
+	m_bounding_box.Center = m_position;
+	m_bounding_box.Center.y += 20.0f;
+	m_bounding_box.Extents = XMFLOAT3(20.0f, 20.0f, 20.0f);
+	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 }
 
 float Monster::ElapsedTime()
@@ -185,7 +190,8 @@ void Monster::Foward(float elapsedTime)
 {
 	m_position.x += m_front.x * move_speed * elapsedTime;
 	m_position.z += m_front.z * move_speed * elapsedTime;
-	
+	m_bounding_box.Center.x = m_position.x;
+	m_bounding_box.Center.z = m_position.z;
 
 	updateFront();
 }
@@ -194,6 +200,8 @@ void Monster::Back(float elapsedTime)
 {
 	m_position.x -= m_front.x * move_speed * elapsedTime;
 	m_position.z -= m_front.z * move_speed * elapsedTime;
+	m_bounding_box.Center.x = m_position.x;
+	m_bounding_box.Center.z = m_position.z;
 
 	updateFront();
 }
@@ -201,13 +209,24 @@ void Monster::Back(float elapsedTime)
 void Monster::Left(float elapsedTime)
 {
 	m_yaw += turnning_speed * elapsedTime;
+	float radian = XMConvertToRadians(m_yaw);
 
+	XMFLOAT4 q{};
+	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
+
+	m_bounding_box.Orientation = q;
 	updateFront();
 }
 
 void Monster::Right(float elapsedTime)
 {
 	m_yaw -= turnning_speed * elapsedTime;
+	float radian = XMConvertToRadians(m_yaw);
+
+	XMFLOAT4 q{};
+	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
+
+	m_bounding_box.Orientation = q;
 
 	updateFront();
 }
@@ -215,11 +234,13 @@ void Monster::Right(float elapsedTime)
 void Monster::Up(float elapsedTime)
 {
 	m_position.y += fly_up_speed * elapsedTime;
+	m_bounding_box.Center.y = m_position.y + 5.0f;
 }
 
 void Monster::Down(float elapsedTime)
 {
 	m_position.y -= fly_up_speed * elapsedTime;
+	m_bounding_box.Center.y = m_position.y + 5.0f;
 }
 
 void Monster::updateFront()

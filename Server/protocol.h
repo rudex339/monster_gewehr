@@ -18,6 +18,7 @@ constexpr char SNIPER = 3;
 constexpr char CS_PACKET_LOGIN = 1;
 constexpr char CS_PACKET_PLAYER_MOVE = 2;
 constexpr char CS_PACKET_CHANGE_ANIMATION = 3;
+constexpr char CS_PACKET_PLAYER_ATTACK = 4;
 
 constexpr char SC_PACKET_LOGIN_INFO = 1;
 constexpr char SC_PACKET_ADD_PLAYER = 2;
@@ -90,6 +91,8 @@ struct CS_PLAYER_ATTACK_PACKET
 {
 	UCHAR size;
 	UCHAR type;
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 dir;
 };
 
 struct CS_RELOAD_PACKET

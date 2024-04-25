@@ -170,6 +170,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
 			AnimationController->next_State = (UINT)SHOOT;
+
 		}
 	}
 

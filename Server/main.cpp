@@ -79,6 +79,14 @@ void ProcessClient(SOCKET sock)
 	
 	int id = global_id++;
 
+	// 총 발사 관련 변수들인데 추후 묶어서 관리할 예정
+	int shoot_timer = 0;
+	float shot_range = 1000.f;
+	DirectX::XMFLOAT3 p_pos;
+	DirectX::XMFLOAT3 c_dir;
+	DirectX::XMVECTOR directionVec;
+	DirectX::XMVECTOR positionVec;
+
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
 	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
@@ -86,8 +94,8 @@ void ProcessClient(SOCKET sock)
 
 	players.try_emplace(id, id, client_sock);
 
-	constexpr int MAX_FAME = 120;
-	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FAME>>;
+	constexpr int MAX_FRAME = 60;
+	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
 	using ms = std::chrono::duration<float, std::milli>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 	build_bt(&souleater, &players);
@@ -108,6 +116,28 @@ void ProcessClient(SOCKET sock)
 		}
 		if (players[id].GetState() == S_STATE::IN_GAME) {
 			run_bt(&souleater);		
+			if (players[id].GetAnimaition() == 2) {
+				if (shoot_timer <= 0) {
+					shoot_timer = MAX_FRAME / 1;					
+					p_pos = players[id].GetAtkPos();
+					c_dir = players[id].GetAtkDir();
+					//c_dir.y += 10.f;
+					positionVec = XMLoadFloat3(&p_pos);
+					directionVec = XMLoadFloat3(&c_dir);
+					if (souleater.GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
+						souleater.m_lock.lock();
+						souleater.SetHp(souleater.GetHp() - 10);
+						souleater.m_lock.unlock();
+					}
+					
+				}
+				else {
+					shoot_timer--;
+				}
+			}
+			else {
+				shoot_timer = 0;
+			}
 			SC_UPDATE_MONSTER_PACKET monster_packet;
 			monster_packet.size = sizeof(monster_packet);
 			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
@@ -115,7 +145,9 @@ void ProcessClient(SOCKET sock)
 			monster_packet.monster = souleater.GetData();
 			monster_packet.animation = souleater.GetAnimation();
 
-			std::cout << monster_packet.monster.pos.x << std::endl;
+			/*std::cout << "몬스터 위치 : " << souleater.GetPosition().x << std::endl;
+			std::cout << souleater.GetBoundingBox().Center.x << std::endl;*/
+			std::cout << souleater.GetHp() << std::endl;
 
 			players[id].DoSend(&monster_packet, monster_packet.size);
 
@@ -181,6 +213,13 @@ void ProcessPacket(int id, char* p)
 		players[id].SetAnimaition(packet->animation);
 
 		SendAnimaition(id);
+		break;
+	}
+	case CS_PACKET_PLAYER_ATTACK: {
+		CS_PLAYER_ATTACK_PACKET* packet = reinterpret_cast<CS_PLAYER_ATTACK_PACKET*>(p);
+		players[id].SetAtkDir(packet->dir);
+		players[id].SetAtkPos(packet->pos);
+
 		break;
 	}
 	}
