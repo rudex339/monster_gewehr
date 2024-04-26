@@ -79,8 +79,14 @@ void ProcessClient(SOCKET sock)
 	
 	int id = global_id++;
 
+	constexpr int MAX_FRAME = 60;
+	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
+	using ms = std::chrono::duration<float, std::milli>;
+	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
+	
 	// 총 발사 관련 변수들인데 추후 묶어서 관리할 예정
 	int shoot_timer = 0;
+	int hit_timer = MAX_FRAME * 5;
 	float shot_range = 1000.f;
 	DirectX::XMFLOAT3 p_pos;
 	DirectX::XMFLOAT3 c_dir;
@@ -93,11 +99,7 @@ void ProcessClient(SOCKET sock)
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
 
 	players.try_emplace(id, id, client_sock);
-
-	constexpr int MAX_FRAME = 60;
-	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
-	using ms = std::chrono::duration<float, std::milli>;
-	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
+	
 	build_bt(&souleater, &players);
 
 	frame fps{}, frame_count{};
@@ -111,17 +113,26 @@ void ProcessClient(SOCKET sock)
 		else if (retval == -1) {
 			break;
 		}
-		else {
-			
-		}
+		
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			run_bt(&souleater, &players);		
+			run_bt(&souleater, &players);
+
+			if (players[id].hit_on) {
+				if (hit_timer <= 0) {
+					hit_timer = MAX_FRAME * 5;
+					players[id].hit_on = 0;
+				}
+				else {
+					hit_timer--;
+				}
+			}
+
 			if (players[id].GetAnimaition() == 2) {
 				if (shoot_timer <= 0) {
-					shoot_timer = MAX_FRAME / 1;					
+					shoot_timer = MAX_FRAME / 10;					
 					p_pos = players[id].GetAtkPos();
 					c_dir = players[id].GetAtkDir();
-					//c_dir.y += 10.f;
+					p_pos.y += 20;
 					positionVec = XMLoadFloat3(&p_pos);
 					directionVec = XMLoadFloat3(&c_dir);
 					if (souleater.GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
@@ -141,6 +152,15 @@ void ProcessClient(SOCKET sock)
 			else {
 				shoot_timer = 0;
 			}
+
+			if (souleater.GetAnimation() == dash_ani) {
+				if (!players[id].hit_on) {
+					if (players[id].GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
+						players[id].hit_on = 1;
+						players[id].SetHp(players[id].GetHp() - 25);
+					}
+				}
+			}
 			SC_UPDATE_MONSTER_PACKET monster_packet;
 			monster_packet.size = sizeof(monster_packet);
 			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
@@ -150,7 +170,8 @@ void ProcessClient(SOCKET sock)
 
 			/*std::cout << "몬스터 위치 : " << souleater.GetPosition().x << std::endl;
 			std::cout << souleater.GetBoundingBox().Center.x << std::endl;*/
-			std::cout << souleater.GetHp() << std::endl;
+			//std::cout << souleater.GetHp() << std::endl;
+			std::cout << players[id].GetHp() << std::endl;
 
 			players[id].DoSend(&monster_packet, monster_packet.size);
 
@@ -208,6 +229,9 @@ void ProcessPacket(int id, char* p)
 		players[id].SetPostion(packet->pos);
 		players[id].SetYaw(packet->yaw);
 		//std::cout << id << "에서 만큼 받아옴 " << packet->pos.x << std::endl;
+		players[id].SetBoundingBox();
+		players[id].RotateBoundingBox();
+
 		SendPlayerMove(id);
 		break;
 	}

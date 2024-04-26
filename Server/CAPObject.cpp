@@ -26,6 +26,26 @@ void CAPObject::SetPostion(float x, float y, float z)
 	m_position.z = z;
 }
 
+void CAPObject::RotateBoundingBox(float yaw)
+{
+	float radian = XMConvertToRadians(yaw);
+
+	XMFLOAT4 q{};
+	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
+
+	m_bounding_box.Orientation = q;
+}
+
+void CAPObject::RotateBoundingBox()
+{
+	float radian = XMConvertToRadians(m_yaw);
+
+	XMFLOAT4 q{};
+	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
+
+	m_bounding_box.Orientation = q;
+}
+
 //-------------------------------------------------------------------------------------------------
 // Player
 //-------------------------------------------------------------------------------------------------
@@ -65,6 +85,10 @@ Player::Player(int id, SOCKET socket)
 
 	m_remain_size = 0;
 	m_state = S_STATE::LOBBY;
+
+	m_bounding_box.Center = m_position;
+	m_bounding_box.Extents = XMFLOAT3(2.f, 5.f, 2.f);
+	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 }
 
 

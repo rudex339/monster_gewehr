@@ -17,7 +17,10 @@ public:
 	void SetID(int id)	{ m_id = id; }
 	void SetRoomID(int id) { m_room_id = id; }
 	void SetBoundingBox(XMFLOAT3 center) { m_bounding_box.Center = center; m_bounding_box.Center.y += 5.0f; }
-	void RotateBoundingBox(XMFLOAT4& orientaion) { m_bounding_box.Orientation = orientaion; }
+	void SetBoundingBox() { m_bounding_box.Center = m_position; }
+
+	void RotateBoundingBox(float yaw);
+	void RotateBoundingBox();
 
 	DirectX::XMFLOAT3 GetPosition() { return m_position; }
 	DirectX::XMFLOAT3 GetVelocity() { return m_velocity; }
@@ -72,6 +75,7 @@ public:
 	PLAYER_DATA GetPlayerData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
 	DirectX::XMFLOAT3 GetAtkDir() { return m_atk_dir; }
 	DirectX::XMFLOAT3 GetAtkPos() { return m_atk_pos; }
+	float GetHp() { return m_hp; }
 	
 
 	int RecvData();
@@ -80,6 +84,8 @@ public:
 	void Process_Packet(char* p);
 
 	char m_recv_buf[BUF_SIZE];
+	bool hit_on = 0;	// 이건 나중에 피격 애니메이션으로 판정할거임 지금은 피격애니메이션 없어서 임시로 사용
+
 protected:
 	SOCKET m_socket;
 	SC_OBJECT_PACKET sc_player_data;
