@@ -1,9 +1,9 @@
 ﻿// LabProject07-9-8.cpp : 응용 프로그램에 대한 진입점을 정의합니다.
 //
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
-#endif
+//#endif
 
 #include "stdafx.h"
 #include "monster_gewehr.h"

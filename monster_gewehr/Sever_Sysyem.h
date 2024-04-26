@@ -10,11 +10,17 @@ struct PacketSend_Event {
 	DirectX::XMFLOAT3 c_dir;
 	CHAR wepon;
 };
+
+struct Login_Event {
+	
+};
+
 class Sever_System : public EntitySystem,
 	public EventSubscriber<PacketSend_Event>
 {
 private:
-
+	bool login = false;
+	bool send = false;
 public:
 
 	Sever_System() = default;

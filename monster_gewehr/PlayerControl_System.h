@@ -7,6 +7,10 @@ struct CursorPos_Event {
 	POINT m_CursorPos;
 };
 
+struct GetPlayerPtr_Event {
+	Entity* Pawn;
+};
+
 struct PlayerController_Angle {
 	XMFLOAT3 m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
@@ -15,7 +19,8 @@ struct PlayerController_Angle {
 
 class PlayerControl_System : public EntitySystem,
 	public EventSubscriber<CaptureHWND_Event>,
-	public EventSubscriber<CursorPos_Event>
+	public EventSubscriber<CursorPos_Event>,
+	public EventSubscriber<GetPlayerPtr_Event>
 {
 private:
 	Entity* m_Pawn;
@@ -24,7 +29,6 @@ private:
 
 public:
 	PlayerControl_System() = default;
-	PlayerControl_System(Entity* Pawn);
 
 	virtual void configure(class World* world);
 	virtual void unconfigure(class World* world);
@@ -32,5 +36,6 @@ public:
 
 	virtual void receive(class World* world, const CaptureHWND_Event& event);
 	virtual void receive(class World* world, const CursorPos_Event& event);
+	virtual void receive(class World* world, const GetPlayerPtr_Event& event);
 };
 

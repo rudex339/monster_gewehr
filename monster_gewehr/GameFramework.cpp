@@ -546,15 +546,14 @@ void CGameFramework::BuildObjects()
 
 
 	//set System
-	m_pWorld->registerSystem(new PlayerControl_System(m_pPlayer));
+	m_pWorld->registerSystem(new PlayerControl_System());
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
 	m_pWorld->registerSystem(new Animate_System());
 	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dCommandList));
 
 
-	m_pWorld->emit<SetCamera_Event>({ camera->m_pCamera });
-
+	m_pWorld->emit<GetPlayerPtr_Event>({ m_pPlayer });
 
 
 	m_pd3dCommandList->Close();
@@ -573,22 +572,17 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::BuildScene(char* pstrFileName)
 {
-
 	FILE* pFile = NULL;
 	::fopen_s(&pFile, pstrFileName, "rb");
 	::rewind(pFile);
 
-
 	char pstrToken[256] = { '\0' };
 	char pstrGameObjectName[256] = { '\0' };
-
 	UINT nReads = 0;
 	BYTE nStrLength = 0, nObjectNameLength = 0;
 	int	m_nObjects = 0;
-
 	::ReadStringFromFile(pFile, pstrToken); //"<GameObjects>:"
 	nReads = (UINT)::fread(&m_nObjects, sizeof(int), 1, pFile);
-
 
 	for (int i = 0; i < m_nObjects; i++)
 	{
@@ -596,8 +590,6 @@ void CGameFramework::BuildScene(char* pstrFileName)
 		if (!strcmp(pstrToken, "<GameObject>:")) {
 			Entity* ent = m_pWorld->create();
 			::ReadStringFromFile(pFile, pstrGameObjectName);
-			//pstrGameObjectName[nObjectNameLength] = '\0';
-			//strcpy_s(pGameObject->m_pstrName, 256, pstrGameObjectName);
 
 			if (!strcmp(pstrGameObjectName, "Cube.001")) {
 				ent->assign<Terrain_Component>(m_pObjectManager->m_pTerrain, "default");
