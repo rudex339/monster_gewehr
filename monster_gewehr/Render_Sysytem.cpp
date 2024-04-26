@@ -72,12 +72,12 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 			SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
 		});
 
-	//world->each<Terrain_Component>([&](
-	//	Entity* ent,
-	//	ComponentHandle<Terrain_Component> Terrain
-	//	) -> void {
-	//		Terrain->m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
-	//	});
+	world->each<Terrain_Component>([&](
+		Entity* ent,
+		ComponentHandle<Terrain_Component> Terrain
+		) -> void {
+			Terrain->m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
+		});
 	world->each< Model_Component, Position_Component>([&](
 		Entity* ent,
 		ComponentHandle<Model_Component> Model,

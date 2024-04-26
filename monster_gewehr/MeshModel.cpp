@@ -1494,8 +1494,9 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CTexture* pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
-	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/SkyBox_0.dds", RESOURCE_TEXTURE_CUBE, 0);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/SkyBox_1.dds", RESOURCE_TEXTURE_CUBE, 0);
 
+	
 	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
 	pSkyBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1524,4 +1525,38 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
+Box::Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f);
+	SetMesh(pSkyBoxMesh);
 
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CTexture* pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/SkyBox_1.dds", RESOURCE_TEXTURE_CUBE, 0);
+
+	CBoxShader* pBoxShader = new CBoxShader();
+	pBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CMaterial* pBoxMaterial = new CMaterial(1);
+
+	ObjectManager::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 10);
+
+	pBoxMaterial->m_xmf4AlbedoColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	pBoxMaterial->SetShader(pBoxShader);
+	pBoxMaterial->SetTexture(pSkyBoxTexture);
+
+	SetMaterial(0, pBoxMaterial);
+}
+
+Box::~Box()
+{
+}
+
+void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+
+	GameObjectModel::Render(pd3dCommandList, pCamera);
+}

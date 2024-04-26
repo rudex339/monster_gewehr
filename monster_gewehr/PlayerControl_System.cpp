@@ -108,8 +108,9 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			controllangle->m_xmf3Right = Vector3::TransformNormal(controllangle->m_xmf3Right, xmmtxRotate);
 
 			controllangle->m_xmf3Look = Vector3::Normalize(controllangle->m_xmf3Look);
-			controllangle->m_xmf3Right = Vector3::CrossProduct(controllangle->m_xmf3Up, controllangle->m_xmf3Look, true);
 			controllangle->m_xmf3Up = Vector3::CrossProduct(controllangle->m_xmf3Look, controllangle->m_xmf3Right, true);
+			controllangle->m_xmf3Right = Vector3::CrossProduct(controllangle->m_xmf3Up, controllangle->m_xmf3Look, true);
+			
 
 
 			float a = XMVectorGetX(DirectX::XMVector3Dot(XMLoadFloat3(& eulerangle->m_xmf3Right),
