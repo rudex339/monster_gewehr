@@ -159,9 +159,9 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			});
 		break;
 	}
-	case SC_PACKET_UPDATE_MONSTER:
+	case SC_PACKET_UPDATE_MONSTER: {
 		SC_UPDATE_MONSTER_PACKET* pk = reinterpret_cast<SC_UPDATE_MONSTER_PACKET*>(packet);
-		
+
 		world->each<player_Component, Position_Component, Rotation_Component, AnimationController_Component>(
 			[&](Entity* ent,
 				ComponentHandle<player_Component> Player,
@@ -181,5 +181,25 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			});
 		break;
 	}
+	case SC_PACKET_LOGOUT: {
+		SC_LOGOUT_PACKET* pk = reinterpret_cast<SC_LOGOUT_PACKET*>(packet);
+
+		world->each<player_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player) ->
+			void {
+				if (Player->id == pk->id) {
+					Player->id = -1;
+				}
+				else
+					return;
+
+			});
+		break;
+
+	}
+
+	}
+	
 	
 }

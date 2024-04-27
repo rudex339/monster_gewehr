@@ -171,7 +171,7 @@ Monster::Monster()
 
 	m_max_hp = 1000;
 	m_hp = m_max_hp;
-	m_runaway_hp = 990; // m_max_hp * 0.9;
+	m_runaway_hp = 600; // m_max_hp * 0.9;
 	m_atk = 0;
 	m_def = 0;
 
@@ -187,9 +187,12 @@ Monster::Monster()
 	m_state = idle_state;
 
 	m_bounding_box.Center = m_position;
-	m_bounding_box.Center.y += 20.0f;
-	m_bounding_box.Extents = XMFLOAT3(20.0f, 20.0f, 20.0f);
-	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
+	m_bounding_box.Center.y += 32.0f;
+	m_bounding_box.Extents = XMFLOAT3(18.0f, 15.0f, 20.0f);
+	float radian = XMConvertToRadians(m_yaw);
+	XMFLOAT4 q{};
+	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
+	m_bounding_box.Orientation = q;
 }
 
 float Monster::ElapsedTime()

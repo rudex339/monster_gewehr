@@ -8,6 +8,7 @@ void ProcessPacket(int id, char* p);
 void SendLoginInfo(int id);
 void SendPlayerMove(int id);
 void SendAnimaition(int id);
+void Disconnect(int id);
 
 std::unordered_map<INT, Player> players;
 Monster souleater;

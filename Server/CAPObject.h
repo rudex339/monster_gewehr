@@ -88,7 +88,6 @@ public:
 
 protected:
 	SOCKET m_socket;
-	SC_OBJECT_PACKET sc_player_data;
 
 	ITEM_DATA items;
 

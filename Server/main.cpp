@@ -79,7 +79,7 @@ void ProcessClient(SOCKET sock)
 	
 	int id = global_id++;
 
-	constexpr int MAX_FRAME = 60;
+	constexpr int MAX_FRAME = 30;
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
 	using ms = std::chrono::duration<float, std::milli>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
@@ -100,7 +100,7 @@ void ProcessClient(SOCKET sock)
 
 	players.try_emplace(id, id, client_sock);
 	
-	build_bt(&souleater, &players);
+	//build_bt(&souleater, &players);
 
 	frame fps{}, frame_count{};
 	while (players[id].GetState() != S_STATE::LOG_OUT) {
@@ -115,7 +115,7 @@ void ProcessClient(SOCKET sock)
 		}
 		
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			run_bt(&souleater, &players);
+			//run_bt(&souleater, &players);
 
 			if (players[id].hit_on) {
 				if (hit_timer <= 0) {
@@ -141,7 +141,7 @@ void ProcessClient(SOCKET sock)
 						souleater.m_lock.unlock();
 						if(souleater.GetState() == idle_state)
 							souleater.SetState(fight_state);
-						build_bt(&souleater, &players);
+						//build_bt(&souleater, &players);
 					}
 					
 				}
@@ -161,6 +161,7 @@ void ProcessClient(SOCKET sock)
 					}
 				}
 			}
+
 			SC_UPDATE_MONSTER_PACKET monster_packet;
 			monster_packet.size = sizeof(monster_packet);
 			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
@@ -170,7 +171,7 @@ void ProcessClient(SOCKET sock)
 
 			/*std::cout << "몬스터 위치 : " << souleater.GetPosition().x << std::endl;
 			std::cout << souleater.GetBoundingBox().Center.x << std::endl;*/
-			//std::cout << souleater.GetHp() << std::endl;
+			std::cout << souleater.GetHp() << std::endl;
 			std::cout << players[id].GetHp() << std::endl;
 
 			players[id].DoSend(&monster_packet, monster_packet.size);
@@ -180,7 +181,7 @@ void ProcessClient(SOCKET sock)
 	}
 
 	// 클라이언트 접속 종료시 자동차 정보 초기화
-	players[id].SetID(-1);
+	Disconnect(id);
 
 	// 소켓 닫기
 	closesocket(client_sock);
@@ -259,7 +260,6 @@ void SendLoginInfo(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_INFO;
 	packet.id = id;
-	std::cout << packet.id << std::endl;
 	retval = players[id].DoSend(&packet, packet.size);
 	if (retval == SOCKET_ERROR) {
 		players[id].SetState(S_STATE::LOG_OUT);
@@ -342,4 +342,20 @@ void SendAnimaition(int id)
 			client.second.SetState(S_STATE::LOG_OUT);
 		}
 	}
+}
+
+void Disconnect(int id)
+{
+	players[id].SetState(S_STATE::LOG_OUT);
+
+	SC_LOGOUT_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_LOGOUT;
+	packet.id = id;
+	for (auto& client : players) {
+		if (client.second.GetID() == id) continue;
+		if (client.second.GetState() != S_STATE::IN_GAME) continue;
+		client.second.DoSend(&packet, packet.size);
+	}
+
 }
