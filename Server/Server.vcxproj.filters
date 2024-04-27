@@ -44,5 +44,11 @@
     <ClInclude Include="database.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="BehaviorTree.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviorTreeDefines.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

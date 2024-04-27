@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "BehaviorTree.h"
+#include "BehaviorTreeDefines.h"
 
 
 class CAPObject
@@ -117,7 +118,7 @@ protected:
 };
 
 
-enum MonsterState { idle_state, fight_state, runaway_state };
+enum MonsterState { idle_state, fight_state, runaway_state, die_state };
 enum MonsterAnimation {
 	idle_ani,
 	growl_ani, walk_ani,
@@ -175,6 +176,8 @@ public:
 	XMFLOAT3 GetTargetPos() { return m_target_position; }
 
 	char GetAnimation() { return m_animation; }
+
+	void SetFront(XMFLOAT3 front) { m_front = front; }
 	XMFLOAT3 GetFront() { return m_front; }
 
 	MONSTER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
