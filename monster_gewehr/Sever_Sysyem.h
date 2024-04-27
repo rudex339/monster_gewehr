@@ -19,8 +19,8 @@ class Sever_System : public EntitySystem,
 	public EventSubscriber<PacketSend_Event>
 {
 private:
-	bool login = false;
-	bool send = false;
+	bool m_login = false;
+	bool m_send = false;
 public:
 
 	Sever_System() = default;

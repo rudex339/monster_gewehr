@@ -161,7 +161,7 @@ Monster::Monster()
 	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
 		isUserArround[i] = false;
 	}
-	m_id = 5;
+	m_id = -2;
 
 	turnning_speed = 0.2f;
 	move_speed = 0.1f;
