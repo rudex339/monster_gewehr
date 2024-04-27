@@ -213,8 +213,20 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					Player->hp = pk->hp;
 					cout << Player->hp << endl;
 					if (ent->has<Camera_Component>() && Player->hp <= 0) {
+						ComponentHandle<EulerAngle_Component> eulerangle =
+							ent->get<EulerAngle_Component>();
+						ComponentHandle<ControllAngle_Component> controllangle =
+							ent->get<ControllAngle_Component>();
+
 						Position->Position = XMFLOAT3(1014.f, 1024.f, 1429.f);
 						Rotation->mfYaw = 0.f;
+						eulerangle->m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+						eulerangle->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+						eulerangle->m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+						controllangle->m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+						controllangle->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+						controllangle->m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 					}
 				}
 				else
