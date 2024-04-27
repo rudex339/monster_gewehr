@@ -173,7 +173,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					cout << pk->monster.pos.x << endl;
 					Position->Position = pk->monster.pos;
 					Rotation->mfYaw = pk->monster.yaw;
-					//AnimationController->next_State = pk->animation;
+					AnimationController->next_State = pk->animation;
 				}
 				else
 					return;
