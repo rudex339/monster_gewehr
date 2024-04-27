@@ -174,7 +174,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				}
 				AnimationController->next_State = (UINT)RUN;
 			}
-			if ((pKeysBuffer[0x53] & 0xF0) && !run_on) {
+			if ((pKeysBuffer[0x53] & 0xF0)) {
 				xmf3Shift = Vector3::Add(xmf3Shift, controllangle->m_xmf3Look, -speed);
 				if (roll_on == 1) {
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Look, -speed * 3);

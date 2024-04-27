@@ -16,7 +16,8 @@ struct Login_Event {
 };
 
 class Sever_System : public EntitySystem,
-	public EventSubscriber<PacketSend_Event>
+	public EventSubscriber<PacketSend_Event>,
+	public EventSubscriber<Login_Event>
 {
 private:
 	bool m_login = false;
@@ -28,6 +29,7 @@ public:
 	virtual void unconfigure(class World* world) {};
 	virtual void tick(class World* world, float deltaTime);
 	virtual void receive(class World* world, const PacketSend_Event& event);
+	virtual void receive(class World* world, const Login_Event& event);
 	void PacketReassembly(World* world, char* recv_buf, size_t recv_size);
 	void ProcessPacket(World* world, char* packet);
 };

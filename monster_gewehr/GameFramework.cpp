@@ -13,6 +13,7 @@
 #include "move_System.h"
 #include "Sever_Sysyem.h"
 #include "Animate_System.h"
+#include "Scene_Sysytem.h"
 //---------------------------------//
 
 CGameFramework::CGameFramework()
@@ -490,62 +491,63 @@ void CGameFramework::BuildObjects()
 	if (m_pObjectManager) m_pObjectManager->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList);
 
 
-	Entity* ent = m_pWorld->create();
-	ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
+	//Entity* ent = m_pWorld->create();
+	//ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
-	BuildScene((char*)"Scene/Scene.bin");
-
-
-	ent = AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Souleater"),
-		1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
-		0.f, 90.f, 0.f,
-		20.f, 20.f, 20.f,
-		10);
-	auto monster_id = ent->get<player_Component>();
-	monster_id->id = -2;
-	
+	//BuildScene((char*)"Scene/Scene.bin");
 
 
-	m_pPlayer = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Soldier"),
-		1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
-		0.f, 0.f, 0.f,
-		6.0f, 6.0f, 6.0f,
-		3);
-	m_pPlayer->assign<ControllAngle_Component>();
+	//ent = AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	//	m_pObjectManager->Get_ModelInfo("Souleater"),
+	//	1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
+	//	0.f, 90.f, 0.f,
+	//	20.f, 20.f, 20.f,
+	//	10);
+	//auto monster_id = ent->get<player_Component>();
+	//monster_id->id = -2;
+	//
 
 
-	AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Soldier"),
-		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
-		0.f, 0.f, 0.f,
-		6.0f, 6.0f, 6.0f,
-		3);
-
-	AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Soldier"),
-		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
-		0.f, 0.f, 0.f,
-		6.0f, 6.0f, 6.0f,
-		3);
-	AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-		m_pObjectManager->Get_ModelInfo("Soldier"),
-		310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
-		0.f, 0.f, 0.f,
-		6.0f, 6.0f, 6.0f,
-		3);
+	//m_pPlayer = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	//	m_pObjectManager->Get_ModelInfo("Soldier"),
+	//	1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
+	//	0.f, 0.f, 0.f,
+	//	6.0f, 6.0f, 6.0f,
+	//	3);
+	//m_pPlayer->assign<ControllAngle_Component>();
 
 
-	CCamera* temp = new CThirdPersonCamera(m_pCamera);	
-	temp->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList);
-	ComponentHandle<Camera_Component> camera = m_pPlayer->assign<Camera_Component>(temp);
-	camera->m_pCamera->SetPosition(XMFLOAT3(310.0f, 
-		m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f)+10.f, 600.0f - 30.f));
+	//AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	//	m_pObjectManager->Get_ModelInfo("Soldier"),
+	//	310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+	//	0.f, 0.f, 0.f,
+	//	6.0f, 6.0f, 6.0f,
+	//	3);
+
+	//AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	//	m_pObjectManager->Get_ModelInfo("Soldier"),
+	//	310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+	//	0.f, 0.f, 0.f,
+	//	6.0f, 6.0f, 6.0f,
+	//	3);
+	//AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
+	//	m_pObjectManager->Get_ModelInfo("Soldier"),
+	//	310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
+	//	0.f, 0.f, 0.f,
+	//	6.0f, 6.0f, 6.0f,
+	//	3);
+
+
+	//CCamera* temp = new CThirdPersonCamera(m_pCamera);	
+	//temp->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList);
+	//ComponentHandle<Camera_Component> camera = m_pPlayer->assign<Camera_Component>(temp);
+	//camera->m_pCamera->SetPosition(XMFLOAT3(310.0f, 
+	//	m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f)+10.f, 600.0f - 30.f));
 
 
 
 	//set System
+	m_pWorld->registerSystem(new Scene_Sysytem(m_pObjectManager, m_pd3dDevice.Get(), m_pd3dCommandList));
 	m_pWorld->registerSystem(new PlayerControl_System());
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
@@ -553,7 +555,7 @@ void CGameFramework::BuildObjects()
 	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dCommandList));
 
 
-	m_pWorld->emit<GetPlayerPtr_Event>({ m_pPlayer });
+	//m_pWorld->emit<GetPlayerPtr_Event>({ m_pPlayer });
 
 
 	m_pd3dCommandList->Close();
@@ -566,7 +568,7 @@ void CGameFramework::BuildObjects()
 
 	m_GameTimer.Reset();
 #ifdef USE_NETWORK
-	InitServer();
+	//InitServer();
 #endif
 }
 

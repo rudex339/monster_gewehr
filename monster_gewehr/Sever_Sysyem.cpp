@@ -2,23 +2,26 @@
 #include "Sever_Sysyem.h"
 #include "Player_Entity.h"
 #include "Object_Entity.h"
+#include "Scene_Sysytem.h"
 
 
 void Sever_System::configure(World* world)
 {
 	world->subscribe<PacketSend_Event>(this);
+	world->subscribe<Login_Event>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
 {
-	char buf[BUF_SIZE] = { 0 };
+	if (m_login) {
+		char buf[BUF_SIZE] = { 0 };
 
-	int retval = recv(g_socket, buf, BUF_SIZE, 0);
+		int retval = recv(g_socket, buf, BUF_SIZE, 0);
 
-	if (retval > 0) {
-		PacketReassembly(world, buf, retval);
+		if (retval > 0) {
+			PacketReassembly(world, buf, retval);
+		}
 	}
-
 	
 }
 
@@ -51,6 +54,73 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	}
 
 }
+
+void Sever_System::receive(World* world, const Login_Event& event)
+{
+	world->each<Velocity_Component,
+		Position_Component,
+		Rotation_Component,
+		player_Component>(
+			[&](Entity* ent, ComponentHandle<Velocity_Component> velocity,
+				ComponentHandle<Position_Component> position,
+				ComponentHandle<Rotation_Component> rotation,
+				ComponentHandle<player_Component> data) -> void {
+					if (ent->has<Camera_Component>()) {
+						WSADATA wsa;
+						WSAStartup(MAKEWORD(2, 2), &wsa);
+
+						g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
+
+						ZeroMemory(&server_addr, sizeof(server_addr));
+						server_addr.sin_family = AF_INET;
+						server_addr.sin_port = htons(SERVER_PORT);
+						inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
+
+						connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+
+						unsigned long noblock = 1;
+						ioctlsocket(g_socket, FIONBIO, &noblock);
+
+						CS_LOGIN_PACKET packet;
+						packet.size = sizeof(packet);
+						packet.type = CS_PACKET_LOGIN;
+						int weapon = 0;
+						cout << "이름 입력" << endl;
+						cin >> packet.name;
+						cout << "무기 입력" << endl;
+						cin >> weapon;
+						packet.weapon = weapon;
+						packet.pos = position->Position;
+						packet.yaw = rotation->mfYaw;
+						packet.vel = velocity->m_velocity;
+
+
+						int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
+
+						SC_LOGIN_INFO_PACKET sub_packet;
+						while (1) {
+							int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
+							if (retval > 0) {
+								if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
+									cout << "ㅈ됬어..." << endl;
+								}
+
+								break;
+							}
+							else {
+								cout << "못받음" << endl;
+							}
+						}
+						//cout << (int)ply.id << endl;
+						data->id = (int)sub_packet.id;
+						std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
+						m_login = true;
+						//cout << Data->id << endl;
+					}
+
+			});
+}
+
 
 void Sever_System::PacketReassembly(World* world, char* recv_buf, size_t recv_size)
 {
