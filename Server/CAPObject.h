@@ -177,7 +177,7 @@ public:
 	char GetAnimation() { return m_animation; }
 	XMFLOAT3 GetFront() { return m_front; }
 
-	MONSTER_DATA GetData() { return { m_room_id, m_position, m_velocity, m_yaw, m_hp }; }
+	MONSTER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
 
 	
 

@@ -87,7 +87,7 @@ Player::Player(int id, SOCKET socket)
 	m_state = S_STATE::LOBBY;
 
 	m_bounding_box.Center = m_position;
-	m_bounding_box.Extents = XMFLOAT3(2.f, 5.f, 2.f);
+	m_bounding_box.Extents = XMFLOAT3(5.f, 10.f, 5.f);
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 }
 
@@ -187,7 +187,7 @@ Monster::Monster()
 	m_state = idle_state;
 
 	m_bounding_box.Center = m_position;
-	m_bounding_box.Center.y += 32.0f;
+	m_bounding_box.Center.y += 10.0f;
 	m_bounding_box.Extents = XMFLOAT3(18.0f, 15.0f, 20.0f);
 	float radian = XMConvertToRadians(m_yaw);
 	XMFLOAT4 q{};

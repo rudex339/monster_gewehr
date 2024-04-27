@@ -102,6 +102,9 @@
     <ClInclude Include="Animate_System.h">
       <Filter>system\HeaderFile</Filter>
     </ClInclude>
+    <ClInclude Include="protocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="monster_gewehr.cpp">
@@ -154,9 +157,6 @@
     </ClCompile>
     <ClCompile Include="PlayerControl_System.cpp">
       <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Server\protocol.h">
-      <Filter>헤더 파일</Filter>
     </ClCompile>
     <ClCompile Include="Sever_Sysyem.cpp">
       <Filter>system</Filter>

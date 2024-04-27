@@ -503,7 +503,7 @@ void CGameFramework::BuildObjects()
 		20.f, 20.f, 20.f,
 		10);
 	auto monster_id = ent->get<player_Component>();
-	monster_id->id = 5;
+	monster_id->id = -2;
 	
 
 

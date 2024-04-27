@@ -28,6 +28,8 @@ Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 struct player_Component {
 
 	INT id = -1;
+	FLOAT hp = 100;
+	FLOAT max_hp = 100;
 
 	player_Component() = default;
 };

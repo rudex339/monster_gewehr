@@ -100,7 +100,7 @@ void ProcessClient(SOCKET sock)
 
 	players.try_emplace(id, id, client_sock);
 	
-	//build_bt(&souleater, &players);
+	build_bt(&souleater, &players);
 
 	frame fps{}, frame_count{};
 	while (players[id].GetState() != S_STATE::LOG_OUT) {
@@ -115,7 +115,7 @@ void ProcessClient(SOCKET sock)
 		}
 		
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			//run_bt(&souleater, &players);
+			run_bt(&souleater, &players);
 
 			if (players[id].hit_on) {
 				if (hit_timer <= 0) {
@@ -141,7 +141,7 @@ void ProcessClient(SOCKET sock)
 						souleater.m_lock.unlock();
 						if(souleater.GetState() == idle_state)
 							souleater.SetState(fight_state);
-						//build_bt(&souleater, &players);
+						build_bt(&souleater, &players);
 					}
 					
 				}
@@ -157,15 +157,17 @@ void ProcessClient(SOCKET sock)
 				if (!players[id].hit_on) {
 					if (players[id].GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
 						players[id].hit_on = 1;
-						players[id].SetHp(players[id].GetHp() - 25);
+						players[id].SetHp(players[id].GetHp() - 50);
+						SendHitPlayer(id);
 					}
 				}
 			}
 
+			
+
 			SC_UPDATE_MONSTER_PACKET monster_packet;
 			monster_packet.size = sizeof(monster_packet);
 			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
-			monster_packet.id = souleater.GetID();
 			monster_packet.monster = souleater.GetData();
 			monster_packet.animation = souleater.GetAnimation();
 
@@ -173,6 +175,10 @@ void ProcessClient(SOCKET sock)
 			std::cout << souleater.GetBoundingBox().Center.x << std::endl;*/
 			std::cout << souleater.GetHp() << std::endl;
 			std::cout << players[id].GetHp() << std::endl;
+
+			if (players[id].GetHp() <= 0) {
+				players[id].SetHp(100);
+			}
 
 			players[id].DoSend(&monster_packet, monster_packet.size);
 
@@ -247,7 +253,6 @@ void ProcessPacket(int id, char* p)
 		CS_PLAYER_ATTACK_PACKET* packet = reinterpret_cast<CS_PLAYER_ATTACK_PACKET*>(p);
 		players[id].SetAtkDir(packet->dir);
 		players[id].SetAtkPos(packet->pos);
-
 		break;
 	}
 	}
@@ -300,7 +305,6 @@ void SendLoginInfo(int id)
 	SC_ADD_MONSTER_PACKET sub_packet3;
 	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
 	sub_packet3.type = SC_PACKET_ADD_MONSTER;
-	sub_packet3.id = souleater.GetID();
 	sub_packet3.monster = souleater.GetData();
 
 	players[id].DoSend(&sub_packet3, sub_packet3.size);
@@ -358,4 +362,18 @@ void Disconnect(int id)
 		client.second.DoSend(&packet, packet.size);
 	}
 
+}
+
+void SendHitPlayer(int id)
+{
+	SC_HIT_PLAYER_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_HIT_PLAYER;
+	packet.id = id;
+	packet.hp = players[id].GetHp();
+
+	for (auto& client : players) {
+		if (client.second.GetState() != S_STATE::IN_GAME) continue;
+		client.second.DoSend(&packet, packet.size);
+	}
 }

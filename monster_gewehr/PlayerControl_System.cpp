@@ -161,7 +161,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 			// 달리기 키는 shift
 			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on) {
-				cout << "쉬프트 눌림" << endl;
+				//cout << "쉬프트 눌림" << endl;
 				run_on = true;
 				speed *= 2;
 			}

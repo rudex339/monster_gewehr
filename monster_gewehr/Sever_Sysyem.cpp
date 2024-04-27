@@ -45,7 +45,7 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 		atk_packet.type = CS_PACKET_PLAYER_ATTACK;
 		atk_packet.dir = event.c_dir;
 		atk_packet.pos = event.c_pos;
-		cout << atk_packet.dir.x << endl;
+		//cout << atk_packet.dir.x << endl;
 
 		send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
 	}
@@ -149,7 +149,9 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 				ComponentHandle<Position_Component> Position,
 				ComponentHandle<Rotation_Component> Rotation) ->
 			void {
-				if (Player->id == pk->id) {
+				if (Player->id == pk->monster.id) {
+					Player->hp == pk->monster.hp;
+					Player->max_hp = 1000;
 					Position->Position = pk->monster.pos;
 					Rotation->mfYaw = pk->monster.yaw;
 				}
@@ -169,8 +171,8 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 				ComponentHandle<Rotation_Component> Rotation,
 				ComponentHandle<AnimationController_Component> AnimationController) ->
 			void {
-				if (Player->id == pk->id) {
-					cout << pk->monster.pos.x << endl;
+				if (Player->id == pk->monster.id) {
+					Player->hp = pk->monster.hp;
 					Position->Position = pk->monster.pos;
 					Rotation->mfYaw = pk->monster.yaw;
 					AnimationController->next_State = pk->animation;
@@ -196,6 +198,29 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 
 			});
 		break;
+
+	}
+	case SC_PACKET_HIT_PLAYER: {
+		SC_HIT_PLAYER_PACKET* pk = reinterpret_cast<SC_HIT_PLAYER_PACKET*>(packet);
+
+		world->each<player_Component, Position_Component, Rotation_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
+				ComponentHandle<Rotation_Component> Rotation) ->
+			void {
+				if (Player->id == pk->id) {
+					Player->hp = pk->hp;
+					cout << Player->hp << endl;
+					if (ent->has<Camera_Component>() && Player->hp <= 0) {
+						Position->Position = XMFLOAT3(1014.f, 1024.f, 1429.f);
+						Rotation->mfYaw = 0.f;
+					}
+				}
+				else
+					return;
+
+			});
 
 	}
 

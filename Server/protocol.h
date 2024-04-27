@@ -28,7 +28,7 @@ constexpr char SC_PACKET_CHANGE_ANIMATION = 5;
 constexpr char SC_PACKET_ADD_MONSTER = 6;
 constexpr char SC_PACKET_UPDATE_MONSTER = 7;
 constexpr char SC_PACKET_LOGOUT = 8;
-constexpr char SC_PACKET_DEAD_PLAYER = 9;
+constexpr char SC_PACKET_HIT_PLAYER = 9;
 
 enum class S_STATE { LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -173,7 +173,6 @@ struct SC_ADD_MONSTER_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	CHAR id;
 	MONSTER_DATA monster;
 };
 
@@ -181,7 +180,6 @@ struct SC_UPDATE_MONSTER_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	CHAR id;
 	MONSTER_DATA monster;
 	CHAR animation;
 };
@@ -191,6 +189,14 @@ struct SC_LOGOUT_PACKET
 	UCHAR size;
 	UCHAR type;
 	CHAR id;
+};
+
+struct SC_HIT_PLAYER_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR id;
+	FLOAT hp;
 };
 #pragma pack (pop)
 

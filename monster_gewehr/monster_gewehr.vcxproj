@@ -131,7 +131,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Server\protocol.h" />
     <ClInclude Include="Animate_System.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="d3dx12.h" />
@@ -146,6 +145,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerControl_System.h" />
     <ClInclude Include="Player_Entity.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="Render_Sysytem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ObjectManager.h" />
