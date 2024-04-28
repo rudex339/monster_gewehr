@@ -27,6 +27,8 @@ class Sever_System : public EntitySystem,
 private:
 	bool m_login = false;
 	bool m_send = false;
+
+	UINT m_id;
 public:
 
 	Sever_System() = default;

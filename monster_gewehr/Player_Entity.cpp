@@ -15,7 +15,7 @@ Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	ent->assign<Velocity_Component>();
 	ent->assign<EulerAngle_Component>();
 	ent->assign<ControllAngle_Component>();
-	//ent->assign<player_Component>();
+	ent->assign<player_Component>();
 
 	return ent;
 }

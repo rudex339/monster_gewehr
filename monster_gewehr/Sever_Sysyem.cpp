@@ -58,58 +58,54 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 
 void Sever_System::receive(World* world, const Login_Event& event)
 {
-	world->each<
-		player_Component>(
-			[&](Entity* ent, 
-				ComponentHandle<player_Component> data) -> void {					
-					WSADATA wsa;
-					WSAStartup(MAKEWORD(2, 2), &wsa);
 
-					g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2, 2), &wsa);
 
-					ZeroMemory(&server_addr, sizeof(server_addr));
-					server_addr.sin_family = AF_INET;
-					server_addr.sin_port = htons(SERVER_PORT);
-					inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
+	g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
 
-					connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	ZeroMemory(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(SERVER_PORT);
+	inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
 
-					unsigned long noblock = 1;
-					ioctlsocket(g_socket, FIONBIO, &noblock);
+	connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 
-					CS_LOGIN_PACKET packet;
-					packet.size = sizeof(packet);
-					packet.type = CS_PACKET_LOGIN;
-					int weapon = 0;
-					cout << "이름 입력" << endl;
-					cin >> packet.name;
-					cout << "무기 입력" << endl;
-					cin >> weapon;
-					packet.weapon = weapon;
+	unsigned long noblock = 1;
+	ioctlsocket(g_socket, FIONBIO, &noblock);
+
+	CS_LOGIN_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_LOGIN;
+	int weapon = 0;
+	cout << "이름 입력" << endl;
+	cin >> packet.name;
+	cout << "무기 입력" << endl;
+	cin >> weapon;
+	packet.weapon = weapon;
 
 
-					int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
+	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
 
-					SC_LOGIN_INFO_PACKET sub_packet;
-					while (1) {
-						int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
-						if (retval > 0) {
-							if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
-								cout << "ㅈ됬어..." << endl;
-							}
+	SC_LOGIN_INFO_PACKET sub_packet;
+	while (1) {
+		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
+		if (retval > 0) {
+			if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
+				cout << "ㅈ됬어..." << endl;
+			}
 
-							break;
-						}
-						else {
-							cout << "못받음" << endl;
-						}
-					}
-					//cout << (int)ply.id << endl;
-					data->id = (int)sub_packet.id;
-					std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
-					m_login = true;
-					//cout << Data->id << endl;
-			});
+			break;
+		}
+		else {
+			cout << "못받음" << endl;
+		}
+	}
+	//cout << (int)ply.id << endl;
+	m_id = (int)sub_packet.id;
+	std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
+	m_login = true;
+	//cout << Data->id << endl;
 
 }
 
@@ -125,7 +121,8 @@ void Sever_System::receive(World* world, const Game_Start& event)
 			ComponentHandle<Rotation_Component> Rotation) ->
 		void {
 			if (ent->has<Camera_Component>()) {
-				
+				Player->id = m_id;
+
 				CS_START_GAME_PACKET p;
 				p.size = sizeof(p);
 				p.type = CS_PACKET_START_GAME;

@@ -64,15 +64,25 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	case LOGIN:
 		break;
 	case LOBBY:
-		world->cleanup();
+	{
+		m_pPawn = NULL;
+		world->reset();
 		world->emit<SetCamera_Event>({ NULL });
-		m_pPawn = world->create();
-		m_pPawn->assign<player_Component>();
-
+	}
 		break;
 	case GAME:
 	{
-		world->cleanup();
+		//world->cleanup();
+
+		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+			m_pObjectManager->Get_ModelInfo("Soldier"),
+			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
+			0.f, 0.f, 0.f,
+			6.0f, 6.0f, 6.0f,
+			3);
+
+
+		cout << m_pPawn->get<player_Component>()->id << endl;
 		Entity* ent = world->create();
 		ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
@@ -82,17 +92,12 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			m_pObjectManager->Get_ModelInfo("Souleater"),
 			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 			0.f, 90.f, 0.f,
-			20.f, 20.f, 20.f,
+			25.f, 25.f, 25.f,
 			10);
 		auto monster_id = ent->get<player_Component>();
 		monster_id->id = -2;
 
-		AddPlayerEntity(m_pPawn, m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager->Get_ModelInfo("Soldier"),
-			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
-			0.f, 0.f, 0.f,
-			6.0f, 6.0f, 6.0f,
-			3);
+		
 
 
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
