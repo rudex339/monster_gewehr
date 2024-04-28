@@ -2,13 +2,19 @@
 
 class ObjectManager;
 
-
+enum {
+	LOGIN,
+	LOBBY,
+	GAME,
+	END
+};
 
 struct ChangeScene_Event {
 	UINT State;
 };
 
-class Scene_Sysytem :public EntitySystem
+class Scene_Sysytem :public EntitySystem,
+	public EventSubscriber<ChangeScene_Event>
 {
 private:
 	UINT m_State = 0;
@@ -27,7 +33,7 @@ public:
 	virtual void unconfigure(class World* world);
 	virtual void tick(class World* world, float deltaTime);
 
-	virtual void changaeScene(class World* world, UINT state);
+	virtual void receive(class World* world, const ChangeScene_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 };

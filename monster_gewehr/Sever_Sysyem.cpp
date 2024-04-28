@@ -329,6 +329,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		cout << "스코어 : " << pk->score << endl << endl;
 		cout << "로비로 가고싶으면 아무 키나 입력" << endl;
 
+		world->emit< ChangeScene_Event>({END});
 		
 	}
 

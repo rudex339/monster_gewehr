@@ -5,14 +5,10 @@
 #include "ObjectManager.h"
 #include "Sever_Sysyem.h"
 #include "PlayerControl_System.h"
+#include "Render_Sysytem.h"
 
 
-enum {
-	LOGIN,
-	LOBBY,
-	GAME,
-	END
-};
+
 
 
 Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList):
@@ -24,6 +20,7 @@ Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDe
 
 void Scene_Sysytem::configure(World* world)
 {
+	world->subscribe<ChangeScene_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -37,39 +34,45 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 		switch (m_State) {
 		case LOGIN:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				changaeScene(world, LOBBY);
+				world->emit< ChangeScene_Event>({LOBBY});
 				world->emit<Login_Event>({});
 			}
 			break;
 		case LOBBY:
 			if (pKeysBuffer[VK_SPACE] & 0xF0) {
-				changaeScene(world, GAME);
+				world->emit< ChangeScene_Event>({ GAME });
 				world->emit<Game_Start>({});
 			}
 			break;
 		case GAME:
 			break;
 		case END:
+			if (pKeysBuffer[VK_RETURN] & 0xF0) {
+				world->emit< ChangeScene_Event>({ LOBBY });
+			}
 			break;
 		}
 	}
 
 }
 
-void Scene_Sysytem::changaeScene(World* world, UINT state)
+void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 {
-	world->cleanup();
-	m_State = state;
+	//world->cleanup();
+	m_State = event.State;
 	switch (m_State) {
 	case LOGIN:
 		break;
 	case LOBBY:
+		world->cleanup();
+		world->emit<SetCamera_Event>({ NULL });
 		m_pPawn = world->create();
 		m_pPawn->assign<player_Component>();
 
 		break;
 	case GAME:
 	{
+		world->cleanup();
 		Entity* ent = world->create();
 		ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
@@ -124,6 +127,7 @@ void Scene_Sysytem::changaeScene(World* world, UINT state)
 	}
 		break;
 	case END:
+		world->emit<GetPlayerPtr_Event>({ NULL });
 		break;
 	}
 	
