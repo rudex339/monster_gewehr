@@ -31,6 +31,7 @@ constexpr char SC_PACKET_UPDATE_MONSTER = 7;
 constexpr char SC_PACKET_LOGOUT = 8;
 constexpr char SC_PACKET_HIT_PLAYER = 9;
 constexpr char SC_PACKET_END_GAME = 10;
+constexpr char SC_PACKET_MAX_PLAYER = 11;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 

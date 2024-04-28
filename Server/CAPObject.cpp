@@ -93,6 +93,7 @@ Player::Player(int id, SOCKET socket)
 
 void Player::PlayerInit()
 {
+	m_position = XMFLOAT3(0.f, 0.f, 0.f);
 	m_hp = 100;
 	m_max_hp = 100;
 

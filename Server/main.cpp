@@ -39,8 +39,9 @@ int main(int argc, char* argv[])
 	SOCKET client_sock;
 	struct sockaddr_in clientaddr;
 	int addrlen;
-	HANDLE hThread;
 
+	std::thread B_Thread{ &BossThread };
+	B_Thread.detach();
 
 	while (1) {
 		addrlen = sizeof(clientaddr);
@@ -100,9 +101,10 @@ void ProcessClient(SOCKET sock)
 
 	players.try_emplace(id, id, client_sock);
 	
-	build_bt(&souleater, &players);
+	//build_bt(&souleater, &players);
 
 	frame fps{}, frame_count{};
+
 	while (players[id].GetState() != S_STATE::LOG_OUT) {
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 		if (fps.count() < 1) continue; // 1/MAX_FRAME
@@ -118,7 +120,7 @@ void ProcessClient(SOCKET sock)
 		
 		if (players[id].GetState() == S_STATE::IN_GAME) {
 			//std::cout << "실행중" << std::endl;
-			run_bt(&souleater, &players);
+			//run_bt(&souleater, &players);
 
 			if (players[id].hit_on) {
 				if (hit_timer <= 0) {
@@ -156,7 +158,7 @@ void ProcessClient(SOCKET sock)
 				shoot_timer = 0;
 			}
 
-			if (souleater.GetAnimation() == dash_ani) {
+			/*if (souleater.GetAnimation() == dash_ani) {
 				if (!players[id].hit_on) {
 					if (players[id].GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
 						players[id].hit_on = 1;
@@ -164,14 +166,14 @@ void ProcessClient(SOCKET sock)
 						SendHitPlayer(id);
 					}
 				}
-			}
+			}*/
 
 			
-			SC_UPDATE_MONSTER_PACKET monster_packet;
+			/*SC_UPDATE_MONSTER_PACKET monster_packet;
 			monster_packet.size = sizeof(monster_packet);
 			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
 			monster_packet.monster = souleater.GetData();
-			monster_packet.animation = souleater.GetAnimation();
+			monster_packet.animation = souleater.GetAnimation();*/
 
 			/*std::cout << "몬스터 위치 : " << souleater.GetPosition().x << std::endl;
 			std::cout << souleater.GetBoundingBox().Center.x << std::endl;*/
@@ -184,15 +186,15 @@ void ProcessClient(SOCKET sock)
 			}
 
 
-			players[id].DoSend(&monster_packet, monster_packet.size);
+			//players[id].DoSend(&monster_packet, monster_packet.size);
 
 
-			if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
-				players[id].PlayerInit();
-				SendEndGame(id);
-				souleater.InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
-				build_bt(&souleater, &players);
-			}
+			//if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
+			//	players[id].PlayerInit();
+			//	SendEndGame(id);
+			//	souleater.InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+			//	build_bt(&souleater, &players);
+			//}
 		}
 		fps_timer = std::chrono::steady_clock::now();
 	}
@@ -206,6 +208,64 @@ void ProcessClient(SOCKET sock)
 	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
 		addr, ntohs(clientaddr.sin_port));
 	return;
+}
+
+void BossThread()
+{
+	constexpr int MAX_FRAME = 30;
+	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
+	using ms = std::chrono::duration<float, std::milli>;
+	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
+
+	frame fps{}, frame_count{};
+	while (1) {
+		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
+		if (fps.count() < 1) continue; // 1/MAX_FRAME
+
+		if (gameroom.GetState() == GameRoomState::G_INGAME) {
+			run_bt(&souleater, &players);
+
+			if (souleater.GetAnimation() == dash_ani) {
+				for (auto& ply : players) {
+					if (ply.second.GetState() == S_STATE::IN_GAME) {
+						if (!ply.second.hit_on) {
+							if (ply.second.GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
+								ply.second.hit_on = 1;
+								ply.second.SetHp(ply.second.GetHp() - 50);
+								SendHitPlayer(ply.second.GetID());
+							}
+						}
+					}
+				}
+			}
+
+			SC_UPDATE_MONSTER_PACKET monster_packet;
+			monster_packet.size = sizeof(monster_packet);
+			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
+			monster_packet.monster = souleater.GetData();
+			monster_packet.animation = souleater.GetAnimation();
+
+			for (auto& ply : players) {
+				if (ply.second.GetState() != S_STATE::IN_GAME) continue;
+				ply.second.DoSend(&monster_packet, monster_packet.size);
+			}
+
+			if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
+				for (auto& ply : players) {
+					if (ply.second.GetState() != S_STATE::IN_GAME) continue;
+					SendEndGame(ply.second.GetID());
+					ply.second.PlayerInit();
+				}
+				souleater.InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+				gameroom.SetFreeRoom();
+			}
+
+		}
+
+
+		fps_timer = std::chrono::steady_clock::now();
+	}
+
 }
 
 void PacketReassembly(int id, size_t recv_size)
@@ -235,7 +295,12 @@ void ProcessPacket(int id, char* p)
 		players[id].SetName(packet->name);
 		players[id].SetWepon(packet->weapon);
 
-		SendLoginInfo(id);
+		if (gameroom.SetPlayerId(id)) {
+			SendLoginInfo(id);
+		}
+		else {
+			SendLoginFail(id);
+		}
 
 		break;
 	}
@@ -245,7 +310,12 @@ void ProcessPacket(int id, char* p)
 		players[id].SetVelocity(packet->vel);
 		players[id].SetYaw(packet->yaw);
 
+		if (gameroom.SetStartGame()) {
+			build_bt(&souleater, &players);
+		}
+
 		SendStartGame(id);
+		break;
 	}
 	case CS_PACKET_PLAYER_MOVE: {
 		CS_PLAYER_MOVE_PACKET* packet = reinterpret_cast<CS_PLAYER_MOVE_PACKET*>(p);
@@ -287,6 +357,18 @@ void SendLoginInfo(int id)
 	}
 
 	players[id].SetState(S_STATE::LOBBY);
+}
+
+void SendLoginFail(int id)
+{
+	int retval;
+	SC_LOGIN_INFO_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_MAX_PLAYER;
+	packet.id = -1;
+	retval = players[id].DoSend(&packet, packet.size);
+
+	players[id].SetState(S_STATE::LOG_OUT);
 }
 
 void SendStartGame(int id)
@@ -378,14 +460,17 @@ void Disconnect(int id)
 {
 	players[id].SetState(S_STATE::LOG_OUT);
 
-	SC_LOGOUT_PACKET packet;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_LOGOUT;
-	packet.id = id;
-	for (auto& client : players) {
-		if (client.second.GetID() == id) continue;
-		if (client.second.GetState() != S_STATE::IN_GAME) continue;
-		client.second.DoSend(&packet, packet.size);
+	if (gameroom.IsPlayerIn(id)) {
+
+		SC_LOGOUT_PACKET packet;
+		packet.size = sizeof(packet);
+		packet.type = SC_PACKET_LOGOUT;
+		packet.id = id;
+		for (auto& client : players) {
+			if (client.second.GetID() == id) continue;
+			if (client.second.GetState() != S_STATE::IN_GAME) continue;
+			client.second.DoSend(&packet, packet.size);
+		}
 	}
 
 }

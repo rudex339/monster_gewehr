@@ -91,11 +91,16 @@ void Sever_System::receive(World* world, const Login_Event& event)
 	while (1) {
 		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
 		if (retval > 0) {
-			if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
-				cout << "ㅈ됬어..." << endl;
+			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
+				break;
 			}
-
-			break;
+			else if (sub_packet.type == SC_PACKET_MAX_PLAYER) {
+				cout << "방이 다찼음" << endl;
+				exit(0);
+			}
+			else {
+				exit(0);
+			}
 		}
 		else {
 			cout << "못받음" << endl;
