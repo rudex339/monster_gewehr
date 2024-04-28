@@ -137,10 +137,10 @@ void ProcessClient(SOCKET sock)
 					directionVec = XMLoadFloat3(&c_dir);
 					if (souleater.GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
 						souleater.m_lock.lock();
-						souleater.SetHp(souleater.GetHp() - 10);
-						souleater.m_lock.unlock();
+						souleater.SetHp(souleater.GetHp() - 10);						
 						if(souleater.GetState() == idle_state)
 							souleater.SetState(fight_state);
+						souleater.m_lock.unlock();
 						build_bt(&souleater, &players);
 					}
 					
@@ -180,7 +180,13 @@ void ProcessClient(SOCKET sock)
 				players[id].SetHp(100);
 			}
 
+
 			players[id].DoSend(&monster_packet, monster_packet.size);
+
+
+			if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
+
+			}
 
 		}
 		fps_timer = std::chrono::steady_clock::now();
@@ -191,6 +197,7 @@ void ProcessClient(SOCKET sock)
 
 	// 소켓 닫기
 	closesocket(client_sock);
+	players[id].closesock();
 	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
 		addr, ntohs(clientaddr.sin_port));
 	return;
@@ -221,15 +228,20 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_LOGIN: {
 		CS_LOGIN_PACKET* packet = reinterpret_cast<CS_LOGIN_PACKET*>(p);
 		players[id].SetName(packet->name);
-		players[id].SetPostion(packet->pos);
-		players[id].SetVelocity(packet->vel);
-		players[id].SetYaw(packet->yaw);
 		players[id].SetWepon(packet->weapon);
 
 
 		SendLoginInfo(id);
 
 		break;
+	}
+	case CS_PACKET_START_GAME: {
+		CS_START_GAME_PACKET* packet = reinterpret_cast<CS_START_GAME_PACKET*>(p);
+		players[id].SetPostion(packet->pos);
+		players[id].SetVelocity(packet->vel);
+		players[id].SetYaw(packet->yaw);
+
+		SendStartGame(id);
 	}
 	case CS_PACKET_PLAYER_MOVE: {
 		CS_PLAYER_MOVE_PACKET* packet = reinterpret_cast<CS_PLAYER_MOVE_PACKET*>(p);
@@ -270,6 +282,14 @@ void SendLoginInfo(int id)
 		players[id].SetState(S_STATE::LOG_OUT);
 	}
 
+	players[id].SetState(S_STATE::LOBBY);
+}
+
+void SendStartGame(int id)
+{
+	int retval;
+
+	// 내 정보를 인게임 상태인 상대에게 보냄
 	SC_ADD_PLAYER_PACKET sub_packet;
 	sub_packet.size = sizeof(sub_packet);
 	sub_packet.type = SC_PACKET_ADD_PLAYER;
@@ -286,6 +306,7 @@ void SendLoginInfo(int id)
 		}
 	}
 
+	// 상대의 정보를 인게임 상태가 될려는 나한테 보냄
 	for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
 		if (client.second.GetState() != S_STATE::IN_GAME) continue;
@@ -302,6 +323,7 @@ void SendLoginInfo(int id)
 		}
 	}
 
+	// 몬스터의 정보도 나한테 보냄
 	SC_ADD_MONSTER_PACKET sub_packet3;
 	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
 	sub_packet3.type = SC_PACKET_ADD_MONSTER;

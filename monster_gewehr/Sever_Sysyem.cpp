@@ -90,9 +90,6 @@ void Sever_System::receive(World* world, const Login_Event& event)
 						cout << "무기 입력" << endl;
 						cin >> weapon;
 						packet.weapon = weapon;
-						packet.pos = position->Position;
-						packet.yaw = rotation->mfYaw;
-						packet.vel = velocity->m_velocity;
 
 
 						int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);

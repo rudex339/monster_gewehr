@@ -84,7 +84,7 @@ Player::Player(int id, SOCKET socket)
 	m_armor = 0;
 
 	m_remain_size = 0;
-	m_state = S_STATE::LOBBY;
+	m_state = S_STATE::LOG_IN;
 
 	m_bounding_box.Center = m_position;
 	m_bounding_box.Extents = XMFLOAT3(5.f, 10.f, 5.f);
@@ -97,13 +97,19 @@ void Player::SetAtkByWeapon(char weapon)
 	switch (weapon)
 	{
 	case SHOT_GUN:
-		m_atk = 100;
+		m_atk = 25;
+		m_ammo = 7;
+		m_mag = 56;
 		break;
 	case ASSAULT_RIFLE:
-		m_atk = 30;
+		m_atk = 10;
+		m_ammo = 30;
+		m_mag = 300;
 		break;
 	case SNIPER:
 		m_atk = 100;
+		m_ammo = 5;
+		m_mag = 40;
 		break;	
 	}
 }
@@ -122,20 +128,6 @@ int Player::RecvData()
 	else {
 		return retval;
 		
-	}
-}
-
-void Player::Process_Packet(char* p)
-{
-	int retval;
-	switch (p[1])
-	{
-	case CS_PACKET_LOGIN: {
-		CS_LOGIN_PACKET* packet = reinterpret_cast<CS_LOGIN_PACKET*>(p);
-		m_name = packet->name;
-		m_wepon = packet->weapon;
-		m_state = S_STATE::IN_GAME;
-	}
 	}
 }
 
@@ -270,6 +262,44 @@ void Monster::updateFront()
 	front = XMVectorSet(-sin(XMConvertToRadians(m_yaw)), 0.0f, -cos(XMConvertToRadians(m_yaw)), 0.0f);
 	XMVECTOR normalizedFront = XMVector3Normalize(front);
 	XMStoreFloat3(&m_front, -normalizedFront);
+}
+
+void Monster::InitMonster()
+{
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		isUserArround[i] = false;
+	}
+
+	turnning_speed = 0.3f;
+	move_speed = 0.08f;
+	fly_up_speed = 0.05f;
+
+	m_yaw = 0.0f;
+
+	m_max_hp = 10;
+	m_hp = m_max_hp;
+	m_runaway_hp = -600; // m_max_hp * 0.9;
+	m_atk = 0;
+	m_def = 0;
+
+	/*m_position.x = 1014.f;
+	m_position.y = 1024.f;
+	m_position.z = 1429.f;*/
+
+	m_position.x = 2289.f;
+	m_position.y = 1024.f;
+	m_position.z = 895.f;
+
+	m_animation = idle_ani;
+	m_state = idle_state;
+
+	m_bounding_box.Center = m_position;
+	m_bounding_box.Center.y += 10.0f;
+	m_bounding_box.Extents = XMFLOAT3(18.0f, 15.0f, 20.0f);
+	float radian = XMConvertToRadians(m_yaw);
+	XMFLOAT4 q{};
+	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
+	m_bounding_box.Orientation = q;
 }
 
 void check_hp(Monster* monster, std::unordered_map<INT, Player>* players)

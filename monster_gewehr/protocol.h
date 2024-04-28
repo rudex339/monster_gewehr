@@ -16,9 +16,10 @@ constexpr char SNIPER = 3;
 
 // 패킷 타입
 constexpr char CS_PACKET_LOGIN = 1;
-constexpr char CS_PACKET_PLAYER_MOVE = 2;
-constexpr char CS_PACKET_CHANGE_ANIMATION = 3;
-constexpr char CS_PACKET_PLAYER_ATTACK = 4;
+constexpr char CS_PACKET_START_GAME = 2;
+constexpr char CS_PACKET_PLAYER_MOVE = 3;
+constexpr char CS_PACKET_CHANGE_ANIMATION = 4;
+constexpr char CS_PACKET_PLAYER_ATTACK = 5;
 
 constexpr char SC_PACKET_LOGIN_INFO = 1;
 constexpr char SC_PACKET_ADD_PLAYER = 2;
@@ -30,7 +31,7 @@ constexpr char SC_PACKET_UPDATE_MONSTER = 7;
 constexpr char SC_PACKET_LOGOUT = 8;
 constexpr char SC_PACKET_HIT_PLAYER = 9;
 
-enum class S_STATE { LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
+enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
 #pragma pack(push,1)
 struct PLAYER_DATA
@@ -68,10 +69,16 @@ struct CS_LOGIN_PACKET
 	UCHAR size;
 	UCHAR type;
 	CHAR name[20];
+	CHAR weapon;
+};
+
+struct CS_START_GAME_PACKET
+{
+	UCHAR size;
+	UCHAR type;
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
-	CHAR weapon;
 };
 
 struct CS_PLAYER_MOVE_PACKET
@@ -96,6 +103,8 @@ struct CS_PLAYER_ATTACK_PACKET
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 dir;
 };
+
+
 
 struct CS_RELOAD_PACKET
 {

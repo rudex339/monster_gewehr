@@ -82,7 +82,7 @@ public:
 	int RecvData();
 	int DoSend(void* p, size_t size);
 
-	void Process_Packet(char* p);
+	void closesock() { closesocket(m_socket); }
 
 	char m_recv_buf[BUF_SIZE];
 	bool hit_on = 0;	// 이건 나중에 피격 애니메이션으로 판정할거임 지금은 피격애니메이션 없어서 임시로 사용
@@ -180,9 +180,9 @@ public:
 	void SetFront(XMFLOAT3 front) { m_front = front; }
 	XMFLOAT3 GetFront() { return m_front; }
 
-	MONSTER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
+	MONSTER_DATA GetData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }	
 
-	
+	void InitMonster();
 
 	void BuildBT(BehaviorTree node) { root = node; }
 	void RunBT() { root.run(); }
