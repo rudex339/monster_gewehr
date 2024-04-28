@@ -30,6 +30,7 @@ constexpr char SC_PACKET_ADD_MONSTER = 6;
 constexpr char SC_PACKET_UPDATE_MONSTER = 7;
 constexpr char SC_PACKET_LOGOUT = 8;
 constexpr char SC_PACKET_HIT_PLAYER = 9;
+constexpr char SC_PACKET_END_GAME = 10;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -206,6 +207,13 @@ struct SC_HIT_PLAYER_PACKET
 	UCHAR type;
 	CHAR id;
 	FLOAT hp;
+};
+
+struct SC_END_GAME_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	SHORT score;
 };
 #pragma pack (pop)
 

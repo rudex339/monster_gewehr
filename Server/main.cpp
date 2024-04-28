@@ -178,6 +178,7 @@ void ProcessClient(SOCKET sock)
 			std::cout << players[id].GetHp() << std::endl;
 
 			if (players[id].GetHp() <= 0) {
+				players[id].death_count += 1;
 				players[id].SetHp(100);
 			}
 
@@ -187,6 +188,10 @@ void ProcessClient(SOCKET sock)
 
 			if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
 
+				players[id].SetState(S_STATE::LOBBY);
+				SendEndGame(id);
+				souleater.InitMonster();
+				
 			}
 
 		}
@@ -399,4 +404,14 @@ void SendHitPlayer(int id)
 		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		client.second.DoSend(&packet, packet.size);
 	}
+}
+
+void SendEndGame(int id)
+{
+	SC_END_GAME_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_END_GAME;
+	packet.score = 1000 - players[id].death_count;
+
+	players[id].DoSend(&packet, packet.size);
 }

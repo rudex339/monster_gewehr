@@ -84,8 +84,10 @@ public:
 
 	void closesock() { closesocket(m_socket); }
 
-	char m_recv_buf[BUF_SIZE];
-	bool hit_on = 0;	// 이건 나중에 피격 애니메이션으로 판정할거임 지금은 피격애니메이션 없어서 임시로 사용
+	CHAR m_recv_buf[BUF_SIZE];
+	BOOL hit_on = 0;	// 이건 나중에 피격 애니메이션으로 판정할거임 지금은 피격애니메이션 없어서 임시로 사용
+
+	SHORT death_count = 0;	// 이것도 나중에 게임룸 클래스에 넣어서 모든 유저의 죽음 횟수를 세서 게임오버나 점수 깎는걸 만들거임
 
 protected:
 	SOCKET m_socket;

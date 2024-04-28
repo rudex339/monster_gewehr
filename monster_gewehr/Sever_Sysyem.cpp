@@ -322,6 +322,15 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			});
 
 	}
+	case SC_PACKET_END_GAME: {
+		SC_END_GAME_PACKET* pk = reinterpret_cast<SC_END_GAME_PACKET*>(packet);
+		// 나중엔 점수 창이 뜨면 점수가 나오고 이를 확인하는 버튼을 눌러서 로비로 가게 하고싶음
+		cout << "게임 클리어!" << endl;
+		cout << "스코어 : " << pk->score << endl << endl;
+		cout << "로비로 가고싶으면 아무 키나 입력" << endl;
+
+		
+	}
 
 	}
 	

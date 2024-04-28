@@ -11,6 +11,7 @@ void SendPlayerMove(int id);
 void SendAnimaition(int id);
 void Disconnect(int id);
 void SendHitPlayer(int id);
+void SendEndGame(int id);
 
 std::unordered_map<INT, Player> players;
 Monster souleater;
