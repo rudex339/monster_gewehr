@@ -105,7 +105,9 @@ void ProcessClient(SOCKET sock)
 	frame fps{}, frame_count{};
 	while (players[id].GetState() != S_STATE::LOG_OUT) {
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
-		if (fps.count() < 1) continue;
+		if (fps.count() < 1) continue; // 1/MAX_FRAME
+
+		// 데이터를 받아서
 		retval = players[id].RecvData();
 		if (retval > 0) {
 			PacketReassembly(id, retval);			
@@ -115,7 +117,7 @@ void ProcessClient(SOCKET sock)
 		}
 		
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			std::cout << "실행중" << std::endl;
+			//std::cout << "실행중" << std::endl;
 			run_bt(&souleater, &players);
 
 			if (players[id].hit_on) {
@@ -165,7 +167,6 @@ void ProcessClient(SOCKET sock)
 			}
 
 			
-
 			SC_UPDATE_MONSTER_PACKET monster_packet;
 			monster_packet.size = sizeof(monster_packet);
 			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
@@ -174,8 +175,8 @@ void ProcessClient(SOCKET sock)
 
 			/*std::cout << "몬스터 위치 : " << souleater.GetPosition().x << std::endl;
 			std::cout << souleater.GetBoundingBox().Center.x << std::endl;*/
-			std::cout << souleater.GetHp() << std::endl;
-			std::cout << players[id].GetHp() << std::endl;
+			//std::cout << souleater.GetHp() << std::endl;
+			//std::cout << players[id].GetHp() << std::endl;
 
 			if (players[id].GetHp() <= 0) {
 				players[id].death_count += 1;
@@ -187,13 +188,11 @@ void ProcessClient(SOCKET sock)
 
 
 			if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
-
-				players[id].SetState(S_STATE::LOBBY);
+				players[id].PlayerInit();
 				SendEndGame(id);
-				souleater.InitMonster();
-				
+				souleater.InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+				build_bt(&souleater, &players);
 			}
-
 		}
 		fps_timer = std::chrono::steady_clock::now();
 	}
@@ -215,7 +214,7 @@ void PacketReassembly(int id, size_t recv_size)
 	char* p = players[id].m_recv_buf;
 	while (remain_size > 0) {
 		int packet_size = p[0];
-		if (packet_size <= remain_size) {
+		if (packet_size <= remain_size) {			
 			ProcessPacket(id, p);
 			p = p + packet_size;
 			remain_size -= packet_size;
@@ -246,7 +245,6 @@ void ProcessPacket(int id, char* p)
 		players[id].SetVelocity(packet->vel);
 		players[id].SetYaw(packet->yaw);
 
-		std::cout << "실행됨" << std::endl;
 		SendStartGame(id);
 	}
 	case CS_PACKET_PLAYER_MOVE: {
@@ -411,7 +409,7 @@ void SendEndGame(int id)
 	SC_END_GAME_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_END_GAME;
-	packet.score = 1000 - players[id].death_count;
+	packet.score = 1000 - players[id].death_count * 100;
 
 	players[id].DoSend(&packet, packet.size);
 }

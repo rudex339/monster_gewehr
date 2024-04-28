@@ -91,6 +91,19 @@ Player::Player(int id, SOCKET socket)
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 }
 
+void Player::PlayerInit()
+{
+	m_hp = 100;
+	m_max_hp = 100;
+
+	m_ammo = 0;
+	m_mag = 0;
+
+	m_state = S_STATE::LOBBY;
+
+	m_bounding_box.Center = m_position;
+	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
+}
 
 void Player::SetAtkByWeapon(char weapon)
 {

@@ -47,6 +47,7 @@ public:
 	Player();
 	~Player() = default; ;
 	Player(int id, SOCKET socket);
+	void PlayerInit();
 
 	void SetSocket(SOCKET& sock) { m_socket = sock; }
 	void SetName(std::string name) { m_name = name; }	

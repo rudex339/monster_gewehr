@@ -216,7 +216,6 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			// 구르기 중이거나 달리는 중에는 총발사 금지해놓음
 			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on) {
 				AnimationController->next_State = (UINT)SHOOT;
-
 			}
 		}
 

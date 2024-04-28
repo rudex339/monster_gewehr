@@ -234,7 +234,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 				ComponentHandle<Rotation_Component> Rotation) ->
 			void {
 				if (Player->id == pk->monster.id) {
-					Player->hp == pk->monster.hp;
+					Player->hp = pk->monster.hp;
 					Player->max_hp = 1000;
 					Position->Position = pk->monster.pos;
 					Rotation->mfYaw = pk->monster.yaw;
@@ -317,6 +317,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					return;
 
 			});
+		break;
 
 	}
 	case SC_PACKET_END_GAME: {
@@ -327,7 +328,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		cout << "로비로 가고싶으면 아무 키나 입력" << endl;
 
 		world->emit< ChangeScene_Event>({END});
-		
+		break;
 	}
 
 	}
