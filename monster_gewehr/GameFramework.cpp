@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// File: CGameFramework.cpp
+// File: GameFramework.cpp
 //-----------------------------------------------------------------------------
 
 #include "stdafx.h"
@@ -16,7 +16,7 @@
 #include "Scene_Sysytem.h"
 //---------------------------------//
 
-CGameFramework::CGameFramework()
+GameFramework::GameFramework()
 {
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
@@ -44,11 +44,11 @@ CGameFramework::CGameFramework()
 	_tcscpy_s(m_pszFrameRate, _T("MonsterGewehr ( "));
 }
 
-CGameFramework::~CGameFramework()
+GameFramework::~GameFramework()
 {
 }
 
-bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
+bool GameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
@@ -70,7 +70,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	return(true);
 }
 
-void CGameFramework::CreateSwapChain()
+void GameFramework::CreateSwapChain()
 {
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
@@ -129,7 +129,7 @@ void CGameFramework::CreateSwapChain()
 #endif
 }
 
-void CGameFramework::CreateDirect3DDevice()
+void GameFramework::CreateDirect3DDevice()
 {
 	HRESULT hResult;
 
@@ -184,7 +184,7 @@ void CGameFramework::CreateDirect3DDevice()
 	if (pd3dAdapter) pd3dAdapter->Release();
 }
 
-void CGameFramework::CreateCommandQueueAndList()
+void GameFramework::CreateCommandQueueAndList()
 {
 	HRESULT hResult;
 
@@ -200,7 +200,7 @@ void CGameFramework::CreateCommandQueueAndList()
 	hResult = m_pd3dCommandList->Close();
 }
 
-void CGameFramework::CreateD3D11On12Device()
+void GameFramework::CreateD3D11On12Device()
 {
 	HRESULT hresuld;
 	ComPtr<ID3D11Device> d3d11Device;
@@ -221,7 +221,7 @@ void CGameFramework::CreateD3D11On12Device()
 	d3d11Device.As(&m_d3d11On12Device);
 }
 
-void CGameFramework::CreateD2DDevice()
+void GameFramework::CreateD2DDevice()
 {
 	D2D1_FACTORY_OPTIONS d2dFactoryOptions{};
 	D2D1_DEVICE_CONTEXT_OPTIONS deviceOptions = D2D1_DEVICE_CONTEXT_OPTIONS_NONE;
@@ -233,7 +233,7 @@ void CGameFramework::CreateD2DDevice()
 	DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dwriteFactory);
 }
 
-void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
+void GameFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
@@ -250,7 +250,7 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 	::gnDsvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
 
-void CGameFramework::CreateRenderTargetViews()
+void GameFramework::CreateRenderTargetViews()
 {
 	float dpiX;
 	float dpiY;
@@ -295,7 +295,7 @@ void CGameFramework::CreateRenderTargetViews()
 	}
 }
 
-void CGameFramework::CreateDepthStencilView()
+void GameFramework::CreateDepthStencilView()
 {
 	D3D12_RESOURCE_DESC d3dResourceDesc;
 	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -335,7 +335,7 @@ void CGameFramework::CreateDepthStencilView()
 	m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, &d3dDepthStencilViewDesc, d3dDsvCPUDescriptorHandle);
 }
 
-void CGameFramework::ChangeSwapChainState()
+void GameFramework::ChangeSwapChainState()
 {
 	WaitForGpuComplete();
 
@@ -364,7 +364,7 @@ void CGameFramework::ChangeSwapChainState()
 	CreateRenderTargetViews();
 }
 
-void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -390,7 +390,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	}
 }
 
-void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pObjectManager) m_pObjectManager->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
@@ -420,7 +420,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	}
 }
 
-LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK GameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -449,7 +449,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	return(0);
 }
 
-void CGameFramework::OnDestroy()
+void GameFramework::OnDestroy()
 {
     ReleaseObjects();
 
@@ -483,67 +483,12 @@ void CGameFramework::OnDestroy()
 
 #define _WITH_TERRAIN_PLAYER
 
-void CGameFramework::BuildObjects()
+void GameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	m_pObjectManager = new ObjectManager();
 	if (m_pObjectManager) m_pObjectManager->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList);
-
-
-	//Entity* ent = m_pWorld->create();
-	//ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
-
-	//BuildScene((char*)"Scene/Scene.bin");
-
-
-	//ent = AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-	//	m_pObjectManager->Get_ModelInfo("Souleater"),
-	//	1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
-	//	0.f, 90.f, 0.f,
-	//	20.f, 20.f, 20.f,
-	//	10);
-	//auto monster_id = ent->get<player_Component>();
-	//monster_id->id = -2;
-	//
-
-
-	//m_pPlayer = AddPlayerEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-	//	m_pObjectManager->Get_ModelInfo("Soldier"),
-	//	1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
-	//	0.f, 0.f, 0.f,
-	//	6.0f, 6.0f, 6.0f,
-	//	3);
-	//m_pPlayer->assign<ControllAngle_Component>();
-
-
-	//AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-	//	m_pObjectManager->Get_ModelInfo("Soldier"),
-	//	310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
-	//	0.f, 0.f, 0.f,
-	//	6.0f, 6.0f, 6.0f,
-	//	3);
-
-	//AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-	//	m_pObjectManager->Get_ModelInfo("Soldier"),
-	//	310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
-	//	0.f, 0.f, 0.f,
-	//	6.0f, 6.0f, 6.0f,
-	//	3);
-	//AddAnotherEntity(m_pWorld->create(), m_pd3dDevice.Get(), m_pd3dCommandList,
-	//	m_pObjectManager->Get_ModelInfo("Soldier"),
-	//	310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
-	//	0.f, 0.f, 0.f,
-	//	6.0f, 6.0f, 6.0f,
-	//	3);
-
-
-	//CCamera* temp = new CThirdPersonCamera(m_pCamera);	
-	//temp->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList);
-	//ComponentHandle<Camera_Component> camera = m_pPlayer->assign<Camera_Component>(temp);
-	//camera->m_pCamera->SetPosition(XMFLOAT3(310.0f, 
-	//	m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f)+10.f, 600.0f - 30.f));
-
 
 
 	//set System
@@ -555,9 +500,6 @@ void CGameFramework::BuildObjects()
 	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dCommandList));
 
 
-	//m_pWorld->emit<GetPlayerPtr_Event>({ m_pPlayer });
-
-
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
@@ -567,96 +509,24 @@ void CGameFramework::BuildObjects()
 	if (m_pObjectManager) m_pObjectManager->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
-#ifdef USE_NETWORK
-	//InitServer();
-#endif
 }
 
-void CGameFramework::BuildScene(char* pstrFileName)
-{
-	FILE* pFile = NULL;
-	::fopen_s(&pFile, pstrFileName, "rb");
-	::rewind(pFile);
-
-	char pstrToken[256] = { '\0' };
-	char pstrGameObjectName[256] = { '\0' };
-	UINT nReads = 0;
-	BYTE nStrLength = 0, nObjectNameLength = 0;
-	int	m_nObjects = 0;
-	::ReadStringFromFile(pFile, pstrToken); //"<GameObjects>:"
-	nReads = (UINT)::fread(&m_nObjects, sizeof(int), 1, pFile);
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		::ReadStringFromFile(pFile, pstrToken); //"<GameObject>:"
-		if (!strcmp(pstrToken, "<GameObject>:")) {
-			Entity* ent = m_pWorld->create();
-			::ReadStringFromFile(pFile, pstrGameObjectName);
-
-			if (!strcmp(pstrGameObjectName, "Cube.001")) {
-				ent->assign<Terrain_Component>(m_pObjectManager->m_pTerrain, "default");
-			}
-		
-
-			XMFLOAT4X4	xmf4x4World;
-			nReads = (UINT)::fread(&xmf4x4World, sizeof(float), 16, pFile); //Transform
-			
-			
-			xmf4x4World = Matrix4x4::Multiply(XMMatrixScaling(
-				(4104 / 330),
-				(4104 / 330),
-				(4104 / 330)), xmf4x4World);
-			
-			
-
-			xmf4x4World._41 *= (4104 / 330);
-			xmf4x4World._42 *= (4104 / 330);
-			xmf4x4World._43 *= (4104 / 330);
-			xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(
-				XMConvertToRadians(0.f),
-				XMConvertToRadians(0.f),
-				XMConvertToRadians(0.f)), xmf4x4World);	
-
-			XMVECTOR translation = XMVectorSet(xmf4x4World._41, xmf4x4World._42, xmf4x4World._43,1.0f);
-			translation = XMVector3Transform(translation, XMMatrixRotationRollPitchYaw(
-				XMConvertToRadians(0.f),
-				XMConvertToRadians(180.f),
-				XMConvertToRadians(0.f)));
-
-			xmf4x4World._41 = XMVectorGetX(translation);
-			xmf4x4World._42 = XMVectorGetY(translation);
-			xmf4x4World._43 = XMVectorGetZ(translation);
-
-			xmf4x4World._41 += 2822.f;
-			xmf4x4World._42 += 1024.f;
-			xmf4x4World._43 += 1900.f;
-
-			ent->assign<Position_Component>(xmf4x4World);
-
-
-			ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName),
-				m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
-		}
-	}
-	::fclose(pFile);
-}
-
-void CGameFramework::ReleaseObjects()
+void GameFramework::ReleaseObjects()
 {
 
 	if (m_pObjectManager) m_pObjectManager->ReleaseObjects();
 	if (m_pObjectManager) delete m_pObjectManager;
 }
 
-void CGameFramework::ProcessInput()
+void GameFramework::ProcessInput()
 {
 }
 
-void CGameFramework::AnimateObjects()
+void GameFramework::AnimateObjects()
 {
 }
 
-void CGameFramework::WaitForGpuComplete()
+void GameFramework::WaitForGpuComplete()
 {
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
 	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
@@ -668,7 +538,7 @@ void CGameFramework::WaitForGpuComplete()
 	}
 }
 
-void CGameFramework::MoveToNextFrame()
+void GameFramework::MoveToNextFrame()
 {
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 
@@ -684,7 +554,7 @@ void CGameFramework::MoveToNextFrame()
 
 //#define _WITH_PLAYER_TOP
 
-void CGameFramework::FrameAdvance()
+void GameFramework::FrameAdvance()
 {    
 	m_GameTimer.Tick(120.0f);
 	
@@ -737,10 +607,10 @@ void CGameFramework::FrameAdvance()
 	static const WCHAR text[] = L"11On12";
 
 	// Acquire our wrapped render target resource for the current back buffer.
-	//m_d3d11On12Device->AcquireWrappedResources(m_wrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
+	m_d3d11On12Device->AcquireWrappedResources(m_wrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
 
-	// Render text directly to the back buffer.
-	//m_d2dDeviceContext->SetTarget(m_d2dRenderTargets[m_nSwapChainBufferIndex].Get());
+	//Render text directly to the back buffer.
+	m_d2dDeviceContext->SetTarget(m_d2dRenderTargets[m_nSwapChainBufferIndex].Get());
 	/*m_d2dDeviceContext->BeginDraw();
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	m_d2dDeviceContext->DrawTextW(
@@ -750,15 +620,15 @@ void CGameFramework::FrameAdvance()
 		&textRect,
 		m_textBrush.Get()
 	);*/
-	//m_d2dDeviceContext->EndDraw();
+	m_d2dDeviceContext->EndDraw();
 
-	// Release our wrapped render target resource. Releasing 
-	// transitions the back buffer resource to the state specified
-	// as the OutState when the wrapped resource was created.
-	//m_d3d11On12Device->ReleaseWrappedResources(m_wrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
+	 //Release our wrapped render target resource. Releasing 
+	 //transitions the back buffer resource to the state specified
+	 //as the OutState when the wrapped resource was created.
+	m_d3d11On12Device->ReleaseWrappedResources(m_wrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
 
 	// Flush to submit the 11 command list to the shared command queue.
-	//m_d3d11DeviceContext->Flush();
+	m_d3d11DeviceContext->Flush();
 
 	
 	
@@ -786,7 +656,7 @@ void CGameFramework::FrameAdvance()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
-void CGameFramework::InitServer()
+void GameFramework::InitServer()
 {
 	WSADATA wsa;
 	WSAStartup(MAKEWORD(2, 2), &wsa);

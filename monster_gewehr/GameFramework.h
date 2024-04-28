@@ -6,11 +6,11 @@
 #include "Player.h"
 #include "ObjectManager.h"
 
-class CGameFramework
+class GameFramework
 {
 public:
-	CGameFramework();
-	~CGameFramework();
+	GameFramework();
+	~GameFramework();
 
 	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
@@ -30,7 +30,6 @@ public:
 	void ChangeSwapChainState();
 
     void BuildObjects();
-	void BuildScene(char* pstrFileName);
     void ReleaseObjects();
 
     void ProcessInput();
