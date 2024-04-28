@@ -38,13 +38,13 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 		case LOGIN:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
 				changaeScene(world, LOBBY);
-				//world->emit<Login_Event>({});
+				world->emit<Login_Event>({});
 			}
 			break;
 		case LOBBY:
-			if (pKeysBuffer[VK_RETURN] & 0xF0) {
+			if (pKeysBuffer[VK_SPACE] & 0xF0) {
 				changaeScene(world, GAME);
-				world->emit<Login_Event>({});
+				world->emit<Game_Start>({});
 			}
 			break;
 		case GAME:

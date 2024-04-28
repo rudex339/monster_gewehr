@@ -68,7 +68,7 @@ struct CS_LOGIN_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	CHAR name[20];	
+	CHAR name[20];
 	CHAR weapon;
 };
 

@@ -682,9 +682,6 @@ void GameFramework::InitServer()
 	cout << "무기 입력" << endl;
 	cin >> weapon;
 	packet.weapon = weapon;
-	packet.pos = m_pPlayer->get<Position_Component>()->Position;
-	packet.yaw = m_pPlayer->get<Rotation_Component>()->mfYaw;
-	packet.vel = m_pPlayer->get<Velocity_Component>()->m_velocity;
 
 
 	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);

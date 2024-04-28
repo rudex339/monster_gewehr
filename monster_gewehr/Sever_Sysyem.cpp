@@ -9,6 +9,7 @@ void Sever_System::configure(World* world)
 {
 	world->subscribe<PacketSend_Event>(this);
 	world->subscribe<Login_Event>(this);
+	world->subscribe<Game_Start>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -57,67 +58,86 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 
 void Sever_System::receive(World* world, const Login_Event& event)
 {
-	world->each<Velocity_Component,
-		Position_Component,
-		Rotation_Component,
+	world->each<
 		player_Component>(
-			[&](Entity* ent, ComponentHandle<Velocity_Component> velocity,
-				ComponentHandle<Position_Component> position,
-				ComponentHandle<Rotation_Component> rotation,
-				ComponentHandle<player_Component> data) -> void {
-					if (ent->has<Camera_Component>()) {
-						WSADATA wsa;
-						WSAStartup(MAKEWORD(2, 2), &wsa);
+			[&](Entity* ent, 
+				ComponentHandle<player_Component> data) -> void {					
+					WSADATA wsa;
+					WSAStartup(MAKEWORD(2, 2), &wsa);
 
-						g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
+					g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
 
-						ZeroMemory(&server_addr, sizeof(server_addr));
-						server_addr.sin_family = AF_INET;
-						server_addr.sin_port = htons(SERVER_PORT);
-						inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
+					ZeroMemory(&server_addr, sizeof(server_addr));
+					server_addr.sin_family = AF_INET;
+					server_addr.sin_port = htons(SERVER_PORT);
+					inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
 
-						connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+					connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 
-						unsigned long noblock = 1;
-						ioctlsocket(g_socket, FIONBIO, &noblock);
+					unsigned long noblock = 1;
+					ioctlsocket(g_socket, FIONBIO, &noblock);
 
-						CS_LOGIN_PACKET packet;
-						packet.size = sizeof(packet);
-						packet.type = CS_PACKET_LOGIN;
-						int weapon = 0;
-						cout << "이름 입력" << endl;
-						cin >> packet.name;
-						cout << "무기 입력" << endl;
-						cin >> weapon;
-						packet.weapon = weapon;
+					CS_LOGIN_PACKET packet;
+					packet.size = sizeof(packet);
+					packet.type = CS_PACKET_LOGIN;
+					int weapon = 0;
+					cout << "이름 입력" << endl;
+					cin >> packet.name;
+					cout << "무기 입력" << endl;
+					cin >> weapon;
+					packet.weapon = weapon;
 
 
-						int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
+					int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
 
-						SC_LOGIN_INFO_PACKET sub_packet;
-						while (1) {
-							int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
-							if (retval > 0) {
-								if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
-									cout << "ㅈ됬어..." << endl;
-								}
-
-								break;
+					SC_LOGIN_INFO_PACKET sub_packet;
+					while (1) {
+						int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
+						if (retval > 0) {
+							if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
+								cout << "ㅈ됬어..." << endl;
 							}
-							else {
-								cout << "못받음" << endl;
-							}
+
+							break;
 						}
-						//cout << (int)ply.id << endl;
-						data->id = (int)sub_packet.id;
-						std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
-						m_login = true;
-						//cout << Data->id << endl;
+						else {
+							cout << "못받음" << endl;
+						}
 					}
-
+					//cout << (int)ply.id << endl;
+					data->id = (int)sub_packet.id;
+					std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
+					m_login = true;
+					//cout << Data->id << endl;
 			});
+
 }
 
+void Sever_System::receive(World* world, const Game_Start& event)
+{
+
+	cout << "실행됨" << endl;
+	world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
+		[&](Entity* ent,
+			ComponentHandle<player_Component> Player,
+			ComponentHandle<Position_Component> Position,
+			ComponentHandle< Velocity_Component> Velocity,
+			ComponentHandle<Rotation_Component> Rotation) ->
+		void {
+			if (ent->has<Camera_Component>()) {
+				
+				CS_START_GAME_PACKET p;
+				p.size = sizeof(p);
+				p.type = CS_PACKET_START_GAME;
+				p.pos = Position->Position;
+				p.vel = Velocity->m_velocity;
+				p.yaw = Rotation->mfYaw;
+
+				send(g_socket, (char*)&p, p.size, 0);
+			}
+
+		});
+}
 
 void Sever_System::PacketReassembly(World* world, char* recv_buf, size_t recv_size)
 {

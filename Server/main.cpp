@@ -115,6 +115,7 @@ void ProcessClient(SOCKET sock)
 		}
 		
 		if (players[id].GetState() == S_STATE::IN_GAME) {
+			std::cout << "실행중" << std::endl;
 			run_bt(&souleater, &players);
 
 			if (players[id].hit_on) {
@@ -230,7 +231,6 @@ void ProcessPacket(int id, char* p)
 		players[id].SetName(packet->name);
 		players[id].SetWepon(packet->weapon);
 
-
 		SendLoginInfo(id);
 
 		break;
@@ -241,6 +241,7 @@ void ProcessPacket(int id, char* p)
 		players[id].SetVelocity(packet->vel);
 		players[id].SetYaw(packet->yaw);
 
+		std::cout << "실행됨" << std::endl;
 		SendStartGame(id);
 	}
 	case CS_PACKET_PLAYER_MOVE: {
