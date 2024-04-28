@@ -413,7 +413,7 @@ int search_target(Monster* monster, std::unordered_map<INT, Player>* players)
 {
 	bool isTargetExist = false;
 
-	for (int i = 0; i < MAX_CLIENT; i++) {
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
 		auto playerIter = players->find(i);
 		if (playerIter != players->end()) {
 			monster->SetUserArround(i, false);
@@ -445,15 +445,15 @@ int time_out(Monster* monster, float& timeout, float cooltime)
 	}
 }
 
-int time_out_seq(Monster* monster, float& timeout, float cooltime)
+int dash_time_out(Monster* monster, float cooltime)
 {
-	timeout += monster->GetElapsedTime();
+	time_out_dash += monster->GetElapsedTime();
 
-	if (timeout < cooltime)
+	if (time_out_dash < cooltime)
 		return BehaviorTree::FAIL;
 
 	else {
-		timeout = 0.0f;
+		time_out_dash = 0.0f;
 		return BehaviorTree::SUCCESS;
 	}
 }
@@ -526,6 +526,7 @@ int bite_attack(Monster* monster)
 	monster->SetAnimation(bite_ani);
 	bite_attack_time += monster->GetElapsedTime();
 	if (bite_attack_time < BITE_ANIMATION) {
+		time_out_dash = 0.0f;
 		return BehaviorTree::RUNNING;
 	}
 	bite_attack_time = 0.0f;
@@ -838,7 +839,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 	set_target_node = Leaf("Set Target", std::bind(choose_target, monster, players));
 	dash_sequence = Sequence("dash sequence", { &set_target_node, &charging_dash_node, &dash_attack_node, &dash_cool_time_node });
 
-	dash_time_out_node = Leaf("Timeout check(dash)", std::bind(time_out_seq, monster, time_out_dash, CHASE_USER_TIME));
+	dash_time_out_node = Leaf("Timeout check(dash)", std::bind(dash_time_out, monster, CHASE_USER_TIME));
 	dash_or_move_sequence = Sequence("dash or move seq", { &dash_time_out_node, &dash_sequence });
 	attack_selector = Selector("attack selector", { &dash_or_move_sequence, &move_to_bite_sequence });
 
