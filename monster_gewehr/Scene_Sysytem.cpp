@@ -64,6 +64,9 @@ void Scene_Sysytem::changaeScene(World* world, UINT state)
 	case LOGIN:
 		break;
 	case LOBBY:
+		m_pPawn = world->create();
+		m_pPawn->assign<player_Component>();
+
 		break;
 	case GAME:
 	{
@@ -81,13 +84,12 @@ void Scene_Sysytem::changaeScene(World* world, UINT state)
 		auto monster_id = ent->get<player_Component>();
 		monster_id->id = -2;
 
-		auto m_pPlayer = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		AddPlayerEntity(m_pPawn, m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager->Get_ModelInfo("Soldier"),
 			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			3);
-		m_pPlayer->assign<ControllAngle_Component>();
 
 
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
@@ -113,13 +115,11 @@ void Scene_Sysytem::changaeScene(World* world, UINT state)
 		CCamera* temp = new CThirdPersonCamera(NULL);
 		temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
 
-		ComponentHandle<Camera_Component> camera = m_pPlayer->assign<Camera_Component>(temp);
+		ComponentHandle<Camera_Component> camera = m_pPawn->assign<Camera_Component>(temp);
 		camera->m_pCamera->SetPosition(XMFLOAT3(310.0f,
 			m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f) + 10.f, 600.0f - 30.f));
 
-
-
-		world->emit<GetPlayerPtr_Event>({ m_pPlayer });
+		world->emit<GetPlayerPtr_Event>({ m_pPawn });
 
 	}
 		break;

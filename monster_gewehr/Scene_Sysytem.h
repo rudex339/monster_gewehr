@@ -16,6 +16,8 @@ private:
 	ObjectManager* m_pObjectManager = NULL;
 	ID3D12Device* m_pd3dDevice;
 	ID3D12GraphicsCommandList* m_pd3dCommandList;
+
+	Entity* m_pPawn;
 public:
 	Scene_Sysytem() = default;
 	Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice,
