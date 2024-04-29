@@ -76,7 +76,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager->Get_ModelInfo("Soldier"),
-			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
+			1014.f, /*m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)*/2000.f, 1429.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			3);
@@ -154,12 +154,12 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 	for (int i = 0; i < m_nObjects; i++)
 	{
-		::ReadStringFromFile(pFile, pstrToken); //"<GameObject>:"
+		::ReadStringFromFile(pFile, pstrToken); //"<GameObject>:"			
 		if (!strcmp(pstrToken, "<GameObject>:")) {
 			Entity* ent = world->create();
 			::ReadStringFromFile(pFile, pstrGameObjectName);
 
-			if (!strcmp(pstrGameObjectName, "Cube.001")) {
+			if (!strcmp(pstrGameObjectName, "Cube")) {
 				ent->assign<Terrain_Component>(m_pObjectManager->m_pTerrain, "default");
 			}
 
@@ -193,9 +193,9 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 			xmf4x4World._42 = XMVectorGetY(translation);
 			xmf4x4World._43 = XMVectorGetZ(translation);
 
-			xmf4x4World._41 += 2822.f;
+			xmf4x4World._41 += 2825.f;
 			xmf4x4World._42 += 1024.f;
-			xmf4x4World._43 += 1900.f;
+			xmf4x4World._43 += 1918.f;
 
 			ent->assign<Position_Component>(xmf4x4World);
 
@@ -203,6 +203,8 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 			ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName),
 				m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
 		}
+		else
+			i -= 1;
 	}
 	::fclose(pFile);
 }

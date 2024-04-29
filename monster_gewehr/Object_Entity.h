@@ -154,3 +154,8 @@ struct EulerAngle_Component {
 
 //----------------------------------------------------------------------------------------------
 //player
+
+struct BoundingBox_Component {
+	DirectX::BoundingOrientedBox m_bounding_box;
+
+};

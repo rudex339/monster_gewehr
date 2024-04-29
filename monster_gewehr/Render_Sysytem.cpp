@@ -21,7 +21,7 @@ bool is_camera_far(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 	float distance;
 	DirectX::XMStoreFloat(&distance, DirectX::XMVector3Length(DirectX::XMVectorSubtract(object_pos, camera_pos)));
 
-	if (distance > 1000.0f) {
+	if (distance > 2000.0f) {
 		return true;
 	}
 
