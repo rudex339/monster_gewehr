@@ -201,9 +201,9 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 			xmf4x4World._42 = XMVectorGetY(translation);
 			xmf4x4World._43 = XMVectorGetZ(translation);
 
-			xmf4x4World._41 += 2825.f;
+			xmf4x4World._41 += 2783.f;
 			xmf4x4World._42 += 1024.f;
-			xmf4x4World._43 += 1918.f;
+			xmf4x4World._43 += 1852.f;
 
 			ent->assign<Position_Component>(xmf4x4World);
 

@@ -34,11 +34,18 @@ cbuffer cbLights : register(b4)
 	int						gnLights;
 };
 
+float Random(in float2 uv)
+{
+    return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+}
+
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
 	float3 vToLight = -gLights[nIndex].m_vDirection;
-	float fDiffuseFactor = dot(vToLight, vNormal);
+	//float fDiffuseFactor = dot(vToLight, vNormal);
+    float fDiffuseFactor = saturate(dot(vToLight, vNormal)); // Ensure the diffuse factor is clamped between 0 and 1 for better color clarity
 	float fSpecularFactor = 0.0f;
+
 	if (fDiffuseFactor > 0.0f)
 	{
 		if (gMaterial.m_cSpecular.a != 0.0f)
@@ -57,7 +64,14 @@ float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 		}
 	}
 
-	return((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular));
+    
+	
+	//return((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular));
+    float4 ambientTerm = saturate(gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient);
+    float4 diffuseTerm = saturate(gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse);
+    float4 specularTerm = saturate(gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular);	
+
+    return ambientTerm + diffuseTerm + specularTerm;
 }
 
 float4 PointLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
@@ -132,12 +146,64 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
 	return(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
+float3 RGBtoHSV(float3 rgb)
+{
+    float minV = min(rgb.r, min(rgb.g, rgb.b));
+    float maxV = max(rgb.r, max(rgb.g, rgb.b));
+    float delta = maxV - minV;
+    float3 hsv = float3(0, 0, maxV);
+
+    if (delta != 0)
+    {
+        hsv.y = delta / maxV;
+
+        if (rgb.r == maxV)
+            hsv.x = (rgb.g - rgb.b) / delta;
+        else if (rgb.g == maxV)
+            hsv.x = 2 + (rgb.b - rgb.r) / delta;
+        else
+            hsv.x = 4 + (rgb.r - rgb.g) / delta;
+
+        hsv.x *= 60;
+        if (hsv.x < 0)
+            hsv.x += 360;
+    }
+
+    return hsv;
+}
+
+float3 HSVtoRGB(float3 hsv)
+{
+    float c = hsv.y * hsv.z;
+    float x = c * (1 - abs(fmod(hsv.x / 60.0, 2) - 1));
+    float m = hsv.z - c;
+
+    float3 rgb;
+
+    if (hsv.x < 60)
+        rgb = float3(c, x, 0);
+    else if (hsv.x < 120)
+        rgb = float3(x, c, 0);
+    else if (hsv.x < 180)
+        rgb = float3(0, c, x);
+    else if (hsv.x < 240)
+        rgb = float3(0, x, c);
+    else if (hsv.x < 300)
+        rgb = float3(x, 0, c);
+    else
+        rgb = float3(c, 0, x);
+
+    return rgb + m;
+}
+
 float4 Lighting(float3 vPosition, float3 vNormal)
 {
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float saturationFactor = 1.75f;
+	
 	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
 	{
 		if (gLights[i].m_bEnable)
@@ -159,6 +225,10 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 
+    float3 hsv = RGBtoHSV(cColor.rgb);
+    hsv.y *= saturationFactor; // Adjust the saturation factor as needed
+    cColor.rgb = HSVtoRGB(hsv);
+	
 	return(cColor);
 }
 

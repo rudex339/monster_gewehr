@@ -103,7 +103,21 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		normalW = normalize(input.normalW);
 	}
 	float4 cIllumination = Lighting(input.positionW, normalW);
-	return(lerp(cColor, cIllumination, 0.5f));
+	//return(lerp(cColor, cIllumination, 0.5f));
+    //cColor = mul(cColor, cIllumination);
+    
+    //return cColor;
+    float3 hsvColor = RGBtoHSV(cColor.rgb);
+    float3 hsvIllumination = RGBtoHSV(cIllumination.rgb);
+
+// Interpolate only the saturation component
+    float3 interpolatedHSV = lerp(hsvColor, hsvIllumination, 0.4f);
+
+// Convert interpolated color back to RGB
+    float3 interpolatedRGB = HSVtoRGB(interpolatedHSV);
+
+// Combine RGB components with the alpha value
+    return float4(interpolatedRGB, cColor.a);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

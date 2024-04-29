@@ -73,7 +73,11 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		if (Capture) {
 
+			//RECT clientRect;
+			//GetClientRect(hWnd, &clientRect); // Get the dimensions of the client area
 
+			//int centerX = (clientRect.left + clientRect.right) / 2;
+			//int centerY = (clientRect.top + clientRect.bottom) / 2;
 
 			POINT ptCursorPos;
 			SetCursor(NULL);
