@@ -150,12 +150,40 @@ struct EulerAngle_Component {
 		float L_x, float L_y, float L_z,
 		float U_x, float U_y, float U_z);
 };
+//----------------------------------------------------------------------------------------------
+//light
+#define MAX_LIGHTS						16 
 
+#define POINT_LIGHT						1
+#define SPOT_LIGHT						2
+#define DIRECTIONAL_LIGHT				3
+
+struct LIGHT
+{
+	XMFLOAT4							m_xmf4Ambient;
+	XMFLOAT4							m_xmf4Diffuse;
+	XMFLOAT4							m_xmf4Specular;
+	XMFLOAT3							m_xmf3Position;
+	float 								m_fFalloff;
+	XMFLOAT3							m_xmf3Direction;
+	float 								m_fTheta; //cos(m_fTheta)
+	XMFLOAT3							m_xmf3Attenuation;
+	float								m_fPhi; //cos(m_fPhi)
+	bool								m_bEnable;
+	int									m_nType;
+	float								m_fRange;
+	float								padding;
+};
+
+struct Light_Component {
+	LIGHT *m_pLight = NULL;
+	Light_Component() = default;
+};
 
 //----------------------------------------------------------------------------------------------
 //player
 
 struct BoundingBox_Component {
 	DirectX::BoundingOrientedBox m_bounding_box;
-
+	BoundingBox_Component() = default;
 };

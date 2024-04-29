@@ -4,6 +4,13 @@
 #include "ObjectManager.h"
 #include "Player_Entity.h"
 
+struct LIGHTS
+{
+	LIGHT								m_pLights[MAX_LIGHTS];
+	XMFLOAT4							m_xmf4GlobalAmbient;
+	int									m_nLights;
+};
+
 bool is_camera_behind(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR& camera_look, const DirectX::XMVECTOR& object_pos) {
 	DirectX::XMVECTOR camera_to_object = DirectX::XMVectorSubtract(object_pos, camera_pos);
 
@@ -35,9 +42,17 @@ bool should_render(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 
 
 
-Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)
+Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
+
+	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
+
+
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 }
 
 void Render_Sysytem::configure(World* world)
@@ -62,8 +77,22 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 		m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
 
 		//UpdateShaderVariables(pd3dCommandList);
-		//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-		//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+		int cur_point = 0;
+		world->each<Light_Component>([&](
+		Entity* ent,
+			ComponentHandle<Light_Component> light
+			) -> void {
+				if (cur_point < MAX_LIGHTS) {
+					::memcpy(&m_pcbMappedLights->m_pLights[cur_point], light->m_pLight, sizeof(LIGHT));
+					cur_point++;
+				}
+			});
+
+		::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+		::memcpy(&m_pcbMappedLights->m_nLights, &cur_point, sizeof(int));
+
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+		m_pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
 
 		world->each<SkyBox_Component>([&](
@@ -73,12 +102,12 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 				SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
 			});
 
-		world->each<Terrain_Component>([&](
+		/*world->each<Terrain_Component>([&](
 			Entity* ent,
 			ComponentHandle<Terrain_Component> Terrain
 			) -> void {
 				Terrain->m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
-			});
+			});*/
 		world->each< Model_Component, Position_Component>([&](
 			Entity* ent,
 			ComponentHandle<Model_Component> Model,

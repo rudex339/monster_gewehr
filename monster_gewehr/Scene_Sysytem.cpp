@@ -72,11 +72,11 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		break;
 	case GAME:
 	{
-		//world->cleanup();
+		world->reset();
 
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager->Get_ModelInfo("Soldier"),
-			1014.f, /*m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)*/2000.f, 1429.0f,
+			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			3);
@@ -97,8 +97,16 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		auto monster_id = ent->get<player_Component>();
 		monster_id->id = -2;
 
-		
-
+		ent = world->create();
+		auto light = ent->assign<Light_Component>();
+		light->m_pLight = new LIGHT;
+		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
+		light->m_pLight->m_bEnable = true;
+		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
+		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager->Get_ModelInfo("Soldier"),
