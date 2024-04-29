@@ -97,7 +97,7 @@ void Player::PlayerInit()
 	m_hp = 100;
 	m_max_hp = 100;
 
-	m_ammo = 0;
+	m_ammo = 30;
 	m_mag = 0;
 
 	m_state = S_STATE::LOBBY;
@@ -106,7 +106,7 @@ void Player::PlayerInit()
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 }
 
-void Player::SetAtkByWeapon(char weapon)
+void Player::SetByWeapon(char weapon)
 {
 	switch (weapon)
 	{
@@ -124,7 +124,7 @@ void Player::SetAtkByWeapon(char weapon)
 		m_atk = 100;
 		m_ammo = 5;
 		m_mag = 40;
-		break;	
+		break;
 	}
 }
 
@@ -141,7 +141,7 @@ int Player::RecvData()
 	}
 	else {
 		return retval;
-		
+
 	}
 }
 
@@ -173,7 +173,7 @@ Monster::Monster()
 
 	m_yaw = 0.0f;
 
-	m_max_hp = 10;
+	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
 	m_runaway_hp = -600; // m_max_hp * 0.9;
 	m_atk = 0;
@@ -290,7 +290,7 @@ void Monster::InitMonster()
 
 	m_yaw = 0.0f;
 
-	m_max_hp = 10;
+	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
 	m_runaway_hp = -600; // m_max_hp * 0.9;
 	m_atk = 0;

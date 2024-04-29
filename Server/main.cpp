@@ -82,13 +82,13 @@ void ProcessClient(SOCKET sock)
 
 	constexpr int MAX_FRAME = 30;
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
-	using ms = std::chrono::duration<float, std::milli>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 	
 	// 총 발사 관련 변수들인데 추후 묶어서 관리할 예정
 	int shoot_timer = 0;
+	int reload_timer = MAX_FRAME * 3;
 	int hit_timer = MAX_FRAME * 5;
-	float shot_range = 1000.f;
+	float shot_range = 800.f;
 	DirectX::XMFLOAT3 p_pos;
 	DirectX::XMFLOAT3 c_dir;
 	DirectX::XMVECTOR directionVec;
@@ -100,13 +100,12 @@ void ProcessClient(SOCKET sock)
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
 
 	players.try_emplace(id, id, client_sock);
-	
-	//build_bt(&souleater, &players);
 
 	frame fps{}, frame_count{};
 
 	while (players[id].GetState() != S_STATE::LOG_OUT) {
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
+
 		if (fps.count() < 1) continue; // 1/MAX_FRAME
 
 		// 데이터를 받아서
@@ -119,8 +118,6 @@ void ProcessClient(SOCKET sock)
 		}
 		
 		if (players[id].GetState() == S_STATE::IN_GAME) {
-			//std::cout << "실행중" << std::endl;
-			//run_bt(&souleater, &players);
 
 			if (players[id].hit_on) {
 				if (hit_timer <= 0) {
@@ -133,10 +130,11 @@ void ProcessClient(SOCKET sock)
 			}
 
 			if (players[id].GetAnimaition() == 2) {
-				if (shoot_timer <= 0) {
+				if (shoot_timer <= 0 && players[id].GetAmmo() > 0) {
 					shoot_timer = MAX_FRAME / 10;					
 					p_pos = players[id].GetAtkPos();
 					c_dir = players[id].GetAtkDir();
+					players[id].AmmoShot();
 					p_pos.y += 20;
 					positionVec = XMLoadFloat3(&p_pos);
 					directionVec = XMLoadFloat3(&c_dir);
@@ -148,7 +146,7 @@ void ProcessClient(SOCKET sock)
 						souleater.m_lock.unlock();
 						build_bt(&souleater, &players);
 					}
-					
+					SendShoot(id);
 				}
 				else {
 					shoot_timer--;
@@ -158,49 +156,32 @@ void ProcessClient(SOCKET sock)
 				shoot_timer = 0;
 			}
 
-			/*if (souleater.GetAnimation() == dash_ani) {
-				if (!players[id].hit_on) {
-					if (players[id].GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
-						players[id].hit_on = 1;
-						players[id].SetHp(players[id].GetHp() - 50);
-						SendHitPlayer(id);
-					}
+			if (players[id].GetAmmo() <= 0) {
+				if (reload_timer <= 0) {
+					std::cout << "리로드 완료" << std::endl;
+					reload_timer = MAX_FRAME * 3;
+					players[id].SetAmmo(30);
+					SendShoot(id);
 				}
-			}*/
+				else {
+					reload_timer--;
+				}
+			}
 
-			
-			/*SC_UPDATE_MONSTER_PACKET monster_packet;
-			monster_packet.size = sizeof(monster_packet);
-			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
-			monster_packet.monster = souleater.GetData();
-			monster_packet.animation = souleater.GetAnimation();*/
 
-			/*std::cout << "몬스터 위치 : " << souleater.GetPosition().x << std::endl;
-			std::cout << souleater.GetBoundingBox().Center.x << std::endl;*/
-			//std::cout << souleater.GetHp() << std::endl;
-			//std::cout << players[id].GetHp() << std::endl;
 
 			if (players[id].GetHp() <= 0) {
 				players[id].death_count += 1;
 				players[id].SetHp(100);
 			}
 
-
-			//players[id].DoSend(&monster_packet, monster_packet.size);
-
-
-			//if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
-			//	players[id].PlayerInit();
-			//	SendEndGame(id);
-			//	souleater.InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
-			//	build_bt(&souleater, &players);
-			//}
 		}
 		fps_timer = std::chrono::steady_clock::now();
 	}
 
-	// 클라이언트 접속 종료시 자동차 정보 초기화
+
 	Disconnect(id);
+	gameroom.DeletePlayerId(id);
 
 	// 소켓 닫기
 	closesocket(client_sock);
@@ -232,6 +213,20 @@ void BossThread()
 							if (ply.second.GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
 								ply.second.hit_on = 1;
 								ply.second.SetHp(ply.second.GetHp() - 50);
+								SendHitPlayer(ply.second.GetID());
+							}
+						}
+					}
+				}
+			}
+
+			if (souleater.GetAnimation() == bite_ani) {
+				for (auto& ply : players) {
+					if (ply.second.GetState() == S_STATE::IN_GAME) {
+						if (!ply.second.hit_on) {
+							if (ply.second.GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
+								ply.second.hit_on = 1;
+								ply.second.SetHp(ply.second.GetHp() - 25);
 								SendHitPlayer(ply.second.GetID());
 							}
 						}
@@ -296,6 +291,7 @@ void ProcessPacket(int id, char* p)
 		players[id].SetWepon(packet->weapon);
 
 		if (gameroom.SetPlayerId(id)) {
+			players[id].SetByWeapon(2);
 			SendLoginInfo(id);
 		}
 		else {
@@ -458,6 +454,7 @@ void SendAnimaition(int id)
 
 void Disconnect(int id)
 {
+	players[id].PlayerInit();
 	players[id].SetState(S_STATE::LOG_OUT);
 
 	if (gameroom.IsPlayerIn(id)) {
@@ -495,6 +492,17 @@ void SendEndGame(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_END_GAME;
 	packet.score = 1000 - players[id].death_count * 100;
+
+	players[id].DoSend(&packet, packet.size);
+}
+
+void SendShoot(int id)
+{
+	SC_SHOOT_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_SHOOT;
+	packet.id = id;
+	packet.ammo = players[id].GetAmmo();
 
 	players[id].DoSend(&packet, packet.size);
 }

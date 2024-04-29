@@ -36,6 +36,16 @@ BOOL GameRoom::IsPlayerIn(int c_id)
 	return false;
 }
 
+void GameRoom::DeletePlayerId(int c_id)
+{
+	for (auto& id : m_player_ids) {
+		if (id == c_id) {
+			id = -1;
+			return;
+		}
+	}
+}
+
 BOOL GameRoom::SetStartGame()
 {
 	m_state_lock.lock();

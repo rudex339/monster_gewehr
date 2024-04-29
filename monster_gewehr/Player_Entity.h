@@ -31,8 +31,11 @@ struct player_Component {
 	FLOAT hp = 100;
 	FLOAT max_hp = 100;
 
+	FLOAT ammo = 30;
+
 	player_Component() = default;
 };
+
 
 
 struct ControllAngle_Component {

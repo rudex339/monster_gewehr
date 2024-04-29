@@ -59,7 +59,7 @@ public:
 	void SetMag(float mag) { m_mag = mag; }
 	void SetWepon(char wepon) { m_wepon = wepon; }
 	void SetArmor(char armor) { m_armor = armor; }
-	void SetAtkByWeapon(char aromor);
+	void SetByWeapon(char aromor);
 	void SetRemainSize(int remain_size) { m_remain_size = remain_size; }
 	void SetState(S_STATE state) { m_state = state; }
 	void SetAnimaition(char ani) { m_animation = ani; }
@@ -78,7 +78,9 @@ public:
 	DirectX::XMFLOAT3 GetAtkDir() { return m_atk_dir; }
 	DirectX::XMFLOAT3 GetAtkPos() { return m_atk_pos; }
 	float GetHp() { return m_hp; }
+	float GetAmmo() { return m_ammo; }
 	
+	void AmmoShot() { m_ammo -= 1; }
 
 	int RecvData();
 	int DoSend(void* p, size_t size);

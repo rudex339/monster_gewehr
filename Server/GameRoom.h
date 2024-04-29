@@ -12,6 +12,7 @@ public:
 
 	BOOL SetPlayerId(int c_id);
 	BOOL IsPlayerIn(int c_id);
+	void DeletePlayerId(int c_id);
 
 	BOOL SetStartGame();
 	void SetEndGame();

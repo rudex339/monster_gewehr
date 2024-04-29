@@ -18,6 +18,7 @@ void SendAnimaition(int id);
 void Disconnect(int id);
 void SendHitPlayer(int id);
 void SendEndGame(int id);
+void SendShoot(int id);
 
 
 std::unordered_map<INT, Player> players;

@@ -335,6 +335,24 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		world->emit< ChangeScene_Event>({END});
 		break;
 	}
+	case SC_PACKET_SHOOT: {
+		SC_SHOOT_PACKET* pk = reinterpret_cast<SC_SHOOT_PACKET*>(packet);
+
+		world->each<player_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player) ->
+			void {
+				if (Player->id == pk->id) {
+					Player->ammo = pk->ammo;
+					std::cout << pk->ammo << std::endl;
+				}
+				else
+					return;
+
+			});
+
+		break;
+	}
 
 	}
 	

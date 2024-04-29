@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="CAPObject.cpp" />
     <ClCompile Include="database.cpp" />
+    <ClCompile Include="GameRoom.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="protocol.h" />
     <ClCompile Include="stdafx.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="BehaviorTree.h" />
     <ClInclude Include="CAPObject.h" />
     <ClInclude Include="database.h" />
+    <ClInclude Include="GameRoom.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="BehaviorTreeDefines.h" />

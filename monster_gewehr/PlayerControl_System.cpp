@@ -67,6 +67,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			m_Pawn->get<Rotation_Component>();
 		ComponentHandle<AnimationController_Component> AnimationController =
 			m_Pawn->get<AnimationController_Component>();
+		ComponentHandle<player_Component> player =
+			m_Pawn->get< player_Component>();
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		if (Capture) {
@@ -214,7 +216,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 구르기 중이거나 달리는 중에는 총발사 금지해놓음
-			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on) {
+			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && player->ammo > 0) {
 				AnimationController->next_State = (UINT)SHOOT;
 			}
 		}
