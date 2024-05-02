@@ -42,22 +42,41 @@ bool should_render(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 
 
 
-Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, IDWriteFactory5* dwriteFactory)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
 
-	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
+	m_d2dDeviceContext = d2dDeviceContext;
+	m_dwriteFactory = dwriteFactory;
 
+	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
+
+
+
+	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Wheat), &m_textBrush);
+	m_dwriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		50,
+		L"en-us",
+		&m_textFormat
+	);
+	m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 }
 
 void Render_Sysytem::configure(World* world)
 {
 	world->subscribe<SetCamera_Event>(this);
+	world->subscribe<DrawUI_Event>(this);
 }
 
 void Render_Sysytem::unconfigure(World* world)
@@ -166,6 +185,42 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 void Render_Sysytem::receive(World* world, const SetCamera_Event& event)
 {
 	m_pCamera = event.pCamera;
+}
+
+void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
+{
+	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	world->each< player_Component, Camera_Component>([&](
+		Entity* ent,
+		ComponentHandle<player_Component> player,
+		ComponentHandle<Camera_Component> camera
+		) -> void {
+			{
+				wstring text = std::to_wstring((int)player->ammo);
+
+				D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH - 300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+				m_d2dDeviceContext->DrawTextW(
+					text.data(),
+					text.size(),
+					m_textFormat.Get(),
+					&textRect,
+					m_textBrush.Get()
+				);
+			}
+			cout << "UI: " << player->hp << endl;
+			{
+				wstring text = std::to_wstring((int)player->hp);
+				textRect = D2D1::RectF(0, 0, 100, 50);
+				m_d2dDeviceContext->DrawTextW(
+					text.data(),
+					text.size(),
+					m_textFormat.Get(),
+					&textRect,
+					m_textBrush.Get()
+				);
+			}
+		}
+	);
 }
 
 void Render_Sysytem::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)

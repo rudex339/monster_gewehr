@@ -67,6 +67,7 @@ bool GameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	BuildObjects();
 
+
 	return(true);
 }
 
@@ -497,7 +498,7 @@ void GameFramework::BuildObjects()
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
 	m_pWorld->registerSystem(new Animate_System());
-	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList));
+	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_dwriteFactory.Get()));
 
 
 	m_pd3dCommandList->Close();
@@ -599,38 +600,20 @@ void GameFramework::FrameAdvance()
 	hResult = m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-	WaitForGpuComplete();
-
-
 	D2D1_SIZE_F rtSize = m_d2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
-	D2D1_RECT_F textRect = D2D1::RectF(0, 0, rtSize.width, rtSize.height);
-	static const WCHAR text[] = L"11On12";
-
-	// Acquire our wrapped render target resource for the current back buffer.
+	
 	m_d3d11On12Device->AcquireWrappedResources(m_wrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
-
-	//Render text directly to the back buffer.
 	m_d2dDeviceContext->SetTarget(m_d2dRenderTargets[m_nSwapChainBufferIndex].Get());
-	/*m_d2dDeviceContext->BeginDraw();
+	m_d2dDeviceContext->BeginDraw();
 	m_d2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	m_d2dDeviceContext->DrawTextW(
-		text,
-		_countof(text) - 1,
-		m_textFormat.Get(),
-		&textRect,
-		m_textBrush.Get()
-	);*/
+	
+	m_pWorld->emit<DrawUI_Event>({});
+
 	m_d2dDeviceContext->EndDraw();
-
-	 //Release our wrapped render target resource. Releasing 
-	 //transitions the back buffer resource to the state specified
-	 //as the OutState when the wrapped resource was created.
 	m_d3d11On12Device->ReleaseWrappedResources(m_wrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
-
-	// Flush to submit the 11 command list to the shared command queue.
 	m_d3d11DeviceContext->Flush();
 
-	
+	WaitForGpuComplete();
 	
 
 #ifdef _WITH_PRESENT_PARAMETERS

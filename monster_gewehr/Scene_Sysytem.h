@@ -13,6 +13,10 @@ struct ChangeScene_Event {
 	UINT State;
 };
 
+
+
+
+
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>
 {
@@ -22,6 +26,8 @@ private:
 	ObjectManager* m_pObjectManager = NULL;
 	ID3D12Device* m_pd3dDevice;
 	ID3D12GraphicsCommandList* m_pd3dCommandList;
+
+	
 
 	Entity* m_pPawn;
 public:
@@ -34,6 +40,7 @@ public:
 	virtual void tick(class World* world, float deltaTime);
 
 	virtual void receive(class World* world, const ChangeScene_Event& event);
+	
 
 	void BuildScene(World* world, char* pstrFileName);
 };

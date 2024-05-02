@@ -90,6 +90,7 @@ private:
 	// DirectWrite
 	ComPtr<IDWriteFactory5>	m_dwriteFactory;
 
+
 #if defined(_DEBUG)
 	ID3D12Debug					*m_pd3dDebugController;
 #endif

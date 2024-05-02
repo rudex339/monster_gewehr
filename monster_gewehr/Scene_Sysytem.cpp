@@ -14,13 +14,14 @@
 Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList):
 	m_pObjectManager(pObjectManager),
 	m_pd3dDevice(pd3dDevice),
-	m_pd3dCommandList(pd3dCommandList) {
+	m_pd3dCommandList(pd3dCommandList){
 
 }
 
 void Scene_Sysytem::configure(World* world)
 {
 	world->subscribe<ChangeScene_Event>(this);
+	
 }
 
 void Scene_Sysytem::unconfigure(World* world)
