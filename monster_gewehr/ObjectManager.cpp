@@ -239,9 +239,18 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_ModelList.insert({ "StaticMeshActor655",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor655.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor480",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor480.bin", NULL) });
 	m_ModelList.insert({ "StaticMeshComponent0",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
-		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshComponent0.bin", NULL) });
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshComponent0.bin", NULL) });	
+	m_ModelList.insert({ "StaticMeshActor495",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor495.bin", NULL) });
+	m_ModelList.insert({ "StaticMeshActor482",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor482.bin", NULL) });
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

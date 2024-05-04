@@ -78,10 +78,11 @@ void Sever_System::receive(World* world, const Login_Event& event)
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
 	int weapon = 0;
-	cout << "이름 입력" << endl;
+	/*cout << "이름 입력" << endl;
 	cin >> packet.name;
 	cout << "무기 입력" << endl;
-	cin >> weapon;
+	cin >> weapon;*/
+	strcpy_s(packet.name, "temp name");
 	packet.weapon = weapon;
 
 
@@ -185,6 +186,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					Player->id = pk->player_data.id;
 					Position->Position = pk->player_data.pos;
 					Rotation->mfYaw = pk->player_data.yaw;
+					
 					pk->player_data.id = -1;
 				}
 				else
@@ -332,7 +334,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		cout << "스코어 : " << pk->score << endl << endl;
 		cout << "로비로 가고싶으면 아무 키나 입력" << endl;
 
-		world->emit< ChangeScene_Event>({END});
+		world->emit< ChangeScene_Event>({END, pk->score });
 		break;
 	}
 	case SC_PACKET_SHOOT: {

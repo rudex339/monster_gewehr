@@ -187,3 +187,14 @@ struct BoundingBox_Component {
 	DirectX::BoundingOrientedBox m_bounding_box;
 	BoundingBox_Component() = default;
 };
+
+//----------------------------------------------------------------------------------------------
+//UI
+struct TextUI_Component {
+	wstring m_text;
+	D2D1_RECT_F m_Rect;
+
+	TextUI_Component() = default;
+	TextUI_Component(const wchar_t* text, float top, float left, float bottom, float right);
+	TextUI_Component(wstring text, float top, float left, float bottom, float right);
+};

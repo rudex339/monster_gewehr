@@ -62,13 +62,34 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	//world->cleanup();
 	m_State = event.State;
 	switch (m_State) {
-	case LOGIN:
+	case LOGIN: {
+		Entity* ent = world->create();
+		ent->assign<TextUI_Component>(L"Monster Gewehr", 
+			(float)FRAME_BUFFER_HEIGHT / 2-120, (float)FRAME_BUFFER_WIDTH / 2-400, 
+			(float)FRAME_BUFFER_HEIGHT / 2+80, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+
+		ent = world->create();
+		ent->assign<TextUI_Component>(L"press enter",
+			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+	}		
 		break;
 	case LOBBY:
 	{
+		world->reset();
 		m_pPawn = NULL;
 		world->reset();
 		world->emit<SetCamera_Event>({ NULL });
+
+		Entity* ent = world->create();
+		ent->assign<TextUI_Component>(L"press space",
+			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+
+		ent = world->create();
+		ent->assign<TextUI_Component>(L"LOBBY",
+			(float)FRAME_BUFFER_HEIGHT / 2 - 20, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 60, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 	}
 		break;
 	case GAME:
@@ -141,6 +162,15 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	}
 		break;
 	case END:
+		Entity* ent = world->create();
+		ent->assign<TextUI_Component>(L"return lobby, press enter",
+			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+		wchar_t m_reportFileName[10];
+		ent = world->create();
+		ent->assign<TextUI_Component>(to_wstring(event.score),
+			(float)FRAME_BUFFER_HEIGHT / 2 -20, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 60, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 		world->emit<GetPlayerPtr_Event>({ NULL });
 		break;
 	}

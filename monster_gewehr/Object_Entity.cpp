@@ -42,3 +42,17 @@ EulerAngle_Component::EulerAngle_Component(float R_x, float R_y, float R_z, floa
 	m_xmf3Look = XMFLOAT3(L_x, L_y, L_z);
 	m_xmf3Up = XMFLOAT3(U_x, U_y, U_z);
 }
+
+//----------------------------------------------------------------------------------------------
+//UI
+
+TextUI_Component::TextUI_Component(const wchar_t* text, float top, float left, float bottom, float right) {
+	m_text = text;
+	m_Rect = D2D1::RectF(left, top, right, bottom);
+}
+
+TextUI_Component::TextUI_Component(wstring text, float top, float left, float bottom, float right)
+{
+	m_text = text;
+	m_Rect = D2D1::RectF(left, top, right, bottom);
+}

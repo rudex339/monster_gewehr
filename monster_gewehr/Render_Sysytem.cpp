@@ -42,12 +42,13 @@ bool should_render(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 
 
 
-Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, IDWriteFactory5* dwriteFactory)
+Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
 
 	m_d2dDeviceContext = d2dDeviceContext;
 	m_dwriteFactory = dwriteFactory;
+	m_d2dFactory = d2dFactory;
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
@@ -69,6 +70,33 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 		L"en-us",
 		&m_textFormat
 	);
+
+	m_dwriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		30,
+		L"en-us",
+		&m_smalltextFormat
+	);
+
+	float dashes[] = { 1.0f, 2.0f, 2.0f, 3.0f, 2.0f, 2.0f };
+	//m_d2dFactory->CreateStrokeStyle(
+	//	D2D1::StrokeStyleProperties(
+	//		D2D1_CAP_STYLE_FLAT,
+	//		D2D1_CAP_STYLE_FLAT,
+	//		D2D1_CAP_STYLE_ROUND,
+	//		D2D1_LINE_JOIN_MITER,
+	//		10.0f,
+	//		D2D1_DASH_STYLE_CUSTOM,
+	//		0.0f),
+	//	dashes,
+	//	ARRAYSIZE(dashes),
+	//	&m_strokeBrush
+	//);
+
 	m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 }
@@ -189,6 +217,21 @@ void Render_Sysytem::receive(World* world, const SetCamera_Event& event)
 
 void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 {
+	m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+	world->each<TextUI_Component>([&](
+		Entity* ent,
+		ComponentHandle<TextUI_Component> textUI
+		) -> void {			
+			m_d2dDeviceContext->DrawTextW(
+				textUI->m_text.data(),
+				textUI->m_text.size(),
+				m_textFormat.Get(),
+				&textUI->m_Rect,
+				m_textBrush.Get()
+			);
+		}
+	);
+
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	world->each< player_Component, Camera_Component>([&](
 		Entity* ent,
@@ -207,10 +250,10 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 					m_textBrush.Get()
 				);
 			}
-			cout << "UI: " << player->hp << endl;
 			{
 				wstring text = std::to_wstring((int)player->hp);
 				textRect = D2D1::RectF(0, 0, 100, 50);
+				m_d2dDeviceContext->DrawRectangle(&textRect, m_textBrush.Get());
 				m_d2dDeviceContext->DrawTextW(
 					text.data(),
 					text.size(),

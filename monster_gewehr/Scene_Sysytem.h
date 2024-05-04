@@ -11,6 +11,7 @@ enum {
 
 struct ChangeScene_Event {
 	UINT State;
+	short score = 0;
 };
 
 
@@ -30,6 +31,8 @@ private:
 	
 
 	Entity* m_pPawn;
+
+	short m_score = 0;
 public:
 	Scene_Sysytem() = default;
 	Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice,

@@ -498,8 +498,9 @@ void GameFramework::BuildObjects()
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
 	m_pWorld->registerSystem(new Animate_System());
-	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_dwriteFactory.Get()));
+	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get()));
 
+	m_pWorld->emit<ChangeScene_Event>({ LOGIN });
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -579,7 +580,7 @@ void GameFramework::FrameAdvance()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
 
-	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
