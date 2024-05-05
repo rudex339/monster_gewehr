@@ -20,6 +20,7 @@ void Move_System::tick(World* world, float deltaTime)
     world->each<Terrain_Component>([&](Entity * ent, ComponentHandle<Terrain_Component> Terrain)-> void {
         m_Terrain = Terrain;
     });
+
     world->each<Velocity_Component,
         Position_Component,
     Rotation_Component,
@@ -72,6 +73,17 @@ void Move_System::tick(World* world, float deltaTime)
                                 rotation->mfYaw, state, 0});
                         }
 #endif
+                        if (p->reload) {
+                            if (p->reload_coolTime <= 0) {
+                                cout << "리로드 완료" << endl;
+                                p->ammo = 30;
+                                p->reload_coolTime = 3.0f;
+                                p->reload = false;
+                            }
+                            else {
+                                p->reload_coolTime -= deltaTime;
+                            }
+                        }
                     }
                     velocity->m_velocity = XMFLOAT3(0, 0, 0);
                     velocity->m_velRotate = XMFLOAT3(0, 0, 0);

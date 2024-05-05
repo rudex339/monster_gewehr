@@ -223,12 +223,15 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 구르기 중이거나 달리는 중에는 총발사 금지해놓음
-			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && player->ammo > 0) {
+			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload) {
 				AnimationController->next_State = (UINT)SHOOT;
 				if (shot_cooltime <= 0) {
 					shot_cooltime = 0.1f;
 					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
-					//player->ammo--;
+					player->ammo--;
+					if (player->ammo <= 0) {
+						player->reload = true;
+					}
 				}
 				else {
 					shot_cooltime -= deltaTime;
@@ -237,6 +240,12 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 			else {
 				shot_cooltime = 0;
+			}
+			if (pKeysBuffer[0x52] & 0xF0) {
+				//AnimationController->next_State = (UINT)RELOAD;
+				if (!player->reload) {
+					player->reload = true;
+				}
 			}
 		}
 

@@ -65,7 +65,6 @@ void Sever_System::receive(class World* world, const Shoot_Event& event)
 	atk_packet.type = CS_PACKET_PLAYER_ATTACK;
 	atk_packet.dir = event.c_dir;
 	atk_packet.pos = event.c_pos;
-	cout << atk_packet.dir.x << endl;
 
 	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
 }
@@ -132,7 +131,6 @@ void Sever_System::receive(World* world, const Login_Event& event)
 void Sever_System::receive(World* world, const Game_Start& event)
 {
 
-	cout << "½ÇÇàµÊ" << endl;
 	world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
 		[&](Entity* ent,
 			ComponentHandle<player_Component> Player,

@@ -6,7 +6,8 @@ enum Player_State {
 	RUN,
 	SHOOT,
 	HEAL,
-	HIT
+	HIT,
+	RELOAD
 };
 
 
@@ -32,6 +33,9 @@ struct player_Component {
 	FLOAT max_hp = 100;
 
 	FLOAT ammo = 30;
+
+	BOOL reload = false;
+	FLOAT reload_coolTime = 3.0f;
 
 	player_Component() = default;
 };
