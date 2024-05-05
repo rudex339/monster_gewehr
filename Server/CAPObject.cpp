@@ -114,16 +114,19 @@ void Player::SetByWeapon(char weapon)
 		m_atk = 25;
 		m_ammo = 7;
 		m_mag = 56;
+		m_range = 200.0f;
 		break;
 	case ASSAULT_RIFLE:
 		m_atk = 10;
 		m_ammo = 30;
 		m_mag = 300;
+		m_range = 500.0f;
 		break;
 	case SNIPER:
 		m_atk = 100;
 		m_ammo = 5;
 		m_mag = 40;
+		m_range = 1000.0f;
 		break;
 	}
 }

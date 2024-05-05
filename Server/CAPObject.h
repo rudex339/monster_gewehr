@@ -78,9 +78,7 @@ public:
 	DirectX::XMFLOAT3 GetAtkDir() { return m_atk_dir; }
 	DirectX::XMFLOAT3 GetAtkPos() { return m_atk_pos; }
 	float GetHp() { return m_hp; }
-	float GetAmmo() { return m_ammo; }
-	
-	void AmmoShot() { m_ammo -= 1; }
+	float GetRange() { return m_range; }
 
 	int RecvData();
 	int DoSend(void* p, size_t size);
@@ -107,6 +105,7 @@ protected:
 	FLOAT m_max_hp;
 	FLOAT m_atk;
 	FLOAT m_def;
+	FLOAT m_range;
 
 	FLOAT m_ammo;	// 현재 총합 총알(소지중 탄약)
 	FLOAT m_mag;	// 현재 탄창에 들어있는 탄약

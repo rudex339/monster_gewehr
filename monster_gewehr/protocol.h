@@ -14,6 +14,9 @@ constexpr char SHOT_GUN = 1;
 constexpr char ASSAULT_RIFLE = 2;
 constexpr char SNIPER = 3;
 
+// 몬스터 데이터
+constexpr float MONSTER_MAX_HP = 1000;
+
 // 패킷 타입
 constexpr char CS_PACKET_LOGIN = 1;
 constexpr char CS_PACKET_START_GAME = 2;
@@ -32,7 +35,6 @@ constexpr char SC_PACKET_LOGOUT = 8;
 constexpr char SC_PACKET_HIT_PLAYER = 9;
 constexpr char SC_PACKET_END_GAME = 10;
 constexpr char SC_PACKET_MAX_PLAYER = 11;
-constexpr char SC_PACKET_SHOOT = 12; // 이후 클라에 총발사 옮기면 삭제
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -216,14 +218,6 @@ struct SC_END_GAME_PACKET
 	UCHAR size;
 	UCHAR type;
 	SHORT score;
-};
-
-struct SC_SHOOT_PACKET // 이후 클라에 총발사 옮기면 사라짐
-{
-	UCHAR size;
-	UCHAR type;
-	CHAR id;
-	FLOAT ammo;
 };
 #pragma pack (pop)
 

@@ -52,6 +52,7 @@ void PlayerControl_System::unconfigure(World* world)
 
 void PlayerControl_System::tick(World* world, float deltaTime)
 {
+	//cout << deltaTime << endl;
 	if (m_Pawn) {
 		ComponentHandle<EulerAngle_Component> eulerangle =
 			m_Pawn->get<EulerAngle_Component>();
@@ -145,6 +146,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			static int roll_timer = 0; // 구르기 하는 시간(?)
 			static short roll_on = 0; // 구르기상태가 어떤지 0 일때는 안구르고 1일때는 방금 구르기 버튼 눌러서 방향 정해주는거, 2일때는 구르기 중임
 
+			static float shot_cooltime = 0;
+
 			XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 
 			// 구르기 속도와 방향이 이 틱이 지나도 유지되어야 하기 때문에 static으로 지정함
@@ -169,7 +172,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on) {
 				//cout << "쉬프트 눌림" << endl;
 				run_on = true;
-				speed *= 2;
+				speed *= 1.5;
 			}
 
 			if (pKeysBuffer[0x57] & 0xF0) {
@@ -222,6 +225,18 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			// 구르기 중이거나 달리는 중에는 총발사 금지해놓음
 			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && player->ammo > 0) {
 				AnimationController->next_State = (UINT)SHOOT;
+				if (shot_cooltime <= 0) {
+					shot_cooltime = 0.1f;
+					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
+					//player->ammo--;
+				}
+				else {
+					shot_cooltime -= deltaTime;
+					cout << shot_cooltime << endl;
+				}
+			}
+			else {
+				shot_cooltime = 0;
 			}
 		}
 

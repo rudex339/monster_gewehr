@@ -8,8 +8,10 @@
 void Sever_System::configure(World* world)
 {
 	world->subscribe<PacketSend_Event>(this);
+	world->subscribe<Shoot_Event>(this);
 	world->subscribe<Login_Event>(this);
 	world->subscribe<Game_Start>(this);
+	
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -43,17 +45,29 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 
 	send(g_socket, (char*)&sub_packet, sub_packet.size, 0);
 
-	if (event.State == (UINT)SHOOT) {
-		CS_PLAYER_ATTACK_PACKET atk_packet;
-		atk_packet.size = sizeof(atk_packet);
-		atk_packet.type = CS_PACKET_PLAYER_ATTACK;
-		atk_packet.dir = event.c_dir;
-		atk_packet.pos = event.c_pos;
-		//cout << atk_packet.dir.x << endl;
+	//if (event.State == (UINT)SHOOT) {
+	//	CS_PLAYER_ATTACK_PACKET atk_packet;
+	//	atk_packet.size = sizeof(atk_packet);
+	//	atk_packet.type = CS_PACKET_PLAYER_ATTACK;
+	//	atk_packet.dir = event.c_dir;
+	//	atk_packet.pos = event.c_pos;
+	//	//cout << atk_packet.dir.x << endl;
 
-		send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
-	}
+	//	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
+	//}
 
+}
+
+void Sever_System::receive(class World* world, const Shoot_Event& event)
+{
+	CS_PLAYER_ATTACK_PACKET atk_packet;
+	atk_packet.size = sizeof(atk_packet);
+	atk_packet.type = CS_PACKET_PLAYER_ATTACK;
+	atk_packet.dir = event.c_dir;
+	atk_packet.pos = event.c_pos;
+	cout << atk_packet.dir.x << endl;
+
+	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
 }
 
 void Sever_System::receive(World* world, const Login_Event& event)
@@ -335,24 +349,6 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		cout << "로비로 가고싶으면 아무 키나 입력" << endl;
 
 		world->emit< ChangeScene_Event>({END, pk->score });
-		break;
-	}
-	case SC_PACKET_SHOOT: {
-		SC_SHOOT_PACKET* pk = reinterpret_cast<SC_SHOOT_PACKET*>(packet);
-
-		world->each<player_Component>(
-			[&](Entity* ent,
-				ComponentHandle<player_Component> Player) ->
-			void {
-				if (Player->id == pk->id) {
-					Player->ammo = pk->ammo;
-					std::cout << pk->ammo << std::endl;
-				}
-				else
-					return;
-
-			});
-
 		break;
 	}
 

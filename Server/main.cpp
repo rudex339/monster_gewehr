@@ -80,7 +80,7 @@ void ProcessClient(SOCKET sock)
 	
 	int id = global_id++;
 
-	constexpr int MAX_FRAME = 30;
+	constexpr int MAX_FRAME = 60;
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 	
@@ -128,47 +128,6 @@ void ProcessClient(SOCKET sock)
 					hit_timer--;
 				}
 			}
-
-			if (players[id].GetAnimaition() == 2) {
-				if (shoot_timer <= 0 && players[id].GetAmmo() > 0) {
-					shoot_timer = MAX_FRAME / 10;					
-					p_pos = players[id].GetAtkPos();
-					c_dir = players[id].GetAtkDir();
-					players[id].AmmoShot();
-					p_pos.y += 20;
-					positionVec = XMLoadFloat3(&p_pos);
-					directionVec = XMLoadFloat3(&c_dir);
-					if (souleater.GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
-						souleater.m_lock.lock();
-						souleater.SetHp(souleater.GetHp() - 10);						
-						if(souleater.GetState() == idle_state)
-							souleater.SetState(fight_state);
-						souleater.m_lock.unlock();
-						build_bt(&souleater, &players);
-					}
-					SendShoot(id);
-				}
-				else {
-					shoot_timer--;
-				}
-			}
-			else {
-				shoot_timer = 0;
-			}
-
-			if (players[id].GetAmmo() <= 0) {
-				if (reload_timer <= 0) {
-					std::cout << "리로드 완료" << std::endl;
-					reload_timer = MAX_FRAME * 3;
-					players[id].SetAmmo(30);
-					SendShoot(id);
-				}
-				else {
-					reload_timer--;
-				}
-			}
-
-
 
 			if (players[id].GetHp() <= 0) {
 				players[id].death_count += 1;
@@ -335,6 +294,20 @@ void ProcessPacket(int id, char* p)
 		CS_PLAYER_ATTACK_PACKET* packet = reinterpret_cast<CS_PLAYER_ATTACK_PACKET*>(p);
 		players[id].SetAtkDir(packet->dir);
 		players[id].SetAtkPos(packet->pos);
+		
+		DirectX::XMVECTOR positionVec = XMLoadFloat3(&packet->pos);
+		DirectX::XMVECTOR directionVec = XMLoadFloat3(&packet->dir);
+		float shot_range = players[id].GetRange();
+
+		if (souleater.GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
+			souleater.m_lock.lock();
+			souleater.SetHp(souleater.GetHp() - 10);
+			if (souleater.GetState() == idle_state)
+				souleater.SetState(fight_state);
+			souleater.m_lock.unlock();
+			std::cout << souleater.GetHp() << std::endl;
+			build_bt(&souleater, &players);
+		}
 		break;
 	}
 	}
@@ -492,17 +465,6 @@ void SendEndGame(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_END_GAME;
 	packet.score = 1000 - players[id].death_count * 100;
-
-	players[id].DoSend(&packet, packet.size);
-}
-
-void SendShoot(int id)
-{
-	SC_SHOOT_PACKET packet;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_SHOOT;
-	packet.id = id;
-	packet.ammo = players[id].GetAmmo();
 
 	players[id].DoSend(&packet, packet.size);
 }
