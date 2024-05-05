@@ -313,13 +313,21 @@ void ProcessPacket(int id, char* p)
 	case CS_DEMO_MONSTER_SETPOS: {
 		souleater.m_lock.lock();
 		souleater.SetPostion(XMFLOAT3(1014.f, 1024.f, 1429.f));
+		souleater.SetBoundingBox();
 		souleater.m_lock.unlock();
+		souleater.SetState(idle_state);
+		build_bt(&souleater, &players);
 		break;
 	}
 	case CS_DEMO_MONSTER_SETHP: {
 		souleater.m_lock.lock();
 		souleater.SetHp(50);
 		souleater.m_lock.unlock();
+		break;
+	}
+	case CS_DEMO_MONSTER_BEHAVIOR: {
+		souleater.SetState(runaway_state);
+		build_bt(&souleater, &players);
 		break;
 	}
 	}

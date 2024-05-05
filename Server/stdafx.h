@@ -14,7 +14,7 @@
 #pragma comment(lib, "ws2_32") // ws2_32.lib 링크
 
 // directx 12 헤더
-#pragma commet(lib, "d3d12.lib");
+#pragma comment(lib, "d3d12.lib")
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
