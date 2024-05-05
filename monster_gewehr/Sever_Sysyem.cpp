@@ -11,6 +11,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Shoot_Event>(this);
 	world->subscribe<Login_Event>(this);
 	world->subscribe<Game_Start>(this);
+	world->subscribe<Demo_Event>(this);
 	
 }
 
@@ -152,6 +153,16 @@ void Sever_System::receive(World* world, const Game_Start& event)
 			}
 
 		});
+}
+
+void Sever_System::receive(World* world, const Demo_Event& event)
+{
+	CS_DEMO_PACKET demo;
+	demo.size = sizeof(demo);
+	demo.type = event.type;
+
+	send(g_socket, (char*)&demo, demo.size, 0);
+
 }
 
 void Sever_System::PacketReassembly(World* world, char* recv_buf, size_t recv_size)

@@ -310,6 +310,18 @@ void ProcessPacket(int id, char* p)
 		}
 		break;
 	}
+	case CS_DEMO_MONSTER_SETPOS: {
+		souleater.m_lock.lock();
+		souleater.SetPostion(XMFLOAT3(1014.f, 1024.f, 1429.f));
+		souleater.m_lock.unlock();
+		break;
+	}
+	case CS_DEMO_MONSTER_SETHP: {
+		souleater.m_lock.lock();
+		souleater.SetHp(50);
+		souleater.m_lock.unlock();
+		break;
+	}
 	}
 }
 

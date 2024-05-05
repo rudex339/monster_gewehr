@@ -7,10 +7,6 @@
 #include "PlayerControl_System.h"
 #include "Render_Sysytem.h"
 
-
-
-
-
 Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList):
 	m_pObjectManager(pObjectManager),
 	m_pd3dDevice(pd3dDevice),

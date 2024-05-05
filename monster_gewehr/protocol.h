@@ -24,6 +24,11 @@ constexpr char CS_PACKET_PLAYER_MOVE = 3;
 constexpr char CS_PACKET_CHANGE_ANIMATION = 4;
 constexpr char CS_PACKET_PLAYER_ATTACK = 5;
 
+// 데모버젼용 패킷
+constexpr char CS_DEMO_MONSTER_SETPOS = 100;
+constexpr char CS_DEMO_MONSTER_SETHP = 101;
+constexpr char CS_DEMO_MONSTER_BEHAVIOR = 102;
+
 constexpr char SC_PACKET_LOGIN_INFO = 1;
 constexpr char SC_PACKET_ADD_PLAYER = 2;
 constexpr char SC_PACKET_REMOVE_PLAYER = 3;
@@ -109,9 +114,7 @@ struct CS_PLAYER_ATTACK_PACKET
 	DirectX::XMFLOAT3 dir;
 };
 
-
-
-struct CS_RELOAD_PACKET
+struct CS_DEMO_PACKET
 {
 	UCHAR size;
 	UCHAR type;

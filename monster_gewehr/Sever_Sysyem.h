@@ -22,11 +22,16 @@ struct Game_Start {
 
 };
 
+struct Demo_Event {
+	CHAR type;
+};
+
 class Sever_System : public EntitySystem,
 	public EventSubscriber<PacketSend_Event>,
 	public EventSubscriber<Shoot_Event>,
 	public EventSubscriber<Login_Event>,
-	public EventSubscriber<Game_Start>
+	public EventSubscriber<Game_Start>,
+	public EventSubscriber<Demo_Event>
 {
 private:
 	bool m_login = false;
@@ -43,6 +48,7 @@ public:
 	virtual void receive(class World* world, const Shoot_Event& event);
 	virtual void receive(class World* world, const Login_Event& event);
 	virtual void receive(class World* world, const Game_Start& event);
+	virtual void receive(class World* world, const Demo_Event& event);
 	void PacketReassembly(World* world, char* recv_buf, size_t recv_size);
 	void ProcessPacket(World* world, char* packet);
 };

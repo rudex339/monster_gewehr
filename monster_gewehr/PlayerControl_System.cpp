@@ -247,6 +247,19 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					player->reload = true;
 				}
 			}
+
+#ifdef DEMO_VER
+			if (pKeysBuffer[VK_F1] & 0xF0) {
+				world->emit<Demo_Event>({ CS_DEMO_MONSTER_SETPOS });
+			}
+			if (pKeysBuffer[VK_F2] & 0xF0) {
+				world->emit<Demo_Event>({ CS_DEMO_MONSTER_SETHP });
+			}
+			if (pKeysBuffer[VK_F3] & 0xF0) {
+				world->emit<Demo_Event>({ CS_DEMO_MONSTER_BEHAVIOR });
+			}
+#endif
+
 		}
 
 	}
