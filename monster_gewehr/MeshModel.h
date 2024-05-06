@@ -313,6 +313,8 @@ public:
 
 	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
 
+	void SetTrackType(int nAnimationTrack, int type) { if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].m_nType = type; };
+
 	void SetTrackEnable(int nAnimationTrack, bool bEnable);
 	void SetTrackPosition(int nAnimationTrack, float fPosition);
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);

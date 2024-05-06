@@ -14,6 +14,7 @@ Entity* AddAnimationMeshObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12Grap
 	for (int i = 0; i < n_animation; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		controller->m_AnimationController->SetTrackEnable(i, false);
+		controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);
 	}
 	controller->m_AnimationController->SetTrackEnable(0, true);
 	ent->assign<Position_Component>(x, y, z);
