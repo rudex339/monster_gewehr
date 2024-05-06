@@ -143,7 +143,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			float speed = 50.25f * deltaTime;
 
 			bool run_on = false; // 달리기 상태인지 아닌지 확인해 주는거
-			static int roll_timer = 0; // 구르기 하는 시간(?)
+			static float roll_timer = 0; // 구르기 하는 시간(?)
 			static short roll_on = 0; // 구르기상태가 어떤지 0 일때는 안구르고 1일때는 방금 구르기 버튼 눌러서 방향 정해주는거, 2일때는 구르기 중임
 
 			static float shot_cooltime = 0;
@@ -155,7 +155,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 			// 구르기 지속중인가 지속이끝나면 구르기 타이머랑 상태 초기화
 			if (roll_timer > 0) {
-				roll_timer--;
+				roll_timer -= deltaTime;
 			}
 			else {
 				roll_timer = 0;
@@ -163,9 +163,9 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 구르기 키는 space바로 했음
-			if ((pKeysBuffer[VK_SPACE] & 0xF0) && roll_timer == 0) {
+			if ((pKeysBuffer[VK_SPACE] & 0xF0) && roll_timer == 0 && !player->reload) {
 				xmf3Shift_roll = XMFLOAT3(0, 0, 0);
-				roll_timer = 5;
+				roll_timer = 0.2f;
 				roll_on = 1;
 			}
 			// 달리기 키는 shift
@@ -181,7 +181,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Look, speed * 3);
 					roll_on = 2; // 그리고 다른 키가 구르기 방향을 망치지 않도록 하기 위해 2로 바꿔줌
 				}
-				AnimationController->next_State = (UINT)RUN;
+				if (!player->reload)
+					AnimationController->next_State = (UINT)RUN;
 			}
 			if ((pKeysBuffer[0x53] & 0xF0)) {
 				xmf3Shift = Vector3::Add(xmf3Shift, controllangle->m_xmf3Look, -speed);
@@ -189,7 +190,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Look, -speed * 3);
 					roll_on = 2;
 				}
-				AnimationController->next_State = (UINT)RUN;
+				if (!player->reload)
+					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x41] & 0xF0) {
 				xmf3Shift = Vector3::Add(xmf3Shift, eulerangle->m_xmf3Right, -speed);
@@ -197,7 +199,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Right, -speed * 3);
 					roll_on = 2;
 				}
-				AnimationController->next_State = (UINT)RUN;
+				if (!player->reload)
+					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x44] & 0xF0) {
 				xmf3Shift = Vector3::Add(xmf3Shift, eulerangle->m_xmf3Right, speed);
@@ -205,7 +208,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Right, speed * 3);
 					roll_on = 2;
 				}
-				AnimationController->next_State = (UINT)RUN;
+				if(!player->reload)
+					AnimationController->next_State = (UINT)RUN;
 			}
 
 			// 구르기가 아닐때는 그냥 일반 이동을 더하고 구르기 일때는 구르기 전용을 더함
@@ -230,18 +234,18 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
 					player->ammo--;
 					if (player->ammo <= 0) {
+						AnimationController->next_State = (UINT)RELOAD;
 						player->reload = true;
 					}
 				}
 				else {
 					shot_cooltime -= deltaTime;
-					cout << shot_cooltime << endl;
 				}
 			}
 			else {
 				shot_cooltime = 0;
 			}
-			if (pKeysBuffer[0x52] & 0xF0) {
+			if (pKeysBuffer[0x52] & 0xF0 && !player->reload) {
 				AnimationController->next_State = (UINT)RELOAD;
 				if (!player->reload) {
 					player->reload = true;

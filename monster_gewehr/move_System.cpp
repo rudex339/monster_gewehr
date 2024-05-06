@@ -77,7 +77,7 @@ void Move_System::tick(World* world, float deltaTime)
                             if (p->reload_coolTime <= 0) {
                                 cout << "리로드 완료" << endl;
                                 p->ammo = 30;
-                                p->reload_coolTime = 3.0f;
+                                p->reload_coolTime = 3.5f;
                                 p->reload = false;
                             }
                             else {

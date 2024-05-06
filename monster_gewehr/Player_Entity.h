@@ -40,7 +40,7 @@ struct player_Component {
 	FLOAT ammo = 30;
 
 	BOOL reload = false;
-	FLOAT reload_coolTime = 3.0f;
+	FLOAT reload_coolTime = 3.5f;
 
 	player_Component() = default;
 };
