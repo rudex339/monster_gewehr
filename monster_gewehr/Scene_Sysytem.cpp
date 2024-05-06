@@ -97,7 +97,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
-			3);
+			6);
 
 
 		cout << m_pPawn->get<player_Component>()->id << endl;

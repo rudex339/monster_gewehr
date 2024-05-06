@@ -217,7 +217,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			float fLength = sqrtf(velocity->m_velocity.x * velocity->m_velocity.x + velocity->m_velocity.z * velocity->m_velocity.z);
-			if (::IsZero(fLength))
+			if (::IsZero(fLength) && !player->reload)
 			{
 				AnimationController->next_State = (UINT)IDLE;
 			}
@@ -242,7 +242,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				shot_cooltime = 0;
 			}
 			if (pKeysBuffer[0x52] & 0xF0) {
-				//AnimationController->next_State = (UINT)RELOAD;
+				AnimationController->next_State = (UINT)RELOAD;
 				if (!player->reload) {
 					player->reload = true;
 				}
