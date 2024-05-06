@@ -93,11 +93,11 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		world->reset();
 
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager->Get_ModelInfo("Soldier"),
+			m_pObjectManager,
 			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
-			6);
+			SOLDIER);
 
 
 		cout << m_pPawn->get<player_Component>()->id << endl;
@@ -107,11 +107,11 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		BuildScene(world, (char*)"Scene/Scene.bin");
 
 		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager->Get_ModelInfo("Souleater"),
+			m_pObjectManager,
 			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 			0.f, 90.f, 0.f,
 			25.f, 25.f, 25.f,
-			10);
+			MONSTER);
 		auto monster_id = ent->get<player_Component>();
 		monster_id->id = -2;
 
@@ -127,24 +127,24 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager->Get_ModelInfo("Soldier"),
+			m_pObjectManager,
 			310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
-			3);
+			SOLDIER);
 
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager->Get_ModelInfo("Soldier"),
+			m_pObjectManager,
 			310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
-			3);
+			SOLDIER);
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager->Get_ModelInfo("Soldier"),
+			m_pObjectManager,
 			310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
-			3);
+			SOLDIER);
 
 		CCamera* temp = new CThirdPersonCamera(NULL);
 		temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);

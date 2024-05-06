@@ -1,6 +1,9 @@
 #pragma once
 #include "Meshmodel.h"
 
+class ObjectManager;
+
+
 struct SkyBox_Component {
 	CSkyBox* m_SkyBox;
 	string m_name;
@@ -115,19 +118,17 @@ struct Scale_Component {
 
 
 
-Entity* AddAnimationMeshObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	CLoadedModelInfo* model,
-	float x, float y, float z,
-	float rx, float ry, float rz, 
-	float sx, float sy, float sz,
-	int n_animation);
-
 Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	CLoadedModelInfo* model,
+	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,
-	float sx, float sy, float sz,
-	int n_animation);
+	float sx, float sy, float sz);
+
+Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ObjectManager* OM,
+	float x, float y, float z,
+	float rx, float ry, float rz,
+	float sx, float sy, float sz);
 
 //----------------------------------------------------------------------------------------------
 //moveable

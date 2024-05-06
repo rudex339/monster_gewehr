@@ -1,17 +1,29 @@
 #include "stdafx.h"
 #include "Player_Entity.h"
 #include "Object_Entity.h"
+#include "ObjectManager.h"
 #include "Camera.h"
 
 
-Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CLoadedModelInfo* model, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, int n_animation)
+Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ObjectManager* OM, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, UINT model)
 {
-	AddAnimationMeshObject(ent, pd3dDevice, pd3dCommandList,
-		model,
-		x, y, z,
-		rx, ry, rz,
-		sx, sy, sz,
-		n_animation);
+	switch (model) {
+	case MONSTER:
+		AddMonsterObject(ent, pd3dDevice, pd3dCommandList,
+			OM,
+			x, y, z,
+			rx, ry, rz,
+			sx, sy, sz);
+		break;
+	case SOLDIER:
+		AddSoldierObject(ent, pd3dDevice, pd3dCommandList,
+			OM,
+			x, y, z,
+			rx, ry, rz,
+			sx, sy, sz);
+		break;
+	}
+	
 	ent->assign<Velocity_Component>();
 	ent->assign<EulerAngle_Component>();
 	ent->assign<ControllAngle_Component>();
@@ -20,14 +32,24 @@ Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	return ent;
 }
 
-Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CLoadedModelInfo* model, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, int n_animation)
+Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ObjectManager* OM, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, UINT model)
 {
-	AddAnimationMeshObject(ent, pd3dDevice, pd3dCommandList,
-		model,
-		x, y, z,
-		rx, ry, rz,
-		sx, sy, sz,
-		n_animation);
+	switch (model) {
+	case MONSTER:
+		AddMonsterObject(ent, pd3dDevice, pd3dCommandList,
+			OM,
+			x, y, z,
+			rx, ry, rz,
+			sx, sy, sz);
+		break;
+	case SOLDIER:
+		AddSoldierObject(ent, pd3dDevice, pd3dCommandList,
+			OM,
+			x, y, z,
+			rx, ry, rz,
+			sx, sy, sz);
+		break;
+	}
 	ent->assign<player_Component>();
 
 	return ent;

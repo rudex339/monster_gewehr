@@ -1,5 +1,6 @@
 #pragma once
 class CLoadedModelInfo;
+class ObjectManager;
 
 enum Player_State {
 	IDLE,
@@ -10,21 +11,25 @@ enum Player_State {
 	RELOAD
 };
 
+enum OM_Model {
+	MONSTER,
+	SOLDIER
+};
 
 
 Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	CLoadedModelInfo* model,
+	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,
 	float sx, float sy, float sz,
-	int n_animation);
+	UINT model);
 
-Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-	CLoadedModelInfo* model,
-	float x, float y, float z, 
-	float rx, float ry, float rz, 
-	float sx, float sy, float sz, 
-	int n_animation);
+Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ObjectManager* OM,
+	float x, float y, float z,
+	float rx, float ry, float rz,
+	float sx, float sy, float sz,
+	UINT model);
 
 struct player_Component {
 

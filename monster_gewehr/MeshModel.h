@@ -257,7 +257,9 @@ public:
 public:
 	void SetAnimationSet(int nAnimationSet) { m_nAnimationSet = nAnimationSet; }
 
-	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
+	void SetEnable(bool bEnable) { m_bEnable = bEnable; 
+	if(!m_bEnable) m_fPosition = -ANIMATION_CALLBACK_EPSILON;
+	}
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
 
