@@ -178,7 +178,7 @@ Monster::Monster()
 
 	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
-	m_runaway_hp = -600; // m_max_hp * 0.9;
+	m_runaway_hp = 900; // m_max_hp * 0.9;
 	m_atk = 0;
 	m_def = 0;
 
@@ -194,8 +194,8 @@ Monster::Monster()
 	m_state = idle_state;
 
 	m_bounding_box.Center = m_position;
-	m_bounding_box.Center.y += 10.0f;
-	m_bounding_box.Extents = XMFLOAT3(18.0f, 15.0f, 20.0f);
+	m_bounding_box.Center.y += 15.0f;
+	m_bounding_box.Extents = XMFLOAT3(30.0f, 30.0f, 30.0f);
 	float radian = XMConvertToRadians(m_yaw);
 	XMFLOAT4 q{};
 	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
@@ -295,7 +295,7 @@ void Monster::InitMonster()
 
 	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
-	m_runaway_hp = -600; // m_max_hp * 0.9;
+	m_runaway_hp = 600; // m_max_hp * 0.9;
 	m_atk = 0;
 	m_def = 0;
 
@@ -311,8 +311,8 @@ void Monster::InitMonster()
 	m_state = idle_state;
 
 	m_bounding_box.Center = m_position;
-	m_bounding_box.Center.y += 10.0f;
-	m_bounding_box.Extents = XMFLOAT3(18.0f, 15.0f, 20.0f);
+	m_bounding_box.Center.y += 15.0f;
+	m_bounding_box.Extents = XMFLOAT3(30.0f, 30.0f, 30.0f);
 	float radian = XMConvertToRadians(m_yaw);
 	XMFLOAT4 q{};
 	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
@@ -729,7 +729,7 @@ int move_to_user(Monster* monster, std::unordered_map<INT, Player>* players)
 	auto playerIter = players->find(monster->GetTarget()->GetID());
 	monster->SetTargetPos(playerIter->second.GetPosition());
 
-	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f)
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 35.0f)
 		return BehaviorTree::SUCCESS;
 
 	XMFLOAT3 target = monster->GetTargetPos();

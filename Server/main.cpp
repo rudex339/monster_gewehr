@@ -121,7 +121,7 @@ void ProcessClient(SOCKET sock)
 
 			if (players[id].hit_on) {
 				if (hit_timer <= 0) {
-					hit_timer = MAX_FRAME * 5;
+					hit_timer = MAX_FRAME * 3;
 					players[id].hit_on = 0;
 				}
 				else {
@@ -322,6 +322,7 @@ void ProcessPacket(int id, char* p)
 	case CS_DEMO_MONSTER_SETHP: {
 		souleater.m_lock.lock();
 		souleater.SetHp(50);
+		souleater.SetRAHp(0);
 		souleater.m_lock.unlock();
 		break;
 	}
