@@ -49,23 +49,28 @@ void Move_System::tick(World* world, float deltaTime)
 
                         XMFLOAT3 camera_pos = position->Position;
                         camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, -20.f);
-                        camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Up, 20.f);
+                        camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Up, 20.f);/*
                         camera_pos = Vector3::Add(camera_pos, controllangle->m_xmf3Right, 10.f);
-                        LockPos = Vector3::Add(LockPos, eulerangle->m_xmf3Right, 10.f);
-                       
+                        LockPos = Vector3::Add(LockPos, eulerangle->m_xmf3Right, 10.f);*/
 
-                        while (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
-                            camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, 2.f);
-                            
+                        if (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
+                            camera->m_pCamera->SetPosition(camera_pos);
+                            camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
+                            while (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
+                                camera_pos = Vector3::Add(camera_pos, controllangle->m_xmf3Look, 0.1f);
+                            }
+                            camera->m_pCamera->SetPosition(camera_pos);
+                            camera->m_pCamera->RegenerateViewMatrix();
                         }
                         /*if (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
-                           
+
                            camera_pos.y = m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) + 2.f;
                         }*/
-                        camera->m_pCamera->SetPosition(camera_pos);
-                        camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
-                        camera->m_pCamera->RegenerateViewMatrix();
-
+                        else {
+                            camera->m_pCamera->SetPosition(camera_pos);
+                            camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
+                            camera->m_pCamera->RegenerateViewMatrix();
+                        }
 #ifdef USE_NETWORK
                         if (ent->has<player_Component>()) {
                             UINT state = ent->get<AnimationController_Component>()->cur_State;
