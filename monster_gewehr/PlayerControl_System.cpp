@@ -226,6 +226,14 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				AnimationController->next_State = (UINT)IDLE;
 			}
 
+
+			if (R_btn) {
+				player->aim_mode = true;
+			}
+			else {
+				player->aim_mode = false;
+			}
+
 			// 구르기 중이거나 달리는 중에는 총발사 금지해놓음
 			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload) {
 				AnimationController->next_State = (UINT)SHOOT;
@@ -242,13 +250,11 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					shot_cooltime -= deltaTime;
 				}
 			}
-			else {
-				shot_cooltime = 0;
-			}
-			if (R_btn) {
+			else if ((pKeysBuffer[VK_RBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload) {
 				player->aim_mode = true;
 			}
 			else {
+				shot_cooltime = 0;
 				player->aim_mode = false;
 			}
 

@@ -386,11 +386,10 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		}
 		break;
 	case WM_LBUTTONUP:
+		m_pWorld->emit< CaptureHWND_Event>({ true, false });
 		break;
 	case WM_RBUTTONUP:
-		//::ReleaseCapture();
 		if (m_pWorld) {
-			//m_pWorld->emit< CaptureHWND_Event>({ false });
 			m_pWorld->emit< CaptureHWND_Event>({ true, false });
 		}
 		break;
@@ -421,6 +420,11 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 					break;
 				case VK_F9:
 					ChangeSwapChainState();
+					break;
+				case VK_TAB:
+					::ReleaseCapture();
+					m_pWorld->emit< CaptureHWND_Event>({ false });
+
 					break;
 				default:
 					break;
