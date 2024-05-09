@@ -199,3 +199,7 @@ struct TextUI_Component {
 	TextUI_Component(const wchar_t* text, float top, float left, float bottom, float right);
 	TextUI_Component(wstring text, float top, float left, float bottom, float right);
 };
+
+struct RectUI_Componet {
+	
+};

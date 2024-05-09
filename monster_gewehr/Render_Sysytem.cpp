@@ -77,7 +77,7 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 		DWRITE_FONT_WEIGHT_NORMAL,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		30,
+		18,
 		L"en-us",
 		&m_smalltextFormat
 	);
@@ -240,6 +240,7 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 		) -> void {
 			{
 				wstring text = std::to_wstring((int)player->ammo);
+				text += std::wstring(" / 30", " / 30" + strlen(" / 30"));
 
 				D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH - 300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 				m_d2dDeviceContext->DrawTextW(
@@ -251,16 +252,25 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 				);
 			}
 			{
-				wstring text = std::to_wstring((int)player->hp);
-				textRect = D2D1::RectF(0, 0, 100, 50);
-				m_d2dDeviceContext->DrawRectangle(&textRect, m_textBrush.Get());
+				wstring text = std::wstring("HP ", "HP " + strlen("HP "));
+				text += std::to_wstring((int)player->hp);
+				textRect = D2D1::RectF(0, 0, 70, 50);
 				m_d2dDeviceContext->DrawTextW(
 					text.data(),
 					text.size(),
-					m_textFormat.Get(),
+					m_smalltextFormat.Get(),
 					&textRect,
 					m_textBrush.Get()
 				);
+
+				textRect = D2D1::RectF(70, 5, 270, 20);
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
+				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+
+				textRect = D2D1::RectF(70, 5, (int)player->hp*2 + 70, 20);
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+
 			}
 		}
 	);

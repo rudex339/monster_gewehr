@@ -341,6 +341,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 						controllangle->m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 						controllangle->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 						controllangle->m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+						Player->hp = 100;
 					}
 				}
 				else

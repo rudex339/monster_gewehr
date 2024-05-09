@@ -39,6 +39,7 @@ private:
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;
 	ComPtr<ID2D1SolidColorBrush> m_textBrush;
+
 	ComPtr<ID2D1StrokeStyle> m_trokeBrush;
 	
 

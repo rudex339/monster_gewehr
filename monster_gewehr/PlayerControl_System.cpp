@@ -245,6 +245,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			else {
 				shot_cooltime = 0;
 			}
+
 			if (pKeysBuffer[0x52] & 0xF0 && !player->reload) {
 				AnimationController->next_State = (UINT)RELOAD;
 				if (!player->reload) {
