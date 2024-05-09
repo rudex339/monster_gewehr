@@ -149,6 +149,7 @@
     <ClInclude Include="Render_Sysytem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ObjectManager.h" />
+    <ClInclude Include="Scene_Sysytem.h" />
     <ClInclude Include="Sever_Sysyem.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="Player_Entity.cpp" />
     <ClCompile Include="Render_Sysytem.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
+    <ClCompile Include="Scene_Sysytem.cpp" />
     <ClCompile Include="Sever_Sysyem.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />

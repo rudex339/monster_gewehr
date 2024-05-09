@@ -54,9 +54,9 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 {
 	//cout << deltaTime << endl;
 	if (m_Pawn) {
-		ComponentHandle<EulerAngle_Component> eulerangle =
+		ComponentHandle<EulerAngle_Component> model_vector =
 			m_Pawn->get<EulerAngle_Component>();
-		ComponentHandle<ControllAngle_Component> controllangle =
+		ComponentHandle<ControllAngle_Component> controller_vector =
 			m_Pawn->get<ControllAngle_Component>();
 		ComponentHandle<Velocity_Component> velocity =
 			m_Pawn->get<Velocity_Component>();
@@ -93,42 +93,42 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				velocity->m_velRotate.x += cxDelta;
 				//velocity->m_velRotate.y += cyDelta;
 
-				XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&controllangle->m_xmf3Up),
+				XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&controller_vector->m_xmf3Up),
 					XMConvertToRadians(cxDelta));
-				eulerangle->m_xmf3Look = Vector3::TransformNormal(eulerangle->m_xmf3Look, xmmtxRotate);
-				eulerangle->m_xmf3Right = Vector3::TransformNormal(eulerangle->m_xmf3Right, xmmtxRotate);
+				model_vector->m_xmf3Look = Vector3::TransformNormal(model_vector->m_xmf3Look, xmmtxRotate);
+				model_vector->m_xmf3Right = Vector3::TransformNormal(model_vector->m_xmf3Right, xmmtxRotate);
 
-				eulerangle->m_xmf3Look = Vector3::Normalize(eulerangle->m_xmf3Look);
-				eulerangle->m_xmf3Up = Vector3::CrossProduct(eulerangle->m_xmf3Look, eulerangle->m_xmf3Right, true);
-				eulerangle->m_xmf3Right = Vector3::CrossProduct(eulerangle->m_xmf3Up, eulerangle->m_xmf3Look, true);
-
-
-
-				controllangle->m_xmf3Look = Vector3::TransformNormal(controllangle->m_xmf3Look, xmmtxRotate);
-				controllangle->m_xmf3Right = Vector3::TransformNormal(controllangle->m_xmf3Right, xmmtxRotate);
-
-				controllangle->m_xmf3Look = Vector3::Normalize(controllangle->m_xmf3Look);
-				controllangle->m_xmf3Up = Vector3::CrossProduct(controllangle->m_xmf3Look, controllangle->m_xmf3Right, true);
-				controllangle->m_xmf3Right = Vector3::CrossProduct(controllangle->m_xmf3Up, controllangle->m_xmf3Look, true);
+				model_vector->m_xmf3Look = Vector3::Normalize(model_vector->m_xmf3Look);
+				model_vector->m_xmf3Up = Vector3::CrossProduct(model_vector->m_xmf3Look, model_vector->m_xmf3Right, true);
+				model_vector->m_xmf3Right = Vector3::CrossProduct(model_vector->m_xmf3Up, model_vector->m_xmf3Look, true);
 
 
+				
+				controller_vector->m_xmf3Look = Vector3::TransformNormal(controller_vector->m_xmf3Look, xmmtxRotate);
+				controller_vector->m_xmf3Right = Vector3::TransformNormal(controller_vector->m_xmf3Right, xmmtxRotate);
 
-				float a = XMVectorGetX(DirectX::XMVector3Dot(XMLoadFloat3(&eulerangle->m_xmf3Right),
-					DirectX::XMVector3Cross(XMLoadFloat3(&controllangle->m_xmf3Look), XMLoadFloat3(&Vector3::TransformNormal(eulerangle->m_xmf3Look, xmmtxRotate)))));
+				controller_vector->m_xmf3Look = Vector3::Normalize(controller_vector->m_xmf3Look);
+				controller_vector->m_xmf3Up = Vector3::CrossProduct(controller_vector->m_xmf3Look, controller_vector->m_xmf3Right, true);
+				controller_vector->m_xmf3Right = Vector3::CrossProduct(controller_vector->m_xmf3Up, controller_vector->m_xmf3Look, true);
+
+
+
+				float a = XMVectorGetX(DirectX::XMVector3Dot(XMLoadFloat3(&model_vector->m_xmf3Right),
+					DirectX::XMVector3Cross(XMLoadFloat3(&controller_vector->m_xmf3Look), XMLoadFloat3(&Vector3::TransformNormal(model_vector->m_xmf3Look, xmmtxRotate)))));
 				//cout << a << endl;
 
-				xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&controllangle->m_xmf3Right),
+				xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&controller_vector->m_xmf3Right),
 					XMConvertToRadians(cyDelta));
 
-				if (AngleBetweenVectors(controllangle->m_xmf3Look, Vector3::TransformNormal(eulerangle->m_xmf3Look, xmmtxRotate), a) < 70.f &&
-					AngleBetweenVectors(controllangle->m_xmf3Look, Vector3::TransformNormal(eulerangle->m_xmf3Look, xmmtxRotate), a) > -105.f) {
+				if (AngleBetweenVectors(controller_vector->m_xmf3Look, Vector3::TransformNormal(model_vector->m_xmf3Look, xmmtxRotate), a) < 60.f &&
+					AngleBetweenVectors(controller_vector->m_xmf3Look, Vector3::TransformNormal(model_vector->m_xmf3Look, xmmtxRotate), a) > -25.f) {
 
-					eulerangle->m_xmf3Look = Vector3::TransformNormal(eulerangle->m_xmf3Look, xmmtxRotate);
-					eulerangle->m_xmf3Right = Vector3::TransformNormal(eulerangle->m_xmf3Right, xmmtxRotate);
+					model_vector->m_xmf3Look = Vector3::TransformNormal(model_vector->m_xmf3Look, xmmtxRotate);
+					model_vector->m_xmf3Right = Vector3::TransformNormal(model_vector->m_xmf3Right, xmmtxRotate);
 
-					eulerangle->m_xmf3Look = Vector3::Normalize(eulerangle->m_xmf3Look);
-					eulerangle->m_xmf3Up = Vector3::CrossProduct(eulerangle->m_xmf3Look, eulerangle->m_xmf3Right, true);
-					eulerangle->m_xmf3Right = Vector3::CrossProduct(eulerangle->m_xmf3Up, eulerangle->m_xmf3Look, true);
+					model_vector->m_xmf3Look = Vector3::Normalize(model_vector->m_xmf3Look);
+					model_vector->m_xmf3Up = Vector3::CrossProduct(model_vector->m_xmf3Look, model_vector->m_xmf3Right, true);
+					model_vector->m_xmf3Right = Vector3::CrossProduct(model_vector->m_xmf3Up, model_vector->m_xmf3Look, true);
 				}
 			}
 			else {
@@ -176,36 +176,36 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			if (pKeysBuffer[0x57] & 0xF0) {
-				xmf3Shift = Vector3::Add(xmf3Shift, controllangle->m_xmf3Look, speed);
+				xmf3Shift = Vector3::Add(xmf3Shift, controller_vector->m_xmf3Look, speed);
 				if (roll_on == 1) { // 구르기 키를 처음 눌렀으면 어디로 굴러야 하는지 방향을 정해줌
-					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Look, speed * 3);
+					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, speed * 3);
 					roll_on = 2; // 그리고 다른 키가 구르기 방향을 망치지 않도록 하기 위해 2로 바꿔줌
 				}
 				if (!player->reload)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if ((pKeysBuffer[0x53] & 0xF0)) {
-				xmf3Shift = Vector3::Add(xmf3Shift, controllangle->m_xmf3Look, -speed);
+				xmf3Shift = Vector3::Add(xmf3Shift, controller_vector->m_xmf3Look, -speed);
 				if (roll_on == 1) {
-					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Look, -speed * 3);
+					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, -speed * 3);
 					roll_on = 2;
 				}
 				if (!player->reload)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x41] & 0xF0) {
-				xmf3Shift = Vector3::Add(xmf3Shift, eulerangle->m_xmf3Right, -speed);
+				xmf3Shift = Vector3::Add(xmf3Shift, model_vector->m_xmf3Right, -speed);
 				if (roll_on == 1) {
-					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Right, -speed * 3);
+					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, -speed * 3);
 					roll_on = 2;
 				}
 				if (!player->reload)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x44] & 0xF0) {
-				xmf3Shift = Vector3::Add(xmf3Shift, eulerangle->m_xmf3Right, speed);
+				xmf3Shift = Vector3::Add(xmf3Shift, model_vector->m_xmf3Right, speed);
 				if (roll_on == 1) {
-					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controllangle->m_xmf3Right, speed * 3);
+					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, speed * 3);
 					roll_on = 2;
 				}
 				if(!player->reload)
@@ -245,6 +245,12 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			else {
 				shot_cooltime = 0;
 			}
+			if (R_btn) {
+				player->aim_mode = true;
+			}
+			else {
+				player->aim_mode = false;
+			}
 
 			if (pKeysBuffer[0x52] & 0xF0 && !player->reload) {
 				AnimationController->next_State = (UINT)RELOAD;
@@ -273,6 +279,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 void PlayerControl_System::receive(World* world, const CaptureHWND_Event& event)
 {
 	Capture = event.capture;
+	R_btn = event.rbd;
 }
 
 void PlayerControl_System::receive(World* world, const CursorPos_Event& event)
@@ -293,4 +300,3 @@ void PlayerControl_System::receive(World* world, const GetPlayerPtr_Event& event
 		}
 	}
 }
-

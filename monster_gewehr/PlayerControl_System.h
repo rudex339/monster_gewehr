@@ -1,6 +1,7 @@
 #pragma once
 struct CaptureHWND_Event {
 	bool capture;
+	bool rbd;
 };
 
 struct CursorPos_Event {
@@ -26,6 +27,7 @@ private:
 	Entity* m_Pawn;
 	POINT m_OldCursorPos;
 	bool Capture = false;
+	bool R_btn = false;
 
 public:
 	PlayerControl_System() = default;

@@ -47,29 +47,40 @@ void Move_System::tick(World* world, float deltaTime)
                         auto controllangle = ent->get<ControllAngle_Component>();
                         XMFLOAT3 LockPos = XMFLOAT3(position->Position.x, position->Position.y + 13.f, position->Position.z);
 
-                        XMFLOAT3 camera_pos = position->Position;
-                        camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, -20.f);
-                        camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Up, 20.f);/*
-                        camera_pos = Vector3::Add(camera_pos, controllangle->m_xmf3Right, 10.f);
-                        LockPos = Vector3::Add(LockPos, eulerangle->m_xmf3Right, 10.f);*/
+                        XMFLOAT3 camera_pos = LockPos; // position->Position;
 
-                        if (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
+                        if (p->aim_mode) {
+                            
+                            camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, -6.f);
+                            camera_pos = Vector3::Add(camera_pos, controllangle->m_xmf3Right, 5.f);
+                            LockPos = Vector3::Add(LockPos, eulerangle->m_xmf3Right, 5.f);
+                            
                             camera->m_pCamera->SetPosition(camera_pos);
-                            camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
-                            while (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
-                                camera_pos = Vector3::Add(camera_pos, controllangle->m_xmf3Look, 0.1f);
-                            }
-                            camera->m_pCamera->SetPosition(camera_pos);
+                            camera->m_pCamera->SetLookAt(LockPos, controllangle->m_xmf3Up);
                             camera->m_pCamera->RegenerateViewMatrix();
                         }
-                        /*if (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
 
-                           camera_pos.y = m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) + 2.f;
-                        }*/
                         else {
-                            camera->m_pCamera->SetPosition(camera_pos);
-                            camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
-                            camera->m_pCamera->RegenerateViewMatrix();
+                            camera_pos = Vector3::Add(camera_pos, eulerangle->m_xmf3Look, -20.f);
+
+                            if (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
+                                camera->m_pCamera->SetPosition(camera_pos);
+                                camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
+                                while (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
+                                    camera_pos = Vector3::Add(camera_pos, controllangle->m_xmf3Look, 2.f);
+                                }
+                                camera->m_pCamera->SetPosition(camera_pos);
+                                camera->m_pCamera->RegenerateViewMatrix();
+                            }
+                            /*if (m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) > camera_pos.y) {
+
+                               camera_pos.y = m_Terrain->m_pTerrain->GetHeight(camera_pos.x, camera_pos.z) + 2.f;
+                            }*/
+                            else {
+                                camera->m_pCamera->SetPosition(camera_pos);
+                                camera->m_pCamera->SetLookAt(LockPos, eulerangle->m_xmf3Up);
+                                camera->m_pCamera->RegenerateViewMatrix();
+                            }
                         }
 #ifdef USE_NETWORK
                         if (ent->has<player_Component>()) {

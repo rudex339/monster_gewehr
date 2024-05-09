@@ -370,19 +370,29 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		if (m_pWorld) {
+			m_pWorld->emit< CaptureHWND_Event>({ true, true });
+			m_pWorld->emit<CursorPos_Event>({ m_ptOldCursorPos });
+		}
+		break;
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		if (m_pWorld) {
-			m_pWorld->emit< CaptureHWND_Event>({ true });
+			m_pWorld->emit< CaptureHWND_Event>({ true, true });
 			m_pWorld->emit<CursorPos_Event>({ m_ptOldCursorPos });
 		}
 		break;
 	case WM_LBUTTONUP:
 		break;
 	case WM_RBUTTONUP:
-		::ReleaseCapture();
-		if (m_pWorld)m_pWorld->emit< CaptureHWND_Event>({ false });
+		//::ReleaseCapture();
+		if (m_pWorld) {
+			//m_pWorld->emit< CaptureHWND_Event>({ false });
+			m_pWorld->emit< CaptureHWND_Event>({ true, false });
+		}
 		break;
 	case WM_MOUSEMOVE:
 		break;

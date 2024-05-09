@@ -233,6 +233,7 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 	);
 
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
 	world->each< player_Component, Camera_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
@@ -271,6 +272,14 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
+			}
+
+			{
+				if (player->aim_mode) {
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Blue));
+					m_d2dDeviceContext->FillEllipse(&ellipse, m_textBrush.Get());
+
+				}
 			}
 		}
 	);

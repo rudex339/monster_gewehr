@@ -39,6 +39,8 @@ struct player_Component {
 
 	FLOAT ammo = 30;
 
+	BOOL aim_mode = false;
+
 	BOOL reload = false;
 	FLOAT reload_coolTime = 3.5f;
 
