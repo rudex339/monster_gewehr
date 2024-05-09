@@ -302,8 +302,10 @@ void ProcessPacket(int id, char* p)
 		if (souleater.GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
 			souleater.m_lock.lock();
 			souleater.SetHp(souleater.GetHp() - 10);
-			if (souleater.GetState() == idle_state)
+			if (souleater.GetState() == idle_state) {
 				souleater.SetState(fight_state);
+				souleater.SetTarget(&players[id]);
+			}
 			souleater.m_lock.unlock();
 			std::cout << souleater.GetHp() << std::endl;
 			build_bt(&souleater, &players);
