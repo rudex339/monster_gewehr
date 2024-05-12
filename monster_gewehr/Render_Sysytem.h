@@ -36,7 +36,7 @@ private:
 	ID2D1DeviceContext2* m_d2dDeviceContext;
 	IDWriteFactory5* m_dwriteFactory;
 	ID2D1Factory3* m_d2dFactory;
-	ID2D1Bitmap* m_bitmap;
+	ID2D1Bitmap* m_bitmaps[10];
 
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;

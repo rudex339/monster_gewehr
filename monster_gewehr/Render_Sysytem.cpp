@@ -110,8 +110,8 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 	m_d2dDeviceContext = d2dDeviceContext;
 	m_dwriteFactory = dwriteFactory;
 	m_d2dFactory = d2dFactory;
-	m_bitmap = bitmap;
-
+	m_bitmaps[0] = bitmap;
+		
 	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
@@ -144,7 +144,8 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 		&m_smalltextFormat
 	);
 
-	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
+	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[0]);
+	//LoadBitmapFromFile(L"image/16317fbf7667c044.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[1]);
 
 	float dashes[] = { 1.0f, 2.0f, 2.0f, 3.0f, 2.0f, 2.0f };
 	//m_d2dFactory->CreateStrokeStyle(
@@ -311,7 +312,8 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 			}
 
 			{
-				m_d2dDeviceContext->DrawBitmap(m_bitmap, imageRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, { 0,0,100,100 });
+				m_d2dDeviceContext->DrawBitmap(m_bitmaps[0], imageRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, {0,0,100,100});
+				//m_d2dDeviceContext->DrawBitmap(m_bitmaps[1], {400, 400, 500, 600}, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, {0,0,100,100});
 			}
 
 			{
