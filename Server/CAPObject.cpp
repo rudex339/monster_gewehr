@@ -171,7 +171,7 @@ Monster::Monster()
 	m_id = -2;
 
 	turnning_speed = 0.3f;
-	move_speed = 0.08f;
+	move_speed = 0.07f;
 	fly_up_speed = 0.05f;
 
 	m_yaw = 0.0f;
@@ -667,9 +667,9 @@ int do_nothing(Monster* monster, float time)
 int find_random_pos(Monster* monster)
 {
 	XMFLOAT3 randompos;
-	randompos.x = monster->GetPosition().x + 50.0f + urd(gen);
+	randompos.x = monster->GetPosition().x + urd(gen) * 3;
 	randompos.y = monster->GetPosition().y;
-	randompos.z = monster->GetPosition().z + 50.0f + urd(gen);
+	randompos.z = monster->GetPosition().z + urd(gen) * 3;
 
 	monster->SetTargetPos(randompos);
 
@@ -684,7 +684,7 @@ int move_to(Monster* monster)
 		monster->SetAnimation(flying_ani);
 	}
 
-	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 1.0f) return BehaviorTree::SUCCESS;
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) return BehaviorTree::SUCCESS;
 
 	XMFLOAT3 target = monster->GetTargetPos();
 	XMFLOAT3 pos = monster->GetPosition();
@@ -707,10 +707,10 @@ int move_to(Monster* monster)
 
 	angle = angle * XMVectorGetX(XMVector3Dot(upVec, XMVector3Cross(FrontVec, frontVec)));
 
-	if (angle < -0.01f) {
+	if (angle < -0.02f) {
 		monster->Left(monster->GetElapsedTime());
 	}
-	else if (angle > 0.01f) {
+	else if (angle > 0.02f) {
 		monster->Right(monster->GetElapsedTime());
 	}
 	else {
