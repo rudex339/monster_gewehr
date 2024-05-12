@@ -191,6 +191,9 @@ public:
 	void BuildBT(BehaviorTree node) { root = node; }
 	void RunBT() { root.run(); }
 
+	// demo only
+	void dash(float time);
+
 	std::mutex m_lock;
 protected:
 	bool isUserArround[MAX_CLIENT_ROOM];

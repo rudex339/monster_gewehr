@@ -345,9 +345,31 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-				textRect = D2D1::RectF(170, 15, (int)player->hp*2 + 170, 30);
+				textRect = D2D1::RectF(170, 15, (int)player->hp * 2 + 170, 30);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+			}
+
+			{
+				wstring text = std::wstring("SP 100", "SP 100" + strlen("SP 100"));
+
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+				textRect = D2D1::RectF(100, 40, 170, 80);
+				m_d2dDeviceContext->DrawTextW(
+					text.data(),
+					text.size(),
+					m_smalltextFormat.Get(),
+					&textRect,
+					m_textBrush.Get()
+				);
+				textRect = D2D1::RectF(170, 45, 370, 60);
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
+				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+
+				textRect = D2D1::RectF(170, 45, 370, 60);
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::YellowGreen));
+				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+
 
 			}
 

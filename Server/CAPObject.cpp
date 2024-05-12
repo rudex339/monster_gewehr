@@ -6,7 +6,8 @@
 
 std::random_device rd;
 std::mt19937 gen(rd());
-std::uniform_real_distribution<double> urd(-30.0, 30.0);
+std::uniform_real_distribution<double> urd(50.0f, 100.0f);
+std::uniform_real_distribution<double> minus(-1.0f, 1.0f);
 std::uniform_int_distribution<int> rand_runaway_point(0, RUNAWAY_POINT-1);
 std::uniform_int_distribution<int> random_0_to_100(0, 100);
 
@@ -319,6 +320,8 @@ void Monster::InitMonster()
 	m_bounding_box.Orientation = q;
 }
 
+
+
 void check_hp(Monster* monster, std::unordered_map<INT, Player>* players)
 {
 	float hp = monster->GetHp();
@@ -410,6 +413,11 @@ static float do_nothing_time = 0.0f;
 static float time_out_search = 0.0f;
 static float time_out_dash = 0.0f;
 static float time_out_choose = 100000.0f;
+
+void Monster::dash(float time)
+{
+	time_out_dash = time;
+}
 
 //fight
 int search_target(Monster* monster, std::unordered_map<INT, Player>* players)
@@ -667,9 +675,11 @@ int do_nothing(Monster* monster, float time)
 int find_random_pos(Monster* monster)
 {
 	XMFLOAT3 randompos;
-	randompos.x = monster->GetPosition().x + urd(gen) * 3;
+	float dir = minus(gen);
+	dir = (dir / abs(dir));
+	randompos.x = monster->GetPosition().x + urd(gen) * dir;
 	randompos.y = monster->GetPosition().y;
-	randompos.z = monster->GetPosition().z + urd(gen) * 3;
+	randompos.z = monster->GetPosition().z + urd(gen) * dir;
 
 	monster->SetTargetPos(randompos);
 

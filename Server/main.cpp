@@ -340,8 +340,7 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_DEMO_MONSTER_BEHAVIOR: {
-		souleater.SetState(runaway_state);
-		build_bt(&souleater, &players);
+		souleater.dash(7500.f);
 		break;
 	}
 	}
