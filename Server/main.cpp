@@ -157,6 +157,8 @@ void BossThread()
 	using ms = std::chrono::duration<float, std::milli>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 
+	int bite_cooltime = 13;
+
 	frame fps{}, frame_count{};
 	while (1) {
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
@@ -180,17 +182,26 @@ void BossThread()
 			}
 
 			if (souleater.GetAnimation() == bite_ani) {
-				for (auto& ply : players) {
-					if (ply.second.GetState() == S_STATE::IN_GAME) {
-						if (!ply.second.hit_on) {
-							if (ply.second.GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
-								ply.second.hit_on = 1;
-								ply.second.SetHp(ply.second.GetHp() - 25);
-								SendHitPlayer(ply.second.GetID());
+				if (!bite_cooltime) {
+					bite_cooltime = 13;
+					for (auto& ply : players) {
+						if (ply.second.GetState() == S_STATE::IN_GAME) {
+							if (!ply.second.hit_on) {
+								if (ply.second.GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
+									ply.second.hit_on = 1;
+									ply.second.SetHp(ply.second.GetHp() - 25);
+									SendHitPlayer(ply.second.GetID());
+								}
 							}
 						}
 					}
 				}
+				else {
+					bite_cooltime--;
+				}
+			}
+			else {
+				bite_cooltime = 13;
 			}
 
 			SC_UPDATE_MONSTER_PACKET monster_packet;
