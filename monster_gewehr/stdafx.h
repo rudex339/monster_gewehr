@@ -46,7 +46,7 @@ using namespace std;
 //	#include <d2d1.h>
 #include <d2d1_3.h>
 #include <dwrite_3.h>
-
+#include <wincodec.h>
 #include "ECS.h"
 using namespace ECS;
 
@@ -102,6 +102,7 @@ extern HINSTANCE						ghAppInstance;
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
+#pragma comment(lib, "windowscodecs.lib")
 //#include <d2d1_3.h>
 //#include <dwrite_3.h>
 

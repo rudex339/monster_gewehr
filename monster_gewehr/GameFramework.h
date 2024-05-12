@@ -89,7 +89,8 @@ private:
 
 	// DirectWrite
 	ComPtr<IDWriteFactory5>	m_dwriteFactory;
-
+	
+	ComPtr<ID2D1Bitmap> m_bitmap;
 
 #if defined(_DEBUG)
 	ID3D12Debug					*m_pd3dDebugController;

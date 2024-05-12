@@ -36,6 +36,8 @@ private:
 	ID2D1DeviceContext2* m_d2dDeviceContext;
 	IDWriteFactory5* m_dwriteFactory;
 	ID2D1Factory3* m_d2dFactory;
+	ID2D1Bitmap* m_bitmap;
+
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;
 	ComPtr<ID2D1SolidColorBrush> m_textBrush;
@@ -46,7 +48,7 @@ private:
 public:
 
 	Render_Sysytem() = default;
-	Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory);
+	Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, ID2D1Bitmap* bitmap);
 	virtual void configure(class World* world);
 	virtual void unconfigure(class World* world);
 	virtual void tick(class World* world, float deltaTime);

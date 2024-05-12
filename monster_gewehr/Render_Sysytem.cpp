@@ -39,16 +39,78 @@ bool should_render(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 	return is_camera_behind(camera_pos, camera_look, object_pos) || is_camera_far(camera_pos, object_pos);
 }
 
+HRESULT LoadBitmapFromFile(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, ID2D1Bitmap** ppBitmap)
+{
+	IWICImagingFactory* pWICFactory = NULL;
+	IWICBitmapDecoder* pDecoder = NULL;
+	IWICBitmapFrameDecode* pFrame = NULL;
+	IWICFormatConverter* pConverter = NULL;
+
+	HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pWICFactory));
+	if (FAILED(hr))
+		return hr;
+
+	hr = pWICFactory->CreateDecoderFromFilename(imagePath, NULL, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &pDecoder);
+	if (FAILED(hr))
+	{
+		pWICFactory->Release();
+		return hr;
+	}
+
+	hr = pDecoder->GetFrame(0, &pFrame);
+	if (FAILED(hr))
+	{
+		pDecoder->Release();
+		pWICFactory->Release();
+		return hr;
+	}
+
+	hr = pWICFactory->CreateFormatConverter(&pConverter);
+	if (FAILED(hr))
+	{
+		pFrame->Release();
+		pDecoder->Release();
+		pWICFactory->Release();
+		return hr;
+	}
+
+	hr = pConverter->Initialize(pFrame, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0, WICBitmapPaletteTypeMedianCut);
+	if (FAILED(hr))
+	{
+		pConverter->Release();
+		pFrame->Release();
+		pDecoder->Release();
+		pWICFactory->Release();
+		return hr;
+	}
+
+	hr = d2dDeviceContext->CreateBitmapFromWicBitmap(pConverter, NULL, ppBitmap);
+	if (FAILED(hr))
+	{
+		pConverter->Release();
+		pFrame->Release();
+		pDecoder->Release();
+		pWICFactory->Release();
+		return hr;
+	}
+
+	pConverter->Release();
+	pFrame->Release();
+	pDecoder->Release();
+	pWICFactory->Release();
+
+	return S_OK;
+}
 
 
-
-Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory)
+Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, ID2D1Bitmap* bitmap)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
 
 	m_d2dDeviceContext = d2dDeviceContext;
 	m_dwriteFactory = dwriteFactory;
 	m_d2dFactory = d2dFactory;
+	m_bitmap = bitmap;
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
@@ -81,6 +143,8 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 		L"en-us",
 		&m_smalltextFormat
 	);
+
+	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
 
 	float dashes[] = { 1.0f, 2.0f, 2.0f, 3.0f, 2.0f, 2.0f };
 	//m_d2dFactory->CreateStrokeStyle(
@@ -233,12 +297,23 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 	);
 
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
 	world->each< player_Component, Camera_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
 		ComponentHandle<Camera_Component> camera
 		) -> void {
+			{
+				textRect = D2D1::RectF(0, 0, 390, 100);
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+				m_d2dDeviceContext->DrawRectangle(&textRect, m_textBrush.Get());
+			}
+
+			{
+				m_d2dDeviceContext->DrawBitmap(m_bitmap, imageRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, { 0,0,100,100 });
+			}
+
 			{
 				wstring text = std::to_wstring((int)player->ammo);
 				text += std::wstring(" / 30", " / 30" + strlen(" / 30"));
@@ -255,7 +330,7 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 			{
 				wstring text = std::wstring("HP ", "HP " + strlen("HP "));
 				text += std::to_wstring((int)player->hp);
-				textRect = D2D1::RectF(0, 0, 70, 50);
+				textRect = D2D1::RectF(100, 10, 170, 50);
 				m_d2dDeviceContext->DrawTextW(
 					text.data(),
 					text.size(),
@@ -264,11 +339,11 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 					m_textBrush.Get()
 				);
 
-				textRect = D2D1::RectF(70, 5, 270, 20);
+				textRect = D2D1::RectF(170, 15, 370, 30);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-				textRect = D2D1::RectF(70, 5, (int)player->hp*2 + 70, 20);
+				textRect = D2D1::RectF(170, 15, (int)player->hp*2 + 170, 30);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
