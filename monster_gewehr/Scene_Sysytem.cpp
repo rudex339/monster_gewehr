@@ -7,11 +7,13 @@
 #include "PlayerControl_System.h"
 #include "Render_Sysytem.h"
 
-Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList):
+Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory):
 	m_pObjectManager(pObjectManager),
 	m_pd3dDevice(pd3dDevice),
-	m_pd3dCommandList(pd3dCommandList){
-
+	m_pd3dCommandList(pd3dCommandList),
+	m_d2dDeviceContext(deviceContext),
+	m_d2dFactory(factory)
+	{
 }
 
 void Scene_Sysytem::configure(World* world)
@@ -60,15 +62,14 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	switch (m_State) {
 	case LOGIN: {
 		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(L"Monster Gewehr", 
-			(float)FRAME_BUFFER_HEIGHT / 2-120, (float)FRAME_BUFFER_WIDTH / 2-400, 
-			(float)FRAME_BUFFER_HEIGHT / 2+80, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
 		ent = world->create();
-		ent->assign<TextUI_Component>(L"press enter",
-			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
-	}		
+		D2D1_RECT_F sRect, imageRect;
+		sRect = { 0,0,FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+		imageRect = { 0, 0, 1000, 563 };
+		ent->assign<ImageUI_Component>(L"image/monster_hunter_login.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+	}
 		break;
 	case LOBBY:
 	{

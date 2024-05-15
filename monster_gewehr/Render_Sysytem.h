@@ -48,7 +48,7 @@ private:
 public:
 
 	Render_Sysytem() = default;
-	Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, ID2D1Bitmap* bitmap);
+	Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory);
 	virtual void configure(class World* world);
 	virtual void unconfigure(class World* world);
 	virtual void tick(class World* world, float deltaTime);

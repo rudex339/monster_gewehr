@@ -194,8 +194,24 @@ struct BoundingBox_Component {
 struct TextUI_Component {
 	wstring m_text;
 	D2D1_RECT_F m_Rect;
-
+	
 	TextUI_Component() = default;
 	TextUI_Component(const wchar_t* text, float top, float left, float bottom, float right);
 	TextUI_Component(wstring text, float top, float left, float bottom, float right);
+};
+
+struct ImageUI_Component {
+	
+	ID2D1DeviceContext2* m_d2dDeviceContext;
+	ID2D1Factory3* m_d2dFactory;
+	ID2D1Bitmap* m_bitmap;
+
+	float m_opacity;
+	D2D1_INTERPOLATION_MODE m_mode;
+
+	D2D1_RECT_F m_Rect, m_imageRect;
+
+	ImageUI_Component() = default;
+	ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect);
+
 };

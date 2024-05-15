@@ -103,14 +103,13 @@ HRESULT LoadBitmapFromFile(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDev
 }
 
 
-Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, ID2D1Bitmap* bitmap)
+Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
 
 	m_d2dDeviceContext = d2dDeviceContext;
 	m_dwriteFactory = dwriteFactory;
 	m_d2dFactory = d2dFactory;
-	m_bitmaps[0] = bitmap;
 		
 	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
@@ -145,7 +144,6 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 	);
 
 	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[0]);
-	//LoadBitmapFromFile(L"image/16317fbf7667c044.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[1]);
 
 	float dashes[] = { 1.0f, 2.0f, 2.0f, 3.0f, 2.0f, 2.0f };
 	//m_d2dFactory->CreateStrokeStyle(
@@ -296,7 +294,19 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 			);
 		}
 	);
-
+	world->each<ImageUI_Component>([&](
+		Entity* ent,
+		ComponentHandle<ImageUI_Component> imageUI
+		) -> void {
+			m_d2dDeviceContext->DrawBitmap(
+				imageUI->m_bitmap,
+				imageUI->m_Rect,
+				imageUI->m_opacity,
+				imageUI->m_mode,
+				imageUI->m_imageRect
+			);
+		}
+	);
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
