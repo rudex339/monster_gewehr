@@ -102,7 +102,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
-		m_pPawn->assign<BoundingBox_Component>();
+		m_pPawn->assign<BoundingBox_Component>(5.f, 10.f, 5.f);
 
 
 		cout << m_pPawn->get<player_Component>()->id << endl;
@@ -118,6 +118,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			25.f, 25.f, 25.f,
 			MONSTER);
 		auto monster_id = ent->get<player_Component>();
+		ent->assign<BoundingBox_Component>(30.f, 30.f, 30.f);
+
 		monster_id->id = -2;
 
 		ent = world->create();

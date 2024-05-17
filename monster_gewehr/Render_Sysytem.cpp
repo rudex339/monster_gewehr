@@ -278,7 +278,7 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 						if (ent->has<BoundingBox_Component>()) {
 							ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
 							box->m_bounding_box.Center = pos->Position;
-							cout << "drawBoundingBox" << endl;
+							box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
 
 							m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
 						}
