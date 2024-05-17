@@ -147,3 +147,9 @@ ImageUI_Component::ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContex
 
 	LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
 }
+
+TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY)
+{
+	x = layoutX;
+	y = layoutY;
+}

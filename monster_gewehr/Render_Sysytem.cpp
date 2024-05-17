@@ -143,6 +143,17 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 		&m_smalltextFormat
 	);
 
+	m_dwriteFactory->CreateTextFormat(
+		L"Garamond",               
+		NULL,                   
+		DWRITE_FONT_WEIGHT_REGULAR,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		26,                      
+		L"en-us",
+		&pTextFormat
+	);
+
 	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[0]);
 
 	float dashes[] = { 1.0f, 2.0f, 2.0f, 3.0f, 2.0f, 2.0f };
@@ -168,6 +179,8 @@ void Render_Sysytem::configure(World* world)
 {
 	world->subscribe<SetCamera_Event>(this);
 	world->subscribe<DrawUI_Event>(this);
+	world->subscribe<KeyDown_Event>(this);
+
 }
 
 void Render_Sysytem::unconfigure(World* world)
@@ -263,6 +276,7 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 					Model->m_MeshModel->m_pModelRootObject->Render(
 						m_pd3dCommandList, m_pCamera);
 
+
 				}
 				else if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
@@ -305,6 +319,55 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 				imageUI->m_mode,
 				imageUI->m_imageRect
 			);
+		}
+	);
+	world->each<TextBoxUI_Component>([&](
+		Entity* ent,
+		ComponentHandle<TextBoxUI_Component> editBox
+		)-> void {
+
+			// 텍스트 입력 박스
+			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+			m_d2dDeviceContext->FillRectangle(
+				{ editBox->x, editBox->y+3.0f, editBox->x + 400.f, editBox->y + 35.0f },
+				m_textBrush.Get()
+			);
+
+			// 텍스트 레이아웃
+			m_dwriteFactory->CreateTextLayout(
+				text.c_str(),
+				static_cast<UINT32>(text.length()),
+				pTextFormat.Get(),
+				500,
+				200,
+				&pTextLayout
+			);
+
+			// 텍스트
+			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
+
+			m_d2dDeviceContext->DrawTextLayout(
+				D2D1::Point2F(editBox->x, editBox->y),
+				pTextLayout,
+				m_textBrush.Get(),
+				D2D1_DRAW_TEXT_OPTIONS_NONE
+			);
+
+			// 커서 
+			if (cursorPosition <= text.length())
+			{
+				DWRITE_TEXT_METRICS textMetrics;
+				pTextLayout->GetMetrics(&textMetrics);
+				float cursorX = textMetrics.widthIncludingTrailingWhitespace + editBox->x + 1.0f;
+
+				m_d2dDeviceContext->DrawLine(
+					D2D1::Point2F(cursorX, editBox->y + 4.0f ),
+					D2D1::Point2F(cursorX, editBox->y + textMetrics.height - 1.0f),
+					m_textBrush.Get(),
+					1.0f
+				);
+			}
+			pTextLayout->Release();
 		}
 	);
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -399,4 +462,26 @@ void Render_Sysytem::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manag
 	m_pd3dCommandList = pd3dCommandList;
 	m_pd3dGraphicsRootSignature = manager->GetGraphicsRootSignature();
 	m_pd3dCbvSrvDescriptorHeap = manager->GetCbvSrvDescriptorHeap();
+}
+
+void Render_Sysytem::receive(World* world, const KeyDown_Event& event)
+{
+	if (event.key == VK_BACK && cursorPosition > 0)
+	{
+		text.erase(text.begin() + cursorPosition - 1);
+		cursorPosition--;
+	}
+	else if (event.key == VK_LEFT && cursorPosition > 0)
+	{
+		cursorPosition--;
+	}
+	else if (event.key == VK_RIGHT && cursorPosition < text.length())
+	{
+		cursorPosition++;
+	}
+
+	else {
+		text.insert(text.begin() + cursorPosition, static_cast<wchar_t>(event.key));
+		cursorPosition++;
+	}
 }

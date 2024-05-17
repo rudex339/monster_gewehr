@@ -200,6 +200,13 @@ struct TextUI_Component {
 	TextUI_Component(wstring text, float top, float left, float bottom, float right);
 };
 
+struct TextBoxUI_Component {
+	float x, y;
+
+	TextBoxUI_Component() = default;
+	TextBoxUI_Component(float layoutX, float layoutY);
+};
+
 struct ImageUI_Component {
 	
 	ID2D1DeviceContext2* m_d2dDeviceContext;
