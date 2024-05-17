@@ -119,9 +119,12 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
 	//boundingbox
+	m_pBox = NULL;
+	////////////////////바운딩 박스를 그리지 않으려면 이부분만 주석처리하면 됨
 	if (manager->m_pBox != NULL) {
 		m_pBox = manager->m_pBox;
 	}
+	////////////////////
 
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Wheat), &m_textBrush);
 	m_dwriteFactory->CreateTextFormat(
@@ -225,7 +228,7 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 			Entity* ent,
 			ComponentHandle<SkyBox_Component> SkyBox
 			) -> void {
-				SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
+				//SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
 			});
 
 		/*world->each<Terrain_Component>([&](
@@ -241,8 +244,7 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 			) -> void {
 				if (ent->has<Terrain_Component>()) {
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
-					Model->m_MeshModel->m_pModelRootObject->Render(
-						m_pd3dCommandList, m_pCamera);
+					Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
 				}
 				else if (ent->has<AnimationController_Component>() &&
 					ent->has<Rotation_Component>() &&
@@ -271,20 +273,28 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 					xmf4x4World._42 = pos->Position.y;
 					xmf4x4World._43 = pos->Position.z;
 
+					//text
+					if (m_pBox) {
+						if (ent->has<BoundingBox_Component>()) {
+							ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
+							box->m_bounding_box.Center = pos->Position;
+							cout << "drawBoundingBox" << endl;
+
+							m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+						}
+					}
 
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
 
 					AnimationController->m_AnimationController->UpdateShaderVariables();
 
-					Model->m_MeshModel->m_pModelRootObject->Render(
-						m_pd3dCommandList, m_pCamera);
+					Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
 
 
 				}
 				else if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
-					Model->m_MeshModel->m_pModelRootObject->Render(
-						m_pd3dCommandList, m_pCamera);
+					Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
 				}
 			});
 	}

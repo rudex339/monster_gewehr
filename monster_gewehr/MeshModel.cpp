@@ -1554,10 +1554,19 @@ Box::~Box()
 {
 }
 
-void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOrientedBox* box)
 {
-	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
-	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+	/*SetScale(box->Extents.x, box->Extents.y, box->Extents.z);
+	SetPosition(box->Center);*/
+	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+	xmf4x4World = Matrix4x4::Multiply(XMMatrixScaling(box->Extents.x,
+		box->Extents.y,
+		box->Extents.z), xmf4x4World);
+	xmf4x4World._41 = box->Center.x;
+	xmf4x4World._42 = box->Center.y;
+	xmf4x4World._43 = box->Center.z;
 
-	GameObjectModel::Render(pd3dCommandList, pCamera);
+	UpdateTransform(&xmf4x4World);
+
+	GameObjectModel::Render(pd3dCommandList);
 }
