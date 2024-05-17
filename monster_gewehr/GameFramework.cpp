@@ -405,6 +405,10 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	if (m_pObjectManager) m_pObjectManager->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
+		case WM_KEYDOWN:
+			m_pWorld->emit<KeyDown_Event>({ wParam });
+			break;
+
 		case WM_KEYUP:
 			switch (wParam)
 			{

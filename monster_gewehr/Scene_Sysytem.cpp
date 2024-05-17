@@ -63,12 +63,13 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	case LOGIN: {
 		Entity* ent = world->create();
 
-		ent = world->create();
 		D2D1_RECT_F sRect, imageRect;
 		sRect = { 0,0,FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 		imageRect = { 0, 0, 1000, 563 };
 		ent->assign<ImageUI_Component>(L"image/monster_hunter_login.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+		ent->assign<TextBoxUI_Component>(800.0f, 340.0f);
 	}
 		break;
 	case LOBBY:
@@ -87,6 +88,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<TextUI_Component>(L"LOBBY",
 			(float)FRAME_BUFFER_HEIGHT / 2 - 20, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 			(float)FRAME_BUFFER_HEIGHT / 2 + 60, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+
+
 	}
 		break;
 	case GAME:
