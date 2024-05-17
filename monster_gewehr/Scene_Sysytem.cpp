@@ -99,6 +99,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
+		m_pPawn->assign<BoundingBox_Component>();
 
 
 		cout << m_pPawn->get<player_Component>()->id << endl;

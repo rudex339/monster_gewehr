@@ -514,6 +514,7 @@ void GameFramework::BuildObjects()
 	m_pWorld->registerSystem(new Animate_System());
 	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get()));
 
+
 	m_pWorld->emit<ChangeScene_Event>({ LOGIN });
 
 	m_pd3dCommandList->Close();

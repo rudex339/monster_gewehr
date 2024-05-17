@@ -4,6 +4,7 @@
 
 class ObjectManager;
 class CCamera;
+class Box;
 
 struct SetCamera_Event {
 	CCamera* pCamera;
@@ -44,6 +45,8 @@ private:
 
 	ComPtr<ID2D1StrokeStyle> m_trokeBrush;
 	
+	//boundingbox
+	Box* m_pBox;
 
 public:
 

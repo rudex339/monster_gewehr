@@ -35,13 +35,15 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,440+1); //사용되는 텍스쳐 갯수 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,443+1); //사용되는 텍스쳐 갯수 
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
 	BuildDefaultLightsAndMaterials();
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);//1
+
+	m_pBox = new Box(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);//1
 
 	XMFLOAT3 xmf3Scale(7.74f, 8.0f, 7.74f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.5f, 0.0f);

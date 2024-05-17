@@ -118,7 +118,10 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
-
+	//boundingbox
+	if (manager->m_pBox != NULL) {
+		m_pBox = manager->m_pBox;
+	}
 
 	m_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Wheat), &m_textBrush);
 	m_dwriteFactory->CreateTextFormat(

@@ -1525,7 +1525,7 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-Box::Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+Box::Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectModel(1)
 {
 	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f);
 	SetMesh(pSkyBoxMesh);
@@ -1538,13 +1538,14 @@ Box::Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, I
 	CBoxShader* pBoxShader = new CBoxShader();
 	pBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	CMaterial* pBoxMaterial = new CMaterial(1);
+	
 
 	ObjectManager::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 10);
 
-	pBoxMaterial->m_xmf4AlbedoColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	pBoxMaterial->SetShader(pBoxShader);
+	CMaterial* pBoxMaterial = new CMaterial(1);
 	pBoxMaterial->SetTexture(pSkyBoxTexture);
+	pBoxMaterial->SetShader(pBoxShader);
+	
 
 	SetMaterial(0, pBoxMaterial);
 }

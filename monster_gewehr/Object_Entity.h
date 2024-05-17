@@ -186,7 +186,13 @@ struct Light_Component {
 
 struct BoundingBox_Component {
 	DirectX::BoundingOrientedBox m_bounding_box;
-	BoundingBox_Component() = default;
+	unordered_map<string, DirectX::BoundingOrientedBox*> m_BoundingBoxList;
+	BoundingBox_Component() {
+		m_bounding_box.Extents = XMFLOAT3(5.f, 10.f, 5.f);
+	}
+	void add(string bone, DirectX::BoundingOrientedBox* boundingbox) {
+		m_BoundingBoxList.insert({ bone, boundingbox });
+	}
 };
 
 //----------------------------------------------------------------------------------------------

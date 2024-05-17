@@ -86,6 +86,7 @@ public:
 
 	CSkyBox								*m_pSkyBox = NULL;
 	CHeightMapTerrain					*m_pTerrain = NULL;
+	Box* m_pBox = NULL;
 };
 
 
