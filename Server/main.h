@@ -22,8 +22,8 @@ void SendShoot(int id);
 
 
 std::unordered_map<INT, Player> players;
-Monster souleater;
+std::array<Monster, MAX_GAME_ROOM> souleaters;
 
-GameRoom gameroom;
+std::array<GameRoom, MAX_GAME_ROOM> gamerooms;
 
 int global_id = 0;

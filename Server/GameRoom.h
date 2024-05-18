@@ -12,12 +12,14 @@ public:
 
 	BOOL SetPlayerId(int c_id);
 	BOOL IsPlayerIn(int c_id);
+	BOOL IsPlayerEmpty();
 	void DeletePlayerId(int c_id);
 
 	BOOL SetStartGame();
 	void SetEndGame();
 	void SetFreeRoom();
 
+	std::array<INT, MAX_CLIENT_ROOM> GetPlyId() { return m_player_ids; }
 
 	GameRoomState GetState() { return m_state; }
 

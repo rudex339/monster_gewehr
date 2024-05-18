@@ -140,7 +140,7 @@ void ProcessClient(SOCKET sock)
 
 
 	Disconnect(id);
-	gameroom.DeletePlayerId(id);
+	gamerooms[0].DeletePlayerId(id);
 
 	// 소켓 닫기
 	closesocket(client_sock);
@@ -164,67 +164,74 @@ void BossThread()
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 		if (fps.count() < 1) continue; // 1/MAX_FRAME
 
-		if (gameroom.GetState() == GameRoomState::G_INGAME) {
-			run_bt(&souleater, &players);
+		for (auto& gameroom : gamerooms) {
+			if (gameroom.GetState() == GameRoomState::G_INGAME) {
+				std::cout << "실행됨1" << std::endl;
+				run_bt(&souleaters[0], &players);
 
-			if (souleater.GetAnimation() == dash_ani) {
-				for (auto& ply : players) {
-					if (ply.second.GetState() == S_STATE::IN_GAME) {
-						if (!ply.second.hit_on) {
-							if (ply.second.GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
-								ply.second.hit_on = 1;
-								ply.second.SetHp(ply.second.GetHp() - 50);
-								SendHitPlayer(ply.second.GetID());
-							}
-						}
-					}
-				}
-			}
-
-			if (souleater.GetAnimation() == bite_ani) {
-				if (!bite_cooltime) {
-					bite_cooltime = 13;
-					for (auto& ply : players) {
-						if (ply.second.GetState() == S_STATE::IN_GAME) {
-							if (!ply.second.hit_on) {
-								if (ply.second.GetBoundingBox().Intersects(souleater.GetBoundingBox())) {
-									ply.second.hit_on = 1;
-									ply.second.SetHp(ply.second.GetHp() - 25);
-									SendHitPlayer(ply.second.GetID());
+				if (souleaters[0].GetAnimation() == dash_ani) {
+					for (int ply_id : gameroom.GetPlyId()) {
+						if (ply_id == -1) continue;
+						if (players[ply_id].GetState() == S_STATE::IN_GAME) {
+							if (!players[ply_id].hit_on) {
+								if (players[ply_id].GetBoundingBox().Intersects(souleaters[0].GetBoundingBox())) {
+									players[ply_id].hit_on = 1;
+									players[ply_id].SetHp(players[ply_id].GetHp() - 50);
+									SendHitPlayer(players[ply_id].GetID());
 								}
 							}
 						}
 					}
 				}
+
+				if (souleaters[0].GetAnimation() == bite_ani) {
+					if (!bite_cooltime) {
+						bite_cooltime = 13;
+						for (int ply_id : gameroom.GetPlyId()) {
+							if (ply_id == -1) continue;
+							if (players[ply_id].GetState() == S_STATE::IN_GAME) {
+								if (!players[ply_id].hit_on) {
+									if (players[ply_id].GetBoundingBox().Intersects(souleaters[0].GetBoundingBox())) {
+										players[ply_id].hit_on = 1;
+										players[ply_id].SetHp(players[ply_id].GetHp() - 25);
+										SendHitPlayer(players[ply_id].GetID());
+									}
+								}
+							}
+						}
+					}
+					else {
+						bite_cooltime--;
+					}
+				}
 				else {
-					bite_cooltime--;
+					bite_cooltime = 13;
 				}
-			}
-			else {
-				bite_cooltime = 13;
-			}
 
-			SC_UPDATE_MONSTER_PACKET monster_packet;
-			monster_packet.size = sizeof(monster_packet);
-			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
-			monster_packet.monster = souleater.GetData();
-			monster_packet.animation = souleater.GetAnimation();
+				SC_UPDATE_MONSTER_PACKET monster_packet;
+				monster_packet.size = sizeof(monster_packet);
+				monster_packet.type = SC_PACKET_UPDATE_MONSTER;
+				monster_packet.monster = souleaters[0].GetData();
+				monster_packet.animation = souleaters[0].GetAnimation();
 
-			for (auto& ply : players) {
-				if (ply.second.GetState() != S_STATE::IN_GAME) continue;
-				ply.second.DoSend(&monster_packet, monster_packet.size);
-			}
-
-			if (souleater.GetHp() <= 0 && monster_packet.animation == die_ani) {
-				for (auto& ply : players) {
-					if (ply.second.GetState() != S_STATE::IN_GAME) continue;
-					SendEndGame(ply.second.GetID());
-					ply.second.PlayerInit();
+				for (int ply_id : gameroom.GetPlyId()) {
+					if (ply_id == -1) continue;
+					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+					players[ply_id].DoSend(&monster_packet, monster_packet.size);
 				}
-				souleater.InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
-				gameroom.SetFreeRoom();
-			}
 
+				if (souleaters[0].GetHp() <= 0 && monster_packet.animation == die_ani) {
+					for (int ply_id : gameroom.GetPlyId()) {
+						if (ply_id == -1) continue;
+						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+						SendEndGame(players[ply_id].GetID());
+						players[ply_id].PlayerInit();
+					}
+					souleaters[0].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+					gameroom.SetFreeRoom();
+				}
+
+			}
 		}
 
 
@@ -260,7 +267,7 @@ void ProcessPacket(int id, char* p)
 		players[id].SetName(packet->name);
 		players[id].SetWepon(packet->weapon);
 
-		if (gameroom.SetPlayerId(id)) {
+		if (gamerooms[0].SetPlayerId(id)) {
 			players[id].SetByWeapon(2);
 			SendLoginInfo(id);
 		}
@@ -276,8 +283,8 @@ void ProcessPacket(int id, char* p)
 		players[id].SetVelocity(packet->vel);
 		players[id].SetYaw(packet->yaw);
 
-		if (gameroom.SetStartGame()) {
-			build_bt(&souleater, &players);
+		if (gamerooms[0].SetStartGame()) {
+			build_bt(&souleaters[0], &players);
 		}
 
 		SendStartGame(id);
@@ -310,37 +317,37 @@ void ProcessPacket(int id, char* p)
 		DirectX::XMVECTOR directionVec = XMLoadFloat3(&packet->dir);
 		float shot_range = players[id].GetRange();
 
-		if (souleater.GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
-			souleater.m_lock.lock();
-			souleater.SetHp(souleater.GetHp() - 10);
-			if (souleater.GetState() == idle_state) {
-				souleater.SetState(fight_state);
-				souleater.SetTarget(&players[id]);
+		if (souleaters[0].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
+			souleaters[0].m_lock.lock();
+			souleaters[0].SetHp(souleaters[0].GetHp() - 10);
+			if (souleaters[0].GetState() == idle_state) {
+				souleaters[0].SetState(fight_state);
+				souleaters[0].SetTarget(&players[id]);
 			}
-			souleater.m_lock.unlock();
-			std::cout << souleater.GetHp() << std::endl;
-			build_bt(&souleater, &players);
+			souleaters[0].m_lock.unlock();
+			std::cout << souleaters[0].GetHp() << std::endl;
+			build_bt(&souleaters[0], &players);
 		}
 		break;
 	}
 	case CS_DEMO_MONSTER_SETPOS: {
-		souleater.m_lock.lock();
-		souleater.SetPostion(XMFLOAT3(1014.f, 1024.f, 1429.f));
-		souleater.SetBoundingBox();
-		souleater.m_lock.unlock();
-		souleater.SetState(idle_state);
-		build_bt(&souleater, &players);
+		souleaters[0].m_lock.lock();
+		souleaters[0].SetPostion(XMFLOAT3(1014.f, 1024.f, 1429.f));
+		souleaters[0].SetBoundingBox();
+		souleaters[0].m_lock.unlock();
+		souleaters[0].SetState(idle_state);
+		build_bt(&souleaters[0], &players);
 		break;
 	}
 	case CS_DEMO_MONSTER_SETHP: {
-		souleater.m_lock.lock();
-		souleater.SetHp(50);
-		souleater.SetRAHp(0);
-		souleater.m_lock.unlock();
+		souleaters[0].m_lock.lock();
+		souleaters[0].SetHp(50);
+		souleaters[0].SetRAHp(0);
+		souleaters[0].m_lock.unlock();
 		break;
 	}
 	case CS_DEMO_MONSTER_BEHAVIOR: {
-		souleater.dash(7500.f);
+		souleaters[0].dash(7500.f);
 		break;
 	}
 	}
@@ -415,7 +422,7 @@ void SendStartGame(int id)
 	SC_ADD_MONSTER_PACKET sub_packet3;
 	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
 	sub_packet3.type = SC_PACKET_ADD_MONSTER;
-	sub_packet3.monster = souleater.GetData();
+	sub_packet3.monster = souleaters[0].GetData();
 
 	players[id].DoSend(&sub_packet3, sub_packet3.size);
 
@@ -463,7 +470,7 @@ void Disconnect(int id)
 	players[id].PlayerInit();
 	players[id].SetState(S_STATE::LOG_OUT);
 
-	if (gameroom.IsPlayerIn(id)) {
+	if (gamerooms[0].IsPlayerIn(id)) {
 
 		SC_LOGOUT_PACKET packet;
 		packet.size = sizeof(packet);

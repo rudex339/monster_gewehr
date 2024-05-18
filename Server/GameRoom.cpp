@@ -36,6 +36,11 @@ BOOL GameRoom::IsPlayerIn(int c_id)
 	return false;
 }
 
+BOOL GameRoom::IsPlayerEmpty()
+{
+	return false;
+}
+
 void GameRoom::DeletePlayerId(int c_id)
 {
 	for (auto& id : m_player_ids) {
