@@ -172,15 +172,14 @@ void BossThread()
 				if (souleaters[0].GetAnimation() == dash_ani) {
 					for (int ply_id : gameroom.GetPlyId()) {
 						if (ply_id == -1) continue;
-						if (players[ply_id].GetState() == S_STATE::IN_GAME) {
-							if (!players[ply_id].hit_on) {
-								if (players[ply_id].GetBoundingBox().Intersects(souleaters[0].GetBoundingBox())) {
-									players[ply_id].hit_on = 1;
-									players[ply_id].SetHp(players[ply_id].GetHp() - 50);
-									SendHitPlayer(players[ply_id].GetID());
-								}
-							}
-						}
+						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+						if (players[ply_id].hit_on) continue;
+
+						if (players[ply_id].GetBoundingBox().Intersects(souleaters[0].GetBoundingBox())) {
+							players[ply_id].hit_on = 1;
+							players[ply_id].SetHp(players[ply_id].GetHp() - 50);
+							SendHitPlayer(players[ply_id].GetID());
+						}						
 					}
 				}
 
@@ -189,15 +188,14 @@ void BossThread()
 						bite_cooltime = 13;
 						for (int ply_id : gameroom.GetPlyId()) {
 							if (ply_id == -1) continue;
-							if (players[ply_id].GetState() == S_STATE::IN_GAME) {
-								if (!players[ply_id].hit_on) {
-									if (players[ply_id].GetBoundingBox().Intersects(souleaters[0].GetBoundingBox())) {
-										players[ply_id].hit_on = 1;
-										players[ply_id].SetHp(players[ply_id].GetHp() - 25);
-										SendHitPlayer(players[ply_id].GetID());
-									}
-								}
-							}
+							if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+							if (players[ply_id].hit_on) continue;
+
+							if (players[ply_id].GetBoundingBox().Intersects(souleaters[0].GetBoundingBox())) {
+								players[ply_id].hit_on = 1;
+								players[ply_id].SetHp(players[ply_id].GetHp() - 25);
+								SendHitPlayer(players[ply_id].GetID());
+							}							
 						}
 					}
 					else {
