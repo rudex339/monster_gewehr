@@ -186,6 +186,7 @@ void Render_Sysytem::configure(World* world)
 	world->subscribe<SetCamera_Event>(this);
 	world->subscribe<DrawUI_Event>(this);
 	world->subscribe<KeyDown_Event>(this);
+	world->subscribe<Tab_Event>(this);
 
 }
 
@@ -342,18 +343,17 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 			// 텍스트 입력 박스
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 			m_d2dDeviceContext->FillRectangle(
-				{ editBox->x, editBox->y+3.0f, editBox->x + 400.f, editBox->y + 35.0f },
+				{ editBox->x, editBox->y + 3.0f, editBox->x + 400.f, editBox->y + 35.0f },
 				m_textBrush.Get()
 			);
-
-			// 텍스트 레이아웃
+			// 텍스트 레이아웃(아이디)
 			m_dwriteFactory->CreateTextLayout(
-				text.c_str(),
-				static_cast<UINT32>(text.length()),
+				text[editBox->index].c_str(),
+				static_cast<UINT32>(text[editBox->index].length()),
 				pTextFormat.Get(),
 				500,
 				200,
-				&pTextLayout
+				&pTextLayout[editBox->index]
 			);
 
 			// 텍스트
@@ -361,26 +361,26 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 
 			m_d2dDeviceContext->DrawTextLayout(
 				D2D1::Point2F(editBox->x, editBox->y),
-				pTextLayout,
+				pTextLayout[editBox->index],
 				m_textBrush.Get(),
 				D2D1_DRAW_TEXT_OPTIONS_NONE
 			);
 
+
 			// 커서 
-			if (cursorPosition <= text.length())
+			if (cursorPosition[textIndex] <= text[textIndex].length() && textIndex == editBox->index)
 			{
 				DWRITE_TEXT_METRICS textMetrics;
-				pTextLayout->GetMetrics(&textMetrics);
+				pTextLayout[textIndex]->GetMetrics(&textMetrics);
 				float cursorX = textMetrics.widthIncludingTrailingWhitespace + editBox->x + 1.0f;
 
 				m_d2dDeviceContext->DrawLine(
-					D2D1::Point2F(cursorX, editBox->y + 4.0f ),
+					D2D1::Point2F(cursorX, editBox->y + 4.0f),
 					D2D1::Point2F(cursorX, editBox->y + textMetrics.height - 1.0f),
 					m_textBrush.Get(),
 					1.0f
 				);
 			}
-			pTextLayout->Release();
 		}
 	);
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -479,22 +479,41 @@ void Render_Sysytem::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manag
 
 void Render_Sysytem::receive(World* world, const KeyDown_Event& event)
 {
-	if (event.key == VK_BACK && cursorPosition > 0)
+	bool isShiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+	bool isCapsLockOn = (GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+	wchar_t key = event.key;
+
+	if ((isShiftPressed && !isCapsLockOn) || (!isShiftPressed && isCapsLockOn))
 	{
-		text.erase(text.begin() + cursorPosition - 1);
-		cursorPosition--;
+		key = toupper(key);
 	}
-	else if (event.key == VK_LEFT && cursorPosition > 0)
+	else
 	{
-		cursorPosition--;
-	}
-	else if (event.key == VK_RIGHT && cursorPosition < text.length())
-	{
-		cursorPosition++;
+		key = tolower(key);
 	}
 
-	else {
-		text.insert(text.begin() + cursorPosition, static_cast<wchar_t>(event.key));
-		cursorPosition++;
+	if (event.key == VK_BACK && cursorPosition[textIndex] > 0)
+	{
+		text[textIndex].erase(text[textIndex].begin() + cursorPosition[textIndex] - 1);
+		cursorPosition[textIndex]--;
 	}
+	else if (event.key == VK_LEFT && cursorPosition[textIndex] > 0)
+	{
+		cursorPosition[textIndex]--;
+	}
+	else if (event.key == VK_RIGHT && cursorPosition[textIndex] < text[textIndex].length())
+	{
+		cursorPosition[textIndex]++;
+	}
+
+	else if(0x30 <= event.key && 0x39 >= event.key ||
+			0x41 <= event.key && 0x5A >= event.key) {
+		text[textIndex].insert(text[textIndex].begin() + cursorPosition[textIndex], static_cast<wchar_t>(key));
+		cursorPosition[textIndex]++;
+	}
+}
+
+void Render_Sysytem::receive(World* world, const Tab_Event& event)
+{
+	textIndex = (textIndex + 1) % 2;
 }

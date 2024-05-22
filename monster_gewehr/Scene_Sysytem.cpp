@@ -69,7 +69,11 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<ImageUI_Component>(L"image/monster_hunter_login.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-		ent->assign<TextBoxUI_Component>(800.0f, 340.0f);
+		ent->assign<TextBoxUI_Component>(800.0f, 340.0f, 0);
+
+		ent = world->create();
+		ent->assign<TextBoxUI_Component>(800.0f, 380.0f, 1);
+
 	}
 		break;
 	case LOBBY:

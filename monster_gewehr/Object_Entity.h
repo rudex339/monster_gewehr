@@ -208,9 +208,10 @@ struct TextUI_Component {
 
 struct TextBoxUI_Component {
 	float x, y;
+	int index;
 
 	TextBoxUI_Component() = default;
-	TextBoxUI_Component(float layoutX, float layoutY);
+	TextBoxUI_Component(float layoutX, float layoutY, int num);
 };
 
 struct ImageUI_Component {

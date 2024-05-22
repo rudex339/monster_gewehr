@@ -14,6 +14,10 @@ struct KeyDown_Event {
 	WPARAM key;
 };
 
+struct Tab_Event {
+	bool tab;
+};
+
 struct LIGHTS;
 
 //임시
@@ -23,7 +27,8 @@ struct DrawUI_Event {
 class Render_Sysytem : public EntitySystem,
 	public EventSubscriber<SetCamera_Event>,
 	public EventSubscriber<DrawUI_Event>,
-	public EventSubscriber<KeyDown_Event>
+	public EventSubscriber<KeyDown_Event>,
+	public EventSubscriber<Tab_Event>
 {
 private:
 	CCamera* m_pCamera = NULL;
@@ -45,9 +50,10 @@ private:
 	ID2D1Bitmap* m_bitmaps[10];
 
 	//editbox
-	IDWriteTextLayout* pTextLayout;
-	wstring	text;
-	size_t cursorPosition = 0;
+	IDWriteTextLayout* pTextLayout[2];
+	wstring	text[2];
+	int textIndex = 0;
+	size_t cursorPosition[2] = { 0, 0 };
 	wchar_t inputKey;
 
 
@@ -74,6 +80,7 @@ public:
 	//인시
 	virtual void receive(class World* world, const DrawUI_Event& event);
 	virtual void receive(class World* world, const KeyDown_Event& event);
+	virtual void receive(class World* world, const Tab_Event& event);
 
 
 	void SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList);

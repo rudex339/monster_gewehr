@@ -428,6 +428,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				case VK_TAB:
 					::ReleaseCapture();
 					m_pWorld->emit< CaptureHWND_Event>({ false });
+					m_pWorld->emit<Tab_Event>({ true });
 
 					break;
 				default:
