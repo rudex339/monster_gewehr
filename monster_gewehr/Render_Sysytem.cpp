@@ -28,7 +28,7 @@ bool is_camera_far(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 	float distance;
 	DirectX::XMStoreFloat(&distance, DirectX::XMVector3Length(DirectX::XMVectorSubtract(object_pos, camera_pos)));
 
-	if (distance > 2000.0f) {
+	if (distance > 700.0f) {
 		return true;
 	}
 
@@ -229,7 +229,7 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 			Entity* ent,
 			ComponentHandle<SkyBox_Component> SkyBox
 			) -> void {
-				//SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
+				SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
 			});
 
 		/*world->each<Terrain_Component>([&](

@@ -102,22 +102,17 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	{
 		normalW = normalize(input.normalW);
 	}
-	float4 cIllumination = Lighting(input.positionW, normalW);
-	//return(lerp(cColor, cIllumination, 0.5f));
-    //cColor = mul(cColor, cIllumination);
-    
-    //return cColor;
-    float3 hsvColor = RGBtoHSV(cColor.rgb);
-    float3 hsvIllumination = RGBtoHSV(cIllumination.rgb);
-
-// Interpolate only the saturation component
-    float3 interpolatedHSV = lerp(hsvColor, hsvIllumination, 0.4f);
-
-// Convert interpolated color back to RGB
-    float3 interpolatedRGB = HSVtoRGB(interpolatedHSV);
-
-// Combine RGB components with the alpha value
-    return float4(interpolatedRGB, cColor.a);
+	float4 cIllumination = Lighting(input.positionW, normalW);	
+	//standard
+    //return (lerp(cColor, cIllumination, 0.5f));
+	//flog
+    float4 FlogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    float3 disttoEye = length(gvCameraPosition - input.positionW);
+    float flogstart;
+    float flogrange;
+	
+    float flogAmount = saturate((disttoEye - 50.f) / 500.f);
+    return (lerp(lerp(cColor, cIllumination, 0.5f), FlogColor, flogAmount));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,5 +250,10 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
 
-	return(cColor);
+	//standard
+	//return(cColor);
+	//flog
+    float4 FlogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    return (FlogColor);
+
 }
