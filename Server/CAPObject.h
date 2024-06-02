@@ -27,7 +27,7 @@ public:
 	DirectX::XMFLOAT3 GetVelocity() { return m_velocity; }
 	FLOAT GetYaw() { return m_yaw; }
 	CHAR GetID() { return m_id; }
-	CHAR GetRoomID() { return m_room_id; }
+	SHORT GetRoomID() { return m_room_id; }
 	DirectX::BoundingOrientedBox GetBoundingBox() { return m_bounding_box; }
 	
 
@@ -38,7 +38,7 @@ protected:
 	FLOAT m_yaw;
 	DirectX::BoundingOrientedBox m_bounding_box;
 	CHAR m_id;
-	CHAR m_room_id;
+	SHORT m_room_id;
 };
 
 class Player : public CAPObject

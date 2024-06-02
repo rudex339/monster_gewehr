@@ -23,6 +23,8 @@ constexpr char CS_PACKET_START_GAME = 2;
 constexpr char CS_PACKET_PLAYER_MOVE = 3;
 constexpr char CS_PACKET_CHANGE_ANIMATION = 4;
 constexpr char CS_PACKET_PLAYER_ATTACK = 5;
+constexpr char CS_PACKET_CREATE_ROOM = 6;
+constexpr char CS_PACKET_SELECT_ROOM = 7;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -114,12 +116,26 @@ struct CS_PLAYER_ATTACK_PACKET
 	DirectX::XMFLOAT3 dir;
 };
 
+struct CS_CREATE_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR room_name[15];
+	SHORT room_num;
+};
+
+struct CS_SELECT_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	SHORT room_num;
+};
+
 struct CS_DEMO_PACKET
 {
 	UCHAR size;
 	UCHAR type;
 };
-
 
 // 로비상태에서 상점이나, 게임방에 들어갔을때 보낼 패킷을 나눠둠
 struct CS_LOBBY_PACKET
@@ -136,15 +152,6 @@ struct CS_SHOP_PACKET
 	SHORT amount;
 };
 
-struct CS_ROOM_PACKET
-{
-	UCHAR size;
-	UCHAR type;
-	UCHAR item;
-	CHAR room_name[15];
-	INT room_num;
-
-};
 
 // 패킷 타입 서버->클라
 
@@ -221,6 +228,25 @@ struct SC_END_GAME_PACKET
 	UCHAR size;
 	UCHAR type;
 	SHORT score;
+};
+
+struct SC_ROOM_LIST_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR room_name[15];
+	SHORT room_num;
+};
+
+struct SC_ROOM_STATE_PACKET	// 게임방에 들어가면 어떤 유저가 누가 있는지 준비상태인지 알려주는 패킷
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR id;
+	CHAR name[20];
+	CHAR weapon;
+	CHAR armor;
+	BOOL ready;
 };
 #pragma pack (pop)
 

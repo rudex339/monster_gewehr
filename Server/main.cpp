@@ -100,6 +100,7 @@ void ProcessClient(SOCKET sock)
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
 
 	players.try_emplace(id, id, client_sock);
+	
 
 	frame fps{}, frame_count{};
 
@@ -140,7 +141,7 @@ void ProcessClient(SOCKET sock)
 
 
 	Disconnect(id);
-	gamerooms[0].DeletePlayerId(id);
+	gamerooms[players[id].GetRoomID()].DeletePlayerId(id);
 
 	// 소켓 닫기
 	closesocket(client_sock);
@@ -264,8 +265,9 @@ void ProcessPacket(int id, char* p)
 		CS_LOGIN_PACKET* packet = reinterpret_cast<CS_LOGIN_PACKET*>(p);
 		players[id].SetName(packet->name);
 		players[id].SetWepon(packet->weapon);
+		players[id].SetRoomID(0);	// 임시로 0번으로 지정
 
-		if (gamerooms[0].SetPlayerId(id)) {
+		if (gamerooms[players[id].GetRoomID()].SetPlayerId(id)) {
 			players[id].SetByWeapon(2);
 			SendLoginInfo(id);
 		}
@@ -280,8 +282,9 @@ void ProcessPacket(int id, char* p)
 		players[id].SetPostion(packet->pos);
 		players[id].SetVelocity(packet->vel);
 		players[id].SetYaw(packet->yaw);
+		SHORT room_id = players[id].GetRoomID();
 
-		if (gamerooms[0].SetStartGame()) {
+		if (gamerooms[room_id].SetStartGame()) {
 			build_bt(&souleaters[0], &players);
 		}
 
@@ -326,6 +329,12 @@ void ProcessPacket(int id, char* p)
 			std::cout << souleaters[0].GetHp() << std::endl;
 			build_bt(&souleaters[0], &players);
 		}
+		break;
+	}
+	case CS_PACKET_CREATE_ROOM: {
+		break;
+	}
+	case CS_PACKET_SELECT_ROOM: {
 		break;
 	}
 	case CS_DEMO_MONSTER_SETPOS: {
