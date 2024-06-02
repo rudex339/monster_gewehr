@@ -229,3 +229,13 @@ struct ImageUI_Component {
 	ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect);
 
 };
+
+struct Button_Component : public ImageUI_Component, TextUI_Component {
+	D2D1_RECT_F m_Rect, m_Rectsaved;
+	bool on;
+
+	Button_Component() = default;
+	Button_Component(const wchar_t* imagePath, wstring m_text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect);
+
+	void CursorOn(POINT cursor);
+};

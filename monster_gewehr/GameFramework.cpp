@@ -394,6 +394,12 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		}
 		break;
 	case WM_MOUSEMOVE:
+		SetCapture(hWnd);
+		GetCursorPos(&m_ptOldCursorPos);
+		ScreenToClient(hWnd, &m_ptOldCursorPos);
+		if (m_pWorld) {
+			m_pWorld->emit<Mouse_Event>({ m_ptOldCursorPos });
+		}
 		break;
 	default:
 		break;

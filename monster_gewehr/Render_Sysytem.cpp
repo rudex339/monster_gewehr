@@ -187,6 +187,7 @@ void Render_Sysytem::configure(World* world)
 	world->subscribe<DrawUI_Event>(this);
 	world->subscribe<KeyDown_Event>(this);
 	world->subscribe<Tab_Event>(this);
+	world->subscribe<Mouse_Event>(this);
 
 }
 
@@ -346,7 +347,7 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 				{ editBox->x, editBox->y + 3.0f, editBox->x + 400.f, editBox->y + 35.0f },
 				m_textBrush.Get()
 			);
-			// 텍스트 레이아웃(아이디)
+			// 텍스트 레이아웃
 			m_dwriteFactory->CreateTextLayout(
 				text[editBox->index].c_str(),
 				static_cast<UINT32>(text[editBox->index].length()),
@@ -383,6 +384,40 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 			}
 		}
 	);
+
+	world->each<Button_Component>([&](
+		Entity* ent,
+		ComponentHandle<Button_Component> button
+		)-> void {
+
+			button->CursorOn(m_cursorPos);
+
+			m_d2dDeviceContext->DrawBitmap(
+				button->m_bitmap,
+				button->m_Rect,
+				button->m_opacity,
+				button->m_mode,
+				button->m_imageRect
+			);
+
+			{
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+				
+				m_smalltextFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
+				m_smalltextFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치
+
+				m_d2dDeviceContext->DrawTextW(
+					button->m_text.data(),
+					button->m_text.size(),
+					m_smalltextFormat.Get(),
+					&button->m_Rect,
+					m_textBrush.Get()
+				);
+			}
+
+		}
+	);
+
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
@@ -516,4 +551,9 @@ void Render_Sysytem::receive(World* world, const KeyDown_Event& event)
 void Render_Sysytem::receive(World* world, const Tab_Event& event)
 {
 	textIndex = (textIndex + 1) % 2;
+}
+
+void Render_Sysytem::receive(World* world, const Mouse_Event& event)
+{
+	m_cursorPos = event.cursorPos;
 }

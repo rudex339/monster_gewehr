@@ -18,6 +18,10 @@ struct Tab_Event {
 	bool tab;
 };
 
+struct Mouse_Event {
+	POINT cursorPos;
+};
+
 struct LIGHTS;
 
 //юс╫ц
@@ -28,7 +32,8 @@ class Render_Sysytem : public EntitySystem,
 	public EventSubscriber<SetCamera_Event>,
 	public EventSubscriber<DrawUI_Event>,
 	public EventSubscriber<KeyDown_Event>,
-	public EventSubscriber<Tab_Event>
+	public EventSubscriber<Tab_Event>,
+	public EventSubscriber<Mouse_Event>
 {
 private:
 	CCamera* m_pCamera = NULL;
@@ -52,6 +57,7 @@ private:
 	//editbox
 	IDWriteTextLayout* pTextLayout[2];
 	wstring	text[2];
+
 	int textIndex = 0;
 	size_t cursorPosition[2] = { 0, 0 };
 	wchar_t inputKey;
@@ -64,6 +70,8 @@ private:
 	ComPtr<ID2D1SolidColorBrush> m_textBrush;
 
 	ComPtr<ID2D1StrokeStyle> m_trokeBrush;
+
+	POINT m_cursorPos;
 	
 	//boundingbox
 	Box* m_pBox;
@@ -81,6 +89,7 @@ public:
 	virtual void receive(class World* world, const DrawUI_Event& event);
 	virtual void receive(class World* world, const KeyDown_Event& event);
 	virtual void receive(class World* world, const Tab_Event& event);
+	virtual void receive(class World* world, const Mouse_Event& event);
 
 
 	void SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList);

@@ -154,3 +154,32 @@ TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY, int num)
 	y = layoutY;
 	index = num;
 }
+
+Button_Component::Button_Component(const wchar_t* imagePath, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)
+{
+	m_text = text;
+	m_d2dDeviceContext = deviceContext;
+	m_d2dFactory = factory;
+	m_bitmap = bitmap;
+	m_Rectsaved = m_Rect = posrect;
+	m_imageRect = imagerect;
+	m_mode = mode;
+	m_opacity = opacity;
+	on = false;
+
+	LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
+}
+
+void Button_Component::CursorOn(POINT cursor)
+{
+	if (cursor.x > m_Rectsaved.left && cursor.x < m_Rectsaved.right && cursor.y > m_Rectsaved.top && cursor.y < m_Rectsaved.bottom) {
+		m_Rect.bottom = m_Rectsaved.bottom + 10.0f;
+		m_Rect.right = m_Rectsaved.right + 10.0f;
+		m_Rect.left = m_Rectsaved.left - 10.0f;
+		m_Rect.top = m_Rectsaved.top - 10.0f;
+	}
+	else {
+		m_Rect = m_Rectsaved;
+	}
+	
+}

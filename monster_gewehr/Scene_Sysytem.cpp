@@ -89,9 +89,11 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
 		ent = world->create();
-		ent->assign<TextUI_Component>(L"LOBBY",
-			(float)FRAME_BUFFER_HEIGHT / 2 - 20, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 60, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+		D2D1_RECT_F sRect, imageRect;
+		sRect = { FRAME_BUFFER_WIDTH/2 - 50.f , FRAME_BUFFER_HEIGHT/2 - 15.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 15.f };
+		imageRect = { 0, 0, 1000, 563 };
+		ent->assign<Button_Component>(L"image/monster_hunter_login.png", L"게임시작", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 
 	}
