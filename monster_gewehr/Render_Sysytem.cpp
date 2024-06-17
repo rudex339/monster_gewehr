@@ -3,6 +3,8 @@
 #include "Object_Entity.h"
 #include "ObjectManager.h"
 #include "Player_Entity.h"
+#include "Sever_Sysyem.h"
+#include "Scene_Sysytem.h"
 
 struct LIGHTS
 {
@@ -103,7 +105,7 @@ HRESULT LoadBitmapFromFile(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDev
 }
 
 
-Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory)
+Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
 
@@ -181,22 +183,21 @@ Render_Sysytem::Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,
 	m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 }
 
-void Render_Sysytem::configure(World* world)
+void Render_System::configure(World* world)
 {
 	world->subscribe<SetCamera_Event>(this);
 	world->subscribe<DrawUI_Event>(this);
 	world->subscribe<KeyDown_Event>(this);
 	world->subscribe<Tab_Event>(this);
 	world->subscribe<Mouse_Event>(this);
-
 }
 
-void Render_Sysytem::unconfigure(World* world)
+void Render_System::unconfigure(World* world)
 {
 	world->unsubscribeAll(this);
 }
 
-void Render_Sysytem::tick(World* world, float deltaTime)
+void Render_System::tick(World* world, float deltaTime)
 {
 	if (m_pCamera) {
 		if (m_pd3dGraphicsRootSignature) m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -302,12 +303,12 @@ void Render_Sysytem::tick(World* world, float deltaTime)
 	}
 }
 
-void Render_Sysytem::receive(World* world, const SetCamera_Event& event)
+void Render_System::receive(World* world, const SetCamera_Event& event)
 {
 	m_pCamera = event.pCamera;
 }
 
-void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
+void Render_System::receive(World* world, const DrawUI_Event& event)
 {
 	m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 	world->each<TextUI_Component>([&](
@@ -391,7 +392,6 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 		)-> void {
 
 			button->CursorOn(m_cursorPos);
-
 			m_d2dDeviceContext->DrawBitmap(
 				button->m_bitmap,
 				button->m_Rect,
@@ -399,6 +399,7 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 				button->m_mode,
 				button->m_imageRect
 			);
+			
 
 			{
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
@@ -415,6 +416,29 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 				);
 			}
 
+
+			if (button->on && clicked) {
+				switch (button->button_id)
+				{
+				case -1:
+					exit(0);
+					break;
+				case 0:
+					cout << "0번 눌림 게임시작" << endl;
+					world->emit< ChangeScene_Event>({ GAME });
+					world->emit<Game_Start>({});
+					break;
+				case 1:
+					cout << "1번 눌림" << endl;
+					break;
+				case 2:
+					cout << "2번 눌림" << endl;
+					break;
+				default:
+					cout << "디폴트" << endl;
+					break;
+				}
+			}
 		}
 	);
 
@@ -505,14 +529,14 @@ void Render_Sysytem::receive(World* world, const DrawUI_Event& event)
 	);
 }
 
-void Render_Sysytem::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)
+void Render_System::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dCommandList = pd3dCommandList;
 	m_pd3dGraphicsRootSignature = manager->GetGraphicsRootSignature();
 	m_pd3dCbvSrvDescriptorHeap = manager->GetCbvSrvDescriptorHeap();
 }
 
-void Render_Sysytem::receive(World* world, const KeyDown_Event& event)
+void Render_System::receive(World* world, const KeyDown_Event& event)
 {
 	bool isShiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
 	bool isCapsLockOn = (GetKeyState(VK_CAPITAL) & 0x0001) != 0;
@@ -548,12 +572,13 @@ void Render_Sysytem::receive(World* world, const KeyDown_Event& event)
 	}
 }
 
-void Render_Sysytem::receive(World* world, const Tab_Event& event)
+void Render_System::receive(World* world, const Tab_Event& event)
 {
 	textIndex = (textIndex + 1) % 2;
 }
 
-void Render_Sysytem::receive(World* world, const Mouse_Event& event)
+void Render_System::receive(World* world, const Mouse_Event& event)
 {
 	m_cursorPos = event.cursorPos;
+	clicked = event.click;
 }

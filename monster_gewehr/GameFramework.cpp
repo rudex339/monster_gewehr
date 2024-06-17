@@ -372,6 +372,9 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_LBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
+
+		GetCursorPos(&m_ptClientCursorPos);
+		ScreenToClient(hWnd, &m_ptClientCursorPos);
 		if (m_pWorld) {
 			m_pWorld->emit< CaptureHWND_Event>({ true, true });
 			m_pWorld->emit<CursorPos_Event>({ m_ptOldCursorPos });
@@ -387,6 +390,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	case WM_LBUTTONUP:
 		m_pWorld->emit< CaptureHWND_Event>({ true, false });
+		m_pWorld->emit<Mouse_Event>({ m_ptClientCursorPos, true });
 		break;
 	case WM_RBUTTONUP:
 		if (m_pWorld) {
@@ -395,10 +399,12 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	case WM_MOUSEMOVE:
 		SetCapture(hWnd);
-		GetCursorPos(&m_ptOldCursorPos);
-		ScreenToClient(hWnd, &m_ptOldCursorPos);
+		::GetCursorPos(&m_ptOldCursorPos);
+
+		GetCursorPos(&m_ptClientCursorPos);
+		ScreenToClient(hWnd, &m_ptClientCursorPos);
 		if (m_pWorld) {
-			m_pWorld->emit<Mouse_Event>({ m_ptOldCursorPos });
+			m_pWorld->emit<Mouse_Event>({ m_ptClientCursorPos, false });
 		}
 		break;
 	default:
@@ -523,7 +529,7 @@ void GameFramework::BuildObjects()
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
 	m_pWorld->registerSystem(new Animate_System());
-	m_pWorld->registerSystem(new Render_Sysytem(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get()));
+	m_pWorld->registerSystem(new Render_System(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get()));
 
 
 	m_pWorld->emit<ChangeScene_Event>({ LOGIN });

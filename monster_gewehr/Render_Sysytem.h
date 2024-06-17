@@ -20,6 +20,7 @@ struct Tab_Event {
 
 struct Mouse_Event {
 	POINT cursorPos;
+	bool click;
 };
 
 struct LIGHTS;
@@ -28,7 +29,7 @@ struct LIGHTS;
 struct DrawUI_Event {
 };
 
-class Render_Sysytem : public EntitySystem,
+class Render_System : public EntitySystem,
 	public EventSubscriber<SetCamera_Event>,
 	public EventSubscriber<DrawUI_Event>,
 	public EventSubscriber<KeyDown_Event>,
@@ -63,6 +64,10 @@ private:
 	wchar_t inputKey;
 
 
+	// button
+	bool clicked;
+	int button_event;
+
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;
 	ComPtr<IDWriteTextFormat> pTextFormat;
@@ -78,8 +83,8 @@ private:
 
 public:
 
-	Render_Sysytem() = default;
-	Render_Sysytem(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory);
+	Render_System() = default;
+	Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory);
 	virtual void configure(class World* world);
 	virtual void unconfigure(class World* world);
 	virtual void tick(class World* world, float deltaTime);

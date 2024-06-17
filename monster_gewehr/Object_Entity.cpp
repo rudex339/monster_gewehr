@@ -155,8 +155,9 @@ TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY, int num)
 	index = num;
 }
 
-Button_Component::Button_Component(const wchar_t* imagePath, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)
+Button_Component::Button_Component(int id, const wchar_t* imagePath, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)
 {
+	button_id = id;
 	m_text = text;
 	m_d2dDeviceContext = deviceContext;
 	m_d2dFactory = factory;
@@ -167,7 +168,9 @@ Button_Component::Button_Component(const wchar_t* imagePath, wstring text, ID2D1
 	m_opacity = opacity;
 	on = false;
 
-	LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
+	if (imagePath != NULL) {
+		LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
+	}
 }
 
 void Button_Component::CursorOn(POINT cursor)
@@ -177,9 +180,10 @@ void Button_Component::CursorOn(POINT cursor)
 		m_Rect.right = m_Rectsaved.right + 10.0f;
 		m_Rect.left = m_Rectsaved.left - 10.0f;
 		m_Rect.top = m_Rectsaved.top - 10.0f;
+		on = true;
 	}
 	else {
 		m_Rect = m_Rectsaved;
+		on = false;
 	}
-	
 }

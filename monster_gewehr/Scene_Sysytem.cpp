@@ -5,7 +5,6 @@
 #include "ObjectManager.h"
 #include "Sever_Sysyem.h"
 #include "PlayerControl_System.h"
-#include "Render_Sysytem.h"
 
 Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory):
 	m_pObjectManager(pObjectManager),
@@ -75,7 +74,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<TextBoxUI_Component>(800.0f, 380.0f, 1);
 
 	}
-		break;
+			  break;
 	case LOBBY:
 	{
 		world->reset();
@@ -89,13 +88,28 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
 		ent = world->create();
-		D2D1_RECT_F sRect, imageRect;
-		sRect = { FRAME_BUFFER_WIDTH/2 - 50.f , FRAME_BUFFER_HEIGHT/2 - 15.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 15.f };
+		D2D1_RECT_F imageRect;
+		D2D1_RECT_F sRect[4] = {{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 - 15.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 15.f},
+					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 30.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 60.f},
+					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 75.f, FRAME_BUFFER_WIDTH / 2 + 50.f, FRAME_BUFFER_HEIGHT / 2 + 105.f},
+					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 130.f, FRAME_BUFFER_WIDTH / 2 + 50.f, FRAME_BUFFER_HEIGHT / 2 + 160.f}};
+		
 		imageRect = { 0, 0, 1000, 563 };
-		ent->assign<Button_Component>(L"image/monster_hunter_login.png", L"게임시작", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
+		ent->assign<Button_Component>(0, L"image/monster_hunter_login.png", L"게임시작", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
+		ent = world->create();
+		ent->assign<Button_Component>(1, L"image/monster_hunter_login.png", L"상점", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+		ent = world->create();
+		ent->assign<Button_Component>(2, L"image/monster_hunter_login.png", L"장비창", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+		ent = world->create();
+		ent->assign<Button_Component>(-1, L"image/monster_hunter_login.png", L"게임종료", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
 		break;
 	case GAME:

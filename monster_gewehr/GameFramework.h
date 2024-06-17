@@ -107,6 +107,7 @@ private:
 	CCamera						*m_pCamera = NULL;
 
 	POINT						m_ptOldCursorPos;
+	POINT						m_ptClientCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];
 };
