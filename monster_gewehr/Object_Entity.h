@@ -27,6 +27,7 @@ struct Model_Component {
 	CLoadedModelInfo* m_MeshModel;
 	string model_name;
 
+	unordered_map<string, GameObjectModel*> m_pSocketObjects;
 	Model_Component() = default;
 	Model_Component(CLoadedModelInfo* MeshModel, string name)
 		:m_MeshModel(MeshModel), model_name(name) {}
@@ -56,7 +57,9 @@ struct State_Component {
 struct Position_Component {
 	XMFLOAT4X4 m_xmf4x4World;
 	XMFLOAT3 Position;
-	Position_Component() : m_xmf4x4World(Matrix4x4::Identity()) {}
+
+
+	Position_Component() : m_xmf4x4World(Matrix4x4::Identity()){}
 	Position_Component(float x, float y, float z) {
 		m_xmf4x4World = Matrix4x4::Identity();
 

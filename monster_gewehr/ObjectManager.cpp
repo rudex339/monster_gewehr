@@ -115,9 +115,13 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_ModelList.insert({ "BP_building60_SM_window8_StaticMeshComponent0",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/BP_building60_SM_window8_StaticMeshComponent0.bin", NULL) });
+
 	m_ModelList.insert({ "Cube",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Cube.bin", NULL) });
+	
+
+
 	m_ModelList.insert({ "SM_broken_concrete1",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/SM_broken_concrete1.bin", NULL) });

@@ -594,6 +594,15 @@ void CStandardMesh::OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 5, pVertexBufferViews);
 }
 
+void CStandardMesh::SetTileTexture2d(float x, float y)
+{
+	//for (int i = 0; i < nTextureCoords; ++i)
+	//{
+	//	m_pxmf2TextureCoords0[i].x *= 5.0f;
+	//	m_pxmf2TextureCoords0[i].y *= 5.0f;
+	//}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CSkinnedMesh::CSkinnedMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) : CStandardMesh(pd3dDevice, pd3dCommandList)
