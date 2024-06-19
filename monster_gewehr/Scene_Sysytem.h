@@ -5,6 +5,10 @@ class ObjectManager;
 enum {
 	LOGIN,
 	LOBBY,
+	ROOMS,
+	INROOM,
+	EQUIPMENT,
+	SHOP,
 	GAME,
 	END
 };

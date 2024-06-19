@@ -38,8 +38,35 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 			break;
 		case LOBBY:
 			if (pKeysBuffer[VK_SPACE] & 0xF0) {
+				/*world->emit< ChangeScene_Event>({ GAME });
+				world->emit<Game_Start>({});*/
+			}
+			break;
+		case ROOMS:
+			if (pKeysBuffer[VK_SPACE] & 0xF0) {
+				world->emit< ChangeScene_Event>({ INROOM });
+			}
+			else if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
+				world->emit< ChangeScene_Event>({ LOBBY });
+			}
+			break;
+		case INROOM:
+			if (pKeysBuffer[VK_RETURN] & 0xF0) {
 				world->emit< ChangeScene_Event>({ GAME });
 				world->emit<Game_Start>({});
+			}
+			else if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
+				world->emit< ChangeScene_Event>({ ROOMS });
+			}
+			break;
+		case SHOP:
+			if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
+				world->emit< ChangeScene_Event>({ LOBBY });
+			}
+			break;
+		case EQUIPMENT:
+			if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
+				world->emit< ChangeScene_Event>({ LOBBY });
 			}
 			break;
 		case GAME:
@@ -74,7 +101,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<TextBoxUI_Component>(800.0f, 380.0f, 1);
 
 	}
-			  break;
+	break;
+
 	case LOBBY:
 	{
 		world->reset();
@@ -111,7 +139,50 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<Button_Component>(-1, L"image/monster_hunter_login.png", L"게임종료", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
-		break;
+	break;
+
+	case ROOMS:
+	{
+		world->reset();
+		Entity* ent = world->create();
+		ent->assign<TextUI_Component>(L"방들 있는 로비",
+			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+	}
+	break;
+
+	case INROOM:
+	{
+		world->reset();
+		Entity* ent = world->create();
+		ent->assign<TextUI_Component>(L"방",
+			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+	} 
+	break;
+	
+	case SHOP:
+	{
+		world->reset();
+		Entity* ent = world->create();
+		ent->assign<TextUI_Component>(L"상점",
+			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+	}
+	break;
+
+	case EQUIPMENT:
+	{
+		world->reset();
+		Entity* ent = world->create();
+		ent->assign<TextUI_Component>(L"장비창",
+			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+	}
+	break;
+
+
+
 	case GAME:
 	{
 		world->reset();

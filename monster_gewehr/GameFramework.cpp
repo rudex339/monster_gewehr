@@ -425,7 +425,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			switch (wParam)
 			{
 				case VK_ESCAPE:
-					::PostQuitMessage(0);
+					//::PostQuitMessage(0);
 					break;
 				case VK_RETURN:
 					break;

@@ -425,14 +425,16 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case 0:
 					cout << "0번 눌림 게임시작" << endl;
-					world->emit< ChangeScene_Event>({ GAME });
-					world->emit<Game_Start>({});
+					world->emit< ChangeScene_Event>({ ROOMS });
 					break;
 				case 1:
 					cout << "1번 눌림" << endl;
+					world->emit< ChangeScene_Event>({ SHOP });
 					break;
 				case 2:
 					cout << "2번 눌림" << endl;
+					world->emit< ChangeScene_Event>({ EQUIPMENT });
+
 					break;
 				default:
 					cout << "디폴트" << endl;
