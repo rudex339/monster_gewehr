@@ -19,7 +19,7 @@ constexpr float MONSTER_MAX_HP = 1000;
 
 // 패킷 타입
 constexpr char CS_PACKET_LOGIN = 1;
-constexpr char CS_PACKET_START_GAME = 2;
+constexpr char CS_PACKET_START_GAME = 2;	// 지금은 게임룸 없이 서로 따로따로 게임을 시작하나 나중에 이건 방장이 게임시작 버튼을 눌렀다는 신호를 보내는 패킷으로 사용할것임
 constexpr char CS_PACKET_PLAYER_MOVE = 3;
 constexpr char CS_PACKET_CHANGE_ANIMATION = 4;
 constexpr char CS_PACKET_PLAYER_ATTACK = 5;
@@ -42,6 +42,7 @@ constexpr char SC_PACKET_LOGOUT = 8;
 constexpr char SC_PACKET_HIT_PLAYER = 9;
 constexpr char SC_PACKET_END_GAME = 10;
 constexpr char SC_PACKET_MAX_PLAYER = 11;
+constexpr char SC_PACKET_GAME_START = 12; // 게임룸 구현시 방장이 시작했다는 것을 알리는 패킷
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -160,6 +161,12 @@ struct SC_LOGIN_INFO_PACKET
 	UCHAR size;
 	UCHAR type;
 	CHAR id;
+};
+
+struct SC_GAME_START_PACKET	// 방장이 게임을 시작했으면 클라이언트들이 add_player를 다 끝내고 이 패킷을 받아 인게임 씬으로 바꿀것임
+{
+	UCHAR size;
+	UCHAR type;
 };
 
 struct SC_ADD_PLAYER_PACKET

@@ -278,6 +278,7 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_PACKET_START_GAME: {
+		// 지금은 클라한테 위치정보를 받지만 방이 생성되면 안받게 할거임
 		CS_START_GAME_PACKET* packet = reinterpret_cast<CS_START_GAME_PACKET*>(p);
 		players[id].SetPostion(packet->pos);
 		players[id].SetVelocity(packet->vel);
@@ -285,7 +286,7 @@ void ProcessPacket(int id, char* p)
 		SHORT room_id = players[id].GetRoomID();
 
 		if (gamerooms[room_id].SetStartGame()) {
-			build_bt(&souleaters[0], &players);
+			build_bt(&souleaters[room_id], &players);
 		}
 
 		SendStartGame(id);
@@ -435,6 +436,42 @@ void SendStartGame(int id)
 
 	players[id].SetState(S_STATE::IN_GAME);
 }
+
+//void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 사람들한테도 모두 게임이 시작이 되었다는 신호가 먼저 가야함
+//{
+//	int retval;
+//
+//	int gameroom_id = players[id].GetRoomID();
+//	auto plys_id = gamerooms[gameroom_id].GetPlyId();
+//
+//	SC_GAME_START_PACKET start_p;
+//	start_p.size = sizeof(start_p);
+//	start_p.type = SC_PACKET_GAME_START;
+//
+//	// 방이 다 만들어지면 지금은 클라에서 위치를 받아서 이를 다른 플레이어들에게 넘겨줬으나
+//	// 이것은 서버에서 플레이어 첫 위치를 설정해서 내 자신에게도 첫 시작지점이 어디인지 보내줄 것임
+//	// 이거 구현 다하면 주석은 지우거나 다 구현했다는 식으로 다시 메모할것
+//	// 패킷 소통을 줄이기 위해 방장소켓을 관리하는 쓰레드에서 다른 클라이언트의 위치정보등을 리셋하고 보내는것을 다 전담할거임
+//	for (int send_id : plys_id) {
+//		SC_ADD_PLAYER_PACKET add_p;
+//		add_p.size = sizeof(add_p);
+//		add_p.type = SC_PACKET_ADD_PLAYER;
+//		strcpy(add_p.name, players[send_id].GetName().c_str());
+//		add_p.player_data = players[send_id].GetPlayerData();
+//		add_p.weapon = players[send_id].GetWeapon();
+//		for (int recv_id : plys_id) {
+//			retval = players[recv_id].DoSend(&add_p, add_p.size);
+//
+//		}
+//		SC_ADD_MONSTER_PACKET monster_p;
+//		monster_p.size = sizeof(SC_ADD_MONSTER_PACKET);
+//		monster_p.type = SC_PACKET_ADD_MONSTER;
+//		monster_p.monster = souleaters[gameroom_id].GetData();
+//
+//		players[send_id].DoSend(&monster_p, monster_p.size);
+//
+//	}
+//}
 
 void SendPlayerMove(int id)
 {
