@@ -27,10 +27,17 @@ struct Model_Component {
 	CLoadedModelInfo* m_MeshModel;
 	string model_name;
 
-	unordered_map<string, GameObjectModel*> m_pSocketObjects;
+	GameObjectModel* socket = NULL;
+
+	Model_Component* m_pParentObject = NULL;
+	vector<Model_Component*> m_pchildObjects;
 	Model_Component() = default;
 	Model_Component(CLoadedModelInfo* MeshModel, string name)
 		:m_MeshModel(MeshModel), model_name(name) {}
+
+	void addChildComponent(Model_Component* child);
+
+	void SetSocket(GameObjectModel* rootModel, char* name);
 };
 
 struct AnimationController_Component {

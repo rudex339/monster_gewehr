@@ -276,7 +276,7 @@ void Render_System::tick(World* world, float deltaTime)
 					xmf4x4World._42 = pos->Position.y;
 					xmf4x4World._43 = pos->Position.z;
 
-					//text
+					//test
 					if (m_pBox) {
 						if (ent->has<BoundingBox_Component>()) {
 							ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
@@ -287,11 +287,22 @@ void Render_System::tick(World* world, float deltaTime)
 						}
 					}
 
+
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
 
 					AnimationController->m_AnimationController->UpdateShaderVariables();
 
 					Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
+
+					for (auto child : Model->m_pchildObjects) {
+						if (child->socket) {
+							child->m_MeshModel->m_pModelRootObject->UpdateTransform(&child->socket->m_xmf4x4World);
+						}
+						else {
+							child->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
+						}
+						child->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
+					}
 
 
 				}

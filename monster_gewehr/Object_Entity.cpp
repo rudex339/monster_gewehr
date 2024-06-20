@@ -10,7 +10,12 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	float sx, float sy, float sz)
 {
 	CLoadedModelInfo* model = OM->Get_ModelInfo("Soldier");
-	ent->assign<Model_Component>(model, model->m_pModelRootObject->m_pstrFrameName);
+	auto Mcomponent = ent->assign<Model_Component>(model, model->m_pModelRootObject->m_pstrFrameName);
+	Model_Component* temp_mComponet = new Model_Component(OM->Get_ModelInfo("M4A1"), 
+		OM->Get_ModelInfo("M4A1")->m_pModelRootObject->m_pstrFrameName);
+	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Finger0");
+	Mcomponent.get().addChildComponent(temp_mComponet);
+
 	auto controller = ent->assign<AnimationController_Component>(
 		new CAnimationController(pd3dDevice, pd3dCommandList, 6, model), 0);
 	for (int i = 0; i < 6; i++) {
@@ -186,4 +191,15 @@ void Button_Component::CursorOn(POINT cursor)
 		m_Rect = m_Rectsaved;
 		on = false;
 	}
+}
+
+void Model_Component::addChildComponent(Model_Component* child)
+{
+	child->m_pParentObject = this;
+	m_pchildObjects.push_back(child);
+}
+
+void Model_Component::SetSocket(GameObjectModel* rootModel, char* name)
+{
+	socket = rootModel->FindFrame(name);
 }
