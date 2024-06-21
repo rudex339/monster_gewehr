@@ -1,4 +1,5 @@
 #pragma once
+#include "Object_Entity.h"
 
 class ObjectManager;
 
@@ -11,6 +12,15 @@ enum {
 	SHOP,
 	GAME,
 	END
+};
+
+enum {
+	ExitBtn = -1,
+	GameStartBtn,
+	ShopBtn,
+	EquipBtn,
+	MakeRoomBtn,
+	RoomBtn,
 };
 
 struct ChangeScene_Event {
@@ -39,7 +49,12 @@ private:
 	Entity* m_pPawn;
 
 	short m_score = 0;
+
+	// 规 格废
+	vector<Button_Component> Rooms;
+
 public:
+
 	Scene_Sysytem() = default;
 	Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory);
 
@@ -51,5 +66,8 @@ public:
 	
 
 	void BuildScene(World* world, char* pstrFileName);
+
+	// 规 积己 窃荐
+	void AddRoom();
 };
 

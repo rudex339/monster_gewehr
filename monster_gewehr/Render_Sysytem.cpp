@@ -105,14 +105,15 @@ HRESULT LoadBitmapFromFile(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDev
 }
 
 
-Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory)
+Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, Scene_Sysytem* scene)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
 
 	m_d2dDeviceContext = d2dDeviceContext;
 	m_dwriteFactory = dwriteFactory;
 	m_d2dFactory = d2dFactory;
-		
+	m_scene = scene;
+
 	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
@@ -202,8 +203,6 @@ void Render_System::tick(World* world, float deltaTime)
 	if (m_pCamera) {
 		if (m_pd3dGraphicsRootSignature) m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 		if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
-
-
 
 		m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 		m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
@@ -431,26 +430,35 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			if (button->on && clicked) {
 				switch (button->button_id)
 				{
-				case -1:
+				case ExitBtn:
 					exit(0);
 					break;
-				case 0:
+				case GameStartBtn:
 					cout << "0번 눌림 게임시작" << endl;
 					world->emit< ChangeScene_Event>({ ROOMS });
 					break;
-				case 1:
-					cout << "1번 눌림" << endl;
+				case ShopBtn:
+					cout << "상점 눌림" << endl;
 					world->emit< ChangeScene_Event>({ SHOP });
 					break;
-				case 2:
-					cout << "2번 눌림" << endl;
+				case EquipBtn:
+					cout << "장비창 눌림" << endl;
 					world->emit< ChangeScene_Event>({ EQUIPMENT });
-
+					break;
+				case MakeRoomBtn:
+					cout << "방 생성" << endl;
+					m_scene->AddRoom();
+					world->emit< ChangeScene_Event>({ ROOMS });
+					break;
+				case RoomBtn:
+					cout << "방 입장" << endl;
+					world->emit< ChangeScene_Event>({ INROOM });
 					break;
 				default:
 					cout << "디폴트" << endl;
 					break;
 				}
+				Clicked(); // 버튼이 눌리고 나면 clicked를 false로 변경(원래 마우스를 움직여야만 false로 바뀌기 때문에 생기는 버그 해결용)
 			}
 		}
 	);

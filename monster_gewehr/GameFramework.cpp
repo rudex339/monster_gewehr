@@ -439,7 +439,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 					break;
 				case VK_TAB:
 					::ReleaseCapture();
-					m_pWorld->emit< CaptureHWND_Event>({ false });
+					m_pWorld->emit< CaptureHWND_Event>({ false, false });
 					m_pWorld->emit<Tab_Event>({ true });
 
 					break;
@@ -524,12 +524,13 @@ void GameFramework::BuildObjects()
 
 
 	//set System
-	m_pWorld->registerSystem(new Scene_Sysytem(m_pObjectManager, m_pd3dDevice.Get(), m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get()));
+	Scene_Sysytem* Scene = new Scene_Sysytem(m_pObjectManager, m_pd3dDevice.Get(), m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get());
+	m_pWorld->registerSystem(Scene);
 	m_pWorld->registerSystem(new PlayerControl_System());
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System());
 	m_pWorld->registerSystem(new Animate_System());
-	m_pWorld->registerSystem(new Render_System(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get()));
+	m_pWorld->registerSystem(new Render_System(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get(), Scene));
 
 
 	m_pWorld->emit<ChangeScene_Event>({ LOGIN });

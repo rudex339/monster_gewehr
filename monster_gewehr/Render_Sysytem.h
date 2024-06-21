@@ -1,5 +1,6 @@
 #pragma once
 #include "Timer.h"
+#include "Scene_Sysytem.h"
 
 
 class ObjectManager;
@@ -41,7 +42,7 @@ private:
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = NULL;
-
+	Scene_Sysytem* m_scene;
 	
 
 	XMFLOAT4							m_xmf4GlobalAmbient;
@@ -81,10 +82,11 @@ private:
 	//boundingbox
 	Box* m_pBox;
 
+
 public:
 
 	Render_System() = default;
-	Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory);
+	Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, Scene_Sysytem* scene);
 	virtual void configure(class World* world);
 	virtual void unconfigure(class World* world);
 	virtual void tick(class World* world, float deltaTime);
@@ -96,6 +98,7 @@ public:
 	virtual void receive(class World* world, const Tab_Event& event);
 	virtual void receive(class World* world, const Mouse_Event& event);
 
+	void Clicked() { clicked = false; };
 
 	void SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList);
 };

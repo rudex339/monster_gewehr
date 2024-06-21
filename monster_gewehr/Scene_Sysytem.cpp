@@ -5,6 +5,8 @@
 #include "ObjectManager.h"
 #include "Sever_Sysyem.h"
 #include "PlayerControl_System.h"
+#include "Render_Sysytem.h"
+
 
 Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory):
 	m_pObjectManager(pObjectManager),
@@ -55,7 +57,7 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 				world->emit< ChangeScene_Event>({ GAME });
 				world->emit<Game_Start>({});
 			}
-			else if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
+			else if (pKeysBuffer[VK_BACK] & 0xF0) {
 				world->emit< ChangeScene_Event>({ ROOMS });
 			}
 			break;
@@ -124,19 +126,19 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		
 		imageRect = { 0, 0, 1000, 563 };
 
-		ent->assign<Button_Component>(0, L"image/monster_hunter_login.png", L"게임시작", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameStartBtn, L"image/monster_hunter_login.png", L"게임시작", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(1, L"image/monster_hunter_login.png", L"상점", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ShopBtn, L"image/monster_hunter_login.png", L"상점", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(2, L"image/monster_hunter_login.png", L"장비창", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(EquipBtn, L"image/monster_hunter_login.png", L"장비창", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(-1, L"image/monster_hunter_login.png", L"게임종료", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ExitBtn, L"image/monster_hunter_login.png", L"게임종료", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
 	break;
@@ -148,6 +150,18 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<TextUI_Component>(L"방들 있는 로비",
 			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+		D2D1_RECT_F imageRect, sRect;
+		imageRect = { 0, 0, 1000, 563 };
+		sRect = { FRAME_BUFFER_WIDTH * 3 / 4, FRAME_BUFFER_HEIGHT * 10 / 16, FRAME_BUFFER_WIDTH * 3 / 4 + 100.0f, FRAME_BUFFER_HEIGHT * 10 / 16 + 30.0f };
+
+		ent = world->create();
+		ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+		for (auto& Room : Rooms) {
+			ent = world->create();
+			ent->assign<Button_Component>(Room);
+		}
 	}
 	break;
 
@@ -340,4 +354,16 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 			i -= 1;
 	}
 	::fclose(pFile);
+}
+
+void Scene_Sysytem::AddRoom()
+{
+	int num = Rooms.size();
+	D2D1_RECT_F sRect, imageRect;
+
+	sRect = { FRAME_BUFFER_WIDTH / 10 , FRAME_BUFFER_HEIGHT / 20 + num*30.f, FRAME_BUFFER_WIDTH * 8 / 10, FRAME_BUFFER_HEIGHT / 20 + (num+1)*30.0f};
+	imageRect = { 0, 0, 1000, 563 };
+
+	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect));
 }
