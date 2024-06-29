@@ -13,7 +13,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	auto Mcomponent = ent->assign<Model_Component>(model, model->m_pModelRootObject->m_pstrFrameName);
 	Model_Component* temp_mComponet = new Model_Component(OM->Get_ModelInfo("M4A1"), 
 		OM->Get_ModelInfo("M4A1")->m_pModelRootObject->m_pstrFrameName);
-	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Finger0");
+	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Hand");
 	Mcomponent.get().addChildComponent(temp_mComponet);
 
 	auto controller = ent->assign<AnimationController_Component>(

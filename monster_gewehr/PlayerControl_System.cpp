@@ -5,6 +5,33 @@
 #include "Render_Sysytem.h"
 #include "Sever_Sysyem.h"
 
+void ExtractEulerAngles(const XMFLOAT4X4& m_xmf4x4World, float& pitch, float& yaw, float& roll) {
+	// 회전 행렬 추출
+	XMMATRIX rotationMatrix = XMLoadFloat4x4(&m_xmf4x4World);
+
+	// 회전 행렬의 요소
+	float r11 = m_xmf4x4World._11, r12 = m_xmf4x4World._12, r13 = m_xmf4x4World._13;
+	float r21 = m_xmf4x4World._21, r22 = m_xmf4x4World._22, r23 = m_xmf4x4World._23;
+	float r31 = m_xmf4x4World._31, r32 = m_xmf4x4World._32, r33 = m_xmf4x4World._33;
+
+	// 오일러 각 계산
+	pitch = std::asin(-r31);
+	if (std::cos(pitch) != 0) {
+		yaw = std::atan2(r21, r11);
+		roll = std::atan2(r32, r33);
+	}
+	else {
+		yaw = 0;
+		roll = std::atan2(-r12, r22);
+	}
+
+	// 각도 단위로 변환 (라디안 -> 도)
+	pitch = XMConvertToDegrees(pitch);
+	yaw = XMConvertToDegrees(yaw);
+	roll = XMConvertToDegrees(roll);
+}
+
+
 float AngleBetweenVectors(const XMFLOAT3& vec1, const XMFLOAT3& vec2, float a)
 {
 	XMVECTOR v1 = XMLoadFloat3(&vec1);
@@ -70,6 +97,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			m_Pawn->get<AnimationController_Component>();
 		ComponentHandle<player_Component> player =
 			m_Pawn->get< player_Component>();
+		ComponentHandle<Model_Component> model =
+			m_Pawn->get<Model_Component>();
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		if (Capture) {
@@ -276,6 +305,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				world->emit<Demo_Event>({ CS_DEMO_MONSTER_BEHAVIOR });
 			}
 #endif
+			
 
 		}
 
