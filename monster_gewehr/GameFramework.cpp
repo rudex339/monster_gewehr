@@ -398,7 +398,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		}
 		break;
 	case WM_MOUSEMOVE:
-		SetCapture(hWnd);
+		//SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 
 		GetCursorPos(&m_ptClientCursorPos);
