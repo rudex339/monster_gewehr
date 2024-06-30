@@ -528,7 +528,7 @@ void GameFramework::BuildObjects()
 	m_pWorld->registerSystem(Scene);
 	m_pWorld->registerSystem(new PlayerControl_System());
 	m_pWorld->registerSystem(new Move_System());
-	m_pWorld->registerSystem(new Sever_System());
+	m_pWorld->registerSystem(new Sever_System(Scene));
 	m_pWorld->registerSystem(new Animate_System());
 	m_pWorld->registerSystem(new Render_System(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get(), Scene));
 

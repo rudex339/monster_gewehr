@@ -3,7 +3,9 @@
 #include "stdafx.h"
 #include "BehaviorTree.h"
 #include "BehaviorTreeDefines.h"
+#include "GameRoom.h"
 
+class GameRoom;
 
 class CAPObject
 {
@@ -228,5 +230,5 @@ protected:
 	BehaviorTree root;
 };
 
-void build_bt(Monster* monster, std::unordered_map<INT, Player>* players);
-void run_bt(Monster* monster, std::unordered_map<INT, Player>* players);
+void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room);
+void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room);

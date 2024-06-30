@@ -322,13 +322,13 @@ void Monster::InitMonster()
 
 
 
-void check_hp(Monster* monster, std::unordered_map<INT, Player>* players)
+void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
 	float hp = monster->GetHp();
 
 	if (hp <= 0) {
 		monster->SetState(die_state);
-		build_bt(monster, players);
+		build_bt(monster, players, room);
 	}
 
 	else if (hp <= monster->GetRAHp()) {
@@ -336,7 +336,7 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players)
 		if (hp >= 300.0f) {
 			monster->SetRAHp(hp * 0.5f);
 		}
-		build_bt(monster, players);
+		build_bt(monster, players, room);
 	}
 }
 
@@ -420,11 +420,24 @@ void Monster::dash(float time)
 }
 
 //fight
-int search_target(Monster* monster, std::unordered_map<INT, Player>* players)
+int search_target(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
 	bool isTargetExist = false;
 
 	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			monster->SetUserArround(i, false);
+			if (playerIter->second.GetID() != -1 ) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
+					isTargetExist = true;
+					monster->SetUserArround(i, true);
+				}
+			}
+		}
+	}
+
+	/*for (int i : room->GetPlyId()) {
 		auto playerIter = players->find(i);
 		if (playerIter != players->end()) {
 			monster->SetUserArround(i, false);
@@ -435,7 +448,7 @@ int search_target(Monster* monster, std::unordered_map<INT, Player>* players)
 				}
 			}
 		}
-	}
+	}*/
 
 	if (isTargetExist) {
 		return BehaviorTree::SUCCESS;
@@ -469,10 +482,10 @@ int dash_time_out(Monster* monster, float cooltime)
 	}
 }
 
-int to_idle(Monster* monster, std::unordered_map<INT, Player>* players)
+int to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
 	monster->SetState(idle_state);
-	build_bt(monster, players);
+	build_bt(monster, players, room);
 
 	return BehaviorTree::SUCCESS;
 }
@@ -608,10 +621,10 @@ int find_near_user(Monster* monster, std::unordered_map<INT, Player>* players, f
 	return BehaviorTree::FAIL;
 }
 
-int to_fight(Monster* monster, std::unordered_map<INT, Player>* players)
+int to_fight(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
 	monster->SetState(fight_state);
-	build_bt(monster, players);
+	build_bt(monster, players, room);
 
 
 	return BehaviorTree::SUCCESS;
@@ -836,7 +849,7 @@ int die(Monster* monster)
 	return BehaviorTree::RUNNING;
 }
 
-void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
+void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
 	//fight
 	bite_cooltime_node = Leaf("CoolTime(bite)", std::bind(wait_cool_time, monster, BITE_COOLTIME));
@@ -860,9 +873,9 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 	choose_user_time_out_node = Leaf("Timeout check(choose user)", std::bind(time_out, monster, time_out_choose, CHANGE_TARGET_USER_TIME));
 	choose_user_selector = Selector("choose user selector", { &choose_user_time_out_node, &choose_user_node });
 
-	fight_to_idle_node = Leaf("State Change(fight->idle)", std::bind(to_idle, monster, players));
+	fight_to_idle_node = Leaf("State Change(fight->idle)", std::bind(to_idle, monster, players, room));
 	search_time_out_node = Leaf("Timeout check(Search)", std::bind(time_out, monster, time_out_search, CALMDOWN_TIME));
-	search_user_node = Leaf("Search Users", std::bind(search_target, monster, players));
+	search_user_node = Leaf("Search Users", std::bind(search_target, monster, players, room));
 
 	search_user_selector = Selector("search user selector", { &search_user_node, &search_time_out_node, &fight_to_idle_node });
 
@@ -872,7 +885,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 
 
 	find_near_user_node = Leaf("Search Near User", std::bind(attent, monster, players, 3000.0f));
-	idle_to_fight_node = Leaf("Change State(idle->fight)", std::bind(to_fight, monster, players));
+	idle_to_fight_node = Leaf("Change State(idle->fight)", std::bind(to_fight, monster, players, room));
 
 
 	attentive_sequence = Sequence("Attent Sequence", { &find_near_user_node, &idle_to_fight_node });
@@ -902,7 +915,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 	flyup_node = Leaf("Fly UP", std::bind(fly_up, monster));
 	runaway_node = Leaf("Fly to Point", std::bind(move_to, monster));
 	landing_node = Leaf("Landing", std::bind(landing, monster));
-	runaway_to_idle_node = Leaf("Change State(runaway->idle)", std::bind(to_idle, monster, players));
+	runaway_to_idle_node = Leaf("Change State(runaway->idle)", std::bind(to_idle, monster, players, room));
 
 	runaway_sequence = Sequence("RunAway", { &set_runaway_location_node, &flyup_node, &runaway_node, &landing_node, &runaway_to_idle_node });
 
@@ -923,9 +936,9 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players)
 		monster->BuildBT(&die_node);
 }
 
-void run_bt(Monster* monster, std::unordered_map<INT, Player>* players)
+void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
 	monster->ElapsedTime();
-	check_hp(monster, players);
+	check_hp(monster, players, room);
 	monster->RunBT();
 }

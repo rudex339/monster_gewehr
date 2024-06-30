@@ -19,6 +19,8 @@ void Disconnect(int id);
 void SendHitPlayer(int id);
 void SendEndGame(int id);
 void SendShoot(int id);
+void SendRoomList(int id);
+void SendRoomCreate(int room_id);
 
 
 std::unordered_map<INT, Player> players;

@@ -447,8 +447,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case MakeRoomBtn:
 					cout << "规 积己" << endl;
-					m_scene->AddRoom();
-					world->emit< ChangeScene_Event>({ ROOMS });
+					//m_scene->AddRoom();
+					//world->emit< ChangeScene_Event>({ ROOMS });
+					world->emit<Create_Room>({});
 					break;
 				case RoomBtn:
 					cout << "规 涝厘" << endl;

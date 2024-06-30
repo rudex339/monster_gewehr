@@ -1,4 +1,5 @@
 #pragma once
+#include "Scene_Sysytem.h"
 
 struct PacketSend_Event {
 	CHAR id;
@@ -22,6 +23,10 @@ struct Game_Start {
 
 };
 
+struct Create_Room {
+
+};
+
 struct Demo_Event {
 	CHAR type;
 };
@@ -31,6 +36,7 @@ class Sever_System : public EntitySystem,
 	public EventSubscriber<Shoot_Event>,
 	public EventSubscriber<Login_Event>,
 	public EventSubscriber<Game_Start>,
+	public EventSubscriber<Create_Room>,
 	public EventSubscriber<Demo_Event>
 {
 private:
@@ -38,9 +44,12 @@ private:
 	bool m_send = false;
 
 	UINT m_id;
+	Scene_Sysytem* m_scene;
+
 public:
 
 	Sever_System() = default;
+	Sever_System(Scene_Sysytem* scene) { m_scene = scene; };
 	virtual void configure(class World* world);
 	virtual void unconfigure(class World* world) {};
 	virtual void tick(class World* world, float deltaTime);
@@ -48,6 +57,7 @@ public:
 	virtual void receive(class World* world, const Shoot_Event& event);
 	virtual void receive(class World* world, const Login_Event& event);
 	virtual void receive(class World* world, const Game_Start& event);
+	virtual void receive(class World* world, const Create_Room& event);
 	virtual void receive(class World* world, const Demo_Event& event);
 	void PacketReassembly(World* world, char* recv_buf, size_t recv_size);
 	void ProcessPacket(World* world, char* packet);

@@ -16,6 +16,7 @@ public:
 	void DeletePlayerId(int c_id);
 
 	BOOL SetStartGame();
+	void SetCreateRoom();
 	void SetEndGame();
 	void SetFreeRoom();
 

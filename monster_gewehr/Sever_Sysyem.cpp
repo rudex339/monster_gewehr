@@ -12,7 +12,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Login_Event>(this);
 	world->subscribe<Game_Start>(this);
 	world->subscribe<Demo_Event>(this);
-	
+	world->subscribe<Create_Room>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -153,6 +153,16 @@ void Sever_System::receive(World* world, const Game_Start& event)
 			}
 
 		});
+}
+
+void Sever_System::receive(class World* world, const Create_Room& event)
+{
+	CS_CREATE_ROOM_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_CREATE_ROOM;
+	cout << "½ÇÇàµÊ" << endl;
+
+	send(g_socket, (char*)&p, p.size, 0);
 }
 
 void Sever_System::receive(World* world, const Demo_Event& event)
@@ -360,6 +370,12 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 
 		world->emit< ChangeScene_Event>({END, pk->score });
 		break;
+	}
+	case SC_PACKET_CREATE_ROOM: {
+		SC_CREATE_ROOM_PACKET* pk = reinterpret_cast<SC_CREATE_ROOM_PACKET*>(packet);
+		cout << pk->room_num << endl;
+		m_scene->AddRoom();
+		world->emit< ChangeScene_Event>({ ROOMS });
 	}
 
 	}

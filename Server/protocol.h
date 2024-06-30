@@ -43,6 +43,7 @@ constexpr char SC_PACKET_HIT_PLAYER = 9;
 constexpr char SC_PACKET_END_GAME = 10;
 constexpr char SC_PACKET_MAX_PLAYER = 11;
 constexpr char SC_PACKET_GAME_START = 12; // 게임룸 구현시 방장이 시작했다는 것을 알리는 패킷
+constexpr char SC_PACKET_CREATE_ROOM = 13;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -121,7 +122,7 @@ struct CS_CREATE_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	CHAR room_name[15];
+	//CHAR room_name[15];
 	SHORT room_num;
 };
 
@@ -237,11 +238,11 @@ struct SC_END_GAME_PACKET
 	SHORT score;
 };
 
-struct SC_ROOM_LIST_PACKET
+struct SC_CREATE_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	CHAR room_name[15];
+	//CHAR room_name[15];
 	SHORT room_num;
 };
 
