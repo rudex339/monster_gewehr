@@ -251,7 +251,7 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, GameObjectModel* pParent, FILE* pInFile, CShader* pShader)
+void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, GameObjectModel* pParent, FILE* pInFile, CShader* pShader, int TileX, int TileY)
 {
 	char pstrTextureName[64] = { '\0' };
 
@@ -1081,7 +1081,7 @@ BYTE ReadStringFromFile(FILE* pInFile, char* pstrToken)
 	return(nStrLength);
 }
 
-void GameObjectModel::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, GameObjectModel* pParent, FILE* pInFile, CShader* pShader)
+void GameObjectModel::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, GameObjectModel* pParent, FILE* pInFile, CShader* pShader,int TileX, int TileY)
 {
 	char pstrToken[64] = { '\0' };
 	int nMaterial = 0;
@@ -1155,31 +1155,31 @@ void GameObjectModel::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 		}
 		else if (!strcmp(pstrToken, "<AlbedoMap>:"))
 		{
-			pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile, pShader);
+			pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile, pShader,TileX,TileY);
 		}
 		else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_SPECULAR_MAP, 4, pMaterial->m_ppstrTextureNames[1], &(pMaterial->m_ppTextures[1]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_SPECULAR_MAP, 4, pMaterial->m_ppstrTextureNames[1], &(pMaterial->m_ppTextures[1]), pParent, pInFile, pShader, TileX, TileY);
 		}
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_NORMAL_MAP, 5, pMaterial->m_ppstrTextureNames[2], &(pMaterial->m_ppTextures[2]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_NORMAL_MAP, 5, pMaterial->m_ppstrTextureNames[2], &(pMaterial->m_ppTextures[2]), pParent, pInFile, pShader, TileX, TileY);
 		}
 		else if (!strcmp(pstrToken, "<MetallicMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_METALLIC_MAP, 6, pMaterial->m_ppstrTextureNames[3], &(pMaterial->m_ppTextures[3]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_METALLIC_MAP, 6, pMaterial->m_ppstrTextureNames[3], &(pMaterial->m_ppTextures[3]), pParent, pInFile, pShader, TileX, TileY);
 		}
 		else if (!strcmp(pstrToken, "<EmissionMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_EMISSION_MAP, 7, pMaterial->m_ppstrTextureNames[4], &(pMaterial->m_ppTextures[4]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_EMISSION_MAP, 7, pMaterial->m_ppstrTextureNames[4], &(pMaterial->m_ppTextures[4]), pParent, pInFile, pShader, TileX, TileY);
 		}
 		else if (!strcmp(pstrToken, "<DetailAlbedoMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_ALBEDO_MAP, 8, pMaterial->m_ppstrTextureNames[5], &(pMaterial->m_ppTextures[5]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_ALBEDO_MAP, 8, pMaterial->m_ppstrTextureNames[5], &(pMaterial->m_ppTextures[5]), pParent, pInFile, pShader, TileX, TileY);
 		}
 		else if (!strcmp(pstrToken, "<DetailNormalMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_NORMAL_MAP, 9, pMaterial->m_ppstrTextureNames[6], &(pMaterial->m_ppTextures[6]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_NORMAL_MAP, 9, pMaterial->m_ppstrTextureNames[6], &(pMaterial->m_ppTextures[6]), pParent, pInFile, pShader, TileX, TileY);
 		}
 		else if (!strcmp(pstrToken, "</Materials>"))
 		{
@@ -1188,7 +1188,7 @@ void GameObjectModel::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 	}
 }
 
-GameObjectModel* GameObjectModel::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, GameObjectModel* pParent, FILE* pInFile, CShader* pShader, int* pnSkinnedMeshes)
+GameObjectModel* GameObjectModel::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, GameObjectModel* pParent, FILE* pInFile, CShader* pShader, int* pnSkinnedMeshes, int TileX, int TileY )
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -1223,7 +1223,7 @@ GameObjectModel* GameObjectModel::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
 			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
-			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile, TileX, TileY);
 			pGameObject->SetMesh(pMesh);
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
@@ -1235,13 +1235,13 @@ GameObjectModel* GameObjectModel::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			pSkinnedMesh->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 			::ReadStringFromFile(pInFile, pstrToken); //<Mesh>:
-			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile, TileX, TileY);
 
 			pGameObject->SetMesh(pSkinnedMesh);
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
-			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader);
+			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader, TileX, TileY);
 		}
 		else if (!strcmp(pstrToken, "<Children>:"))
 		{
@@ -1250,7 +1250,7 @@ GameObjectModel* GameObjectModel::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					GameObjectModel* pChild = GameObjectModel::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGameObject, pInFile, pShader, pnSkinnedMeshes);
+					GameObjectModel* pChild = GameObjectModel::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGameObject, pInFile, pShader, pnSkinnedMeshes, TileX, TileY);
 					if (pChild) pGameObject->SetChild(pChild);
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
@@ -1359,7 +1359,7 @@ void GameObjectModel::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLo
 	}
 }
 
-CLoadedModelInfo* GameObjectModel::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader)
+CLoadedModelInfo* GameObjectModel::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, int TileX, int TileY)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
@@ -1375,7 +1375,7 @@ CLoadedModelInfo* GameObjectModel::LoadGeometryAndAnimationFromFile(ID3D12Device
 		{
 			if (!strcmp(pstrToken, "<Hierarchy>:"))
 			{
-				pLoadedModel->m_pModelRootObject = GameObjectModel::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes);
+				pLoadedModel->m_pModelRootObject = GameObjectModel::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes, TileX, TileY);
 				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
 			}
 			else if (!strcmp(pstrToken, "<Animation>:"))
@@ -1406,7 +1406,7 @@ CLoadedModelInfo* GameObjectModel::LoadGeometryAndAnimationFromFile(ID3D12Device
 }
 
 
-CLoadedModelInfo* GameObjectModel::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader)
+CLoadedModelInfo* GameObjectModel::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, int TileX, int TileY)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
@@ -1422,7 +1422,7 @@ CLoadedModelInfo* GameObjectModel::LoadGeometryFromFile(ID3D12Device* pd3dDevice
 		{
 			GameObjectModel* pGameObject = new GameObjectModel();
 			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
-			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile, TileX,TileY);
 			pGameObject->SetMesh(pMesh);
 			pLoadedModel->m_pModelRootObject = pGameObject;
 		}

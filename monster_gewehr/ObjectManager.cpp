@@ -123,7 +123,7 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	m_ModelList.insert({ "Cube",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
-		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Cube.bin", NULL) });
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Cube.bin", NULL,10,10) });
 	
 
 

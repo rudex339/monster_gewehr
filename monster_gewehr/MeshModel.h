@@ -146,7 +146,7 @@ public:
 	_TCHAR							(*m_ppstrTextureNames)[64] = NULL;
 	CTexture						**m_ppTextures = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
 
-	void LoadTextureFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR *pwstrTextureName, CTexture **ppTexture, GameObjectModel *pParent, FILE *pInFile, CShader *pShader);
+	void LoadTextureFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR *pwstrTextureName, CTexture **ppTexture, GameObjectModel *pParent, FILE *pInFile, CShader *pShader,int TileX, int TileY);
 
 public:
 	static CShader					*m_pStandardShader;
@@ -439,13 +439,13 @@ public:
 
 	void SetRootMotion(bool bRootMotion) { if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetRootMotion(bRootMotion); }
 
-	void LoadMaterialsFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, GameObjectModel *pParent, FILE *pInFile, CShader *pShader);
+	void LoadMaterialsFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, GameObjectModel *pParent, FILE *pInFile, CShader *pShader, int TileX, int TileY);
 
 	static void LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoadedModel);
-	static GameObjectModel *LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, GameObjectModel *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
+	static GameObjectModel *LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, GameObjectModel *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes, int TileX, int TileY);
 
-	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader);
-	static CLoadedModelInfo *LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader);
+	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, int TileX=1, int TileY=1);
+	static CLoadedModelInfo *LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, int TileX=1, int TileY=1);
 	static void PrintFrameInfo(GameObjectModel *pGameObject, GameObjectModel *pParent);
 };
 

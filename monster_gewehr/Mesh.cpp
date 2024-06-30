@@ -424,7 +424,7 @@ void CStandardMesh::ReleaseUploadBuffers()
 	m_pd3dBiTangentUploadBuffer = NULL;
 }
 
-void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile)
+void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile, int TileX, int TileY)
 {
 	char pstrToken[64] = { '\0' };
 	int nPositions = 0, nColors = 0, nNormals = 0, nTangents = 0, nBiTangents = 0, nTextureCoords = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
@@ -476,6 +476,13 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 				m_pxmf2TextureCoords0 = new XMFLOAT2[nTextureCoords];
 				nReads = (UINT)::fread(m_pxmf2TextureCoords0, sizeof(XMFLOAT2), nTextureCoords, pInFile);
 
+				for (int i = 0; i < nTextureCoords; ++i)
+				{
+					m_pxmf2TextureCoords0[i].x *= TileX;
+					m_pxmf2TextureCoords0[i].y *= TileY;
+				}
+
+
 				m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
 
 				m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
@@ -491,6 +498,12 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 				m_nType |= VERTEXT_TEXTURE_COORD1;
 				m_pxmf2TextureCoords1 = new XMFLOAT2[nTextureCoords];
 				nReads = (UINT)::fread(m_pxmf2TextureCoords1, sizeof(XMFLOAT2), nTextureCoords, pInFile);
+
+				for (int i = 0; i < nTextureCoords; ++i)
+				{
+					m_pxmf2TextureCoords0[i].x *= TileX;
+					m_pxmf2TextureCoords0[i].y *= TileY;
+				}
 
 				m_pd3dTextureCoord1Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords1, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord1UploadBuffer);
 
