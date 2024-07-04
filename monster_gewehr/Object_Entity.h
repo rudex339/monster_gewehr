@@ -31,6 +31,8 @@ struct Model_Component {
 
 	Model_Component* m_pParentObject = NULL;
 	vector<Model_Component*> m_pchildObjects;
+
+	bool draw = true;
 	Model_Component() = default;
 	Model_Component(CLoadedModelInfo* MeshModel, string name)
 		:m_MeshModel(MeshModel), model_name(name) {}

@@ -53,9 +53,16 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_ModelList.insert({"Soldier",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Soldier.bin", NULL) });
+
+	m_ModelList.insert({ "benelliM4",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/benelliM4.bin", NULL) });
 	m_ModelList.insert({ "M4A1",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/m4a1.bin", NULL) });
+	m_ModelList.insert({ "M110",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/M110.bin", NULL) });
 	
 
 	m_ModelList.insert({ "Souleater",

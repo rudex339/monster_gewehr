@@ -16,6 +16,16 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Hand");
 	Mcomponent.get().addChildComponent(temp_mComponet);
 
+	temp_mComponet = new Model_Component(OM->Get_ModelInfo("benelliM4"),
+		OM->Get_ModelInfo("benelliM4")->m_pModelRootObject->m_pstrFrameName);
+	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Hand");
+	Mcomponent.get().addChildComponent(temp_mComponet);
+
+	temp_mComponet = new Model_Component(OM->Get_ModelInfo("M110"),
+		OM->Get_ModelInfo("M110")->m_pModelRootObject->m_pstrFrameName);
+	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Hand");
+	Mcomponent.get().addChildComponent(temp_mComponet);
+
 	auto controller = ent->assign<AnimationController_Component>(
 		new CAnimationController(pd3dDevice, pd3dCommandList, 6, model), 0);
 	for (int i = 0; i < 6; i++) {

@@ -290,8 +290,8 @@ void Render_System::tick(World* world, float deltaTime)
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
 
 					AnimationController->m_AnimationController->UpdateShaderVariables();
-
-					Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
+					if(Model->draw)
+						Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
 
 					for (auto child : Model->m_pchildObjects) {
 						if (child->socket) {
@@ -300,14 +300,16 @@ void Render_System::tick(World* world, float deltaTime)
 						else {
 							child->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
 						}
-						child->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
+						if (child->draw)
+							child->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
 					}
 
 
 				}
 				else if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
-					Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
+					if (Model->draw)
+						Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
 				}
 			});
 	}

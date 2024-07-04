@@ -16,6 +16,11 @@ enum OM_Model {
 	SOLDIER
 };
 
+enum Weapon_State {
+	RIFLE,
+	SHOTGUN,
+	SNIPERRIFLE
+};
 
 Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
@@ -43,6 +48,8 @@ struct player_Component {
 
 	BOOL reload = false;
 	FLOAT reload_coolTime = 3.5f;
+
+	UINT m_weapon = RIFLE;
 
 	player_Component() = default;
 };
