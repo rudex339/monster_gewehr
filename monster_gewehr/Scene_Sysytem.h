@@ -1,4 +1,5 @@
 #pragma once
+#include <queue>
 #include "Object_Entity.h"
 
 class ObjectManager;
@@ -28,12 +29,16 @@ struct ChangeScene_Event {
 	short score = 0;
 };
 
-
+struct EnterRoom_Event {
+	UINT State;
+	int room_num = 0;
+};
 
 
 
 class Scene_Sysytem :public EntitySystem,
-	public EventSubscriber<ChangeScene_Event>
+	public EventSubscriber<ChangeScene_Event>,
+	public EventSubscriber<EnterRoom_Event>
 {
 private:
 	UINT m_State = 0;
@@ -52,6 +57,9 @@ private:
 
 	// 规 格废
 	vector<Button_Component> Rooms;
+	queue<int> Room_ids;
+
+	int m_room_num;
 
 public:
 
@@ -63,11 +71,11 @@ public:
 	virtual void tick(class World* world, float deltaTime);
 
 	virtual void receive(class World* world, const ChangeScene_Event& event);
-	
+	virtual void receive(class World* world, const EnterRoom_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 规 积己 窃荐
-	void AddRoom();
+	void AddRoom(int room_num);
 };
 

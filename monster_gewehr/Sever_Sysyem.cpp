@@ -374,7 +374,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	case SC_PACKET_CREATE_ROOM: {
 		SC_CREATE_ROOM_PACKET* pk = reinterpret_cast<SC_CREATE_ROOM_PACKET*>(packet);
 		cout << pk->room_num << endl;
-		m_scene->AddRoom();
+		m_scene->AddRoom(pk->room_num);
 		world->emit< ChangeScene_Event>({ ROOMS });
 	}
 

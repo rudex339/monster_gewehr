@@ -455,7 +455,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case RoomBtn:
 					cout << "방 입장" << endl;
-					world->emit< ChangeScene_Event>({ INROOM });
+					world->emit<EnterRoom_Event>({ INROOM, button->m_room_num });
 					break;
 				default:
 					cout << "디폴트" << endl;

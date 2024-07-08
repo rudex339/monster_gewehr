@@ -170,7 +170,7 @@ TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY, int num)
 	index = num;
 }
 
-Button_Component::Button_Component(int id, const wchar_t* imagePath, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)
+Button_Component::Button_Component(int id, const wchar_t* imagePath, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int room_num)
 {
 	button_id = id;
 	m_text = text;
@@ -182,6 +182,10 @@ Button_Component::Button_Component(int id, const wchar_t* imagePath, wstring tex
 	m_mode = mode;
 	m_opacity = opacity;
 	on = false;
+
+	if (button_id == RoomBtn) {
+		m_room_num = room_num;
+	}
 
 	if (imagePath != NULL) {
 		LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);

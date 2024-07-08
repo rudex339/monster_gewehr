@@ -20,6 +20,7 @@ Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDe
 void Scene_Sysytem::configure(World* world)
 {
 	world->subscribe<ChangeScene_Event>(this);
+	world->subscribe<EnterRoom_Event>(this);
 	
 }
 
@@ -126,7 +127,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		
 		imageRect = { 0, 0, 1000, 563 };
 
-		ent->assign<Button_Component>(GameStartBtn, L"image/monster_hunter_login.png", L"게임시작", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameStartBtn, L"image/button/Connect.png", L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
@@ -163,16 +164,6 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			ent->assign<Button_Component>(Room);
 		}
 	}
-	break;
-
-	case INROOM:
-	{
-		world->reset();
-		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(L"방",
-			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
-	} 
 	break;
 	
 	case SHOP:
@@ -285,6 +276,19 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	
 }
 
+void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
+{
+	m_State = event.State;
+	m_room_num = event.room_num;
+
+	world->reset();
+	Entity* ent = world->create();
+	ent->assign<TextUI_Component>(to_wstring(m_room_num) + L"번 방",
+		(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
+		(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+
+}
+
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 {
 	FILE* pFile = NULL;
@@ -356,14 +360,14 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 	::fclose(pFile);
 }
 
-void Scene_Sysytem::AddRoom()
+void Scene_Sysytem::AddRoom(int room_num)
 {
-	int num = Rooms.size();
+	int num = room_num;
 	D2D1_RECT_F sRect, imageRect;
 
 	sRect = { FRAME_BUFFER_WIDTH / 10 , FRAME_BUFFER_HEIGHT / 20 + num*30.f, FRAME_BUFFER_WIDTH * 8 / 10, FRAME_BUFFER_HEIGHT / 20 + (num+1)*30.0f};
 	imageRect = { 0, 0, 1000, 563 };
 
 	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect));
+		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
 }
