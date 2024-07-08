@@ -103,7 +103,7 @@ void ProcessClient(SOCKET sock)
 	
 
 	frame fps{}, frame_count{};
-	std::cout << id << std::endl;
+	//std::cout << id << std::endl;
 
 	while (players[id].GetState() != S_STATE::LOG_OUT) {
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
@@ -214,10 +214,8 @@ void BossThread()
 				monster_packet.animation = souleaters[i].GetAnimation();
 
 				for (int ply_id : gamerooms[i].GetPlyId()) {
-					//std::cout << ply_id << std::endl;
 					if (ply_id == -1) continue;
 					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-					std::cout << ply_id << std::endl;
 					players[ply_id].DoSend(&monster_packet, monster_packet.size);
 				}
 
@@ -352,6 +350,11 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_PACKET_SELECT_ROOM: {
+		CS_SELECT_ROOM_PACKET *packet = reinterpret_cast<CS_SELECT_ROOM_PACKET*>(p);
+		players[id].SetRoomID(packet->room_num);
+
+		std::cout << "플레이어 id : " << id << " 방 선택 : " << players[id].GetRoomID() << std::endl;
+
 		break;
 	}
 	case CS_DEMO_MONSTER_SETPOS: {

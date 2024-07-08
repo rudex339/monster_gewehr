@@ -13,6 +13,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Game_Start>(this);
 	world->subscribe<Demo_Event>(this);
 	world->subscribe<Create_Room>(this);
+	world->subscribe<Select_Room>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -26,7 +27,7 @@ void Sever_System::tick(World* world, float deltaTime)
 			PacketReassembly(world, buf, retval);
 		}
 	}
-	
+
 }
 
 void Sever_System::receive(World* world, const PacketSend_Event& event)
@@ -160,7 +161,17 @@ void Sever_System::receive(class World* world, const Create_Room& event)
 	CS_CREATE_ROOM_PACKET p;
 	p.size = sizeof(p);
 	p.type = CS_PACKET_CREATE_ROOM;
-	cout << "실행됨" << endl;
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(class World* world, const Select_Room& event)
+{
+	CS_SELECT_ROOM_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_SELECT_ROOM;
+	p.room_num = event.room_num;
+	cout << p.room_num << endl;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
@@ -219,7 +230,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					Player->id = pk->player_data.id;
 					Position->Position = pk->player_data.pos;
 					Rotation->mfYaw = pk->player_data.yaw;
-					
+
 					pk->player_data.id = -1;
 				}
 				else
@@ -266,7 +277,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_ADD_MONSTER: {
 		SC_ADD_MONSTER_PACKET* pk = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet);
-		
+
 		world->each<player_Component, Position_Component, Rotation_Component>(
 			[&](Entity* ent,
 				ComponentHandle<player_Component> Player,
@@ -368,7 +379,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		cout << "스코어 : " << pk->score << endl << endl;
 		cout << "로비로 가고싶으면 아무 키나 입력" << endl;
 
-		world->emit< ChangeScene_Event>({END, pk->score });
+		world->emit< ChangeScene_Event>({ END, pk->score });
 		break;
 	}
 	case SC_PACKET_CREATE_ROOM: {
@@ -379,6 +390,6 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 
 	}
-	
-	
+
+
 }

@@ -18,7 +18,7 @@ public:
 	void SetVelocity(const DirectX::XMFLOAT3& vel) { m_velocity = vel; }
 	void SetYaw(float yaw) { m_yaw = yaw; }
 	void SetID(int id)	{ m_id = id; }
-	void SetRoomID(int id) { m_room_id = id; }
+	void SetRoomID(short id) { m_room_id = id; }
 	void SetBoundingBox(XMFLOAT3 center) { m_bounding_box.Center = center; m_bounding_box.Center.y += 5.0f; }
 	void SetBoundingBox() { m_bounding_box.Center = m_position; }
 
