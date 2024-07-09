@@ -571,14 +571,16 @@ void SendEndGame(int id)
 void SendRoomList(int id)
 {
 	for (int i = 0; i < MAX_GAME_ROOM; i++) {
+		gamerooms[i].SetStateLock();
 		if (gamerooms[i].GetState() != G_FREE) {
-			SC_CREATE_ROOM_PACKET sub_packet;
+			SC_ADD_ROOM_PACKET sub_packet;
 			sub_packet.size = sizeof(sub_packet);
-			sub_packet.type = SC_PACKET_CREATE_ROOM;
+			sub_packet.type = SC_PACKET_ADD_ROOM;
 			sub_packet.room_num = i;
 
 			players[id].DoSend(&sub_packet, sub_packet.size);
 		}
+		gamerooms[i].SetStateUnLock();
 	}
 }
 

@@ -20,6 +20,9 @@ public:
 	void SetEndGame();
 	void SetFreeRoom();
 
+	void SetStateLock() { m_state_lock.lock(); }
+	void SetStateUnLock() { m_state_lock.unlock(); }
+
 	std::array<INT, MAX_CLIENT_ROOM> GetPlyId() { return m_player_ids; }
 
 	GameRoomState GetState() { return m_state; }
