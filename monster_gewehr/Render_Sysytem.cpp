@@ -413,7 +413,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<Button_Component> button
 		)-> void {
 
-			button->CursorOn(m_cursorPos);
+			button->CursorOn(m_cursorPos, pTextFormat, m_smalltextFormat);
 			m_d2dDeviceContext->DrawBitmap(
 				button->m_bitmap,
 				button->m_Rect,
@@ -425,14 +425,14 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 			{
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-				
-				m_smalltextFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
-				m_smalltextFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치
+
+				button->m_textFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
+				button->m_textFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치
 
 				m_d2dDeviceContext->DrawTextW(
 					button->m_text.data(),
 					button->m_text.size(),
-					m_smalltextFormat.Get(),
+					button->m_textFormat.Get(),
 					&button->m_Rect,
 					m_textBrush.Get()
 				);

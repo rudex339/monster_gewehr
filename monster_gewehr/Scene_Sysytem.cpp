@@ -122,25 +122,24 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		D2D1_RECT_F imageRect;
 		D2D1_RECT_F sRect[4] = {{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 - 15.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 15.f},
 					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 30.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 60.f},
-					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 75.f, FRAME_BUFFER_WIDTH / 2 + 50.f, FRAME_BUFFER_HEIGHT / 2 + 105.f},
+					{FRAME_BUFFER_WIDTH / 2 - 55.f , FRAME_BUFFER_HEIGHT / 2 + 75.f, FRAME_BUFFER_WIDTH / 2 + 55.f, FRAME_BUFFER_HEIGHT / 2 + 105.f},
 					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 130.f, FRAME_BUFFER_WIDTH / 2 + 50.f, FRAME_BUFFER_HEIGHT / 2 + 160.f}};
 		
-		imageRect = { 0, 0, 1000, 563 };
+		imageRect = { 0, 0, 340, 70 };
 
-		ent->assign<Button_Component>(GameStartBtn, L"image/monster_hunter_login.png", L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameStartBtn, L"image/monster_hunter_login.png", L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(ShopBtn, L"image/monster_hunter_login.png", L"상점", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ShopBtn, L"image/monster_hunter_login.png", L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(EquipBtn, L"image/monster_hunter_login.png", L"장비창", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(EquipBtn, L"image/monster_hunter_login.png", L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-
-		ent->assign<Button_Component>(ExitBtn, L"image/monster_hunter_login.png", L"게임종료", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ExitBtn, L"image/monster_hunter_login.png", L"EXIT", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
 	break;
