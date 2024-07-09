@@ -127,7 +127,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		
 		imageRect = { 0, 0, 1000, 563 };
 
-		ent->assign<Button_Component>(GameStartBtn, L"image/button/Connect.png", L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameStartBtn, L"image/monster_hunter_login.png", L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
@@ -139,6 +139,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
+
 		ent->assign<Button_Component>(ExitBtn, L"image/monster_hunter_login.png", L"게임종료", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
@@ -353,6 +354,19 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 			ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName),
 				m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
+
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
+			auto box = ent->assign<BoundingBox_Component>(
+				m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents);
+
+
+			// XMFLOAT4X4를 XMMATRIX로 변환
+			XMMATRIX worldMatrix = XMLoadFloat4x4(&xmf4x4World);
+
+			// BoundingOrientedBox 변환
+			box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
+			//box->m_bounding_box.Extents = m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
+
 		}
 		else
 			i -= 1;

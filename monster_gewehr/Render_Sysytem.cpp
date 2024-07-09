@@ -310,6 +310,16 @@ void Render_System::tick(World* world, float deltaTime)
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
 					if (Model->draw)
 						Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
+					//test
+					if (m_pBox) {
+						if (ent->has<BoundingBox_Component>()) {
+							ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
+							//box->m_bounding_box.Center = pos->Position;
+							//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
+
+							m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+						}
+					}
 				}
 			});
 	}

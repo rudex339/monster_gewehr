@@ -202,6 +202,9 @@ struct BoundingBox_Component {
 	BoundingBox_Component(float x, float y, float z) {
 		m_bounding_box.Extents = XMFLOAT3(x,y,z);
 	}
+	BoundingBox_Component(XMFLOAT3 extent) {
+		m_bounding_box.Extents = extent;
+	}
 	void add(string bone, DirectX::BoundingOrientedBox* boundingbox) {
 		m_BoundingBoxList.insert({ bone, boundingbox });
 	}
