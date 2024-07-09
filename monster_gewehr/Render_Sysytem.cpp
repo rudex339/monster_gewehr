@@ -104,7 +104,6 @@ HRESULT LoadBitmapFromFile(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDev
 	return S_OK;
 }
 
-
 Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, Scene_Sysytem* scene)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
@@ -161,6 +160,54 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 		26,                      
 		L"en-us",
 		&pTextFormat
+	);
+
+	// custom font
+	IDWriteFactory3* pDWriteFactory;
+	HRESULT hr = DWriteCreateFactory(
+		DWRITE_FACTORY_TYPE_SHARED,
+		__uuidof(IDWriteFactory5),
+		reinterpret_cast<IUnknown**>(&pDWriteFactory)
+	);
+	IDWriteFontSetBuilder* pFontSetBuilder = nullptr;
+	if (SUCCEEDED(hr))
+	{
+		hr = pDWriteFactory->CreateFontSetBuilder(&pFontSetBuilder);
+	}
+	IDWriteFontFile* pFontFile = nullptr;
+	if (SUCCEEDED(hr))
+	{
+		hr = pDWriteFactory->CreateFontFileReference(L"font/Galmuri14.ttf", nullptr, &pFontFile);
+	}
+	BOOL isSupported;
+	DWRITE_FONT_FILE_TYPE fileType;
+	UINT32 numberOfFonts;
+	hr = pFontFile->Analyze(&isSupported, &fileType, /* face type */ nullptr, &numberOfFonts);
+
+	for (uint32_t fontIndex = 0; fontIndex < numberOfFonts; fontIndex++)
+	{
+		IDWriteFontFaceReference* pFontFaceReference;
+		hr = pDWriteFactory->CreateFontFaceReference(pFontFile, fontIndex, DWRITE_FONT_SIMULATIONS_NONE, &pFontFaceReference);
+
+		if (SUCCEEDED(hr))
+		{
+			hr = pFontSetBuilder->AddFontFaceReference(pFontFaceReference);
+		}
+	}
+	IDWriteFontSet* pFontSet;
+	hr = pFontSetBuilder->CreateFontSet(&pFontSet);
+
+	pDWriteFactory->CreateFontCollectionFromFontSet(pFontSet, &fontCollection);
+
+	m_dwriteFactory->CreateTextFormat(
+		L"Galmuri14",
+		fontCollection,
+		DWRITE_FONT_WEIGHT_REGULAR,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		26,
+		L"en-us",
+		&customFonts[0]
 	);
 
 	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[0]);
@@ -414,7 +461,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<Button_Component> button
 		)-> void {
 
-			button->CursorOn(m_cursorPos, pTextFormat, m_smalltextFormat);
+			button->CursorOn(m_cursorPos, customFonts[0], m_smalltextFormat);
 			m_d2dDeviceContext->DrawBitmap(
 				button->m_bitmap,
 				button->m_Rect,

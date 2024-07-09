@@ -79,6 +79,12 @@ private:
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;
 	ComPtr<IDWriteTextFormat> pTextFormat;
 
+	IDWriteFontFile* pFontFile;
+	IDWriteFontFace* pFontFace;
+	IDWriteFontCollection1* fontCollection;
+
+	ComPtr<IDWriteTextFormat> customFonts[2];
+
 	ComPtr<ID2D1SolidColorBrush> m_textBrush;
 
 	ComPtr<ID2D1StrokeStyle> m_trokeBrush;
