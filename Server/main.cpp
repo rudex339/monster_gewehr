@@ -85,14 +85,7 @@ void ProcessClient(SOCKET sock)
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 	
 	// 총 발사 관련 변수들인데 추후 묶어서 관리할 예정
-	int shoot_timer = 0;
-	int reload_timer = MAX_FRAME * 3;
 	int hit_timer = MAX_FRAME * 5;
-	float shot_range = 800.f;
-	DirectX::XMFLOAT3 p_pos;
-	DirectX::XMFLOAT3 c_dir;
-	DirectX::XMVECTOR directionVec;
-	DirectX::XMVECTOR positionVec;
 
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
@@ -112,10 +105,12 @@ void ProcessClient(SOCKET sock)
 
 		// 데이터를 받아서
 		retval = players[id].RecvData();
+		
 		if (retval > 0) {
 			PacketReassembly(id, retval);			
 		}
 		else if (retval == -1) {
+			std::cout << "실행됨" << std::endl;
 			break;
 		}
 		
@@ -167,7 +162,7 @@ void BossThread()
 
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
 			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
-				std::cout << "실행됨 : " << i << std::endl;
+				
 				run_bt(&souleaters[i], &players, &gamerooms[i]);
 
 				if (souleaters[i].GetAnimation() == dash_ani) {
@@ -267,6 +262,7 @@ void ProcessPacket(int id, char* p)
 		players[id].SetWepon(packet->weapon);
 		players[id].SetRoomID(0);	// 임시로 0번으로 지정
 
+		std::cout << players[id].GetName().c_str() << std::endl;
 
 		/*players[id].SetByWeapon(2);
 		SendLoginInfo(id);

@@ -30,12 +30,18 @@ struct LIGHTS;
 struct DrawUI_Event {
 };
 
+// 로그인 이벤트
+struct InputId_Event {
+
+};
+
 class Render_System : public EntitySystem,
 	public EventSubscriber<SetCamera_Event>,
 	public EventSubscriber<DrawUI_Event>,
 	public EventSubscriber<KeyDown_Event>,
 	public EventSubscriber<Tab_Event>,
-	public EventSubscriber<Mouse_Event>
+	public EventSubscriber<Mouse_Event>,
+	public EventSubscriber<InputId_Event>
 {
 private:
 	CCamera* m_pCamera = NULL;
@@ -97,6 +103,7 @@ public:
 	virtual void receive(class World* world, const KeyDown_Event& event);
 	virtual void receive(class World* world, const Tab_Event& event);
 	virtual void receive(class World* world, const Mouse_Event& event);
+	virtual void receive(class World* world, const InputId_Event& event);
 
 	void Clicked() { clicked = false; };
 

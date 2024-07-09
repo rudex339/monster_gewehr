@@ -419,6 +419,13 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	{
 		case WM_KEYDOWN:
 			m_pWorld->emit<KeyDown_Event>({ wParam });
+			/*switch (wParam)
+			{
+				case VK_RETURN:
+					cout << "실행됨11" << endl;
+					m_pWorld->emit<InputId_Event>({});
+					break;
+			}*/
 			break;
 
 		case WM_KEYUP:
@@ -544,6 +551,8 @@ void GameFramework::BuildObjects()
 	if (m_pObjectManager) m_pObjectManager->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
+
+	InitServer();
 }
 
 void GameFramework::ReleaseObjects()
@@ -689,38 +698,4 @@ void GameFramework::InitServer()
 	
 	unsigned long noblock = 1;
 	ioctlsocket(g_socket, FIONBIO, &noblock);
-
-	CS_LOGIN_PACKET packet;
-	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_LOGIN;
-	int weapon = 0;
-	cout << "이름 입력" << endl;
-	cin >> packet.name;
-	cout << "무기 입력" << endl;
-	cin >> weapon;
-	packet.weapon = weapon;
-
-
-	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
-
-	SC_LOGIN_INFO_PACKET sub_packet;
-	while (1) {
-		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
-		if (retval > 0) {
-			if (retval != sizeof(SC_LOGIN_INFO_PACKET)) {
-				cout << "ㅈ됬어..." << endl;
-			}
-			
-			break;
-		}
-		else {
-			cout << "못받음" << endl;
-		}
-	}
-	//cout << (int)ply.id << endl;
-
-	ComponentHandle<player_Component> Data = m_pPlayer->get<player_Component>();
-	Data->id = (int)sub_packet.id;
-	std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
-	//cout << Data->id << endl;
 }

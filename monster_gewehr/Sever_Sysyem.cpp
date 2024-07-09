@@ -73,31 +73,12 @@ void Sever_System::receive(class World* world, const Shoot_Event& event)
 
 void Sever_System::receive(World* world, const Login_Event& event)
 {
-
-	WSADATA wsa;
-	WSAStartup(MAKEWORD(2, 2), &wsa);
-
-	g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
-
-	ZeroMemory(&server_addr, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(SERVER_PORT);
-	inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
-
-	connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-
-	unsigned long noblock = 1;
-	ioctlsocket(g_socket, FIONBIO, &noblock);
-
 	CS_LOGIN_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
 	int weapon = 0;
-	/*cout << "이름 입력" << endl;
-	cin >> packet.name;
-	cout << "무기 입력" << endl;
-	cin >> weapon;*/
-	strcpy_s(packet.name, "temp name");
+	cout << event.text.c_str() << endl;
+	strcpy_s(packet.name, event.text.c_str());
 	packet.weapon = weapon;
 
 
@@ -112,23 +93,78 @@ void Sever_System::receive(World* world, const Login_Event& event)
 			}
 			else if (sub_packet.type == SC_PACKET_MAX_PLAYER) {
 				cout << "방이 다찼음" << endl;
-				exit(0);
 			}
 			else {
-				exit(0);
 			}
 		}
 		else {
-			cout << "못받음" << endl;
+			//cout << "못받음" << endl;
 		}
 	}
-	//cout << (int)ply.id << endl;
 	m_id = (int)sub_packet.id;
 	std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
 	m_login = true;
-	//cout << Data->id << endl;
+	world->emit<LoginCheck_Event>({ m_login });
 
 }
+
+//void Sever_System::receive(World* world, const Login_Event& event)
+//{
+//	WSADATA wsa;
+//	WSAStartup(MAKEWORD(2, 2), &wsa);
+//
+//	g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
+//
+//	ZeroMemory(&server_addr, sizeof(server_addr));
+//	server_addr.sin_family = AF_INET;
+//	server_addr.sin_port = htons(SERVER_PORT);
+//	inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
+//
+//	connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+//
+//	unsigned long noblock = 1;
+//	ioctlsocket(g_socket, FIONBIO, &noblock);
+//
+//	CS_LOGIN_PACKET packet;
+//	packet.size = sizeof(packet);
+//	packet.type = CS_PACKET_LOGIN;
+//	int weapon = 0;
+//	/*cout << "이름 입력" << endl;
+//	cin >> packet.name;
+//	cout << "무기 입력" << endl;
+//	cin >> weapon;*/
+//	strcpy_s(packet.name, "temp name");
+//	packet.weapon = weapon;
+//
+//
+//	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
+//
+//	SC_LOGIN_INFO_PACKET sub_packet;
+//	while (1) {
+//		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
+//		if (retval > 0) {
+//			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
+//				break;
+//			}
+//			else if (sub_packet.type == SC_PACKET_MAX_PLAYER) {
+//				cout << "방이 다찼음" << endl;
+//				exit(0);
+//			}
+//			else {
+//				exit(0);
+//			}
+//		}
+//		else {
+//			cout << "못받음" << endl;
+//		}
+//	}
+//	//cout << (int)ply.id << endl;
+//	m_id = (int)sub_packet.id;
+//	std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
+//	m_login = true;
+//	//cout << Data->id << endl;
+//
+//}
 
 void Sever_System::receive(World* world, const Game_Start& event)
 {

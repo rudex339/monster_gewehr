@@ -28,7 +28,7 @@ public:
 	~DataBase();
 
 	void Createaccount(const char* id, const char* password);
-	void Login(const char* id, const char* password);
+	bool Login(const char* id, const char* password);
 
 private:
 	

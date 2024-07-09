@@ -90,7 +90,7 @@ void DataBase::Createaccount(const char* id, const char* password)
 	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 }
 
-void DataBase::Login(const char* id, const char* password)
+bool DataBase::Login(const char* id, const char* password)
 {
 	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
 
@@ -108,7 +108,7 @@ void DataBase::Login(const char* id, const char* password)
 		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
 		SQLCancel(m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
-		return;
+		return false;
 	}
 
 	PLAYER_TABLE player_table{};
@@ -137,7 +137,7 @@ void DataBase::Login(const char* id, const char* password)
 				SQLCancel(m_hstmt);
 				SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 				std::cout << "id / password가 일치하지 않습니다." << std::endl;
-				return;
+				return false;
 			}
 
 			std::wcout << "id : " << player_data.user_id << std::endl;
@@ -145,6 +145,7 @@ void DataBase::Login(const char* id, const char* password)
 			std::cout << "user_level : " << player_data.user_level << std::endl;
 			std::cout << "possion : " << player_data.possion << std::endl;
 			std::cout << "grenade : " << player_data.grenade << std::endl;
+			
 		}
 		else {
 			std::cout << "id / password가 일치하지 않습니다." << std::endl;
@@ -152,6 +153,7 @@ void DataBase::Login(const char* id, const char* password)
 
 		SQLCancel(m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
-		break;
+		return true;
 	}
+	return false;
 }

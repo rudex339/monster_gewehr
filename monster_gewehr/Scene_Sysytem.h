@@ -34,11 +34,16 @@ struct EnterRoom_Event {
 	int room_num = 0;
 };
 
+struct LoginCheck_Event {
+	bool logincheck = false;
+};
+
 
 
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
-	public EventSubscriber<EnterRoom_Event>
+	public EventSubscriber<EnterRoom_Event>,
+	public EventSubscriber<LoginCheck_Event>
 {
 private:
 	UINT m_State = 0;
@@ -60,6 +65,7 @@ private:
 	queue<int> Room_ids;
 
 	int m_room_num;
+	bool loginCheck = false;
 
 public:
 
@@ -72,6 +78,7 @@ public:
 
 	virtual void receive(class World* world, const ChangeScene_Event& event);
 	virtual void receive(class World* world, const EnterRoom_Event& event);
+	virtual void receive(class World* world, const LoginCheck_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 

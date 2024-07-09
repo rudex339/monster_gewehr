@@ -21,6 +21,7 @@ void Scene_Sysytem::configure(World* world)
 {
 	world->subscribe<ChangeScene_Event>(this);
 	world->subscribe<EnterRoom_Event>(this);
+	world->subscribe<LoginCheck_Event>(this);
 	
 }
 
@@ -35,8 +36,10 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 		switch (m_State) {
 		case LOGIN:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				world->emit< ChangeScene_Event>({LOBBY});
-				world->emit<Login_Event>({});
+				cout << "½ÇÇàµÊ22" << endl;
+				world->emit<InputId_Event>({});
+				if (loginCheck)
+					world->emit< ChangeScene_Event>({ LOBBY });
 			}
 			break;
 		case LOBBY:
@@ -287,6 +290,11 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 		(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 		(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
+}
+
+void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
+{
+	loginCheck = event.logincheck;
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)

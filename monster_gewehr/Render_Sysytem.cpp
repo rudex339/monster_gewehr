@@ -191,6 +191,7 @@ void Render_System::configure(World* world)
 	world->subscribe<KeyDown_Event>(this);
 	world->subscribe<Tab_Event>(this);
 	world->subscribe<Mouse_Event>(this);
+	world->subscribe<InputId_Event>(this);
 }
 
 void Render_System::unconfigure(World* world)
@@ -616,4 +617,13 @@ void Render_System::receive(World* world, const Mouse_Event& event)
 {
 	m_cursorPos = event.cursorPos;
 	clicked = event.click;
+}
+
+void Render_System::receive(World* world, const InputId_Event& event)
+{
+	string id;
+
+	id.assign(text[0].begin(), text[0].end());
+	cout << id.c_str() << endl;
+	world->emit<Login_Event>({ id });
 }
