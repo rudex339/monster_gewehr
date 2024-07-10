@@ -117,32 +117,49 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		world->emit<SetCamera_Event>({ NULL });
 
 		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(L"press space",
-			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
-		ent = world->create();
-		D2D1_RECT_F imageRect;
-		D2D1_RECT_F sRect[4] = {{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 - 15.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 15.f},
-					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 30.f, FRAME_BUFFER_WIDTH / 2 + 50.f , FRAME_BUFFER_HEIGHT / 2 + 60.f},
-					{FRAME_BUFFER_WIDTH / 2 - 55.f , FRAME_BUFFER_HEIGHT / 2 + 75.f, FRAME_BUFFER_WIDTH / 2 + 55.f, FRAME_BUFFER_HEIGHT / 2 + 105.f},
-					{FRAME_BUFFER_WIDTH / 2 - 50.f , FRAME_BUFFER_HEIGHT / 2 + 130.f, FRAME_BUFFER_WIDTH / 2 + 50.f, FRAME_BUFFER_HEIGHT / 2 + 160.f}};
+		D2D1_RECT_F imageRect, screenRect;
+		imageRect = { 0, 0, 1125, 675 };
+		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+
+		ent->assign<ImageUI_Component>(L"image/title.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+		D2D1_RECT_F sRect[4] = {
+					{FRAME_BUFFER_WIDTH / 2 - FRAME_BUFFER_WIDTH / 10 , FRAME_BUFFER_HEIGHT / 2 - FRAME_BUFFER_HEIGHT / 15, FRAME_BUFFER_WIDTH / 2 + FRAME_BUFFER_WIDTH / 10 , FRAME_BUFFER_HEIGHT / 2 - FRAME_BUFFER_HEIGHT / 15 +  FRAME_BUFFER_HEIGHT / 10}};
+		float width = FRAME_BUFFER_WIDTH / 10;
+		float y1 = FRAME_BUFFER_HEIGHT / 2 - FRAME_BUFFER_HEIGHT / 15;
+		float height = FRAME_BUFFER_HEIGHT / 10;
+		float offset = FRAME_BUFFER_HEIGHT / 45;
+
+		sRect[0].left = FRAME_BUFFER_WIDTH / 2 - width;
+		sRect[0].right = FRAME_BUFFER_WIDTH / 2 + width;
+		sRect[0].top = FRAME_BUFFER_HEIGHT / 2;
+		sRect[0].bottom = sRect[0].top + height;
+
+		for (int i = 1; i < 4; ++i) {
+			sRect[i].left = sRect[i - 1].left;
+			sRect[i].right = sRect[i - 1].right;
+
+			sRect[i].top = sRect[i - 1].bottom + offset;
+			sRect[i].bottom = sRect[i].top + height;
+		}
 		
 		imageRect = { 0, 0, 340, 70 };
 
-		ent->assign<Button_Component>(GameStartBtn, L"image/monster_hunter_login.png", L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(ShopBtn, L"image/monster_hunter_login.png", L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ShopBtn, L"image/null.png", L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(EquipBtn, L"image/monster_hunter_login.png", L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(EquipBtn, L"image/null.png", L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		ent = world->create();
-		ent->assign<Button_Component>(ExitBtn, L"image/monster_hunter_login.png", L"EXIT", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ExitBtn, L"image/null.png", L"EXIT", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
 	break;

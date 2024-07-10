@@ -177,7 +177,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 	IDWriteFontFile* pFontFile = nullptr;
 	if (SUCCEEDED(hr))
 	{
-		hr = pDWriteFactory->CreateFontFileReference(L"font/Galmuri14.ttf", nullptr, &pFontFile);
+		hr = pDWriteFactory->CreateFontFileReference(L"font/Needleteeth Regular.ttf", nullptr, &pFontFile);
 	}
 	BOOL isSupported;
 	DWRITE_FONT_FILE_TYPE fileType;
@@ -200,15 +200,27 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 	pDWriteFactory->CreateFontCollectionFromFontSet(pFontSet, &fontCollection);
 
 	m_dwriteFactory->CreateTextFormat(
-		L"Galmuri14",
+		L"Needleteeth Regular",
 		fontCollection,
 		DWRITE_FONT_WEIGHT_REGULAR,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		26,
+		48,
 		L"en-us",
-		&customFonts[0]
+		&Needleteeth[0]
 	);
+
+	m_dwriteFactory->CreateTextFormat(
+		L"Needleteeth Regular",
+		fontCollection,
+		DWRITE_FONT_WEIGHT_REGULAR,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		54,
+		L"en-us",
+		&Needleteeth[1]
+	);
+
 
 	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[0]);
 
@@ -229,6 +241,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 
 	m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	
 }
 
 void Render_System::configure(World* world)
@@ -428,6 +441,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				&pTextLayout[editBox->index]
 			);
 
+			
+
 			// 텍스트
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 
@@ -461,7 +476,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<Button_Component> button
 		)-> void {
 
-			button->CursorOn(m_cursorPos, customFonts[0], m_smalltextFormat);
+			button->CursorOn(m_cursorPos, Needleteeth[1], Needleteeth[0]);
 			m_d2dDeviceContext->DrawBitmap(
 				button->m_bitmap,
 				button->m_Rect,
@@ -472,7 +487,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			
 
 			{
-				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
 
 				button->m_textFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
 				button->m_textFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치

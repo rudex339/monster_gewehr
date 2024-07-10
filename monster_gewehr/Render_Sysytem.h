@@ -83,7 +83,11 @@ private:
 	IDWriteFontFace* pFontFace;
 	IDWriteFontCollection1* fontCollection;
 
-	ComPtr<IDWriteTextFormat> customFonts[2];
+	/*
+		[0] : fontsize 48
+		[1] : fontsize 54
+	*/
+	ComPtr<IDWriteTextFormat> Needleteeth[2];
 
 	ComPtr<ID2D1SolidColorBrush> m_textBrush;
 
