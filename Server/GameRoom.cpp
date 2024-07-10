@@ -76,9 +76,9 @@ void GameRoom::SetCreateRoom()
 	m_state = G_CREATE;
 	m_state_lock.unlock();
 
-	//for (auto& id : m_player_ids) {
-	//	id = -1;
-	//}
+	for (auto& id : m_player_ids) {
+		id = -1;
+	}
 }
 
 void GameRoom::SetEndGame()

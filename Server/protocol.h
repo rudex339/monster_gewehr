@@ -25,6 +25,7 @@ constexpr char CS_PACKET_CHANGE_ANIMATION = 4;
 constexpr char CS_PACKET_PLAYER_ATTACK = 5;
 constexpr char CS_PACKET_CREATE_ROOM = 6;
 constexpr char CS_PACKET_SELECT_ROOM = 7;
+constexpr char CS_PACKET_QUIT_ROOM = 8;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -41,7 +42,7 @@ constexpr char SC_PACKET_UPDATE_MONSTER = 7;
 constexpr char SC_PACKET_LOGOUT = 8;
 constexpr char SC_PACKET_HIT_PLAYER = 9;
 constexpr char SC_PACKET_END_GAME = 10;
-constexpr char SC_PACKET_MAX_PLAYER = 11;
+constexpr char SC_PACKET_LOGIN_FAIL = 11;
 constexpr char SC_PACKET_GAME_START = 12; // 게임룸 구현시 방장이 시작했다는 것을 알리는 패킷
 constexpr char SC_PACKET_CREATE_ROOM = 13;
 constexpr char SC_PACKET_ADD_ROOM = 14;
@@ -132,6 +133,12 @@ struct CS_SELECT_ROOM_PACKET
 	UCHAR size;
 	UCHAR type;
 	SHORT room_num;
+};
+
+struct CS_QUIT_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
 };
 
 struct CS_DEMO_PACKET

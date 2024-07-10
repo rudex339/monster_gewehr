@@ -260,22 +260,22 @@ void ProcessPacket(int id, char* p)
 		CS_LOGIN_PACKET* packet = reinterpret_cast<CS_LOGIN_PACKET*>(p);
 		players[id].SetName(packet->name);
 		players[id].SetWepon(packet->weapon);
-		players[id].SetRoomID(0);	// 임시로 0번으로 지정
+		players[id].SetRoomID(-1);
 
 		std::cout << players[id].GetName().c_str() << std::endl;
 
-		/*players[id].SetByWeapon(2);
+		players[id].SetByWeapon(0);
 		SendLoginInfo(id);
-		SendRoomList(id);*/
+		SendRoomList(id);
 
-		if (gamerooms[players[id].GetRoomID()].SetPlayerId(id)) {
+		/*if (gamerooms[players[id].GetRoomID()].SetPlayerId(id)) {
 			players[id].SetByWeapon(2);
 			SendLoginInfo(id);
 			SendRoomList(id);
 		}
 		else {
 			SendLoginFail(id);
-		}
+		}*/
 
 		break;
 	}
@@ -348,29 +348,43 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_SELECT_ROOM: {
 		CS_SELECT_ROOM_PACKET *packet = reinterpret_cast<CS_SELECT_ROOM_PACKET*>(p);
 		players[id].SetRoomID(packet->room_num);
+		gamerooms[packet->room_num].SetPlayerId(id);
 
 		std::cout << "플레이어 id : " << id << " 방 선택 : " << players[id].GetRoomID() << std::endl;
 
 		break;
 	}
+	case CS_PACKET_QUIT_ROOM: {
+		CS_QUIT_ROOM_PACKET *packet = reinterpret_cast<CS_QUIT_ROOM_PACKET*>(p);
+		
+		gamerooms[players[id].GetRoomID()].DeletePlayerId(id);
+		players[id].SetRoomID(-1);
+
+		std::cout << "플레이어 id : " << id << " 방 나감" << std::endl;
+
+		break;
+	}
 	case CS_DEMO_MONSTER_SETPOS: {
-		souleaters[0].m_lock.lock();
-		souleaters[0].SetPostion(XMFLOAT3(1014.f, 1024.f, 1429.f));
-		souleaters[0].SetBoundingBox();
-		souleaters[0].m_lock.unlock();
-		souleaters[0].SetState(idle_state);
-		build_bt(&souleaters[0], &players, &gamerooms[players[id].GetRoomID()]);
+		int room_id = players[id].GetRoomID();
+		souleaters[room_id].m_lock.lock();
+		souleaters[room_id].SetPostion(XMFLOAT3(1014.f, 1024.f, 1429.f));
+		souleaters[room_id].SetBoundingBox();
+		souleaters[room_id].m_lock.unlock();
+		souleaters[room_id].SetState(idle_state);
+		build_bt(&souleaters[room_id], &players, &gamerooms[players[id].GetRoomID()]);
 		break;
 	}
 	case CS_DEMO_MONSTER_SETHP: {
-		souleaters[0].m_lock.lock();
-		souleaters[0].SetHp(50);
-		souleaters[0].SetRAHp(0);
-		souleaters[0].m_lock.unlock();
+		int room_id = players[id].GetRoomID();
+		souleaters[room_id].m_lock.lock();
+		souleaters[room_id].SetHp(50);
+		souleaters[room_id].SetRAHp(0);
+		souleaters[room_id].m_lock.unlock();
 		break;
 	}
 	case CS_DEMO_MONSTER_BEHAVIOR: {
-		souleaters[0].dash(7500.f);
+		int room_id = players[id].GetRoomID();
+		souleaters[room_id].dash(7500.f);
 		break;
 	}
 	}
@@ -396,7 +410,7 @@ void SendLoginFail(int id)
 	int retval;
 	SC_LOGIN_INFO_PACKET packet;
 	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_MAX_PLAYER;
+	packet.type = SC_PACKET_LOGIN_FAIL;
 	packet.id = -1;
 	retval = players[id].DoSend(&packet, packet.size);
 
@@ -406,6 +420,7 @@ void SendLoginFail(int id)
 void SendStartGame(int id)
 {
 	int retval;
+	int room_id = players[id].GetRoomID();
 
 	// 내 정보를 인게임 상태인 상대에게 보냄
 	SC_ADD_PLAYER_PACKET sub_packet;
@@ -415,29 +430,31 @@ void SendStartGame(int id)
 	sub_packet.player_data = players[id].GetPlayerData();
 	sub_packet.weapon = players[id].GetWeapon();
 
-	for (auto& client : players) {
-		if (client.second.GetID() == id) continue;
-		if (client.second.GetState() != S_STATE::IN_GAME) continue;
-		retval = client.second.DoSend(&sub_packet, sub_packet.size);
+	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+		if (ply_id < 0) continue;
+		if (ply_id == id) continue;
+		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+		retval = players[ply_id].DoSend(&sub_packet, sub_packet.size);
 		if (retval == SOCKET_ERROR) {
-			client.second.SetState(S_STATE::LOG_OUT);
+			players[ply_id].SetState(S_STATE::LOG_OUT);
 		}
 	}
 
 	// 상대의 정보를 인게임 상태가 될려는 나한테 보냄
-	for (auto& client : players) {
-		if (client.second.GetID() == id) continue;
-		if (client.second.GetState() != S_STATE::IN_GAME) continue;
+	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+		if (ply_id < 0) continue;
+		if (ply_id == id) continue;
+		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 		SC_ADD_PLAYER_PACKET sub_packet2;
 		sub_packet2.size = sizeof(sub_packet2);
 		sub_packet2.type = SC_PACKET_ADD_PLAYER;
-		strcpy(sub_packet2.name, client.second.GetName().c_str());
-		sub_packet2.player_data = client.second.GetPlayerData();
-		sub_packet2.weapon = client.second.GetWeapon();
+		strcpy(sub_packet2.name, players[ply_id].GetName().c_str());
+		sub_packet2.player_data = players[ply_id].GetPlayerData();
+		sub_packet2.weapon = players[ply_id].GetWeapon();
 
 		retval = players[id].DoSend(&sub_packet2, sub_packet2.size);
 		if (retval == SOCKET_ERROR) {
-			client.second.SetState(S_STATE::LOG_OUT);
+			players[ply_id].SetState(S_STATE::LOG_OUT);
 		}
 	}
 
@@ -445,12 +462,63 @@ void SendStartGame(int id)
 	SC_ADD_MONSTER_PACKET sub_packet3;
 	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
 	sub_packet3.type = SC_PACKET_ADD_MONSTER;
-	sub_packet3.monster = souleaters[0].GetData();
+	sub_packet3.monster = souleaters[room_id].GetData();
 
 	players[id].DoSend(&sub_packet3, sub_packet3.size);
 
 	players[id].SetState(S_STATE::IN_GAME);
 }
+
+// 원본
+//void SendStartGame(int id)
+//{
+//	int retval;
+//	int room_id = players[id].GetRoomID();
+//
+//	// 내 정보를 인게임 상태인 상대에게 보냄
+//	SC_ADD_PLAYER_PACKET sub_packet;
+//	sub_packet.size = sizeof(sub_packet);
+//	sub_packet.type = SC_PACKET_ADD_PLAYER;
+//	strcpy(sub_packet.name, players[id].GetName().c_str());
+//	sub_packet.player_data = players[id].GetPlayerData();
+//	sub_packet.weapon = players[id].GetWeapon();
+//
+//	for (auto& client : players) {
+//		if (client.second.GetID() == id) continue;
+//		if (client.second.GetState() != S_STATE::IN_GAME) continue;
+//		retval = client.second.DoSend(&sub_packet, sub_packet.size);
+//		if (retval == SOCKET_ERROR) {
+//			client.second.SetState(S_STATE::LOG_OUT);
+//		}
+//	}
+//
+//	// 상대의 정보를 인게임 상태가 될려는 나한테 보냄
+//	for (auto& client : players) {
+//		if (client.second.GetID() == id) continue;
+//		if (client.second.GetState() != S_STATE::IN_GAME) continue;
+//		SC_ADD_PLAYER_PACKET sub_packet2;
+//		sub_packet2.size = sizeof(sub_packet2);
+//		sub_packet2.type = SC_PACKET_ADD_PLAYER;
+//		strcpy(sub_packet2.name, client.second.GetName().c_str());
+//		sub_packet2.player_data = client.second.GetPlayerData();
+//		sub_packet2.weapon = client.second.GetWeapon();
+//
+//		retval = players[id].DoSend(&sub_packet2, sub_packet2.size);
+//		if (retval == SOCKET_ERROR) {
+//			client.second.SetState(S_STATE::LOG_OUT);
+//		}
+//	}
+//
+//	// 몬스터의 정보도 나한테 보냄
+//	SC_ADD_MONSTER_PACKET sub_packet3;
+//	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
+//	sub_packet3.type = SC_PACKET_ADD_MONSTER;
+//	sub_packet3.monster = souleaters[0].GetData();
+//
+//	players[id].DoSend(&sub_packet3, sub_packet3.size);
+//
+//	players[id].SetState(S_STATE::IN_GAME);
+//}
 
 //void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 사람들한테도 모두 게임이 시작이 되었다는 신호가 먼저 가야함
 //{
@@ -496,12 +564,25 @@ void SendPlayerMove(int id)
 	packet.type = SC_PACKET_UPDATE_PLAYER;
 	packet.player_data = players[id].GetPlayerData();
 
-	for (auto& client : players) {
+	int room_id = players[id].GetRoomID();
+
+	/*for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
 		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		retval = client.second.DoSend(&packet, packet.size);
 		if (retval == SOCKET_ERROR) {
 			client.second.SetState(S_STATE::LOG_OUT);
+		}
+	}*/
+
+	// 같은 게임룸 안의 사람들 한테만 보내기
+	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+		if (ply_id < 0) continue;
+		if (ply_id == id) continue;
+		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+		retval = players[ply_id].DoSend(&packet, packet.size);
+		if (retval == SOCKET_ERROR) {
+			players[ply_id].SetState(S_STATE::LOG_OUT);
 		}
 	}
 }
@@ -514,12 +595,26 @@ void SendAnimaition(int id)
 	packet.type = SC_PACKET_CHANGE_ANIMATION;
 	packet.id = players[id].GetID();
 	packet.animation = players[id].GetAnimaition();
-	for (auto& client : players) {
+
+	int room_id = players[id].GetRoomID();
+
+	/*for (auto& client : players) {
 		if (client.second.GetID() == id) continue;
 		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		retval = client.second.DoSend(&packet, packet.size);
 		if (retval == SOCKET_ERROR) {
 			client.second.SetState(S_STATE::LOG_OUT);
+		}
+	}*/
+
+	// 같은 게임룸 안의 사람들 한테만 보내기
+	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+		if (ply_id < 0) continue;
+		if (ply_id == id) continue;
+		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+		retval = players[ply_id].DoSend(&packet, packet.size);
+		if (retval == SOCKET_ERROR) {
+			players[ply_id].SetState(S_STATE::LOG_OUT);
 		}
 	}
 }
@@ -552,9 +647,17 @@ void SendHitPlayer(int id)
 	packet.id = id;
 	packet.hp = players[id].GetHp();
 
-	for (auto& client : players) {
+	int room_id = players[id].GetRoomID();
+
+	/*for (auto& client : players) {
 		if (client.second.GetState() != S_STATE::IN_GAME) continue;
 		client.second.DoSend(&packet, packet.size);
+	}*/
+
+	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+		if (ply_id < 0) continue;
+		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+		players[ply_id].DoSend(&packet, packet.size);		
 	}
 }
 

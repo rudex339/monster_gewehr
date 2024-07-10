@@ -89,22 +89,19 @@ void Sever_System::receive(World* world, const Login_Event& event)
 		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
 		if (retval > 0) {
 			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
+				m_id = (int)sub_packet.id;
+				std::cout << "성공했음 일단 " << (int)sub_packet.id << std::endl;
+				m_login = true;
+				world->emit<LoginCheck_Event>({ m_login });
 				break;
 			}
-			else if (sub_packet.type == SC_PACKET_MAX_PLAYER) {
-				cout << "방이 다찼음" << endl;
+			else if (sub_packet.type == SC_PACKET_LOGIN_FAIL) {
+				cout << "로그인 실패" << endl;
+				break;
 			}
-			else {
-			}
-		}
-		else {
-			//cout << "못받음" << endl;
 		}
 	}
-	m_id = (int)sub_packet.id;
-	std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
-	m_login = true;
-	world->emit<LoginCheck_Event>({ m_login });
+	
 
 }
 
