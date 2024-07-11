@@ -633,27 +633,27 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel* pRoo
 	{
 		for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++) m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
 
+		for (int k = 0; k < m_nAnimationTracks; k++) {
+			if (m_pAnimationTracks[k].m_bEnable) {
+				m_pAnimationTracks[k].m_fWeight += 2.f * fTimeElapsed;
+				if (m_pAnimationTracks[k].m_fWeight > 1.f) {
+					m_pAnimationTracks[k].m_fWeight = 1.f;
+				}
+			}
+			else {
+				m_pAnimationTracks[k].m_fWeight -= 2.f * fTimeElapsed;
+				if (m_pAnimationTracks[k].m_fWeight < 0.f) {
+					m_pAnimationTracks[k].m_fWeight = 0.f;
+				}
+			}
+		}
+
 		for (int k = 0; k < m_nAnimationTracks; k++)
 		{
 			//1 가중치 0.f에서 enable 하면 점차 증가
 			//가중치 < 1.f 이고 enable 이라면 증가, 1.f 이상이되면 스탑
 			//가중치 = 1.f 이고 disable 이라면 감소, 
-			if (m_pAnimationTracks[k].m_bEnable) {
-				if (m_pAnimationTracks[k].m_fWeight < 1.f) {
-					m_pAnimationTracks[k].m_fWeight += fTimeElapsed;
-				}
-				else {
-					m_pAnimationTracks[k].m_fWeight = 1.f;
-				}
-			}
-			else {
-				if (m_pAnimationTracks[k].m_fWeight > 0.f) {
-					m_pAnimationTracks[k].m_fWeight -= fTimeElapsed;
-				}
-				else {
-					m_pAnimationTracks[k].m_fWeight = 0.f;
-				}
-			}
+			
 			if (m_pAnimationTracks[k].m_fWeight>0.f)
 			{
 				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
