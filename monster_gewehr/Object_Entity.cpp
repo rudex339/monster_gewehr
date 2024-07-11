@@ -36,6 +36,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		//controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);
 	}
 	controller->m_AnimationController->SetTrackEnable(0, true);
+	controller->m_AnimationController->SetTrackWeight(0,1.f);
 	ent->assign<Position_Component>(x, y, z);
 	ent->assign<Rotation_Component>(rx, ry, rz);
 	ent->assign<Scale_Component>(sx, sy, sz);

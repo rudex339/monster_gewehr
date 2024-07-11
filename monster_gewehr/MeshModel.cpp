@@ -635,7 +635,26 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel* pRoo
 
 		for (int k = 0; k < m_nAnimationTracks; k++)
 		{
-			if (m_pAnimationTracks[k].m_bEnable)
+			//1 가중치 0.f에서 enable 하면 점차 증가
+			//가중치 < 1.f 이고 enable 이라면 증가, 1.f 이상이되면 스탑
+			//가중치 = 1.f 이고 disable 이라면 감소, 
+			if (m_pAnimationTracks[k].m_bEnable) {
+				if (m_pAnimationTracks[k].m_fWeight < 1.f) {
+					m_pAnimationTracks[k].m_fWeight += fTimeElapsed;
+				}
+				else {
+					m_pAnimationTracks[k].m_fWeight = 1.f;
+				}
+			}
+			else {
+				if (m_pAnimationTracks[k].m_fWeight > 0.f) {
+					m_pAnimationTracks[k].m_fWeight -= fTimeElapsed;
+				}
+				else {
+					m_pAnimationTracks[k].m_fWeight = 0.f;
+				}
+			}
+			if (m_pAnimationTracks[k].m_fWeight>0.f)
 			{
 				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 				float fPosition = m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
@@ -1556,15 +1575,22 @@ Box::~Box()
 
 void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOrientedBox* box)
 {
-	/*SetScale(box->Extents.x, box->Extents.y, box->Extents.z);
-	SetPosition(box->Center);*/
+	//SetScale(box->Extents.x, box->Extents.y, box->Extents.z);
+	//SetPosition(box->Center);
+	//Rotate(box->Orientation.x, box->Orientation.x, box->Orientation.z)
 	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
 	xmf4x4World = Matrix4x4::Multiply(XMMatrixScaling(box->Extents.x,
 		box->Extents.y,
 		box->Extents.z), xmf4x4World);
+	xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(
+		XMConvertToRadians(box->Orientation.x),
+		XMConvertToRadians(box->Orientation.y),
+		XMConvertToRadians(box->Orientation.z)), xmf4x4World);
+
 	xmf4x4World._41 = box->Center.x;
 	xmf4x4World._42 = box->Center.y;
 	xmf4x4World._43 = box->Center.z;
+	
 
 	UpdateTransform(&xmf4x4World);
 

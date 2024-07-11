@@ -243,7 +243,7 @@ public:
     BOOL 							m_bEnable = true;
     float 							m_fSpeed = 1.0f;
     float 							m_fPosition = -ANIMATION_CALLBACK_EPSILON;
-	float 							m_fWeight = 1.0f;
+	float 							m_fWeight = 0.0f;
 
 	int 							m_nAnimationSet = 0;
 
