@@ -67,6 +67,7 @@ public:
 	void SetAnimaition(char ani) { m_animation = ani; }
 	void SetAtkDir(const DirectX::XMFLOAT3& dir) { m_atk_dir = dir; }
 	void SetAtkPos(const DirectX::XMFLOAT3& pos) { m_atk_pos = pos; }
+	void SetHost(bool is_host) { m_is_host = is_host; }
 
 	void Lock() { m_lock.lock(); }
 	void UnLock() { m_lock.unlock(); }
@@ -81,6 +82,7 @@ public:
 	DirectX::XMFLOAT3 GetAtkPos() { return m_atk_pos; }
 	float GetHp() { return m_hp; }
 	float GetRange() { return m_range; }
+	bool GetHost() { return m_is_host; }
 
 	int RecvData();
 	int DoSend(void* p, size_t size);
@@ -121,6 +123,8 @@ protected:
 	CHAR m_animation;
 
 	INT m_remain_size;
+
+	BOOL m_is_host;
 };
 
 

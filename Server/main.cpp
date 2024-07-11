@@ -340,7 +340,10 @@ void ProcessPacket(int id, char* p)
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
 			if (gamerooms[i].GetState() == G_FREE) {
 				gamerooms[i].SetCreateRoom();
-				SendRoomCreate(i);
+				gamerooms[i].SetPlayerId(id);
+				players[id].SetRoomID(i);
+				players[id].SetHost(true);
+				SendRoomCreate(id, i);
 				break;
 			}
 		}
@@ -362,10 +365,16 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_QUIT_ROOM: {
 		CS_QUIT_ROOM_PACKET *packet = reinterpret_cast<CS_QUIT_ROOM_PACKET*>(p);
 		
+		std::cout << gamerooms[players[id].GetRoomID()].GetPlyId()[0] << std::endl;
+		
+		//if (gamerooms[players[id].GetRoomID()].GetPlyId()[0] == id) {
+		//	players[id].SetHost(false);
+		//	// 여기에 이 방이 폭파되었다는 메세지 알리는거 넣으면 됨
+		//}
 		gamerooms[players[id].GetRoomID()].DeletePlayerId(id);
 		players[id].SetRoomID(-1);
 
-		std::cout << "플레이어 id : " << id << " 방 나감" << std::endl;
+		//std::cout << "플레이어 id : " << id << " 방 나감" << std::endl;
 
 		break;
 	}
@@ -692,15 +701,22 @@ void SendRoomList(int id)
 	}
 }
 
-void SendRoomCreate(int room_id)
+void SendRoomCreate(int ply_id, int room_id)
 {
 	int retval;
-	SC_CREATE_ROOM_PACKET sub_packet;
+	SC_CREATE_ROOM_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_CREATE_ROOM;
+	packet.room_num = room_id;
+	players[ply_id].DoSend(&packet, packet.size);
+
+	SC_ADD_ROOM_PACKET sub_packet;
 	sub_packet.size = sizeof(sub_packet);
-	sub_packet.type = SC_PACKET_CREATE_ROOM;
+	sub_packet.type = SC_PACKET_ADD_ROOM;
 	sub_packet.room_num = room_id;
 
 	for (auto& client : players) {
+		if (client.second.GetID() == ply_id) continue;
 		if (client.second.GetState() == S_STATE::LOG_OUT) continue;
 		retval = client.second.DoSend(&sub_packet, sub_packet.size);
 		if (retval == SOCKET_ERROR) {

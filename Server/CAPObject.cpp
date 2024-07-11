@@ -90,6 +90,8 @@ Player::Player(int id, SOCKET socket)
 	m_bounding_box.Center = m_position;
 	m_bounding_box.Extents = XMFLOAT3(5.f, 10.f, 5.f);
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
+
+	m_is_host = false;
 }
 
 void Player::PlayerInit()
@@ -105,6 +107,8 @@ void Player::PlayerInit()
 
 	m_bounding_box.Center = m_position;
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
+
+	m_is_host = false;
 }
 
 void Player::SetByWeapon(char weapon)
