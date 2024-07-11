@@ -362,6 +362,8 @@ public:
 
 	CMesh							*m_pMesh = NULL;
 
+	CBoxMesh* m_pBoundingBoxMesh = NULL;
+
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
 
@@ -494,7 +496,8 @@ public:
 class Box : public GameObjectModel
 {
 public:
-	Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature
+		, float x = 1.0f, float y = 1.0f, float z = 1.0f);
 	virtual ~Box();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOrientedBox* box);

@@ -45,6 +45,7 @@ public:
 	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
+	XMFLOAT3* m_pxmf3Positions = NULL;
 protected:
 	UINT							m_nType = 0x00;
 
@@ -56,7 +57,7 @@ protected:
 protected:
 	int								m_nVertices = 0;
 
-	XMFLOAT3						*m_pxmf3Positions = NULL;
+	
 
 	ID3D12Resource					*m_pd3dPositionBuffer = NULL;
 	ID3D12Resource					*m_pd3dPositionUploadBuffer = NULL;
@@ -160,7 +161,9 @@ public:
 class CBoxMesh : public CMesh
 {
 public:
-	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f);
+	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f
+		, float cx = 0.0f, float cy = 0.0f, float  cz = 0.0f);
+	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, BoundingOrientedBox* box);
 	virtual ~CBoxMesh();
 };
 

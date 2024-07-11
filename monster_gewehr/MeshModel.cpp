@@ -1244,6 +1244,12 @@ GameObjectModel* GameObjectModel::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile, TileX, TileY);
 			pGameObject->SetMesh(pMesh);
+
+			//test
+			pGameObject->m_pBoundingBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList,
+				pMesh->m_xmf3AABBExtents.x, pMesh->m_xmf3AABBExtents.y, pMesh->m_xmf3AABBExtents.z,
+				pMesh->m_xmf3AABBCenter.x, pMesh->m_xmf3AABBCenter.y, pMesh->m_xmf3AABBCenter.z);
+
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
 		{
@@ -1443,7 +1449,7 @@ CLoadedModelInfo* GameObjectModel::LoadGeometryFromFile(ID3D12Device* pd3dDevice
 			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile, TileX,TileY);
 			pGameObject->SetMesh(pMesh);
-			pLoadedModel->m_pModelRootObject = pGameObject;
+			
 		}
 		else
 		{
@@ -1544,9 +1550,9 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-Box::Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectModel(1)
+Box::Box(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,float x, float y, float z) : GameObjectModel(1)
 {
-	CBoxMesh* pSkyBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f);
+	CBoxMesh* pSkyBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, x, y, z);
 	SetMesh(pSkyBoxMesh);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1575,24 +1581,9 @@ Box::~Box()
 
 void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOrientedBox* box)
 {
-	//SetScale(box->Extents.x, box->Extents.y, box->Extents.z);
-	//SetPosition(box->Center);
-	//Rotate(box->Orientation.x, box->Orientation.x, box->Orientation.z)
-	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
-	xmf4x4World = Matrix4x4::Multiply(XMMatrixScaling(box->Extents.x,
-		box->Extents.y,
-		box->Extents.z), xmf4x4World);
-	xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(
-		XMConvertToRadians(box->Orientation.x),
-		XMConvertToRadians(box->Orientation.y),
-		XMConvertToRadians(box->Orientation.z)), xmf4x4World);
-
-	xmf4x4World._41 = box->Center.x;
-	xmf4x4World._42 = box->Center.y;
-	xmf4x4World._43 = box->Center.z;
 	
-
-	UpdateTransform(&xmf4x4World);
 
 	GameObjectModel::Render(pd3dCommandList);
 }
+
+

@@ -291,7 +291,7 @@ void Render_System::tick(World* world, float deltaTime)
 			Entity* ent,
 			ComponentHandle<SkyBox_Component> SkyBox
 			) -> void {
-				SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
+				//SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
 			});
 
 		/*world->each<Terrain_Component>([&](
@@ -338,13 +338,13 @@ void Render_System::tick(World* world, float deltaTime)
 
 					//test
 					if (m_pBox) {
-						if (ent->has<BoundingBox_Component>()) {
-							ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
-							box->m_bounding_box.Center = pos->Position;
-							box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
+						//if (ent->has<BoundingBox_Component>()) {
+						//	ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
+						//	box->m_bounding_box.Center = pos->Position;
+						//	box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
 
-							m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
-						}
+						//	m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+						//}
 					}
 
 
@@ -367,18 +367,22 @@ void Render_System::tick(World* world, float deltaTime)
 
 
 				}
-				else if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {
+				else{
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
-					if (Model->draw)
-						Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
-					//test
-					if (m_pBox) {
-						if (ent->has<BoundingBox_Component>()) {
-							ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
-							//box->m_bounding_box.Center = pos->Position;
-							//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
-
-							m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {						
+						if (Model->draw){
+							Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
+						}
+						//test
+						if (m_pBox) {
+							if (ent->has<BoundingBox_Component>()) {
+								ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
+								//box->m_bounding_box.Center = pos->Position;
+								//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
+								
+								m_pBox->m_pMesh = box->m_pMesh;
+								m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+							}
 						}
 					}
 				}

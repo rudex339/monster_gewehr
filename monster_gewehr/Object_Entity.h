@@ -198,11 +198,16 @@ struct Light_Component {
 
 struct BoundingBox_Component {
 	DirectX::BoundingOrientedBox m_bounding_box;
+	//test
+	CMesh* m_pMesh = NULL;
+
+
 	unordered_map<string, DirectX::BoundingOrientedBox*> m_BoundingBoxList;
 	BoundingBox_Component(float x, float y, float z) {
 		m_bounding_box.Extents = XMFLOAT3(x,y,z);
 	}
-	BoundingBox_Component(XMFLOAT3 extent) {
+	BoundingBox_Component(XMFLOAT3 extent, XMFLOAT3 center = XMFLOAT3(0.f, 0.f, 0.f)) {
+		m_bounding_box.Center = center;
 		m_bounding_box.Extents = extent;
 	}
 	void add(string bone, DirectX::BoundingOrientedBox* boundingbox) {
