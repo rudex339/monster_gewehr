@@ -215,10 +215,11 @@ struct BoundingBox_Component {
 struct TextUI_Component {
 	wstring m_text;
 	D2D1_RECT_F m_Rect;
+	int m_fontType;
 	
 	TextUI_Component() = default;
-	TextUI_Component(const wchar_t* text, float top, float left, float bottom, float right);
-	TextUI_Component(wstring text, float top, float left, float bottom, float right);
+	TextUI_Component(int fontType, const wchar_t* text, float top, float left, float bottom, float right);
+	TextUI_Component(int fontType, wstring text, float top, float left, float bottom, float right);
 };
 
 struct TextBoxUI_Component {

@@ -7,6 +7,12 @@ class ObjectManager;
 class CCamera;
 class Box;
 
+enum FontType {
+	DEFAULT_FONT,
+	GARMULI_FONT,
+	NEEDLE_FONT
+};
+
 struct SetCamera_Event {
 	CCamera* pCamera;
 };

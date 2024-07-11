@@ -393,20 +393,7 @@ void Render_System::receive(World* world, const SetCamera_Event& event)
 
 void Render_System::receive(World* world, const DrawUI_Event& event)
 {
-	m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
-	world->each<TextUI_Component>([&](
-		Entity* ent,
-		ComponentHandle<TextUI_Component> textUI
-		) -> void {			
-			m_d2dDeviceContext->DrawTextW(
-				textUI->m_text.data(),
-				textUI->m_text.size(),
-				m_textFormat.Get(),
-				&textUI->m_Rect,
-				m_textBrush.Get()
-			);
-		}
-	);
+	
 	world->each<ImageUI_Component>([&](
 		Entity* ent,
 		ComponentHandle<ImageUI_Component> imageUI
@@ -420,6 +407,37 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			);
 		}
 	);
+
+	m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+	world->each<TextUI_Component>([&](
+		Entity* ent,
+		ComponentHandle<TextUI_Component> textUI
+		) -> void {
+			ComPtr<IDWriteTextFormat> textformat;
+			switch (textUI->m_fontType)
+			{
+			case GARMULI_FONT:
+				textformat = m_smalltextFormat;
+				break;
+			case NEEDLE_FONT:
+				textformat = Needleteeth[0];
+				break;
+			case DEFAULT_FONT:
+			default:
+				textformat = m_textFormat;
+				break;
+			}
+			
+			m_d2dDeviceContext->DrawTextW(
+				textUI->m_text.data(),
+				textUI->m_text.size(),
+				textformat.Get(),
+				&textUI->m_Rect,
+				m_textBrush.Get()
+			);
+		}
+	);
+
 	world->each<TextBoxUI_Component>([&](
 		Entity* ent,
 		ComponentHandle<TextBoxUI_Component> editBox

@@ -7,6 +7,20 @@
 #include "PlayerControl_System.h"
 #include "Render_Sysytem.h"
 
+#define I_BG_WIDTH 1920
+#define I_BG_HEIGHT 1152
+
+#define I_TITLE_W 1127
+#define I_TITLE_H 676
+
+#define I_LOGIN_W 1000
+#define I_LOGIN_H 563
+
+#define I_FACE_W 100
+#define I_FACE_H 100
+
+#define I_FRAME_W 1400
+#define I_FRAME_H 900
 
 Scene_Sysytem::Scene_Sysytem(ObjectManager* pObjectManager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory):
 	m_pObjectManager(pObjectManager),
@@ -148,6 +162,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		
 		imageRect = { 0, 0, 340, 70 };
 
+		ent = world->create();
 		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
@@ -169,16 +184,37 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	{
 		world->reset();
 		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(L"방들 있는 로비",
-			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
-		D2D1_RECT_F imageRect, sRect;
+
+		D2D1_RECT_F imageRect, screenRect;
+		D2D1_RECT_F sRect;
+		imageRect = { 0, 0, 1920, 1152 };
+		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+
+
+		ent->assign<TextUI_Component>(NEEDLE_FONT, L"ROOM LIST",
+			FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50,FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+
+		ent = world->create();
+		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		
+		
+	
+		ent = world->create();
+		imageRect = { 0, 0, 1400, 900 };
+		sRect = { FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 13 / 20, FRAME_BUFFER_HEIGHT * 9 / 10 };
+		ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+		
 		imageRect = { 0, 0, 1000, 563 };
 		sRect = { FRAME_BUFFER_WIDTH * 3 / 4, FRAME_BUFFER_HEIGHT * 10 / 16, FRAME_BUFFER_WIDTH * 3 / 4 + 100.0f, FRAME_BUFFER_HEIGHT * 10 / 16 + 30.0f };
 
 		ent = world->create();
 		ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
 
 		for (auto& Room : Rooms) {
 			ent = world->create();
@@ -191,9 +227,14 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	{
 		world->reset();
 		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(L"상점",
-			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+
+		D2D1_RECT_F imageRect, screenRect;
+
+		imageRect = { 0, 0, 1920, 1152 };
+		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+
+		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
 	break;
 
@@ -201,9 +242,14 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	{
 		world->reset();
 		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(L"장비창",
-			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
+		
+		D2D1_RECT_F imageRect, screenRect;
+		imageRect = { 0, 0, 1920, 1152 };
+		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+
+		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
 	}
 	break;
 
@@ -283,12 +329,12 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		break;
 	case END:
 		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(L"return lobby, press enter",
+		ent->assign<TextUI_Component>(DEFAULT_FONT, L"return lobby, press enter",
 			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 		wchar_t m_reportFileName[10];
 		ent = world->create();
-		ent->assign<TextUI_Component>(to_wstring(event.score),
+		ent->assign<TextUI_Component>(DEFAULT_FONT, to_wstring(event.score),
 			(float)FRAME_BUFFER_HEIGHT / 2 -20, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 			(float)FRAME_BUFFER_HEIGHT / 2 + 60, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 		world->emit<GetPlayerPtr_Event>({ NULL });
@@ -304,7 +350,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 
 	world->reset();
 	Entity* ent = world->create();
-	ent->assign<TextUI_Component>(to_wstring(m_room_num) + L"번 방",
+	ent->assign<TextUI_Component>(DEFAULT_FONT, to_wstring(m_room_num) + L"번 방",
 		(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 		(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
@@ -404,7 +450,11 @@ void Scene_Sysytem::AddRoom(int room_num)
 	int num = room_num;
 	D2D1_RECT_F sRect, imageRect;
 
-	sRect = { FRAME_BUFFER_WIDTH / 10 , FRAME_BUFFER_HEIGHT / 20 + num*30.f, FRAME_BUFFER_WIDTH * 8 / 10, FRAME_BUFFER_HEIGHT / 20 + (num+1)*30.0f};
+	// FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 13 / 20, FRAME_BUFFER_HEIGHT * 9 / 10
+	sRect = { FRAME_BUFFER_WIDTH / 20 + 10.0f, 
+		FRAME_BUFFER_HEIGHT / 8 + (float)num * FRAME_BUFFER_HEIGHT / 7 + 20.0f, 
+		FRAME_BUFFER_WIDTH * 13 / 20 - 10.0f, 
+		FRAME_BUFFER_HEIGHT / 8 + (float)(num+1)*FRAME_BUFFER_HEIGHT / 7 + 10.0f };
 	imageRect = { 0, 0, 1000, 563 };
 
 	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,

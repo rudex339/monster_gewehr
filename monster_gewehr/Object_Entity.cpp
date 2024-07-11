@@ -142,15 +142,17 @@ HRESULT LoadBitmapFromFiles(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDe
 	return S_OK;
 }
 
-TextUI_Component::TextUI_Component(const wchar_t* text, float top, float left, float bottom, float right) {
+TextUI_Component::TextUI_Component(int fontType, const wchar_t* text, float top, float left, float bottom, float right) {
 	m_text = text;
 	m_Rect = D2D1::RectF(left, top, right, bottom);
+	m_fontType = fontType;
 }
 
-TextUI_Component::TextUI_Component(wstring text, float top, float left, float bottom, float right)
+TextUI_Component::TextUI_Component(int fontType, wstring text, float top, float left, float bottom, float right)
 {
 	m_text = text;
 	m_Rect = D2D1::RectF(left, top, right, bottom);
+	m_fontType = fontType;
 }
 
 ImageUI_Component::ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)
