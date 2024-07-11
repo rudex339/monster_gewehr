@@ -289,6 +289,7 @@ void ProcessPacket(int id, char* p)
 
 		if (gamerooms[room_id].SetStartGame()) {
 			build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
+
 		}
 
 		SendStartGame(id);
@@ -351,6 +352,10 @@ void ProcessPacket(int id, char* p)
 		gamerooms[packet->room_num].SetPlayerId(id);
 
 		std::cout << "플레이어 id : " << id << " 방 선택 : " << players[id].GetRoomID() << std::endl;
+		for (auto i : gamerooms[packet->room_num].GetPlyId()) {
+			std::cout << i << " ";
+		}
+		std::cout << std::endl;
 
 		break;
 	}

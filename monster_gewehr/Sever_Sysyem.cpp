@@ -14,6 +14,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Demo_Event>(this);
 	world->subscribe<Create_Room>(this);
 	world->subscribe<Select_Room>(this);
+	world->subscribe<Quit_Room>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -205,6 +206,15 @@ void Sever_System::receive(class World* world, const Select_Room& event)
 	p.type = CS_PACKET_SELECT_ROOM;
 	p.room_num = event.room_num;
 	cout << p.room_num << endl;
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(class World* world, const Quit_Room& event)
+{
+	CS_QUIT_ROOM_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_QUIT_ROOM;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }

@@ -62,6 +62,7 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 				world->emit<Game_Start>({});
 			}
 			else if (pKeysBuffer[VK_BACK] & 0xF0) {
+				world->emit<Quit_Room>({});
 				world->emit< ChangeScene_Event>({ ROOMS });
 			}
 			break;

@@ -25,6 +25,7 @@ constexpr char CS_PACKET_CHANGE_ANIMATION = 4;
 constexpr char CS_PACKET_PLAYER_ATTACK = 5;
 constexpr char CS_PACKET_CREATE_ROOM = 6;
 constexpr char CS_PACKET_SELECT_ROOM = 7;
+constexpr char CS_PACKET_QUIT_ROOM = 8;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -132,6 +133,12 @@ struct CS_SELECT_ROOM_PACKET
 	UCHAR size;
 	UCHAR type;
 	SHORT room_num;
+};
+
+struct CS_QUIT_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
 };
 
 struct CS_DEMO_PACKET
