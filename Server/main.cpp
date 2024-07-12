@@ -350,7 +350,12 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_PACKET_SELECT_ROOM: {
-		CS_SELECT_ROOM_PACKET *packet = reinterpret_cast<CS_SELECT_ROOM_PACKET*>(p);
+		CS_SELECT_ROOM_PACKET* packet = reinterpret_cast<CS_SELECT_ROOM_PACKET*>(p);
+		SendRoomSelect(id, packet->room_num);
+		break;
+	}
+	case CS_PACKET_JOIN_ROOM: {
+		CS_JOIN_ROOM_PACKET *packet = reinterpret_cast<CS_JOIN_ROOM_PACKET*>(p);
 		players[id].SetRoomID(packet->room_num);
 		gamerooms[packet->room_num].SetPlayerId(id);
 
@@ -701,19 +706,19 @@ void SendRoomList(int id)
 	}
 }
 
-void SendRoomCreate(int ply_id, int room_id)
+void SendRoomCreate(int ply_id, int room_num)
 {
 	int retval;
 	SC_CREATE_ROOM_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_CREATE_ROOM;
-	packet.room_num = room_id;
+	packet.room_num = room_num;
 	players[ply_id].DoSend(&packet, packet.size);
 
 	SC_ADD_ROOM_PACKET sub_packet;
 	sub_packet.size = sizeof(sub_packet);
 	sub_packet.type = SC_PACKET_ADD_ROOM;
-	sub_packet.room_num = room_id;
+	sub_packet.room_num = room_num;
 
 	for (auto& client : players) {
 		if (client.second.GetID() == ply_id) continue;
@@ -721,6 +726,27 @@ void SendRoomCreate(int ply_id, int room_id)
 		retval = client.second.DoSend(&sub_packet, sub_packet.size);
 		if (retval == SOCKET_ERROR) {
 			client.second.SetState(S_STATE::LOG_OUT);
+		}
+	}
+}
+
+void SendRoomSelect(int id, short room_num)
+{
+	int retval;
+	
+	for (int ply_id : gamerooms[room_num].GetPlyId()) {
+		if (ply_id < 0) continue;
+		SC_SELECT_ROOM_PACKET packet;
+		packet.size = sizeof(packet);
+		packet.type = SC_PACKET_SELECT_ROOM;
+		strcpy_s(packet.name, players[ply_id].GetName().c_str());
+		packet.weapon = players[ply_id].GetWeapon();
+		//packet.armor = players[ply_id].GetArmor();
+		// 이제 위의 방에 있는 플레이어 정보들을 선택한 놈한테 다시 보냄
+		retval = players[id].DoSend(&packet, packet.size);
+		if (retval == SOCKET_ERROR) {
+			players[id].SetState(S_STATE::LOG_OUT);
+			return;
 		}
 	}
 }
