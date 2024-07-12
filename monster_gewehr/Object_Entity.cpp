@@ -175,7 +175,7 @@ TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY, int num)
 	index = num;
 }
 
-Button_Component::Button_Component(int id, const wchar_t* imagePath, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int room_num)
+Button_Component::Button_Component(int id, const wchar_t* imagePath, int fontType, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int room_num)
 {
 	button_id = id;
 	m_text = text;
@@ -186,7 +186,11 @@ Button_Component::Button_Component(int id, const wchar_t* imagePath, wstring tex
 	m_imageRect = imagerect;
 	m_mode = mode;
 	m_opacity = opacity;
-	on = false;
+	cursor_on = false;
+
+	m_fontType = fontType;
+
+	activate = true;
 
 	if (button_id == RoomBtn) {
 		m_room_num = room_num;
@@ -199,19 +203,34 @@ Button_Component::Button_Component(int id, const wchar_t* imagePath, wstring tex
 
 void Button_Component::CursorOn(POINT cursor, ComPtr<IDWriteTextFormat> big_font, ComPtr<IDWriteTextFormat> small_font)
 {
+	if (!activate) {
+		return;
+	}
 	if (cursor.x > m_Rectsaved.left && cursor.x < m_Rectsaved.right && cursor.y > m_Rectsaved.top && cursor.y < m_Rectsaved.bottom) {
 		m_Rect.bottom = m_Rectsaved.bottom + 10.0f;
 		m_Rect.right = m_Rectsaved.right + 10.0f;
 		m_Rect.left = m_Rectsaved.left - 10.0f;
 		m_Rect.top = m_Rectsaved.top - 10.0f;
-		on = true;
+		cursor_on = true;
 		m_textFormat = big_font;
 	}
 	else {
 		m_Rect = m_Rectsaved;
-		on = false;
+		cursor_on = false;
 		m_textFormat = small_font;
 	}
+}
+
+void Button_Component::Disable()
+{
+	activate = false;
+	m_opacity = 0.5f;
+}
+
+void Button_Component::Activate()
+{
+	activate = true;
+	m_opacity = 1.0f;
 }
 
 void Model_Component::addChildComponent(Model_Component* child)

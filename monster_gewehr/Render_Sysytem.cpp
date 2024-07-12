@@ -498,18 +498,44 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<Button_Component> button
 		)-> void {
 
-			button->CursorOn(m_cursorPos, Needleteeth[1], Needleteeth[0]);
-			m_d2dDeviceContext->DrawBitmap(
-				button->m_bitmap,
-				button->m_Rect,
-				button->m_opacity,
-				button->m_mode,
-				button->m_imageRect
-			);
-			
+			{
+				ComPtr<IDWriteTextFormat> textformat[2];
+				switch (button->m_fontType)
+				{
+				case GARMULI_FONT:
+					textformat[0] = m_smalltextFormat;
+					textformat[1] = m_textFormat;
+					break;
+				case NEEDLE_FONT:
+					textformat[0] = Needleteeth[0];
+					textformat[1] = Needleteeth[1];
+					break;
+				case DEFAULT_FONT:
+				default:
+					textformat[0] = m_smalltextFormat;
+					textformat[1] = m_textFormat;
+					break;
+				}
+				button->m_textFormat = textformat[0];
+
+				button->m_textFormats[0] = textformat[0];
+				button->m_textFormats[1] = textformat[1];
+			}
+
+			{
+				button->CursorOn(m_cursorPos, button->m_textFormats[1], button->m_textFormats[0]);
+				m_d2dDeviceContext->DrawBitmap(
+					button->m_bitmap,
+					button->m_Rect,
+					button->m_opacity, 
+					button->m_mode,
+					button->m_imageRect
+				);
+			}
 
 			{
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
+				m_textBrush.Get()->SetOpacity(button->m_opacity);
 
 				button->m_textFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
 				button->m_textFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치
@@ -524,7 +550,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			}
 
 
-			if (button->on && clicked) {
+			if (button->cursor_on && clicked && button->activate) {
 				switch (button->button_id)
 				{
 				case ExitBtn:

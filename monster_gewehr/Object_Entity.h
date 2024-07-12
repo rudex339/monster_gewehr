@@ -253,13 +253,19 @@ struct ImageUI_Component {
 
 struct Button_Component : public ImageUI_Component, TextUI_Component {
 	D2D1_RECT_F m_Rect, m_Rectsaved;
+	ComPtr<IDWriteTextFormat> m_textFormats[2];
 	ComPtr<IDWriteTextFormat> m_textFormat;
+
 	int button_id;
-	bool on;
+	bool cursor_on;
 	int m_room_num;
 
+	bool activate;
+
 	Button_Component() = default;
-	Button_Component(int id, const wchar_t* imagePath, wstring m_text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int room_num = -1);
+	Button_Component(int id, const wchar_t* imagePath, int fontType, wstring m_text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int room_num = -1);
 
 	void CursorOn(POINT cursor, ComPtr<IDWriteTextFormat> pTextFormat, ComPtr<IDWriteTextFormat> small_font);
+	void Disable();
+	void Activate();
 };

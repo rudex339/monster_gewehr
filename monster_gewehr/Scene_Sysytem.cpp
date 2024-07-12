@@ -163,20 +163,31 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		imageRect = { 0, 0, 340, 70 };
 
 		ent = world->create();
-		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		
 
 		ent = world->create();
-		ent->assign<Button_Component>(ShopBtn, L"image/null.png", L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ShopBtn, L"image/null.png", NEEDLE_FONT, L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
+		/*ent = world->create();
+		ent->assign<Button_Component>(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);*/
+
+		// 버튼 비활성화 테스트 임시로 장비창에 가는 버튼을 비활성화 했다.
 		ent = world->create();
-		ent->assign<Button_Component>(EquipBtn, L"image/null.png", L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		Button_Component test = Button_Component(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		test.Disable();
+		ent->assign<Button_Component>(test);
+
 
 		ent = world->create();
-		ent->assign<Button_Component>(ExitBtn, L"image/null.png", L"EXIT", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(ExitBtn, L"image/null.png", NEEDLE_FONT, L"EXIT", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
 	}
 	break;
 
@@ -211,7 +222,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		sRect = { FRAME_BUFFER_WIDTH * 3 / 4, FRAME_BUFFER_HEIGHT * 10 / 16, FRAME_BUFFER_WIDTH * 3 / 4 + 100.0f, FRAME_BUFFER_HEIGHT * 10 / 16 + 30.0f };
 
 		ent = world->create();
-		ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 
@@ -460,6 +471,6 @@ void Scene_Sysytem::AddRoom(int room_num)
 		FRAME_BUFFER_HEIGHT / 8 + (float)(num+1)*FRAME_BUFFER_HEIGHT / 7 + 10.0f };
 	imageRect = { 0, 0, 1000, 563 };
 
-	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
 }
