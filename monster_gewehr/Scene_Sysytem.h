@@ -43,6 +43,11 @@ struct LoginCheck_Event {
 	bool logincheck = false;
 };
 
+struct Player_Info {
+	wstring name;
+	int weapon;
+
+};
 
 
 class Scene_Sysytem :public EntitySystem,

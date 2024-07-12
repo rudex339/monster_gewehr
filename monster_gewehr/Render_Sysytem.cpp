@@ -426,12 +426,19 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			case NEEDLE_FONT:
 				textformat = Needleteeth[0];
 				break;
+			case SMALL_FONT:
+				textformat = m_smalltextFormat;
+				break;
 			case DEFAULT_FONT:
 			default:
 				textformat = m_textFormat;
 				break;
 			}
 			
+			textformat.Get()->SetParagraphAlignment(textUI->m_paragraph_alignment);
+			textformat.Get()->SetTextAlignment(textUI->m_text_alignment);
+
+
 			m_d2dDeviceContext->DrawTextW(
 				textUI->m_text.data(),
 				textUI->m_text.size(),

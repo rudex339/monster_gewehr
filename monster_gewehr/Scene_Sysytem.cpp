@@ -222,16 +222,47 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		// 방에 대한 설명
 		{
-			ent = world->create();
-			imageRect = { 0, 0, 1400, 900 };
-			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 7 / 10 };
-			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-
-
-
 			if (m_room_num >= 0) {
-				// 위의 코드를 여기로
+				// 방 설명창 프레임
+				ent = world->create();
+				imageRect = { 0, 0, 1400, 900 };
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 7 / 10 };
+				ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+				// 게임모드 이미지
+				ent = world->create();
+				imageRect = { 0, 0, 1000, 563 };
+				float margin = FRAME_BUFFER_WIDTH / 200;
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20 + margin, FRAME_BUFFER_HEIGHT / 8 + margin, FRAME_BUFFER_WIDTH * 19 / 20 - margin, FRAME_BUFFER_HEIGHT * 3.5f / 10 - margin };
+				ent->assign<ImageUI_Component>(L"image/monster_hunter_login.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
+				// 게임방 번호 출력
+				ent = world->create();
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20 + margin, FRAME_BUFFER_HEIGHT * 3.7f / 10, FRAME_BUFFER_WIDTH * 19 / 20 , FRAME_BUFFER_HEIGHT * 3.9 / 10 };
+				TextUI_Component text = TextUI_Component(SMALL_FONT, L"ROOM NO. " + to_wstring(m_room_num), sRect.top, sRect.left, sRect.bottom, sRect.right);
+
+				text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+				text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+
+				ent->assign<TextUI_Component>(text);
+
+				// 유저 정보 출력 (지금은 임시로 출력하지만 나중에 이름이랑 무기를 서버에서 가져와서 출력할 예정)
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20 + margin, FRAME_BUFFER_HEIGHT * 4 / 10, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 14 / 30 };
+				for (int i = 0; i < 4; ++i) {
+					ent = world->create();
+					text = TextUI_Component(SMALL_FONT, L"User " + to_wstring(i), sRect.top, sRect.left, sRect.bottom, sRect.right);
+					// 위에 들어갈 인자를 서버에서 가져오자
+
+					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+
+					ent->assign<TextUI_Component>(text);
+					sRect.top = sRect.bottom;
+					sRect.bottom += FRAME_BUFFER_HEIGHT / 15;
+				}
 			}
 		}
 
