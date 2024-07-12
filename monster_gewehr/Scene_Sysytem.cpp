@@ -441,7 +441,6 @@ void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
 void Scene_Sysytem::receive(World* world, const ChoiceRoom_Event& event)
 {
 	m_room_num = event.room_num;
-	world->emit<ChangeScene_Event>({ ROOMS });
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
