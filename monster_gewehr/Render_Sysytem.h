@@ -80,6 +80,7 @@ private:
 	// button
 	bool clicked;
 	int button_event;
+	int select_room_num = -1;
 
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;
@@ -106,7 +107,6 @@ private:
 
 
 public:
-
 	Render_System() = default;
 	Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, Scene_Sysytem* scene);
 	virtual void configure(class World* world);

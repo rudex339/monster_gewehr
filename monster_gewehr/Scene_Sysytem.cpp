@@ -36,7 +36,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<ChangeScene_Event>(this);
 	world->subscribe<EnterRoom_Event>(this);
 	world->subscribe<LoginCheck_Event>(this);
-	
+	world->subscribe<ChoiceRoom_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -210,23 +210,58 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		
 		
-	
-		ent = world->create();
-		imageRect = { 0, 0, 1400, 900 };
-		sRect = { FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 13 / 20, FRAME_BUFFER_HEIGHT * 9 / 10 };
-		ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		// 방 목록
+		{
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 13 / 20, FRAME_BUFFER_HEIGHT * 9 / 10 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-		
-		imageRect = { 0, 0, 1000, 563 };
-		sRect = { FRAME_BUFFER_WIDTH * 3 / 4, FRAME_BUFFER_HEIGHT * 10 / 16, FRAME_BUFFER_WIDTH * 3 / 4 + 100.0f, FRAME_BUFFER_HEIGHT * 10 / 16 + 30.0f };
+		}
 
-		ent = world->create();
-		ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		// 방에 대한 설명
+		{
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 7 / 10 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 
 
+			if (m_room_num >= 0) {
+				// 위의 코드를 여기로
+			}
+		}
+
+		// 방생성 & 방입장 버튼
+		{
+			imageRect = { 0, 0, 1000, 563 };
+			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 15 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 16 / 20 };
+
+			ent = world->create();
+			ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 17 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 18 / 20 };
+			ent = world->create();
+			Button_Component joinBtn = Button_Component(JoinRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방입장", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			cout << m_room_num << endl;
+
+			if (m_room_num >= 0) {
+				joinBtn.Activate();
+			}
+			else {
+				joinBtn.Disable();
+			}
+			ent->assign<Button_Component>(joinBtn);
+
+		}
+
+		// 생성된 방들만큼 버튼을 추가
 		for (auto& Room : Rooms) {
 			ent = world->create();
 			ent->assign<Button_Component>(Room);
@@ -370,6 +405,12 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
 {
 	loginCheck = event.logincheck;
+}
+
+void Scene_Sysytem::receive(World* world, const ChoiceRoom_Event& event)
+{
+	m_room_num = event.room_num;
+	world->emit<ChangeScene_Event>({ ROOMS });
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)

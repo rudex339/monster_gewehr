@@ -22,11 +22,16 @@ enum {
 	EquipBtn,
 	MakeRoomBtn,
 	RoomBtn,
+	JoinRoomBtn,
 };
 
 struct ChangeScene_Event {
 	UINT State;
 	short score = 0;
+};
+
+struct ChoiceRoom_Event {
+	int room_num = -1 ;
 };
 
 struct EnterRoom_Event {
@@ -43,7 +48,8 @@ struct LoginCheck_Event {
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
 	public EventSubscriber<EnterRoom_Event>,
-	public EventSubscriber<LoginCheck_Event>
+	public EventSubscriber<LoginCheck_Event>,
+	public EventSubscriber<ChoiceRoom_Event>
 {
 private:
 	UINT m_State = 0;
@@ -64,7 +70,7 @@ private:
 	vector<Button_Component> Rooms;
 	queue<int> Room_ids;
 
-	int m_room_num;
+	int m_room_num = -1;
 	bool loginCheck = false;
 
 public:
@@ -79,6 +85,7 @@ public:
 	virtual void receive(class World* world, const ChangeScene_Event& event);
 	virtual void receive(class World* world, const EnterRoom_Event& event);
 	virtual void receive(class World* world, const LoginCheck_Event& event);
+	virtual void receive(class World* world, const ChoiceRoom_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 

@@ -497,7 +497,6 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		Entity* ent,
 		ComponentHandle<Button_Component> button
 		)-> void {
-
 			{
 				ComPtr<IDWriteTextFormat> textformat[2];
 				switch (button->m_fontType)
@@ -575,9 +574,12 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<Create_Room>({});
 					break;
 				case RoomBtn:
-					cout << "방 입장" << endl;
-					world->emit<EnterRoom_Event>({ INROOM, button->m_room_num });
-					world->emit<Select_Room>({ (SHORT)button->m_room_num });
+					world->emit<ChoiceRoom_Event>({ button->m_room_num });
+					select_room_num = button->m_room_num;
+					break;
+				case JoinRoomBtn:
+					world->emit<EnterRoom_Event>({ INROOM, select_room_num });
+					world->emit<Select_Room>({ (SHORT)select_room_num });
 					break;
 				default:
 					cout << "디폴트" << endl;
