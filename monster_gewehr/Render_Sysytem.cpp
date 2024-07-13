@@ -438,7 +438,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			textformat.Get()->SetParagraphAlignment(textUI->m_paragraph_alignment);
 			textformat.Get()->SetTextAlignment(textUI->m_text_alignment);
 
-
+			m_textBrush->SetOpacity(1.0f);
 			m_d2dDeviceContext->DrawTextW(
 				textUI->m_text.data(),
 				textUI->m_text.size(),
@@ -505,6 +505,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<Button_Component> button
 		)-> void {
 			{
+				button->m_textBrush = m_textBrush;
 				ComPtr<IDWriteTextFormat> textformat[2];
 				switch (button->m_fontType)
 				{
@@ -540,8 +541,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			}
 
 			{
-				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
-				m_textBrush.Get()->SetOpacity(button->m_opacity);
+				button->m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
+				button->m_textBrush.Get()->SetOpacity(button->m_opacity);
 
 				button->m_textFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
 				button->m_textFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치
@@ -551,7 +552,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					button->m_text.size(),
 					button->m_textFormat.Get(),
 					&button->m_Rect,
-					m_textBrush.Get()
+					button->m_textBrush.Get()
 				);
 			}
 

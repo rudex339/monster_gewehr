@@ -258,6 +258,7 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 	D2D1_RECT_F m_Rect, m_Rectsaved;
 	ComPtr<IDWriteTextFormat> m_textFormats[2];
 	ComPtr<IDWriteTextFormat> m_textFormat;
+	ComPtr<ID2D1SolidColorBrush> m_textBrush;
 
 	int button_id;
 	bool cursor_on;
