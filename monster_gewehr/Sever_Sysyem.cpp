@@ -399,7 +399,14 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_SELECT_ROOM: {
 		SC_SELECT_ROOM_PACKET* pk = reinterpret_cast<SC_SELECT_ROOM_PACKET*>(packet);
-		cout << "닉네임 : " << pk->name << " 무기 타입" << (int)pk->weapon << endl;
+
+		int len = MultiByteToWideChar(CP_ACP, 0, pk->name, -1, nullptr, 0);
+		std::wstring wstr(len, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
+
+		m_scene->AddRoomPlayers(wstr, pk->weapon);
+		world->emit<ChangeScene_Event>({ ROOMS });
+		// cout << "닉네임 : " << pk->name << " 무기 타입" << (int)pk->weapon << endl;
 		break;
 	}
 

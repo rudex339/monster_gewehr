@@ -251,15 +251,19 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 				// 유저 정보 출력 (지금은 임시로 출력하지만 나중에 이름이랑 무기를 서버에서 가져와서 출력할 예정)
 				sRect = { FRAME_BUFFER_WIDTH * 14 / 20 + margin, FRAME_BUFFER_HEIGHT * 4 / 10, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 14 / 30 };
-				for (int i = 0; i < 4; ++i) {
+				for (auto& player : RoomPlayers) {
 					ent = world->create();
-					text = TextUI_Component(SMALL_FONT, L"User " + to_wstring(i), sRect.top, sRect.left, sRect.bottom, sRect.right);
-					// 위에 들어갈 인자를 서버에서 가져오자
-
+					text = TextUI_Component(SMALL_FONT, player.name , sRect.top, sRect.left, sRect.bottom, sRect.right);
 					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
-
 					ent->assign<TextUI_Component>(text);
+
+					ent = world->create();
+					text = TextUI_Component(SMALL_FONT, to_wstring(player.weapon) + L" ", sRect.top, sRect.left, sRect.bottom, sRect.right);
+					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_TRAILING;
+					ent->assign<TextUI_Component>(text);
+
 					sRect.top = sRect.bottom;
 					sRect.bottom += FRAME_BUFFER_HEIGHT / 15;
 				}
@@ -544,4 +548,21 @@ void Scene_Sysytem::AddRoom(int room_num)
 
 	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
+}
+
+void Scene_Sysytem::AddRoomPlayers(wstring name, int weapon)
+{
+	Player_Info info;
+	info.name = name;
+	info.weapon = weapon;
+	if (RoomPlayerNames.find(name) == RoomPlayerNames.end()) {
+		RoomPlayerNames.insert(name);
+		RoomPlayers.push_back({ name, weapon });
+	}
+}
+
+void Scene_Sysytem::InitRoomPlayers()
+{
+	RoomPlayerNames.clear();
+	RoomPlayers.clear();
 }

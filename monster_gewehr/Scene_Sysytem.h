@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <unordered_set>
 #include "Object_Entity.h"
 
 class ObjectManager;
@@ -75,6 +76,9 @@ private:
 	vector<Button_Component> Rooms;
 	queue<int> Room_ids;
 
+	vector<Player_Info> RoomPlayers;
+	unordered_set<wstring> RoomPlayerNames;
+
 	int m_room_num = -1;
 	bool loginCheck = false;
 
@@ -96,5 +100,7 @@ public:
 
 	// 방 생성 함수
 	void AddRoom(int room_num);
+	void AddRoomPlayers(wstring name, int weapon);
+	void InitRoomPlayers();
 };
 
