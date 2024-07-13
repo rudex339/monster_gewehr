@@ -257,3 +257,15 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
     return (FlogColor);
 
 }
+
+float4 PSBoundingBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
+
+	//standard
+	//return(cColor);
+	//flog
+	float4 FlogColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	return (FlogColor);
+
+}

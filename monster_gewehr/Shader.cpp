@@ -595,3 +595,8 @@ D3D12_DEPTH_STENCIL_DESC CBoxShader::CreateDepthStencilState()
 
 	return(d3dDepthStencilDesc);
 }
+
+D3D12_SHADER_BYTECODE CBoxShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBoundingBox", "ps_5_1", &m_pd3dPixelShaderBlob));
+}

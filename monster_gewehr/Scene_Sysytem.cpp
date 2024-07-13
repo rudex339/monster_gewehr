@@ -568,18 +568,22 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 				m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
 
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
-			auto box = ent->assign<BoundingBox_Component>(
-				m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
-				m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
-
-
-			// XMFLOAT4X4를 XMMATRIX로 변환
-			XMMATRIX worldMatrix = XMLoadFloat4x4(&xmf4x4World);
-
-			// BoundingOrientedBox 변환
-			box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
 			
-			box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+
+
+			if (xmf4x4World._42 < 1054.f) {
+				cout << xmf4x4World._42 << "\n";
+				auto box = ent->assign<BoundingBox_Component>(
+					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
+					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
+				// XMFLOAT4X4를 XMMATRIX로 변환
+				XMMATRIX worldMatrix = XMLoadFloat4x4(&xmf4x4World);
+
+				// BoundingOrientedBox 변환
+				box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
+
+				box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+			}
 			//box->m_bounding_box.Extents *= m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
 
 		}

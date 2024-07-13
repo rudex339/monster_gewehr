@@ -24,6 +24,7 @@ enum {
 	MakeRoomBtn,
 	RoomBtn,
 	JoinRoomBtn,
+	ItemBtn
 };
 
 struct ChangeScene_Event {

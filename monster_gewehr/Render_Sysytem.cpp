@@ -348,8 +348,8 @@ void Render_System::tick(World* world, float deltaTime)
 							if (box->m_pMesh) {
 								m_pBox->m_pMesh = box->m_pMesh;
 								m_pBox->SetPosition(box->m_bounding_box.Center);
-								cout << box->m_bounding_box.Center.x << " " << box->m_bounding_box.Center.z << endl;
-								cout << pos->Position.x << " " << pos->Position.z << endl;
+								//cout << box->m_bounding_box.Center.x << " " << box->m_bounding_box.Center.z << endl;
+								//cout << pos->Position.x << " " << pos->Position.y << " " << pos->Position.z << endl;
 								m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
 								m_pBox->SetPosition(0.f, 0.f, 0.f);
 							}
