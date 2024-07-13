@@ -171,16 +171,16 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<Button_Component>(ShopBtn, L"image/null.png", NEEDLE_FONT, L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-		/*ent = world->create();
+		ent = world->create();
 		ent->assign<Button_Component>(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);*/
+			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		// 버튼 비활성화 테스트 임시로 장비창에 가는 버튼을 비활성화 했다.
-		ent = world->create();
+		/*ent = world->create();
 		Button_Component test = Button_Component(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		test.Disable();
-		ent->assign<Button_Component>(test);
+		ent->assign<Button_Component>(test);*/
 
 
 		ent = world->create();
@@ -309,13 +309,67 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		world->reset();
 		Entity* ent = world->create();
 
-		D2D1_RECT_F imageRect, screenRect;
+		D2D1_RECT_F imageRect, screenRect, sRect, itemRects[2][5];
 
 		imageRect = { 0, 0, 1920, 1152 };
 		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 
 		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
+		ent = world->create();
+		ent->assign<TextUI_Component>(NEEDLE_FONT, L"SHOP",
+			FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+
+		{
+			// 상인 프레임 + 이미지
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 7 / 20, FRAME_BUFFER_HEIGHT * 7 / 8 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			ent = world->create();
+			imageRect = { 0, 0, 700, 1100 };
+			sRect = { FRAME_BUFFER_WIDTH / 20 + 3.5, FRAME_BUFFER_HEIGHT / 8 + 5.5f, FRAME_BUFFER_WIDTH * 7 / 20 - 3.5f, FRAME_BUFFER_HEIGHT * 7 / 8 - 5.5f };
+			ent->assign<ImageUI_Component>(L"image/Mechanic.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		}
+
+		{
+			// 무기 및 아이템 프레임 및 이미지
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH * 13/ 20, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 9 / 10 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
+			float margin = 1.0f;
+			float height = FRAME_BUFFER_HEIGHT * 1.6 / 10;
+			itemRects[0][0] = { FRAME_BUFFER_WIDTH * 13 / 20 + margin, FRAME_BUFFER_HEIGHT / 10 + margin, FRAME_BUFFER_WIDTH * 16 / 20 - margin, FRAME_BUFFER_HEIGHT * 2.6f / 10 - margin };
+			itemRects[1][0] = { FRAME_BUFFER_WIDTH * 16 / 20 + margin, FRAME_BUFFER_HEIGHT / 10 + margin, FRAME_BUFFER_WIDTH * 19 / 20 - margin, FRAME_BUFFER_HEIGHT * 2.6f / 10 - margin };
+			for (int i = 1; i < 5; ++i) {
+				itemRects[0][i] = itemRects[0][i - 1];
+				itemRects[0][i].top = itemRects[0][i - 1].bottom + margin*2;
+				itemRects[0][i].bottom = itemRects[0][i].top + height - margin;
+
+				itemRects[1][i] = itemRects[1][i - 1];
+				itemRects[1][i].top = itemRects[1][i - 1].bottom + margin * 2;
+				itemRects[1][i].bottom = itemRects[1][i].top + height - margin;
+			}
+
+
+			imageRect = { 0, 0, 1000, 563 };
+			for (int i = 0; i < 2; ++i) {
+				for (int j = 0; j < 5; ++j) {
+					ent = world->create();
+					ent->assign<Button_Component>(ItemBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"무기" + to_wstring(i) + L" " + to_wstring(j), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+						itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+				}
+			}
+		}
 	}
 	break;
 
