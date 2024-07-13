@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <unordered_set>
 #include "Object_Entity.h"
 
 class ObjectManager;
@@ -22,11 +23,16 @@ enum {
 	EquipBtn,
 	MakeRoomBtn,
 	RoomBtn,
+	JoinRoomBtn,
 };
 
 struct ChangeScene_Event {
 	UINT State;
 	short score = 0;
+};
+
+struct ChoiceRoom_Event {
+	int room_num = -1 ;
 };
 
 struct EnterRoom_Event {
@@ -38,12 +44,18 @@ struct LoginCheck_Event {
 	bool logincheck = false;
 };
 
+struct Player_Info {
+	wstring name;
+	int weapon;
+
+};
 
 
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
 	public EventSubscriber<EnterRoom_Event>,
-	public EventSubscriber<LoginCheck_Event>
+	public EventSubscriber<LoginCheck_Event>,
+	public EventSubscriber<ChoiceRoom_Event>
 {
 private:
 	UINT m_State = 0;
@@ -64,7 +76,10 @@ private:
 	vector<Button_Component> Rooms;
 	queue<int> Room_ids;
 
-	int m_room_num;
+	vector<Player_Info> RoomPlayers;
+	unordered_set<wstring> RoomPlayerNames;
+
+	int m_room_num = -1;
 	bool loginCheck = false;
 
 public:
@@ -79,10 +94,13 @@ public:
 	virtual void receive(class World* world, const ChangeScene_Event& event);
 	virtual void receive(class World* world, const EnterRoom_Event& event);
 	virtual void receive(class World* world, const LoginCheck_Event& event);
+	virtual void receive(class World* world, const ChoiceRoom_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수
 	void AddRoom(int room_num);
+	void AddRoomPlayers(wstring name, int weapon);
+	void InitRoomPlayers();
 };
 

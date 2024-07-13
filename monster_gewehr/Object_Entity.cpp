@@ -146,6 +146,8 @@ TextUI_Component::TextUI_Component(int fontType, const wchar_t* text, float top,
 	m_text = text;
 	m_Rect = D2D1::RectF(left, top, right, bottom);
 	m_fontType = fontType;
+	m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+	m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
 }
 
 TextUI_Component::TextUI_Component(int fontType, wstring text, float top, float left, float bottom, float right)

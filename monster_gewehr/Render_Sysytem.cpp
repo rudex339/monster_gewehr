@@ -435,12 +435,19 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			case NEEDLE_FONT:
 				textformat = Needleteeth[0];
 				break;
+			case SMALL_FONT:
+				textformat = m_smalltextFormat;
+				break;
 			case DEFAULT_FONT:
 			default:
 				textformat = m_textFormat;
 				break;
 			}
 			
+			textformat.Get()->SetParagraphAlignment(textUI->m_paragraph_alignment);
+			textformat.Get()->SetTextAlignment(textUI->m_text_alignment);
+
+			m_textBrush->SetOpacity(1.0f);
 			m_d2dDeviceContext->DrawTextW(
 				textUI->m_text.data(),
 				textUI->m_text.size(),
@@ -506,8 +513,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		Entity* ent,
 		ComponentHandle<Button_Component> button
 		)-> void {
-
 			{
+				button->m_textBrush = m_textBrush;
 				ComPtr<IDWriteTextFormat> textformat[2];
 				switch (button->m_fontType)
 				{
@@ -543,8 +550,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			}
 
 			{
-				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
-				m_textBrush.Get()->SetOpacity(button->m_opacity);
+				button->m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
+				button->m_textBrush.Get()->SetOpacity(button->m_opacity);
 
 				button->m_textFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
 				button->m_textFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치
@@ -554,7 +561,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					button->m_text.size(),
 					button->m_textFormat.Get(),
 					&button->m_Rect,
-					m_textBrush.Get()
+					button->m_textBrush.Get()
 				);
 			}
 
@@ -584,9 +591,14 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<Create_Room>({});
 					break;
 				case RoomBtn:
-					cout << "방 입장" << endl;
-					world->emit<EnterRoom_Event>({ INROOM, button->m_room_num });
-					world->emit<Select_Room>({ (SHORT)button->m_room_num });
+					world->emit<ChoiceRoom_Event>({ button->m_room_num });
+					select_room_num = button->m_room_num;
+					m_scene->InitRoomPlayers();
+					world->emit<Select_Room>({ (SHORT)select_room_num });					
+					break;
+				case JoinRoomBtn:
+					world->emit<EnterRoom_Event>({ INROOM, select_room_num });
+					world->emit<Join_Room>({ (SHORT)select_room_num });
 					break;
 				default:
 					cout << "디폴트" << endl;

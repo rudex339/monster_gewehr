@@ -13,8 +13,9 @@ void Sever_System::configure(World* world)
 	world->subscribe<Game_Start>(this);
 	world->subscribe<Demo_Event>(this);
 	world->subscribe<Create_Room>(this);
-	world->subscribe<Select_Room>(this);
+	world->subscribe<Join_Room>(this);	
 	world->subscribe<Quit_Room>(this);
+	world->subscribe<Select_Room>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -106,64 +107,6 @@ void Sever_System::receive(World* world, const Login_Event& event)
 
 }
 
-//void Sever_System::receive(World* world, const Login_Event& event)
-//{
-//	WSADATA wsa;
-//	WSAStartup(MAKEWORD(2, 2), &wsa);
-//
-//	g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
-//
-//	ZeroMemory(&server_addr, sizeof(server_addr));
-//	server_addr.sin_family = AF_INET;
-//	server_addr.sin_port = htons(SERVER_PORT);
-//	inet_pton(AF_INET, SERVER_IP.c_str(), &server_addr.sin_addr);
-//
-//	connect(g_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-//
-//	unsigned long noblock = 1;
-//	ioctlsocket(g_socket, FIONBIO, &noblock);
-//
-//	CS_LOGIN_PACKET packet;
-//	packet.size = sizeof(packet);
-//	packet.type = CS_PACKET_LOGIN;
-//	int weapon = 0;
-//	/*cout << "이름 입력" << endl;
-//	cin >> packet.name;
-//	cout << "무기 입력" << endl;
-//	cin >> weapon;*/
-//	strcpy_s(packet.name, "temp name");
-//	packet.weapon = weapon;
-//
-//
-//	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
-//
-//	SC_LOGIN_INFO_PACKET sub_packet;
-//	while (1) {
-//		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
-//		if (retval > 0) {
-//			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
-//				break;
-//			}
-//			else if (sub_packet.type == SC_PACKET_MAX_PLAYER) {
-//				cout << "방이 다찼음" << endl;
-//				exit(0);
-//			}
-//			else {
-//				exit(0);
-//			}
-//		}
-//		else {
-//			cout << "못받음" << endl;
-//		}
-//	}
-//	//cout << (int)ply.id << endl;
-//	m_id = (int)sub_packet.id;
-//	std::cout << "성공했음 일단" << (int)sub_packet.id << std::endl;
-//	m_login = true;
-//	//cout << Data->id << endl;
-//
-//}
-
 void Sever_System::receive(World* world, const Game_Start& event)
 {
 
@@ -199,11 +142,11 @@ void Sever_System::receive(class World* world, const Create_Room& event)
 	send(g_socket, (char*)&p, p.size, 0);
 }
 
-void Sever_System::receive(class World* world, const Select_Room& event)
+void Sever_System::receive(class World* world, const Join_Room& event)
 {
-	CS_SELECT_ROOM_PACKET p;
+	CS_JOIN_ROOM_PACKET p;
 	p.size = sizeof(p);
-	p.type = CS_PACKET_SELECT_ROOM;
+	p.type = CS_PACKET_JOIN_ROOM;
 	p.room_num = event.room_num;
 	cout << p.room_num << endl;
 
@@ -215,6 +158,16 @@ void Sever_System::receive(class World* world, const Quit_Room& event)
 	CS_QUIT_ROOM_PACKET p;
 	p.size = sizeof(p);
 	p.type = CS_PACKET_QUIT_ROOM;
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(class World* world, const Select_Room& event)
+{
+	CS_SELECT_ROOM_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_SELECT_ROOM;
+	p.room_num = event.room_num;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
@@ -436,11 +389,25 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		m_scene->AddRoom(pk->room_num);
 		//world->emit< ChangeScene_Event>({ ROOMS });
 		world->emit<EnterRoom_Event>({ INROOM, pk->room_num });
+		break;
 	}
 	case SC_PACKET_ADD_ROOM: {
 		SC_ADD_ROOM_PACKET* pk = reinterpret_cast<SC_ADD_ROOM_PACKET*>(packet);
 		cout << pk->room_num << endl;
 		m_scene->AddRoom(pk->room_num);
+		break;
+	}
+	case SC_PACKET_SELECT_ROOM: {
+		SC_SELECT_ROOM_PACKET* pk = reinterpret_cast<SC_SELECT_ROOM_PACKET*>(packet);
+
+		int len = MultiByteToWideChar(CP_ACP, 0, pk->name, -1, nullptr, 0);
+		std::wstring wstr(len, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
+
+		m_scene->AddRoomPlayers(wstr, pk->weapon);
+		world->emit<ChangeScene_Event>({ ROOMS });
+		// cout << "닉네임 : " << pk->name << " 무기 타입" << (int)pk->weapon << endl;
+		break;
 	}
 
 	}

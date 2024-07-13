@@ -222,6 +222,9 @@ struct TextUI_Component {
 	D2D1_RECT_F m_Rect;
 	int m_fontType;
 	
+	DWRITE_PARAGRAPH_ALIGNMENT m_paragraph_alignment;
+	DWRITE_TEXT_ALIGNMENT m_text_alignment;
+
 	TextUI_Component() = default;
 	TextUI_Component(int fontType, const wchar_t* text, float top, float left, float bottom, float right);
 	TextUI_Component(int fontType, wstring text, float top, float left, float bottom, float right);
@@ -255,6 +258,7 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 	D2D1_RECT_F m_Rect, m_Rectsaved;
 	ComPtr<IDWriteTextFormat> m_textFormats[2];
 	ComPtr<IDWriteTextFormat> m_textFormat;
+	ComPtr<ID2D1SolidColorBrush> m_textBrush;
 
 	int button_id;
 	bool cursor_on;

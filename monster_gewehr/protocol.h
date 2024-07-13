@@ -25,7 +25,8 @@ constexpr char CS_PACKET_CHANGE_ANIMATION = 4;
 constexpr char CS_PACKET_PLAYER_ATTACK = 5;
 constexpr char CS_PACKET_CREATE_ROOM = 6;
 constexpr char CS_PACKET_SELECT_ROOM = 7;
-constexpr char CS_PACKET_QUIT_ROOM = 8;
+constexpr char CS_PACKET_JOIN_ROOM = 8;
+constexpr char CS_PACKET_QUIT_ROOM = 9;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -46,6 +47,7 @@ constexpr char SC_PACKET_LOGIN_FAIL = 11;
 constexpr char SC_PACKET_GAME_START = 12; // 게임룸 구현시 방장이 시작했다는 것을 알리는 패킷
 constexpr char SC_PACKET_CREATE_ROOM = 13;
 constexpr char SC_PACKET_ADD_ROOM = 14;
+constexpr char SC_PACKET_SELECT_ROOM = 15;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -129,6 +131,13 @@ struct CS_CREATE_ROOM_PACKET
 };
 
 struct CS_SELECT_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	SHORT room_num;
+};
+
+struct CS_JOIN_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
@@ -262,11 +271,10 @@ struct SC_ADD_ROOM_PACKET
 	SHORT room_num;
 };
 
-struct SC_ROOM_STATE_PACKET	// 게임방에 들어가면 어떤 유저가 누가 있는지 준비상태인지 알려주는 패킷
+struct SC_SELECT_ROOM_PACKET	// 게임방에 들어가면 어떤 유저가 누가 있는지 준비상태인지 알려주는 패킷
 {
 	UCHAR size;
 	UCHAR type;
-	CHAR id;
 	CHAR name[20];
 	CHAR weapon;
 	CHAR armor;

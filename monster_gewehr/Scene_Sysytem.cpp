@@ -36,7 +36,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<ChangeScene_Event>(this);
 	world->subscribe<EnterRoom_Event>(this);
 	world->subscribe<LoginCheck_Event>(this);
-	
+	world->subscribe<ChoiceRoom_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -171,16 +171,16 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<Button_Component>(ShopBtn, L"image/null.png", NEEDLE_FONT, L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-		/*ent = world->create();
+		ent = world->create();
 		ent->assign<Button_Component>(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);*/
+			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		// 버튼 비활성화 테스트 임시로 장비창에 가는 버튼을 비활성화 했다.
-		ent = world->create();
+		/*ent = world->create();
 		Button_Component test = Button_Component(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		test.Disable();
-		ent->assign<Button_Component>(test);
+		ent->assign<Button_Component>(test);*/
 
 
 		ent = world->create();
@@ -210,23 +210,93 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		
 		
-	
-		ent = world->create();
-		imageRect = { 0, 0, 1400, 900 };
-		sRect = { FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 13 / 20, FRAME_BUFFER_HEIGHT * 9 / 10 };
-		ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		// 방 목록
+		{
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 13 / 20, FRAME_BUFFER_HEIGHT * 9 / 10 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-		
-		imageRect = { 0, 0, 1000, 563 };
-		sRect = { FRAME_BUFFER_WIDTH * 3 / 4, FRAME_BUFFER_HEIGHT * 10 / 16, FRAME_BUFFER_WIDTH * 3 / 4 + 100.0f, FRAME_BUFFER_HEIGHT * 10 / 16 + 30.0f };
+		}
 
-		ent = world->create();
-		ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		// 방에 대한 설명
+		{
+			if (m_room_num >= 0) {
+				// 방 설명창 프레임
+				ent = world->create();
+				imageRect = { 0, 0, 1400, 900 };
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 7 / 10 };
+				ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+				// 게임모드 이미지
+				ent = world->create();
+				imageRect = { 0, 0, 1000, 563 };
+				float margin = FRAME_BUFFER_WIDTH / 200;
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20 + margin, FRAME_BUFFER_HEIGHT / 8 + margin, FRAME_BUFFER_WIDTH * 19 / 20 - margin, FRAME_BUFFER_HEIGHT * 3.5f / 10 - margin };
+				ent->assign<ImageUI_Component>(L"image/monster_hunter_login.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 
+				// 게임방 번호 출력
+				ent = world->create();
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20 + margin, FRAME_BUFFER_HEIGHT * 3.7f / 10, FRAME_BUFFER_WIDTH * 19 / 20 , FRAME_BUFFER_HEIGHT * 3.9 / 10 };
+				TextUI_Component text = TextUI_Component(SMALL_FONT, L"ROOM NO. " + to_wstring(m_room_num), sRect.top, sRect.left, sRect.bottom, sRect.right);
 
+				text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+				text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+
+				ent->assign<TextUI_Component>(text);
+
+				// 유저 정보 출력 (지금은 임시로 출력하지만 나중에 이름이랑 무기를 서버에서 가져와서 출력할 예정)
+				sRect = { FRAME_BUFFER_WIDTH * 14 / 20 + margin, FRAME_BUFFER_HEIGHT * 4 / 10, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 14 / 30 };
+				for (auto& player : RoomPlayers) {
+					ent = world->create();
+					text = TextUI_Component(SMALL_FONT, player.name , sRect.top, sRect.left, sRect.bottom, sRect.right);
+					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+					ent->assign<TextUI_Component>(text);
+
+					ent = world->create();
+					text = TextUI_Component(SMALL_FONT, to_wstring(player.weapon) + L" ", sRect.top, sRect.left, sRect.bottom, sRect.right);
+					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_TRAILING;
+					ent->assign<TextUI_Component>(text);
+
+					sRect.top = sRect.bottom;
+					sRect.bottom += FRAME_BUFFER_HEIGHT / 15;
+				}
+			}
+		}
+
+		// 방생성 & 방입장 버튼
+		{
+			imageRect = { 0, 0, 1000, 563 };
+			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 15 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 16 / 20 };
+
+			ent = world->create();
+			ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 17 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 18 / 20 };
+			ent = world->create();
+			Button_Component joinBtn = Button_Component(JoinRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방입장", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			cout << m_room_num << endl;
+
+			if (m_room_num >= 0) {
+				joinBtn.Activate();
+			}
+			else {
+				joinBtn.Disable();
+			}
+			ent->assign<Button_Component>(joinBtn);
+
+		}
+
+		// 생성된 방들만큼 버튼을 추가
 		for (auto& Room : Rooms) {
 			ent = world->create();
 			ent->assign<Button_Component>(Room);
@@ -239,13 +309,67 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		world->reset();
 		Entity* ent = world->create();
 
-		D2D1_RECT_F imageRect, screenRect;
+		D2D1_RECT_F imageRect, screenRect, sRect, itemRects[2][5];
 
 		imageRect = { 0, 0, 1920, 1152 };
 		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 
 		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
+		ent = world->create();
+		ent->assign<TextUI_Component>(NEEDLE_FONT, L"SHOP",
+			FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+
+		{
+			// 상인 프레임 + 이미지
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 7 / 20, FRAME_BUFFER_HEIGHT * 7 / 8 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			ent = world->create();
+			imageRect = { 0, 0, 700, 1100 };
+			sRect = { FRAME_BUFFER_WIDTH / 20 + 3.5, FRAME_BUFFER_HEIGHT / 8 + 5.5f, FRAME_BUFFER_WIDTH * 7 / 20 - 3.5f, FRAME_BUFFER_HEIGHT * 7 / 8 - 5.5f };
+			ent->assign<ImageUI_Component>(L"image/Mechanic.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		}
+
+		{
+			// 무기 및 아이템 프레임 및 이미지
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH * 13/ 20, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 9 / 10 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
+			float margin = 1.0f;
+			float height = FRAME_BUFFER_HEIGHT * 1.6 / 10;
+			itemRects[0][0] = { FRAME_BUFFER_WIDTH * 13 / 20 + margin, FRAME_BUFFER_HEIGHT / 10 + margin, FRAME_BUFFER_WIDTH * 16 / 20 - margin, FRAME_BUFFER_HEIGHT * 2.6f / 10 - margin };
+			itemRects[1][0] = { FRAME_BUFFER_WIDTH * 16 / 20 + margin, FRAME_BUFFER_HEIGHT / 10 + margin, FRAME_BUFFER_WIDTH * 19 / 20 - margin, FRAME_BUFFER_HEIGHT * 2.6f / 10 - margin };
+			for (int i = 1; i < 5; ++i) {
+				itemRects[0][i] = itemRects[0][i - 1];
+				itemRects[0][i].top = itemRects[0][i - 1].bottom + margin*2;
+				itemRects[0][i].bottom = itemRects[0][i].top + height - margin;
+
+				itemRects[1][i] = itemRects[1][i - 1];
+				itemRects[1][i].top = itemRects[1][i - 1].bottom + margin * 2;
+				itemRects[1][i].bottom = itemRects[1][i].top + height - margin;
+			}
+
+
+			imageRect = { 0, 0, 1000, 563 };
+			for (int i = 0; i < 2; ++i) {
+				for (int j = 0; j < 5; ++j) {
+					ent = world->create();
+					ent->assign<Button_Component>(ItemBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"무기" + to_wstring(i) + L" " + to_wstring(j), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+						itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+				}
+			}
+		}
 	}
 	break;
 
@@ -373,6 +497,11 @@ void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
 	loginCheck = event.logincheck;
 }
 
+void Scene_Sysytem::receive(World* world, const ChoiceRoom_Event& event)
+{
+	m_room_num = event.room_num;
+}
+
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 {
 	FILE* pFile = NULL;
@@ -474,4 +603,21 @@ void Scene_Sysytem::AddRoom(int room_num)
 
 	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
+}
+
+void Scene_Sysytem::AddRoomPlayers(wstring name, int weapon)
+{
+	Player_Info info;
+	info.name = name;
+	info.weapon = weapon;
+	if (RoomPlayerNames.find(name) == RoomPlayerNames.end()) {
+		RoomPlayerNames.insert(name);
+		RoomPlayers.push_back({ name, weapon });
+	}
+}
+
+void Scene_Sysytem::InitRoomPlayers()
+{
+	RoomPlayerNames.clear();
+	RoomPlayers.clear();
 }

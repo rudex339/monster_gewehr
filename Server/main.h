@@ -20,7 +20,8 @@ void SendHitPlayer(int id);
 void SendEndGame(int id);
 void SendShoot(int id);
 void SendRoomList(int id);
-void SendRoomCreate(int ply_id, int room_id);
+void SendRoomCreate(int ply_id, int room_num);
+void SendRoomSelect(int id, short room_num);
 
 
 std::unordered_map<INT, Player> players;
