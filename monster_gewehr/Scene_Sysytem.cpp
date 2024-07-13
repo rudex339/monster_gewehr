@@ -400,7 +400,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
-		auto box = m_pPawn->assign<BoundingBox_Component>(5.f, 10.f, 5.f);
+		auto box = m_pPawn->assign<BoundingBox_Component>(2.f, 6.f, 2.f);
 		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 
 
