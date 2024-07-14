@@ -600,6 +600,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<EnterRoom_Event>({ INROOM, select_room_num });
 					world->emit<Join_Room>({ (SHORT)select_room_num });
 					break;
+				case ItemBtn:
+					world->emit<ChoiceItem_Event>({ button->item_num });
+					break;
 				default:
 					cout << "µğÆúÆ®" << endl;
 					break;

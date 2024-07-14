@@ -27,6 +27,19 @@ enum {
 	ItemBtn
 };
 
+enum Items {
+	M4,
+	SAIGA,
+	M24,
+	L_ARMOR,
+	H_ARMOR,
+	GRANADE,
+	FLASHBANG,
+	BANDAGE,
+	FAK,
+	INJECTOR
+};
+
 struct ChangeScene_Event {
 	UINT State;
 	short score = 0;
@@ -51,12 +64,18 @@ struct Player_Info {
 
 };
 
+struct ChoiceItem_Event {
+	int item_num = -1;
+};
+
+
 
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
 	public EventSubscriber<EnterRoom_Event>,
 	public EventSubscriber<LoginCheck_Event>,
-	public EventSubscriber<ChoiceRoom_Event>
+	public EventSubscriber<ChoiceRoom_Event>,
+	public EventSubscriber<ChoiceItem_Event>
 {
 private:
 	UINT m_State = 0;
@@ -82,6 +101,8 @@ private:
 
 	int m_room_num = -1;
 	bool loginCheck = false;
+	int m_item_num = -1;
+	int m_item_info[10];
 
 public:
 
@@ -96,6 +117,7 @@ public:
 	virtual void receive(class World* world, const EnterRoom_Event& event);
 	virtual void receive(class World* world, const LoginCheck_Event& event);
 	virtual void receive(class World* world, const ChoiceRoom_Event& event);
+	virtual void receive(class World* world, const ChoiceItem_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 

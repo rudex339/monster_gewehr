@@ -361,12 +361,26 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			}
 
 
-			imageRect = { 0, 0, 1000, 563 };
+			wstring imagefiles[10] = {
+				L"image/M4.png",
+				L"image/Saiga12.png",
+				L"image/M24.png",
+				L"image/LightArmor.png",
+				L"image/HeavyArmor.png",
+				L"image/Grenade.png",
+				L"image/Flashbang.png",
+				L"image/Bandage.png",
+				L"image/FirstAidKit.png",
+				L"image/Flashbang.png"
+			};
+
+
+			imageRect = { 0, 0, 500, 300 };
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 5; ++j) {
 					ent = world->create();
-					ent->assign<Button_Component>(ItemBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"¹«±â" + to_wstring(i) + L" " + to_wstring(j), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-						itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+					ent->assign<Button_Component>(ItemBtn, imagefiles[j + 5 * i].c_str(), DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+						itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, j + 5*i);
 				}
 			}
 		}
@@ -500,6 +514,12 @@ void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
 void Scene_Sysytem::receive(World* world, const ChoiceRoom_Event& event)
 {
 	m_room_num = event.room_num;
+}
+
+void Scene_Sysytem::receive(World* world, const ChoiceItem_Event& event)
+{
+	m_item_num = event.item_num;
+	world->emit<ChangeScene_Event>({ SHOP });
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
