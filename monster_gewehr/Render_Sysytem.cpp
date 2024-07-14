@@ -291,7 +291,7 @@ void Render_System::tick(World* world, float deltaTime)
 			Entity* ent,
 			ComponentHandle<SkyBox_Component> SkyBox
 			) -> void {
-				//SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
+				SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
 			});
 
 		/*world->each<Terrain_Component>([&](
