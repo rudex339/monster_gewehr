@@ -194,6 +194,9 @@ Button_Component::Button_Component(int id, const wchar_t* imagePath, int fontTyp
 
 	activate = true;
 
+	m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+	m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
+
 	if (button_id == RoomBtn) {
 		m_room_num = num;
 	}

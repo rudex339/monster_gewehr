@@ -24,7 +24,8 @@ enum {
 	MakeRoomBtn,
 	RoomBtn,
 	JoinRoomBtn,
-	ItemBtn
+	ItemBtn,
+	BuyBtn,
 };
 
 enum Items {
@@ -125,5 +126,6 @@ public:
 	void AddRoom(int room_num);
 	void AddRoomPlayers(wstring name, int weapon);
 	void InitRoomPlayers();
+	void initSelect();
 };
 

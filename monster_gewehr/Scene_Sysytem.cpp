@@ -37,6 +37,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<EnterRoom_Event>(this);
 	world->subscribe<LoginCheck_Event>(this);
 	world->subscribe<ChoiceRoom_Event>(this);
+	world->subscribe<ChoiceItem_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -126,6 +127,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 	case LOBBY:
 	{
+		initSelect();
 		world->reset();
 		m_pPawn = NULL;
 		world->reset();
@@ -306,6 +308,19 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	
 	case SHOP:
 	{
+		wstring imagefiles[10] = {
+				L"image/M4.png",
+				L"image/Saiga12.png",
+				L"image/M24.png",
+				L"image/LightArmor.png",
+				L"image/HeavyArmor.png",
+				L"image/Grenade.png",
+				L"image/Flashbang.png",
+				L"image/Bandage.png",
+				L"image/FirstAidKit.png",
+				L"image/Flashbang.png"
+		};
+
 		world->reset();
 		Entity* ent = world->create();
 
@@ -360,29 +375,76 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 				itemRects[1][i].bottom = itemRects[1][i].top + height - margin;
 			}
 
-
-			wstring imagefiles[10] = {
-				L"image/M4.png",
-				L"image/Saiga12.png",
-				L"image/M24.png",
-				L"image/LightArmor.png",
-				L"image/HeavyArmor.png",
-				L"image/Grenade.png",
-				L"image/Flashbang.png",
-				L"image/Bandage.png",
-				L"image/FirstAidKit.png",
-				L"image/Flashbang.png"
-			};
-
-
 			imageRect = { 0, 0, 500, 300 };
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 5; ++j) {
 					ent = world->create();
 					ent->assign<Button_Component>(ItemBtn, imagefiles[j + 5 * i].c_str(), DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 						itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, j + 5*i);
+
+					ent = world->create();
+					Button_Component info;
+					if(i == 0)
+						info = Button_Component(ItemBtn, imagefiles[j + 5 * i].c_str(), SMALL_FONT, L"+" + to_wstring(m_item_info[j + 5 * i]), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+							itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, j + 5 * i);
+					else
+						info = Button_Component(ItemBtn, imagefiles[j + 5 * i].c_str(), SMALL_FONT, to_wstring(m_item_info[j + 5 * i]) + L"개", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+							itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, j + 5 * i);
+
+					info.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_FAR;
+					info.m_text_alignment = DWRITE_TEXT_ALIGNMENT_TRAILING;
+
+					ent->assign<Button_Component>(info);
 				}
 			}
+		}
+
+		{
+			// 선택된 아이템 및 강화 버튼
+			ent = world->create();
+			imageRect = { 0, 0, 1400, 900 };
+			sRect = { FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_HEIGHT * 2 / 8, FRAME_BUFFER_WIDTH * 12 / 20, FRAME_BUFFER_HEIGHT * 7 / 8 };
+			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+			
+			float margin = 1.0f;
+			float height = FRAME_BUFFER_HEIGHT * 3.2 / 15;
+
+			
+
+			if (m_item_num >= 0) {
+				//선택한 아이템이 있는 경우만 이미지를 출력한다.
+				imageRect = { 0, 0, 500, 300 };
+				sRect.left = sRect.left + margin;
+				sRect.right = sRect.right - margin;
+				sRect.top = sRect.top + margin;
+				sRect.bottom = sRect.top + height - margin;
+
+				ent = world->create();
+				ent->assign<ImageUI_Component>(imagefiles[m_item_num].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+				
+			}
+
+			// 강화 정보 표시
+			ent = world->create();
+			ent->assign<TextUI_Component>(NEEDLE_FONT, L"SHOP",
+				FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+
+
+			// 구매/강화 버튼
+			ent = world->create();
+
+			imageRect = { 0, 0, 1000, 563 };
+			sRect = { FRAME_BUFFER_WIDTH * 8 / 20 + margin, FRAME_BUFFER_HEIGHT * 12 / 16 , FRAME_BUFFER_WIDTH * 12 / 20 - margin, FRAME_BUFFER_HEIGHT * 14 / 16 - margin };
+
+			Button_Component buyBtn = Button_Component(BuyBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"구매/강화", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+			buyBtn.Disable();
+
+			if (m_item_num >= 0) buyBtn.Activate();
+			ent->assign<Button_Component>(buyBtn);
 		}
 	}
 	break;
@@ -514,6 +576,7 @@ void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
 void Scene_Sysytem::receive(World* world, const ChoiceRoom_Event& event)
 {
 	m_room_num = event.room_num;
+	world->emit<ChangeScene_Event>({ ROOMS });
 }
 
 void Scene_Sysytem::receive(World* world, const ChoiceItem_Event& event)
@@ -644,4 +707,10 @@ void Scene_Sysytem::InitRoomPlayers()
 {
 	RoomPlayerNames.clear();
 	RoomPlayers.clear();
+}
+
+void Scene_Sysytem::initSelect()
+{
+	m_item_num = -1;
+	m_item_num = -1;
 }

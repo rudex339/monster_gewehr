@@ -553,8 +553,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				button->m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
 				button->m_textBrush.Get()->SetOpacity(button->m_opacity);
 
-				button->m_textFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);	// 텍스트를 상하의 가운데에 위치
-				button->m_textFormat.Get()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);			// 텍스트를 좌우의 가운데에 위치
+				button->m_textFormat.Get()->SetParagraphAlignment(button->m_paragraph_alignment);	// 텍스트를 상하의 가운데에 위치
+				button->m_textFormat.Get()->SetTextAlignment(button->m_text_alignment);			// 텍스트를 좌우의 가운데에 위치
 
 				m_d2dDeviceContext->DrawTextW(
 					button->m_text.data(),
@@ -573,28 +573,22 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					exit(0);
 					break;
 				case GameStartBtn:
-					cout << "0번 눌림 게임시작" << endl;
 					world->emit< ChangeScene_Event>({ ROOMS });
 					break;
 				case ShopBtn:
-					cout << "상점 눌림" << endl;
 					world->emit< ChangeScene_Event>({ SHOP });
 					break;
 				case EquipBtn:
-					cout << "장비창 눌림" << endl;
 					world->emit< ChangeScene_Event>({ EQUIPMENT });
 					break;
 				case MakeRoomBtn:
-					cout << "방 생성" << endl;
-					//m_scene->AddRoom();
-					//world->emit< ChangeScene_Event>({ ROOMS });
 					world->emit<Create_Room>({});
 					break;
 				case RoomBtn:
-					world->emit<ChoiceRoom_Event>({ button->m_room_num });
-					select_room_num = button->m_room_num;
 					m_scene->InitRoomPlayers();
-					world->emit<Select_Room>({ (SHORT)select_room_num });					
+					select_room_num = button->m_room_num;
+					world->emit<Select_Room>({ (SHORT)select_room_num });
+					world->emit<ChoiceRoom_Event>({ button->m_room_num });
 					break;
 				case JoinRoomBtn:
 					world->emit<EnterRoom_Event>({ INROOM, select_room_num });
@@ -602,6 +596,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case ItemBtn:
 					world->emit<ChoiceItem_Event>({ button->item_num });
+					break;
+				case BuyBtn:
+					cout << "구메/강화" << endl;
 					break;
 				default:
 					cout << "디폴트" << endl;
