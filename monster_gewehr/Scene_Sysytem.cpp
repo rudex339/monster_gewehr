@@ -400,17 +400,17 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		}
 
 		{
+			
 			// 선택된 아이템 및 강화 버튼
 			ent = world->create();
 			imageRect = { 0, 0, 1400, 900 };
 			sRect = { FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_HEIGHT * 2 / 8, FRAME_BUFFER_WIDTH * 12 / 20, FRAME_BUFFER_HEIGHT * 7 / 8 };
 			ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-			
+
 			float margin = 1.0f;
 			float height = FRAME_BUFFER_HEIGHT * 3.2 / 15;
 
-			
 
 			if (m_item_num >= 0) {
 				//선택한 아이템이 있는 경우만 이미지를 출력한다.
@@ -424,13 +424,17 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 				ent->assign<ImageUI_Component>(imagefiles[m_item_num].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-				
+				// 강화와 관련된 정보 표시 
+				// 비용이나 텍스트는 추후 추가 예정
+				ent = world->create();
+				TextUI_Component text = TextUI_Component(SMALL_FONT, L"비용 : " + to_wstring(100), FRAME_BUFFER_HEIGHT * 2 / 8 + height - margin, FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_WIDTH * 8 / 20 + margin, FRAME_BUFFER_WIDTH * 12 / 20);
+				text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+				text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
+				ent->assign<TextUI_Component>(text);
+
 			}
 
-			// 강화 정보 표시
-			ent = world->create();
-			ent->assign<TextUI_Component>(NEEDLE_FONT, L"SHOP",
-				FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+			
 
 
 			// 구매/강화 버튼

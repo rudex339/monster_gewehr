@@ -215,10 +215,10 @@ void Button_Component::CursorOn(POINT cursor, ComPtr<IDWriteTextFormat> big_font
 		return;
 	}
 	if (cursor.x > m_Rectsaved.left && cursor.x < m_Rectsaved.right && cursor.y > m_Rectsaved.top && cursor.y < m_Rectsaved.bottom) {
-		m_Rect.bottom = m_Rectsaved.bottom + 10.0f;
-		m_Rect.right = m_Rectsaved.right + 10.0f;
-		m_Rect.left = m_Rectsaved.left - 10.0f;
-		m_Rect.top = m_Rectsaved.top - 10.0f;
+		m_Rect.bottom = m_Rectsaved.bottom + (m_Rectsaved.bottom - m_Rectsaved.top) * 0.05;
+		m_Rect.right = m_Rectsaved.right + (m_Rectsaved.right - m_Rectsaved.left) * 0.05;
+		m_Rect.left = m_Rectsaved.left - (m_Rectsaved.right - m_Rectsaved.left) * 0.05;
+		m_Rect.top = m_Rectsaved.top - (m_Rectsaved.bottom - m_Rectsaved.top) * 0.05;
 		cursor_on = true;
 		m_textFormat = big_font;
 	}
