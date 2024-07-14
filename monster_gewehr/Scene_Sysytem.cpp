@@ -396,7 +396,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
-			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f)/*2000.f*/, 1429.0f,
+			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f) + 10.f/*2000.f*/, 1429.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
@@ -427,10 +427,28 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
 		light->m_pLight->m_bEnable = true;
 		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
-		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.3f, 0.2f, 0.1f, 0.5f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.8f, 0.7f, 0.6f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(1.0f, 0.9f, 0.8f, 0.0f);
 		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+
+		//ent = world->create();
+		//light = ent->assign<Light_Component>();
+		//light->m_pLight = new LIGHT;
+		//light->m_pLight->m_bEnable = true;
+		//light->m_pLight->m_nType = SPOT_LIGHT;
+		//light->m_pLight->m_fRange = 400.0f;
+		//light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		//light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+		//light->m_pLight->m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+		//light->m_pLight->m_xmf3Position = XMFLOAT3(1646.0f, 1164.0f, 2246.0f);
+		//light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+		//light->m_pLight->m_xmf3Attenuation = XMFLOAT3(0.5f, 0.01f, 0.0001f);
+		//light->m_pLight->m_fFalloff = 8.0f;
+		//light->m_pLight->m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+		//light->m_pLight->m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+
+
 
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
@@ -457,7 +475,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		ComponentHandle<Camera_Component> camera = m_pPawn->assign<Camera_Component>(temp);
 		camera->m_pCamera->SetPosition(XMFLOAT3(310.0f,
-			m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f) + 10.f, 600.0f - 30.f));
+			m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f) , 600.0f - 30.f));
 
 		world->emit<GetPlayerPtr_Event>({ m_pPawn });
 
@@ -572,7 +590,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 
 			if (xmf4x4World._42 < 1054.f) {
-				cout << xmf4x4World._42 << "\n";
+				//cout << xmf4x4World._42 << "\n";
 				auto box = ent->assign<BoundingBox_Component>(
 					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
 					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
