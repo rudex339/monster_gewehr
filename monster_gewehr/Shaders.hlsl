@@ -106,7 +106,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//standard
     //return (lerp(cColor, cIllumination, 0.5f));
 	//flog
-    float4 FlogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+	float4 FlogColor = float4(0.5f, 0.3f, 0.2f, 1.0f);
     float3 disttoEye = length(gvCameraPosition - input.positionW);
     float flogstart;
     float flogrange;
@@ -253,7 +253,7 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 	//standard
 	//return(cColor);
 	//flog
-    float4 FlogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+	float4 FlogColor = float4(0.5f, 0.3f, 0.2f, 1.0f);
     return (FlogColor);
 
 }
