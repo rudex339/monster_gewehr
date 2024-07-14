@@ -683,7 +683,10 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
 					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
 				// XMFLOAT4X4를 XMMATRIX로 변환
-				xmf4x4World._42 += 2.f;
+				if (!strcmp(pstrGameObjectName, "Cube")) {
+					xmf4x4World._42 += 2.f;
+				}
+				
 				XMMATRIX worldMatrix = XMLoadFloat4x4(&xmf4x4World);
 
 				// BoundingOrientedBox 변환
