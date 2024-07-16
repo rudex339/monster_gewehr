@@ -274,3 +274,8 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 	void Disable();
 	void Activate();
 };
+
+//grande component
+struct Grande_Component {
+	UINT property = 0;
+};

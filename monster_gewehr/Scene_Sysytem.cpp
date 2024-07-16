@@ -38,6 +38,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<LoginCheck_Event>(this);
 	world->subscribe<ChoiceRoom_Event>(this);
 	world->subscribe<ChoiceItem_Event>(this);
+	world->subscribe<CreateObject_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -606,6 +607,22 @@ void Scene_Sysytem::receive(World* world, const ChoiceItem_Event& event)
 {
 	m_item_num = event.item_num;
 	world->emit<ChangeScene_Event>({ SHOP });
+}
+
+void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
+{
+	switch (event.object) {
+	case GRANADE:
+	case FLASHBANG:
+		Entity* ent = world->create();
+		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
+		ent->assign<Rotation_Component>(event.Rotate.x, event.Rotate.y, event.Rotate.z);
+		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
+
+		ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo("BP_building60_SM_wall2_StaticMeshComponent0"),
+			m_pObjectManager->Get_ModelInfo("BP_building60_SM_wall2_StaticMeshComponent0")->m_pModelRootObject->m_pstrFrameName);
+		break;
+	}
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)

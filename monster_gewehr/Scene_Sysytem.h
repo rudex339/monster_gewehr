@@ -69,6 +69,12 @@ struct ChoiceItem_Event {
 	int item_num = -1;
 };
 
+struct CreateObject_Event {
+	int object = 0;
+
+	XMFLOAT3 Position, Rotate;
+};
+
 
 
 class Scene_Sysytem :public EntitySystem,
@@ -76,7 +82,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<EnterRoom_Event>,
 	public EventSubscriber<LoginCheck_Event>,
 	public EventSubscriber<ChoiceRoom_Event>,
-	public EventSubscriber<ChoiceItem_Event>
+	public EventSubscriber<ChoiceItem_Event>,
+	public EventSubscriber<CreateObject_Event>
 {
 private:
 	UINT m_State = 0;
@@ -119,7 +126,8 @@ public:
 	virtual void receive(class World* world, const LoginCheck_Event& event);
 	virtual void receive(class World* world, const ChoiceRoom_Event& event);
 	virtual void receive(class World* world, const ChoiceItem_Event& event);
-
+	virtual void receive(class World* world, const CreateObject_Event& event);
+	
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수
