@@ -149,6 +149,7 @@ struct Velocity_Component {
 	XMFLOAT3 m_velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_velRotate = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
+	bool gravity = true;
 
 	Velocity_Component() = default;
 };

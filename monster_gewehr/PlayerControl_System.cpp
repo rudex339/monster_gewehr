@@ -248,7 +248,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					XMFLOAT3(model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._41,
 						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._42,
 						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._43),
-					XMFLOAT3(rotation->mfPitch,rotation->mfRoll,rotation->mfYaw)});
+					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
+					model_vector->m_xmf3Look});
 			}
 
 			// 구르기가 아닐때는 그냥 일반 이동을 더하고 구르기 일때는 구르기 전용을 더함
@@ -335,6 +336,7 @@ void PlayerControl_System::receive(World* world, const CursorPos_Event& event)
 
 void PlayerControl_System::receive(World* world, const GetPlayerPtr_Event& event)
 {
+	world->enableSystem(this);
 	m_Pawn = event.Pawn;
 	//ComponentHandle<EulerAngle_Component> eulerangle =
 	//	m_Pawn->get<EulerAngle_Component>();

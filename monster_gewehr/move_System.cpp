@@ -98,7 +98,7 @@ void Move_System::tick(World* world, float deltaTime)
     
 
 
-
+    
     //velocity Àû¿ë
     world->each<Velocity_Component,
         Position_Component,
@@ -186,6 +186,9 @@ void Move_System::tick(World* world, float deltaTime)
                     }
                     else {
                         position->Position = Vector3::Add(position->Position, velocity->m_velocity);
+                        if(velocity->gravity)
+                            velocity->m_velocity = 
+                            Vector3::Add(velocity->m_velocity, XMFLOAT3(0, -65.4f * deltaTime, 0));
                     }
         });
 }

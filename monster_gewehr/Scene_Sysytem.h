@@ -72,7 +72,7 @@ struct ChoiceItem_Event {
 struct CreateObject_Event {
 	int object = 0;
 
-	XMFLOAT3 Position, Rotate;
+	XMFLOAT3 Position, Rotate, direct;
 };
 
 
