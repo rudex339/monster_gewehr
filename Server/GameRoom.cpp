@@ -8,6 +8,14 @@ GameRoom::GameRoom()
 	m_state = GameRoomState::G_FREE;
 }
 
+void GameRoom::InitGameRoom()
+{
+	for (auto& id : m_player_ids) {
+		id = -1;
+	}
+	SetFreeRoom();
+}
+
 BOOL GameRoom::SetPlayerId(int c_id)
 {
 	m_state_lock.lock();

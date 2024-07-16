@@ -39,7 +39,6 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	packet.type = CS_PACKET_PLAYER_MOVE;
 	packet.pos = event.pos;
 	packet.yaw = event.yaw;
-	//cout << (int)pk.id << evnet.pos << endl;
 	send(g_socket, (char*)&packet, packet.size, 0);
 
 	CS_CHANGE_ANIMATION_PACKET sub_packet;
@@ -79,7 +78,6 @@ void Sever_System::receive(World* world, const Login_Event& event)
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
 	int weapon = 0;
-	cout << event.text.c_str() << endl;
 	strcpy_s(packet.name, event.text.c_str());
 	packet.weapon = weapon;
 
@@ -342,7 +340,6 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			void {
 				if (Player->id == pk->id) {
 					Player->hp = pk->hp;
-					cout << Player->hp << endl;
 					if (ent->has<Camera_Component>() && Player->hp <= 0) {
 						ComponentHandle<EulerAngle_Component> eulerangle =
 							ent->get<EulerAngle_Component>();
@@ -371,15 +368,6 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	case SC_PACKET_END_GAME: {
 		SC_END_GAME_PACKET* pk = reinterpret_cast<SC_END_GAME_PACKET*>(packet);
 		// 나중엔 점수 창이 뜨면 점수가 나오고 이를 확인하는 버튼을 눌러서 로비로 가게 하고싶음
-		world->each<player_Component>(
-			[&](Entity* ent,
-				ComponentHandle<player_Component> Player) ->
-			void {
-				cout << Player->id << " ";
-
-			});
-		cout << endl;
-
 		world->emit< ChangeScene_Event>({ END, pk->score });
 		break;
 	}
@@ -393,8 +381,8 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_ADD_ROOM: {
 		SC_ADD_ROOM_PACKET* pk = reinterpret_cast<SC_ADD_ROOM_PACKET*>(packet);
-		cout << pk->room_num << endl;
 		m_scene->AddRoom(pk->room_num);
+		world->emit<Refresh_Scene>({ ROOMS });
 		break;
 	}
 	case SC_PACKET_SELECT_ROOM: {
@@ -406,7 +394,20 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 
 		m_scene->AddRoomPlayers(wstr, pk->weapon);
 		world->emit<ChangeScene_Event>({ ROOMS });
-		// cout << "닉네임 : " << pk->name << " 무기 타입" << (int)pk->weapon << endl;
+		break;
+	}
+	case SC_PACKET_READY_ROOM: {
+		break;
+	}
+	case SC_PACKET_BREAK_ROOM: {
+		// 여기에 방이 터졌다 뭐시기뭐시기 안내하는 창 뜨는 이벤트 같은거 넣으면 됨
+		world->emit<ChangeScene_Event>({ ROOMS });
+		break;
+	}
+	case SC_PACKET_DELETE_ROOM: {
+		SC_DELETE_ROOM_PACKET* pk = reinterpret_cast<SC_DELETE_ROOM_PACKET*>(packet);
+		m_scene->DeleteRoom(pk->room_num);
+		world->emit<Refresh_Scene>({ ROOMS });
 		break;
 	}
 

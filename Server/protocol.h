@@ -27,6 +27,7 @@ constexpr char CS_PACKET_CREATE_ROOM = 6;
 constexpr char CS_PACKET_SELECT_ROOM = 7;
 constexpr char CS_PACKET_JOIN_ROOM = 8;
 constexpr char CS_PACKET_QUIT_ROOM = 9;
+constexpr char CS_PACKET_READY_ROOM = 10;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -48,6 +49,9 @@ constexpr char SC_PACKET_GAME_START = 12; // 게임룸 구현시 방장이 시작했다는 것�
 constexpr char SC_PACKET_CREATE_ROOM = 13;
 constexpr char SC_PACKET_ADD_ROOM = 14;
 constexpr char SC_PACKET_SELECT_ROOM = 15;
+constexpr char SC_PACKET_READY_ROOM = 16;
+constexpr char SC_PACKET_BREAK_ROOM = 17;
+constexpr char SC_PACKET_DELETE_ROOM = 18;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -145,6 +149,12 @@ struct CS_JOIN_ROOM_PACKET
 };
 
 struct CS_QUIT_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+};
+
+struct CS_READY_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
@@ -271,14 +281,33 @@ struct SC_ADD_ROOM_PACKET
 	SHORT room_num;
 };
 
-struct SC_SELECT_ROOM_PACKET	// 게임방에 들어가면 어떤 유저가 누가 있는지 준비상태인지 알려주는 패킷
+struct SC_SELECT_ROOM_PACKET	// 게임방 선택하면 누가 있는지 어떤 장비인지 알려줌
 {
 	UCHAR size;
 	UCHAR type;
 	CHAR name[20];
 	CHAR weapon;
 	CHAR armor;
+};
+
+struct SC_READY_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
 	BOOL ready;
+};
+
+struct SC_BREAK_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+};
+
+struct SC_DELETE_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	SHORT room_num;
 };
 #pragma pack (pop)
 

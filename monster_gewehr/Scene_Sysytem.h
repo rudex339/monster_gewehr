@@ -69,6 +69,10 @@ struct ChoiceItem_Event {
 	int item_num = -1;
 };
 
+struct Refresh_Scene {
+	UINT State;
+};
+
 
 
 class Scene_Sysytem :public EntitySystem,
@@ -76,7 +80,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<EnterRoom_Event>,
 	public EventSubscriber<LoginCheck_Event>,
 	public EventSubscriber<ChoiceRoom_Event>,
-	public EventSubscriber<ChoiceItem_Event>
+	public EventSubscriber<ChoiceItem_Event>,
+	public EventSubscriber<Refresh_Scene>
 {
 private:
 	UINT m_State = 0;
@@ -119,11 +124,13 @@ public:
 	virtual void receive(class World* world, const LoginCheck_Event& event);
 	virtual void receive(class World* world, const ChoiceRoom_Event& event);
 	virtual void receive(class World* world, const ChoiceItem_Event& event);
+	virtual void receive(class World* world, const Refresh_Scene& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수
 	void AddRoom(int room_num);
+	void DeleteRoom(int room_num);
 	void AddRoomPlayers(wstring name, int weapon);
 	void InitRoomPlayers();
 	void initSelect();

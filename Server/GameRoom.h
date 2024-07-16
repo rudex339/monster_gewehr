@@ -10,6 +10,8 @@ public:
 	GameRoom();
 	~GameRoom() = default;
 
+	void InitGameRoom();
+
 	BOOL SetPlayerId(int c_id);
 	BOOL IsPlayerIn(int c_id);
 	BOOL IsPlayerEmpty();

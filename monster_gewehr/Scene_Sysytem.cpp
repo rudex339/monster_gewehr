@@ -38,6 +38,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<LoginCheck_Event>(this);
 	world->subscribe<ChoiceRoom_Event>(this);
 	world->subscribe<ChoiceItem_Event>(this);
+	world->subscribe<Refresh_Scene>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -608,6 +609,12 @@ void Scene_Sysytem::receive(World* world, const ChoiceItem_Event& event)
 	world->emit<ChangeScene_Event>({ SHOP });
 }
 
+void Scene_Sysytem::receive(World* world, const Refresh_Scene& event)
+{
+	if(m_State == event.State)
+		world->emit<ChangeScene_Event>({ m_State });
+}
+
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 {
 	FILE* pFile = NULL;
@@ -717,6 +724,13 @@ void Scene_Sysytem::AddRoom(int room_num)
 
 	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"¹ø ¹æ", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
+}
+
+void Scene_Sysytem::DeleteRoom(int room_num)
+{
+	Rooms.erase(remove_if(Rooms.begin(), Rooms.end(), [room_num](const Button_Component& b) {
+		return b.m_room_num == room_num;
+		}), Rooms.end());
 }
 
 void Scene_Sysytem::AddRoomPlayers(wstring name, int weapon)

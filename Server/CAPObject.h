@@ -68,6 +68,7 @@ public:
 	void SetAtkDir(const DirectX::XMFLOAT3& dir) { m_atk_dir = dir; }
 	void SetAtkPos(const DirectX::XMFLOAT3& pos) { m_atk_pos = pos; }
 	void SetHost(bool is_host) { m_is_host = is_host; }
+	void SetReady(bool is_ready) { m_is_ready = is_ready; }
 
 	void Lock() { m_lock.lock(); }
 	void UnLock() { m_lock.unlock(); }
@@ -83,6 +84,7 @@ public:
 	float GetHp() { return m_hp; }
 	float GetRange() { return m_range; }
 	bool GetHost() { return m_is_host; }
+	bool GetReady() { return m_is_ready; }
 
 	int RecvData();
 	int DoSend(void* p, size_t size);
@@ -125,6 +127,8 @@ protected:
 	INT m_remain_size;
 
 	BOOL m_is_host;
+
+	BOOL m_is_ready;
 };
 
 

@@ -96,7 +96,8 @@ Player::Player(int id, SOCKET socket)
 
 void Player::PlayerInit()
 {
-	m_position = XMFLOAT3(0.f, 0.f, 0.f);
+	m_position = XMFLOAT3(1014.f, 1024.f, 1429.f);
+	m_yaw = 0.f;
 	m_hp = 100;
 	m_max_hp = 100;
 
@@ -428,7 +429,7 @@ int search_target(Monster* monster, std::unordered_map<INT, Player>* players, Ga
 {
 	bool isTargetExist = false;
 
-	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+	/*for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
 		auto playerIter = players->find(i);
 		if (playerIter != players->end()) {
 			monster->SetUserArround(i, false);
@@ -439,9 +440,10 @@ int search_target(Monster* monster, std::unordered_map<INT, Player>* players, Ga
 				}
 			}
 		}
-	}
+	}*/
 
-	/*for (int i : room->GetPlyId()) {
+	for (int i : room->GetPlyId()) {
+		if (i == -1) continue;
 		auto playerIter = players->find(i);
 		if (playerIter != players->end()) {
 			monster->SetUserArround(i, false);
@@ -452,7 +454,7 @@ int search_target(Monster* monster, std::unordered_map<INT, Player>* players, Ga
 				}
 			}
 		}
-	}*/
+	}
 
 	if (isTargetExist) {
 		return BehaviorTree::SUCCESS;
@@ -563,11 +565,25 @@ int bite_attack(Monster* monster)
 }
 
 //// idle
-int attent(Monster* monster, std::unordered_map<INT, Player>* players, float cooltime)
+int attent(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room, float cooltime)
 {
 	bool isTargetExist = false;
 
-	for (int i = 0; i < MAX_CLIENT; i++) {
+	/*for (int i = 0; i < MAX_CLIENT; i++) {
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			monster->SetUserArround(i, false);
+			if (playerIter->second.GetID() != -1) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
+					isTargetExist = true;
+					monster->SetUserArround(i, true);
+				}
+			}
+		}
+	}*/
+
+	for (int i : room->GetPlyId()) {
+		if (i == -1) continue;
 		auto playerIter = players->find(i);
 		if (playerIter != players->end()) {
 			monster->SetUserArround(i, false);
@@ -595,7 +611,7 @@ int attent(Monster* monster, std::unordered_map<INT, Player>* players, float coo
 
 }
 
-int find_near_user(Monster* monster, std::unordered_map<INT, Player>* players, float cooltime)
+int find_near_user(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room, float cooltime)
 {
 	bool isTargetExist = false;
 
@@ -888,7 +904,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 	//idle
 
 
-	find_near_user_node = Leaf("Search Near User", std::bind(attent, monster, players, 3000.0f));
+	find_near_user_node = Leaf("Search Near User", std::bind(attent, monster, players, room, 3000.0f));
 	idle_to_fight_node = Leaf("Change State(idle->fight)", std::bind(to_fight, monster, players, room));
 
 
