@@ -4,92 +4,17 @@
 #include "Player_Entity.h"
 #include "Sever_Sysyem.h"
 
-float CalculateDistanceToPlane(const DirectX::XMVECTOR& point, const DirectX::XMVECTOR& planePoint, const DirectX::XMVECTOR& planeNormal) {
-    // 평면의 법선 벡터 (a, b, c)
-    float a = DirectX::XMVectorGetX(planeNormal);
-    float b = DirectX::XMVectorGetY(planeNormal);
-    float c = DirectX::XMVectorGetZ(planeNormal);
-
-    // 평면 위의 한 점 (x0, y0, z0)
-    float x0 = DirectX::XMVectorGetX(planePoint);
-    float y0 = DirectX::XMVectorGetY(planePoint);
-    float z0 = DirectX::XMVectorGetZ(planePoint);
-
-    // 평면 방정식의 d 계산
-    float d = -(a * x0 + b * y0 + c * z0);
-
-    // 점 (x1, y1, z1)
-    float x1 = DirectX::XMVectorGetX(point);
-    float y1 = DirectX::XMVectorGetY(point);
-    float z1 = DirectX::XMVectorGetZ(point);
-
-    // 점과 평면 사이의 거리 계산
-    float distance = fabsf(a * x1 + b * y1 + c * z1 + d) / sqrtf(a * a + b * b + c * c);
-
-    return distance;
-}
-
-void DetermineNormal(const DirectX::XMVECTOR& relativePosition,
-    const DirectX::XMVECTOR& axisX,
-    const DirectX::XMVECTOR& axisY,
-    const DirectX::XMVECTOR& axisZ,
-    const DirectX::XMVECTOR& upSide,
-    const DirectX::XMVECTOR& underSide,
-    const DirectX::XMVECTOR& frontSide,
-    const DirectX::XMVECTOR& backSide,
-    const DirectX::XMVECTOR& leftSide,
-    const DirectX::XMVECTOR& rightSide,
-    DirectX::XMVECTOR& normal) {
-
-    // 각 축에 대한 도트 프로덕트의 절대값 계산
-    float dotUp = XMVectorGetX(DirectX::XMVector3Dot(relativePosition, upSide));
-    float dotDown = XMVectorGetX(DirectX::XMVector3Dot(relativePosition, underSide));
-    float dotFront = XMVectorGetX(DirectX::XMVector3Dot(relativePosition, frontSide));
-    float dotBack = XMVectorGetX(DirectX::XMVector3Dot(relativePosition, backSide));
-    float dotLeft = XMVectorGetX(DirectX::XMVector3Dot(relativePosition, leftSide));
-    float dotRight = XMVectorGetX(DirectX::XMVector3Dot(relativePosition, rightSide));
-
-    float disUp = (dotUp > 0.f) ? CalculateDistanceToPlane(relativePosition, upSide, axisY) : FLT_MAX;
-    float disDown = (dotDown > 0.f) ? CalculateDistanceToPlane(relativePosition, underSide, axisY) : FLT_MAX;
-    float disFront = (dotFront > 0.f) ? CalculateDistanceToPlane(relativePosition, frontSide, axisZ) : FLT_MAX;
-    float disBack = (dotBack > 0.f) ? CalculateDistanceToPlane(relativePosition, backSide, axisZ) : FLT_MAX;
-    float disLeft = (dotLeft > 0.f) ? CalculateDistanceToPlane(relativePosition, leftSide, axisX) : FLT_MAX;
-    float disRight = (dotRight > 0.f) ? CalculateDistanceToPlane(relativePosition, rightSide, axisX) : FLT_MAX;
-
-    //float minDot = ;
-    float minDot = FLT_MAX;
-    normal = axisY;
-    
-    if (disUp < minDot) {
-        minDot = disUp;
-        normal = axisY;
-        std::cout << "Collided with the up side." << std::endl;
-    }
-    if (disDown < minDot) {
-        minDot = disDown;
-        normal = DirectX::XMVectorNegate(axisY);
-        std::cout << "Collided with the down side." << std::endl;
-    }
-    if (disFront < minDot) {
-        minDot = disFront;
-        normal = axisZ;
-        std::cout << "Collided with the front side." << std::endl;
-    }
-    if (disBack < minDot) {
-        minDot = disBack;
-        normal = DirectX::XMVectorNegate(axisZ);
-        std::cout << "Collided with the back side." << std::endl;
-    }
-    if (disLeft < minDot) {
-        minDot = disLeft;
-        normal = DirectX::XMVectorNegate(axisX);
-        std::cout << "Collided with the left side." << std::endl;
-    }
-    if (disRight < minDot) {
-        minDot = disRight;
-        normal = axisX;
-        std::cout << "Collided with the right side." << std::endl;
-    }
+float AngleBetweenVectors(XMVECTOR v1, XMVECTOR v2) {
+    // 내적을 계산
+    float dotProduct = XMVectorGetX(XMVector3Dot(v1, v2));
+    // 벡터의 크기를 계산
+    float len1 = XMVectorGetX(XMVector3Length(v1));
+    float len2 = XMVectorGetX(XMVector3Length(v2));
+    // 코사인 값을 계산
+    float cosTheta = dotProduct / (len1 * len2);
+    // 아크 코사인을 사용하여 각도를 계산
+    float angle = acos(cosTheta);
+    return angle;
 }
 
 void Move_System::configure(World* world)
@@ -132,7 +57,7 @@ void Move_System::tick(World* world, float deltaTime)
 
                         const DirectX::XMVECTOR centerA = DirectX::XMLoadFloat3(&BBox->m_bounding_box.Center);
                         const DirectX::XMVECTOR centerB = DirectX::XMLoadFloat3(&another_BBox->m_bounding_box.Center);
-                        const DirectX::XMVECTOR relativePosition = (DirectX::XMVectorSubtract(centerA, centerB));
+                        const DirectX::XMVECTOR direction = (DirectX::XMVectorSubtract(centerA, centerB));
 
                         // 박스 A의 회전 쿼터니언
                         //const DirectX::XMVECTOR orientationA = DirectX::XMLoadFloat4(&another_BBox->m_bounding_box.Orientation);
@@ -156,53 +81,66 @@ void Move_System::tick(World* world, float deltaTime)
                         leftSide = XMVectorSetW(leftSide, another_BBox->m_bounding_box.Extents.x);   // 왼쪽
                         rightSide = XMVectorSetW(rightSide, another_BBox->m_bounding_box.Extents.x);   // 오른쪽
 
-                        DirectX::XMVECTOR normal[3];
+                        DirectX::XMVECTOR normal= axisY;
                         
-                        //DetermineNormal(relativePosition, axisX, axisY, axisZ, upSide, underSide, frontSide, backSide, leftSide, rightSide, normal);
-                        if (BBox->m_bounding_box.Intersects(upSide) == FRONT) {
-                            normal[0] = axisZ;
-                            std::cout << "Collided with the up side." << std::endl;
-                        }
-                        if (BBox->m_bounding_box.Intersects(underSide) == FRONT) {
-                            normal[0] = DirectX::XMVectorNegate(axisZ);
-                            std::cout << "Collided with the under side." << std::endl;
-                        }
+                        float angleX = AngleBetweenVectors(direction, axisX);
+                        float angleY = AngleBetweenVectors(direction, axisY);
+                        float angleZ = AngleBetweenVectors(direction, axisZ);
 
-                        if (BBox->m_bounding_box.Intersects(frontSide) == FRONT) {
-                            normal[1] = axisY;
-                            std::cout << "Collided with the front side." << std::endl;
+                        // 가장 작은 각도를 찾기
+                        XMFLOAT3 corners[8];
+                        another_BBox->m_bounding_box.GetCorners(corners);
+                        XMVECTOR Vcorners[8];
+                        for (int i = 0; i < 8; i++) {
+                            Vcorners[i] = DirectX::XMLoadFloat3(&corners[i]);
                         }
-                        if (BBox->m_bounding_box.Intersects(backSide) == FRONT) {
-                            normal[1] = DirectX::XMVectorNegate(axisY);
-                            std::cout << "Collided with the back side." << std::endl;
+                        //float minAngle = std::min<float>({ angleX, angleY, angleZ });
+                        {
+                            /*if (BBox->m_bounding_box.Intersects(Vcorners[2], Vcorners[3], Vcorners[7]) ||
+                                BBox->m_bounding_box.Intersects(Vcorners[2], Vcorners[7], Vcorners[6])) {
+                                normal = axisY;
+                                std::cout << "Collided with the up side." << std::endl;
+                            }
+                            else if (BBox->m_bounding_box.Intersects(Vcorners[0], Vcorners[1], Vcorners[5]) ||
+                                BBox->m_bounding_box.Intersects(Vcorners[0], Vcorners[5], Vcorners[4])) {
+                                normal = DirectX::XMVectorNegate(axisY);
+                                std::cout << "Collided with the under side." << std::endl;
+                            }*/
+                            if (BBox->m_bounding_box.Intersects(Vcorners[0], Vcorners[1], Vcorners[2]) ||
+                                BBox->m_bounding_box.Intersects(Vcorners[0], Vcorners[2], Vcorners[3])) {
+                                normal = axisZ;
+                                std::cout << "Collided with the front side." << std::endl;
+                            }
+                            else if (BBox->m_bounding_box.Intersects(Vcorners[4], Vcorners[5], Vcorners[6]) ||
+                                BBox->m_bounding_box.Intersects(Vcorners[4], Vcorners[6], Vcorners[7])) {
+                                normal = DirectX::XMVectorNegate(axisZ);
+                                std::cout << "Collided with the back side." << std::endl;
+                            }
+                            /*else if (BBox->m_bounding_box.Intersects(Vcorners[0], Vcorners[3], Vcorners[7]) ||
+                                BBox->m_bounding_box.Intersects(Vcorners[0], Vcorners[7], Vcorners[4])) {
+                                normal = DirectX::XMVectorNegate(axisX);
+                                std::cout << "Collided with the left side." << std::endl;
+                            }
+                            else if (BBox->m_bounding_box.Intersects(Vcorners[1], Vcorners[2], Vcorners[6]) ||
+                                BBox->m_bounding_box.Intersects(Vcorners[1], Vcorners[6], Vcorners[5])) {
+                                normal = axisX;
+                                std::cout << "Collided with the right side." << std::endl;
+                            }*/
                         }
+                        
 
-                        if (BBox->m_bounding_box.Intersects(leftSide) == FRONT) {
-                            normal[2] = DirectX::XMVectorNegate(axisX);
-                            std::cout << "Collided with the left side." << std::endl;
-                        }
-                        if (BBox->m_bounding_box.Intersects(rightSide) == FRONT) {
-                            normal[2] = axisX;
-                            std::cout << "Collided with the right side." << std::endl;
-                        }
+                        
 
-                        /*if (XMVector4EqualInt(DirectX::XMVectorEqual(normal, axisY), XMVectorTrueInt())) {
-                            std::cout << "nothing." << std::endl;
-                        }*/
+                        
+
 
                         // 미끄러짐 벡터 계산
-                        XMFLOAT3 tempVel[3];
-                        for (int i = 0; i < 3; i++) {
-                            const DirectX::XMVECTOR velocityVec = DirectX::XMLoadFloat3(&velocity->m_velocity);
-                            const DirectX::XMVECTOR dotProduct = DirectX::XMVector3Dot(velocityVec, normal[i]);
-                            const DirectX::XMVECTOR slidingVector = DirectX::XMVectorSubtract(velocityVec, DirectX::XMVectorMultiply(normal[i], dotProduct));
-                            DirectX::XMStoreFloat3(&tempVel[i], slidingVector);
-                        }
+                        const DirectX::XMVECTOR velocityVec = DirectX::XMLoadFloat3(&velocity->m_velocity);
+                        const DirectX::XMVECTOR dotProduct = DirectX::XMVector3Dot(velocityVec, normal);
+                        const DirectX::XMVECTOR slidingVector = DirectX::XMVectorSubtract(velocityVec, DirectX::XMVectorMultiply(normal, dotProduct));
                         // 속도 및 위치 업데이트
-                        velocity->m_velocity.x= tempVel[0].x+ tempVel[1].x+ tempVel[2].x;
-                        velocity->m_velocity.y = tempVel[0].y + tempVel[1].y + tempVel[2].y;
-                        velocity->m_velocity.z = tempVel[0].z + tempVel[1].z + tempVel[2].z;
-                        //cout << velocity->m_velocity.x << " " << velocity->m_velocity.y << " " << velocity->m_velocity.z << endl;
+                        DirectX::XMStoreFloat3(&velocity->m_velocity, slidingVector);
+                        cout << velocity->m_velocity.x << " " << velocity->m_velocity.y << " " << velocity->m_velocity.z << endl;
                     }
                         
                 });
