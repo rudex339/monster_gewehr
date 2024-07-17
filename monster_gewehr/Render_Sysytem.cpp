@@ -600,6 +600,18 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case BuyBtn:
 					cout << "구메/강화" << endl;
 					break;
+				case EquipLeftBtn:
+					world->emit<ChoiceEquip_Event>({ EquipLeftBtn, button->item_num });
+					break;
+				case EquipRightBtn:
+					world->emit<ChoiceEquip_Event>({ EquipRightBtn, button->item_num });
+					break;
+				case EquipUpBtn:
+					cout << "+버튼" << endl;
+					break;
+				case EquipDownBtn:
+					cout << "-버튼" << endl;
+					break;
 				default:
 					cout << "디폴트" << endl;
 					break;
@@ -612,10 +624,11 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
-	world->each< player_Component, Camera_Component>([&](
+	world->each< player_Component, Camera_Component, ControllAngle_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
-		ComponentHandle<Camera_Component> camera
+		ComponentHandle<Camera_Component> camera,
+		ComponentHandle<ControllAngle_Component> cc
 		) -> void {
 			{
 				textRect = D2D1::RectF(0, 0, 390, 100);
