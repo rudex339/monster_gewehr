@@ -200,7 +200,7 @@ Button_Component::Button_Component(int id, const wchar_t* imagePath, int fontTyp
 	if (button_id == SelectRoomBtn) {
 		m_room_num = num;
 	}
-	else if (button_id == ItemBtn) {
+	else if (button_id == ItemBtn || button_id == EquipLeftBtn || button_id == EquipRightBtn) {
 		item_num = num;
 	}
 
