@@ -10,6 +10,7 @@ struct CursorPos_Event {
 
 struct GetPlayerPtr_Event {
 	Entity* Pawn;
+	bool enable = true;
 };
 
 struct PlayerController_Angle {
