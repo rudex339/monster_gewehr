@@ -149,6 +149,7 @@ struct Velocity_Component {
 	XMFLOAT3 m_velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_velRotate = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
+	bool gravity = true;
 
 	Velocity_Component() = default;
 };
@@ -273,4 +274,21 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 	void CursorOn(POINT cursor, ComPtr<IDWriteTextFormat> pTextFormat, ComPtr<IDWriteTextFormat> small_font);
 	void Disable();
 	void Activate();
+};
+
+//grande component
+struct Grande_Component {
+	UINT property = 0;
+	DirectX::BoundingSphere sphere;
+	float damage;
+	float range;
+	bool Boom = false;
+	float coolTime = 0.f;
+	Grande_Component() = default;
+
+	Grande_Component(const UINT& property,float range, float damage)
+		: property(property), range(range), damage(damage)
+	{
+		sphere.Radius = range;
+	}
 };

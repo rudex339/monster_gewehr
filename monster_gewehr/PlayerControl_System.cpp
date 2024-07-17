@@ -243,6 +243,17 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					AnimationController->next_State = (UINT)RUN;
 			}
 
+			if (pKeysBuffer[0x47] & 0xF0) {
+				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
+				;
+				world->emit<CreateObject_Event>({ GRANADE, 
+					XMFLOAT3(model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._41,
+						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._42,
+						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._43),
+					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
+					model_vector->m_xmf3Look});
+			}
+
 			// 구르기가 아닐때는 그냥 일반 이동을 더하고 구르기 일때는 구르기 전용을 더함
 			if (roll_on == 0) {
 				velocity->m_velocity = Vector3::Add(velocity->m_velocity, xmf3Shift);
@@ -330,14 +341,21 @@ void PlayerControl_System::receive(World* world, const CursorPos_Event& event)
 
 void PlayerControl_System::receive(World* world, const GetPlayerPtr_Event& event)
 {
-	m_Pawn = event.Pawn;
-	//ComponentHandle<EulerAngle_Component> eulerangle =
-	//	m_Pawn->get<EulerAngle_Component>();
-	if (m_Pawn) {
-		if (m_Pawn->has<Camera_Component>())
-			world->emit<SetCamera_Event>({ m_Pawn->get<Camera_Component>()->m_pCamera });
-		else {
-			world->emit<SetCamera_Event>({ NULL });
+	if (event.enable) {
+		world->enableSystem(this);
+		m_Pawn = event.Pawn;
+		//ComponentHandle<EulerAngle_Component> eulerangle =
+		//	m_Pawn->get<EulerAngle_Component>();
+		if (m_Pawn) {
+			if (m_Pawn->has<Camera_Component>())
+				world->emit<SetCamera_Event>({ m_Pawn->get<Camera_Component>()->m_pCamera });
+			else {
+				world->emit<SetCamera_Event>({ NULL });
+			}
 		}
+	}
+	else {
+		m_Pawn = NULL;
+		world->disableSystem(this);
 	}
 }

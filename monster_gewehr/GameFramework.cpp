@@ -14,6 +14,7 @@
 #include "Sever_Sysyem.h"
 #include "Animate_System.h"
 #include "Scene_Sysytem.h"
+#include "Collision_Sysytem.h"
 //---------------------------------//
 
 GameFramework::GameFramework()
@@ -533,12 +534,12 @@ void GameFramework::BuildObjects()
 	//set System
 	Scene_Sysytem* Scene = new Scene_Sysytem(m_pObjectManager, m_pd3dDevice.Get(), m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get());
 	m_pWorld->registerSystem(Scene);
-	m_pWorld->registerSystem(new PlayerControl_System());
+	m_pWorld->disableSystem(m_pWorld->registerSystem(new PlayerControl_System()));
 	m_pWorld->registerSystem(new Move_System());
 	m_pWorld->registerSystem(new Sever_System(Scene));
 	m_pWorld->registerSystem(new Animate_System());
 	m_pWorld->registerSystem(new Render_System(m_pObjectManager, m_pd3dDevice.Get() ,m_pd3dCommandList, m_d2dDeviceContext.Get(), m_d2dFactory.Get(), m_dwriteFactory.Get(), Scene));
-
+	m_pWorld->registerSystem(new Collision_Sysytem());
 
 	m_pWorld->emit<ChangeScene_Event>({ LOGIN });
 
