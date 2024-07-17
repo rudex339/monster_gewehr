@@ -310,18 +310,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	
 	case SHOP:
 	{
-		wstring imagefiles[10] = {
-				L"image/M4.png",
-				L"image/Saiga12.png",
-				L"image/M24.png",
-				L"image/LightArmor.png",
-				L"image/HeavyArmor.png",
-				L"image/Grenade.png",
-				L"image/Flashbang.png",
-				L"image/Bandage.png",
-				L"image/FirstAidKit.png",
-				L"image/Flashbang.png"
-		};
+		
 
 		world->reset();
 		Entity* ent = world->create();
@@ -496,61 +485,100 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		}
 
-		wstring imagefiles[10] = {
-				L"image/M4.png",
-				L"image/Saiga12.png",
-				L"image/M24.png",
-				L"image/LightArmor.png",
-				L"image/HeavyArmor.png",
-				L"image/Grenade.png",
-				L"image/Flashbang.png",
-				L"image/Bandage.png",
-				L"image/FirstAidKit.png",
-				L"image/Flashbang.png"
-		};
-
 		{// 무기 및 방어구 선택창
 
 			imageRect = { 0, 0, 500, 300 };
-			sRect = { FRAME_BUFFER_WIDTH * 12 / 20, FRAME_BUFFER_HEIGHT / 8 ,FRAME_BUFFER_WIDTH * 16 / 20, FRAME_BUFFER_HEIGHT * 5 / 16 };
+			sRect = { FRAME_BUFFER_WIDTH * 24 / 40, FRAME_BUFFER_HEIGHT * 2 / 32 , FRAME_BUFFER_WIDTH * 30 / 40, FRAME_BUFFER_HEIGHT * 7 / 32 };
+
+			float height = FRAME_BUFFER_HEIGHT * 5 / 32;
+			float y_margin = FRAME_BUFFER_HEIGHT * 2 / 32;
+			float x_margin = FRAME_BUFFER_WIDTH / 40;
+
+			float button_width = FRAME_BUFFER_WIDTH * 2 / 40;
+
+			for (int i = 0; i < 4; ++i) {
+				D2D1_RECT_F Rect;
+				// 중앙 이미지
+				ent = world->create();
+				ent->assign<ImageUI_Component>(imagefiles[equipments[i]].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+				// 왼쪽 버튼
+				ent = world->create();
+				Rect = { sRect.left - x_margin - button_width, sRect.top, sRect.left - x_margin, sRect.bottom };
+				ent->assign<Button_Component>(EquipLeftBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					Rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, i);
+
+				// 오른쪽 버튼
+				ent = world->create();
+				Rect = { sRect.right + x_margin, sRect.top, sRect.right + x_margin + button_width, sRect.bottom };
+				ent->assign<Button_Component>(EquipRightBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					Rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, i);
+
+				if (i == 3) break;
+				sRect = { sRect.left , sRect.bottom + y_margin, sRect.right, sRect.bottom + y_margin + height };
+			}
+
+			// 힐 아이템 정보 및 추가/제거
+			ent = world->create();
+			TextUI_Component healtem = TextUI_Component(SMALL_FONT, to_wstring(equipHealItems[choicedHealItem]) , sRect.top, sRect.left, sRect.bottom, sRect.right);
+
+			healtem.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_FAR;
+			healtem.m_text_alignment = DWRITE_TEXT_ALIGNMENT_TRAILING;
+			ent->assign<TextUI_Component>(healtem);
+
+			sRect = { sRect.left , sRect.bottom + x_margin / 4, sRect.right, sRect.bottom + x_margin / 4 + height / 4 };
+			D2D1_RECT_F Rect = { sRect.left, sRect.top, sRect.right - ((sRect.right - sRect.left) / 2), sRect.bottom };
 
 
 			ent = world->create();
-			ent->assign<ImageUI_Component>(imagefiles[equipments[0]].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			Button_Component downBtn = Button_Component(EquipDownBtn, L"image/null.png", DEFAULT_FONT, L"ㅡ", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				Rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+			
+			if (equipHealItems[choicedHealItem] == 0) {
+				downBtn.Disable();
+			}
+			else {
+				downBtn.Activate();
+			}
+			ent->assign<Button_Component>(downBtn);
+
+
+			sRect = { Rect.right, sRect.top, sRect.right, sRect.bottom};
+			ent = world->create();
+			Button_Component upBtn = Button_Component(EquipUpBtn, L"image/null.png", DEFAULT_FONT, L"+", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
+			
 
-			// 버튼 종류 BuyBtn 말고 EquipLeft/EquipRight 추가할것
-			ent = world->create();
-			sRect = { FRAME_BUFFER_WIDTH * 21 / 40, FRAME_BUFFER_HEIGHT * 2 / 16 ,FRAME_BUFFER_WIDTH * 23 / 40, FRAME_BUFFER_HEIGHT * 5 / 16 };
-			ent->assign<Button_Component>(EquipLeftBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 0);
+			switch (choicedHealItem)
+			{
+			case 0:
+				upBtn.Activate();
+				if (equipHealItems[0] == 9) {
+					upBtn.Disable();
+				}
+				break;
+			case 1:
+				upBtn.Activate();
+				if (equipHealItems[1] == 4) {
+					upBtn.Disable();
+				}
+				break;
+			case 2:
+				upBtn.Activate();
+				if (equipHealItems[2] == 2) {
+					upBtn.Disable();
+				}
+				break;
+			default:
+				break;
+			}
 
-			ent = world->create();
-			sRect = { FRAME_BUFFER_WIDTH * 33 / 40, FRAME_BUFFER_HEIGHT * 2 / 16 ,FRAME_BUFFER_WIDTH * 35 / 40, FRAME_BUFFER_HEIGHT * 5 / 16 };
-			ent->assign<Button_Component>(EquipRightBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 0);
-
-
-			sRect = { FRAME_BUFFER_WIDTH * 12 / 20, FRAME_BUFFER_HEIGHT * 3 / 8 ,FRAME_BUFFER_WIDTH * 16 / 20, FRAME_BUFFER_HEIGHT * 9 / 16 };
-			ent = world->create();
-			ent->assign<ImageUI_Component>(imagefiles[equipments[1]].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-
-			ent = world->create();
-			sRect = { FRAME_BUFFER_WIDTH * 21 / 40, FRAME_BUFFER_HEIGHT * 3 / 8 ,FRAME_BUFFER_WIDTH * 23 / 40, FRAME_BUFFER_HEIGHT * 9 / 16 };
-			ent->assign<Button_Component>(EquipLeftBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 1);
-
-			ent = world->create();
-			sRect = { FRAME_BUFFER_WIDTH * 33 / 40, FRAME_BUFFER_HEIGHT * 3 / 8 ,FRAME_BUFFER_WIDTH * 35 / 40, FRAME_BUFFER_HEIGHT * 9 / 16 };
-			ent->assign<Button_Component>(EquipRightBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 1);
-
+			ent->assign<Button_Component>(upBtn);
 		}
 
 	}
-	break;
 	break;
 
 
@@ -708,10 +736,14 @@ void Scene_Sysytem::receive(World* world, const ChoiceEquip_Event& event)
 		break;
 	case EquipRightBtn:
 		equipments[event.equipType]++;
-
+		break;
 	case EquipUpBtn:
+		equipHealItems[choicedHealItem]++;
+		// 최대 보유량과 비교해서 보유량 -1 하는 코드 필요
 		break;
 	case EquipDownBtn:
+		equipHealItems[choicedHealItem]--;
+		// 최대 보유량에 1 추가하는 코드 필요
 		break;
 
 	default:
@@ -724,6 +756,13 @@ void Scene_Sysytem::receive(World* world, const ChoiceEquip_Event& event)
 	if (equipments[1] < 3) equipments[1] = 4;
 	if (equipments[1] > 4) equipments[1] = 3;
 	
+	if (equipments[2] < 5) equipments[2] = 6;
+	if (equipments[2] > 6) equipments[2] = 5;
+
+	if (equipments[3] < 7) equipments[3] = 9;
+	if (equipments[3] > 9) equipments[3] = 7;
+	choicedHealItem = equipments[3] - 7;
+
 	world->emit<ChangeScene_Event>({ EQUIPMENT });
 }
 
@@ -869,5 +908,5 @@ void Scene_Sysytem::InitRoomPlayers()
 void Scene_Sysytem::initSelect()
 {
 	m_item_num = -1;
-	m_item_num = -1;
+	m_room_num = -1;
 }

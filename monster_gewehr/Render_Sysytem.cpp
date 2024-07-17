@@ -607,10 +607,10 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<ChoiceEquip_Event>({ EquipRightBtn, button->item_num });
 					break;
 				case EquipUpBtn:
-					cout << "+버튼" << endl;
+					world->emit<ChoiceEquip_Event>({ EquipUpBtn, button->item_num });
 					break;
 				case EquipDownBtn:
-					cout << "-버튼" << endl;
+					world->emit<ChoiceEquip_Event>({ EquipDownBtn, button->item_num });
 					break;
 				default:
 					cout << "디폴트" << endl;

@@ -115,12 +115,28 @@ private:
 	vector<Player_Info> RoomPlayers;
 	unordered_set<wstring> RoomPlayerNames;
 
+	wstring imagefiles[10] = {
+				L"image/M4.png",
+				L"image/Saiga12.png",
+				L"image/M24.png",
+				L"image/LightArmor.png",
+				L"image/HeavyArmor.png",
+				L"image/Grenade.png",
+				L"image/Flashbang.png",
+				L"image/Bandage.png",
+				L"image/FirstAidKit.png",
+				L"image/Injector.png"
+	};
+
 	int m_room_num = -1;
 	bool loginCheck = false;
 	int m_item_num = -1;
 	int m_item_info[10];
 
-	int equipments[2] = { 0, 3 };
+	int equipments[4] = { 0, 3, 5, 7 };
+	int choicedHealItem = 0;
+	int haveHealItems[3];
+	int equipHealItems[3] = { 0, 1, 2 };
 
 public:
 
