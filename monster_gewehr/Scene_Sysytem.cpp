@@ -287,7 +287,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			Button_Component joinBtn = Button_Component(JoinRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"πÊ¿‘¿Â", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-			cout << m_room_num << endl;
+			//cout << m_room_num << endl;
 
 			if (m_room_num >= 0) {
 				joinBtn.Activate();
@@ -731,6 +731,10 @@ void Scene_Sysytem::DeleteRoom(int room_num)
 	Rooms.erase(remove_if(Rooms.begin(), Rooms.end(), [room_num](const Button_Component& b) {
 		return b.m_room_num == room_num;
 		}), Rooms.end());
+
+	if (m_room_num == room_num) {
+		m_room_num = -1;
+	}
 }
 
 void Scene_Sysytem::AddRoomPlayers(wstring name, int weapon)
