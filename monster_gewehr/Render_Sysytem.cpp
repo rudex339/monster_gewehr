@@ -115,14 +115,14 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
 	//boundingbox
 	m_pBox = NULL;
-	////////////////////¹Ù¿îµù ¹Ú½º¸¦ ±×¸®Áö ¾ÊÀ¸·Á¸é ÀÌºÎºÐ¸¸ ÁÖ¼®Ã³¸®ÇÏ¸é µÊ
+	////////////////////ï¿½Ù¿ï¿½ï¿½ ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ÌºÎºÐ¸ï¿½ ï¿½Ö¼ï¿½Ã³ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½
 	if (manager->m_pBox != NULL) {
 		m_pBox = manager->m_pBox;
 	}
@@ -463,13 +463,13 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<TextBoxUI_Component> editBox
 		)-> void {
 
-			// ÅØ½ºÆ® ÀÔ·Â ¹Ú½º
+			// ï¿½Ø½ï¿½Æ® ï¿½Ô·ï¿½ ï¿½Ú½ï¿½
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 			m_d2dDeviceContext->FillRectangle(
 				{ editBox->x, editBox->y + 3.0f, editBox->x + 400.f, editBox->y + 35.0f },
 				m_textBrush.Get()
 			);
-			// ÅØ½ºÆ® ·¹ÀÌ¾Æ¿ô
+			// ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½Ì¾Æ¿ï¿½
 			m_dwriteFactory->CreateTextLayout(
 				text[editBox->index].c_str(),
 				static_cast<UINT32>(text[editBox->index].length()),
@@ -481,7 +481,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 			
 
-			// ÅØ½ºÆ®
+			// ï¿½Ø½ï¿½Æ®
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 
 			m_d2dDeviceContext->DrawTextLayout(
@@ -492,7 +492,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			);
 
 
-			// Ä¿¼­ 
+			// Ä¿ï¿½ï¿½ 
 			if (cursorPosition[textIndex] <= text[textIndex].length() && textIndex == editBox->index)
 			{
 				DWRITE_TEXT_METRICS textMetrics;
@@ -553,8 +553,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				button->m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
 				button->m_textBrush.Get()->SetOpacity(button->m_opacity);
 
-				button->m_textFormat.Get()->SetParagraphAlignment(button->m_paragraph_alignment);	// ÅØ½ºÆ®¸¦ »óÇÏÀÇ °¡¿îµ¥¿¡ À§Ä¡
-				button->m_textFormat.Get()->SetTextAlignment(button->m_text_alignment);			// ÅØ½ºÆ®¸¦ ÁÂ¿ìÀÇ °¡¿îµ¥¿¡ À§Ä¡
+				button->m_textFormat.Get()->SetParagraphAlignment(button->m_paragraph_alignment);	// ï¿½Ø½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½îµ¥ï¿½ï¿½ ï¿½ï¿½Ä¡
+				button->m_textFormat.Get()->SetTextAlignment(button->m_text_alignment);			// ï¿½Ø½ï¿½Æ®ï¿½ï¿½ ï¿½Â¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½îµ¥ï¿½ï¿½ ï¿½ï¿½Ä¡
 
 				m_d2dDeviceContext->DrawTextW(
 					button->m_text.data(),
@@ -598,23 +598,34 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<ChoiceItem_Event>({ button->item_num });
 					break;
 				case BuyBtn:
-					cout << "±¸¸Þ/°­È­" << endl;
+					cout << "ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½È­" << endl;
 					break;
 				case GameReadyBtn:
 					world->emit<Ready_Room>({});
-					cout << "·¹µð" << endl;
+					cout << "ï¿½ï¿½ï¿½ï¿½" << endl;
 
 					break;
 				case GameStartBtn:
 					//world->emit< ChangeScene_Event>({ GAME });
 					world->emit<Game_Start>({});
-					cout << "½ÃÀÛ" << endl;
+					cout << "ï¿½ï¿½ï¿½ï¿½" << endl;
+				case EquipLeftBtn:
+					world->emit<ChoiceEquip_Event>({ EquipLeftBtn, button->item_num });
+					break;
+				case EquipRightBtn:
+					world->emit<ChoiceEquip_Event>({ EquipRightBtn, button->item_num });
+					break;
+				case EquipUpBtn:
+					cout << "+ï¿½ï¿½Æ°" << endl;
+					break;
+				case EquipDownBtn:
+					cout << "-ï¿½ï¿½Æ°" << endl;
 					break;
 				default:
-					cout << "µðÆúÆ®" << endl;
+					cout << "ï¿½ï¿½ï¿½ï¿½Æ®" << endl;
 					break;
 				}
-				Clicked(); // ¹öÆ°ÀÌ ´­¸®°í ³ª¸é clicked¸¦ false·Î º¯°æ(¿ø·¡ ¸¶¿ì½º¸¦ ¿òÁ÷¿©¾ß¸¸ false·Î ¹Ù²î±â ¶§¹®¿¡ »ý±â´Â ¹ö±× ÇØ°á¿ë)
+				Clicked(); // ï¿½ï¿½Æ°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ clickedï¿½ï¿½ falseï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ì½ºï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¸ï¿½ falseï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ø°ï¿½ï¿½)
 			}
 		}
 	);
@@ -622,10 +633,11 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
-	world->each< player_Component, Camera_Component>([&](
+	world->each< player_Component, Camera_Component, ControllAngle_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
-		ComponentHandle<Camera_Component> camera
+		ComponentHandle<Camera_Component> camera,
+		ComponentHandle<ControllAngle_Component> cc
 		) -> void {
 			{
 				textRect = D2D1::RectF(0, 0, 390, 100);

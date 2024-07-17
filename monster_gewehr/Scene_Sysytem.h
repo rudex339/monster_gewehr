@@ -27,7 +27,11 @@ enum {
 	ItemBtn,
 	BuyBtn,
 	GameReadyBtn,
-	GameStartBtn
+	GameStartBtn,
+	EquipLeftBtn,
+	EquipRightBtn,
+	EquipUpBtn,
+	EquipDownBtn
 };
 
 enum Items {
@@ -76,6 +80,11 @@ struct Refresh_Scene {
 	UINT State;
 };
 
+struct ChoiceEquip_Event {
+	int btnType;
+	int equipType;
+};
+
 
 
 class Scene_Sysytem :public EntitySystem,
@@ -84,7 +93,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<LoginCheck_Event>,
 	public EventSubscriber<ChoiceRoom_Event>,
 	public EventSubscriber<ChoiceItem_Event>,
-	public EventSubscriber<Refresh_Scene>
+	public EventSubscriber<Refresh_Scene>,
+	public EventSubscriber<ChoiceEquip_Event>
 {
 private:
 	UINT m_State = 0;
@@ -101,7 +111,7 @@ private:
 
 	short m_score = 0;
 
-	// ¹æ ¸ñ·Ï
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½
 	vector<Button_Component> Rooms;
 	queue<int> Room_ids;
 
@@ -112,6 +122,8 @@ private:
 	bool loginCheck = false;
 	int m_item_num = -1;
 	int m_item_info[10];
+
+	int equipments[2] = { 0, 3 };
 
 public:
 
@@ -128,10 +140,11 @@ public:
 	virtual void receive(class World* world, const ChoiceRoom_Event& event);
 	virtual void receive(class World* world, const ChoiceItem_Event& event);
 	virtual void receive(class World* world, const Refresh_Scene& event);
+	virtual void receive(class World* world, const ChoiceEquip_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 
-	// ¹æ »ý¼º ÇÔ¼ö
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	void AddRoom(int room_num);
 	void DeleteRoom(int room_num);
 	void AddRoomPlayers(wstring name, int weapon);

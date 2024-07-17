@@ -39,6 +39,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<ChoiceRoom_Event>(this);
 	world->subscribe<ChoiceItem_Event>(this);
 	world->subscribe<Refresh_Scene>(this);
+	world->subscribe<ChoiceEquip_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -458,15 +459,98 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	{
 		world->reset();
 		Entity* ent = world->create();
-		
-		D2D1_RECT_F imageRect, screenRect;
-		imageRect = { 0, 0, 1920, 1152 };
-		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 
-		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		D2D1_RECT_F imageRect, sRect;
+		int selected[2] = { 0, 0 };
+
+		ent = world->create();
+		ent->assign<TextUI_Component>(NEEDLE_FONT, L"EQUIPMENT",
+			FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+
+		{ // 플레이어를 그린다
+
+			ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+				m_pObjectManager,
+				-12.f, -8.0f, 20.0f,
+				0.f, 145.f, 0.f,
+				6.0f, 6.0f, 6.0f,
+				SOLDIER);
+
+			ent->get<player_Component>()->id = 1;
+
+			auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin(); 
+			for (int i = 0; i < 3; ++i) {
+				if (i == equipments[0]) {
+					weapon[i]->draw = true;
+				}
+				else weapon[i]->draw = false;
+			}
+			
+
+			CCamera* temp = new CThirdPersonCamera(NULL);
+			temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
+
+			ComponentHandle<Camera_Component> camera = ent->assign<Camera_Component>(temp);
+
+			world->emit<SetCamera_Event>({ ent->get<Camera_Component>().get().m_pCamera });
+
+		}
+
+		wstring imagefiles[10] = {
+				L"image/M4.png",
+				L"image/Saiga12.png",
+				L"image/M24.png",
+				L"image/LightArmor.png",
+				L"image/HeavyArmor.png",
+				L"image/Grenade.png",
+				L"image/Flashbang.png",
+				L"image/Bandage.png",
+				L"image/FirstAidKit.png",
+				L"image/Flashbang.png"
+		};
+
+		{// 무기 및 방어구 선택창
+
+			imageRect = { 0, 0, 500, 300 };
+			sRect = { FRAME_BUFFER_WIDTH * 12 / 20, FRAME_BUFFER_HEIGHT / 8 ,FRAME_BUFFER_WIDTH * 16 / 20, FRAME_BUFFER_HEIGHT * 5 / 16 };
+
+
+			ent = world->create();
+			ent->assign<ImageUI_Component>(imagefiles[equipments[0]].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+
+			// 버튼 종류 BuyBtn 말고 EquipLeft/EquipRight 추가할것
+			ent = world->create();
+			sRect = { FRAME_BUFFER_WIDTH * 21 / 40, FRAME_BUFFER_HEIGHT * 2 / 16 ,FRAME_BUFFER_WIDTH * 23 / 40, FRAME_BUFFER_HEIGHT * 5 / 16 };
+			ent->assign<Button_Component>(EquipLeftBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 0);
+
+			ent = world->create();
+			sRect = { FRAME_BUFFER_WIDTH * 33 / 40, FRAME_BUFFER_HEIGHT * 2 / 16 ,FRAME_BUFFER_WIDTH * 35 / 40, FRAME_BUFFER_HEIGHT * 5 / 16 };
+			ent->assign<Button_Component>(EquipRightBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 0);
+
+
+			sRect = { FRAME_BUFFER_WIDTH * 12 / 20, FRAME_BUFFER_HEIGHT * 3 / 8 ,FRAME_BUFFER_WIDTH * 16 / 20, FRAME_BUFFER_HEIGHT * 9 / 16 };
+			ent = world->create();
+			ent->assign<ImageUI_Component>(imagefiles[equipments[1]].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			ent = world->create();
+			sRect = { FRAME_BUFFER_WIDTH * 21 / 40, FRAME_BUFFER_HEIGHT * 3 / 8 ,FRAME_BUFFER_WIDTH * 23 / 40, FRAME_BUFFER_HEIGHT * 9 / 16 };
+			ent->assign<Button_Component>(EquipLeftBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 1);
+
+			ent = world->create();
+			sRect = { FRAME_BUFFER_WIDTH * 33 / 40, FRAME_BUFFER_HEIGHT * 3 / 8 ,FRAME_BUFFER_WIDTH * 35 / 40, FRAME_BUFFER_HEIGHT * 9 / 16 };
+			ent->assign<Button_Component>(EquipRightBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, 1);
+
+		}
 
 	}
+	break;
 	break;
 
 
@@ -639,6 +723,34 @@ void Scene_Sysytem::receive(World* world, const Refresh_Scene& event)
 {
 	if(m_State == event.State)
 		world->emit<ChangeScene_Event>({ m_State });
+}
+
+void Scene_Sysytem::receive(World* world, const ChoiceEquip_Event& event)
+{
+	switch (event.btnType)
+	{
+	case EquipLeftBtn:
+		equipments[event.equipType]--;
+		break;
+	case EquipRightBtn:
+		equipments[event.equipType]++;
+
+	case EquipUpBtn:
+		break;
+	case EquipDownBtn:
+		break;
+
+	default:
+		break;
+	}
+
+	if (equipments[0] < 0) equipments[0] = 2;
+	equipments[0] = equipments[0] % 3;
+
+	if (equipments[1] < 3) equipments[1] = 4;
+	if (equipments[1] > 4) equipments[1] = 3;
+	
+	world->emit<ChangeScene_Event>({ EQUIPMENT });
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
