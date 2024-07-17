@@ -42,6 +42,8 @@ struct player_Component {
 	FLOAT hp = 100;
 	FLOAT max_hp = 100;
 
+	FLOAT stamina = 100;
+
 	FLOAT ammo = 30;
 
 	BOOL aim_mode = false;

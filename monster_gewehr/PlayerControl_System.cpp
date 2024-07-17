@@ -192,22 +192,24 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 구르기 키는 space바로 했음
-			if ((pKeysBuffer[VK_SPACE] & 0xF0) && roll_timer == 0 && !player->reload) {
+			if ((pKeysBuffer[VK_SPACE] & 0xF0) && roll_timer == 0 && !player->reload && player->stamina >= 25) {
 				xmf3Shift_roll = XMFLOAT3(0, 0, 0);
 				roll_timer = 0.2f;
 				roll_on = 1;
 			}
 			// 달리기 키는 shift
-			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on) {
+			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on && player->stamina > 0) {
 				//cout << "쉬프트 눌림" << endl;
 				run_on = true;
 				speed *= 1.5;
+				player->stamina -= 0.1;
 			}
 
 			if (pKeysBuffer[0x57] & 0xF0) {
 				xmf3Shift = Vector3::Add(xmf3Shift, controller_vector->m_xmf3Look, speed);
 				if (roll_on == 1) { // 구르기 키를 처음 눌렀으면 어디로 굴러야 하는지 방향을 정해줌
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, speed * 3);
+					player->stamina -= 25;
 					roll_on = 2; // 그리고 다른 키가 구르기 방향을 망치지 않도록 하기 위해 2로 바꿔줌
 				}
 				if (!player->reload)
@@ -294,6 +296,10 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				}
 			}
 
+			if (!run_on && !roll_on && player->stamina <= 100) {
+				player->stamina += 0.1;				
+			}
+			cout << player->stamina << endl;
 #ifdef DEMO_VER
 			if (pKeysBuffer[VK_F1] & 0xF0) {
 				world->emit<Demo_Event>({ CS_DEMO_MONSTER_SETPOS });
@@ -306,7 +312,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 #endif
 			
-			velocity->m_velocity = Vector3::Add(velocity->m_velocity, XMFLOAT3(0, -65.4f* deltaTime, 0));
+			//velocity->m_velocity = Vector3::Add(velocity->m_velocity, XMFLOAT3(0, -65.4f* deltaTime, 0));
 		}
 
 	}

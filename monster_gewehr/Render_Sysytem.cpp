@@ -663,8 +663,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			}
 
 			{
-				wstring text = std::wstring("SP 100", "SP 100" + strlen("SP 100"));
-
+				wstring text = std::wstring("SP ", "SP " + strlen("SP "));
+				text += std::to_wstring((int)player->stamina);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 				textRect = D2D1::RectF(100, 40, 170, 80);
 				m_d2dDeviceContext->DrawTextW(
@@ -678,7 +678,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-				textRect = D2D1::RectF(170, 45, 370, 60);
+				textRect = D2D1::RectF(170, 45, (int)player->stamina * 2 + 170, 60);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::YellowGreen));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
