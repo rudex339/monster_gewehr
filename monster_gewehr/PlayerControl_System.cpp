@@ -299,7 +299,6 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if (!run_on && !roll_on && player->stamina <= 100) {
 				player->stamina += 0.1;				
 			}
-			cout << player->stamina << endl;
 #ifdef DEMO_VER
 			if (pKeysBuffer[VK_F1] & 0xF0) {
 				world->emit<Demo_Event>({ CS_DEMO_MONSTER_SETPOS });

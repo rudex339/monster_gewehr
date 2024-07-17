@@ -18,14 +18,16 @@ enum {
 
 enum {
 	ExitBtn = -1,
-	GameStartBtn,
+	RoomBtn,
 	ShopBtn,
 	EquipBtn,
 	MakeRoomBtn,
-	RoomBtn,
+	SelectRoomBtn,
 	JoinRoomBtn,
 	ItemBtn,
 	BuyBtn,
+	GameReadyBtn,
+	GameStartBtn
 };
 
 enum Items {
@@ -53,6 +55,7 @@ struct ChoiceRoom_Event {
 struct EnterRoom_Event {
 	UINT State;
 	int room_num = 0;
+	BOOL is_host;
 };
 
 struct LoginCheck_Event {

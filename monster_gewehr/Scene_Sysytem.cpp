@@ -74,8 +74,8 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 			break;
 		case INROOM:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				world->emit< ChangeScene_Event>({ GAME });
-				world->emit<Game_Start>({});
+				//world->emit< ChangeScene_Event>({ GAME });
+				//world->emit<Game_Start>({});
 			}
 			else if (pKeysBuffer[VK_BACK] & 0xF0) {
 				world->emit<Quit_Room>({});
@@ -166,7 +166,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		imageRect = { 0, 0, 340, 70 };
 
 		ent = world->create();
-		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(RoomBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		
 
@@ -590,6 +590,32 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 		(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 		(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
+	D2D1_RECT_F imageRect;
+	imageRect = { 0, 0, 340, 70 };
+
+	D2D1_RECT_F sRect;
+
+	float width = FRAME_BUFFER_WIDTH / 10;
+	float height = FRAME_BUFFER_HEIGHT / 10;
+	float offset = FRAME_BUFFER_HEIGHT / 45;
+
+	sRect.left = FRAME_BUFFER_WIDTH / 2 - width;
+	sRect.right = FRAME_BUFFER_WIDTH / 2 + width;
+	sRect.top = FRAME_BUFFER_HEIGHT / 2;
+	sRect.bottom = sRect.top + height;
+
+	if (event.is_host) {
+		ent = world->create();
+		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", NEEDLE_FONT, L"GameStart", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+	}
+	else {
+		ent = world->create();
+		ent->assign<Button_Component>(GameReadyBtn, L"image/null.png", NEEDLE_FONT, L"Ready", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+	}
+	
+
 }
 
 void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
@@ -722,7 +748,7 @@ void Scene_Sysytem::AddRoom(int room_num)
 		FRAME_BUFFER_HEIGHT / 8 + (float)(num+1)*FRAME_BUFFER_HEIGHT / 7 + 10.0f };
 	imageRect = { 0, 0, 1000, 563 };
 
-	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+	Rooms.push_back(Button_Component(SelectRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
 }
 

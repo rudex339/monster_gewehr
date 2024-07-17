@@ -110,6 +110,7 @@ void Player::PlayerInit()
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 
 	m_is_host = false;
+	m_is_ready = false;
 }
 
 void Player::SetByWeapon(char weapon)

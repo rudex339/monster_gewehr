@@ -572,7 +572,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case ExitBtn:
 					exit(0);
 					break;
-				case GameStartBtn:
+				case RoomBtn:
 					world->emit< ChangeScene_Event>({ ROOMS });
 					break;
 				case ShopBtn:
@@ -584,14 +584,14 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case MakeRoomBtn:
 					world->emit<Create_Room>({});
 					break;
-				case RoomBtn:
+				case SelectRoomBtn:
 					m_scene->InitRoomPlayers();
 					select_room_num = button->m_room_num;
 					world->emit<Select_Room>({ (SHORT)select_room_num });
 					world->emit<ChoiceRoom_Event>({ button->m_room_num });
 					break;
 				case JoinRoomBtn:
-					world->emit<EnterRoom_Event>({ INROOM, select_room_num });
+					world->emit<EnterRoom_Event>({ INROOM, select_room_num, false });
 					world->emit<Join_Room>({ (SHORT)select_room_num });
 					break;
 				case ItemBtn:
@@ -599,6 +599,16 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case BuyBtn:
 					cout << "구메/강화" << endl;
+					break;
+				case GameReadyBtn:
+					world->emit<Ready_Room>({});
+					cout << "레디" << endl;
+
+					break;
+				case GameStartBtn:
+					//world->emit< ChangeScene_Event>({ GAME });
+					world->emit<Game_Start>({});
+					cout << "시작" << endl;
 					break;
 				default:
 					cout << "디폴트" << endl;

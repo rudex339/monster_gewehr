@@ -223,7 +223,8 @@ void BossThread()
 						players[ply_id].PlayerInit();
 					}
 					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
-					gamerooms[i].SetCreateRoom();
+					gamerooms[i].InitGameRoom();
+					SendDeleteRoom(i);
 				}
 
 			}
@@ -282,7 +283,7 @@ void ProcessPacket(int id, char* p)
 	}
 	case CS_PACKET_START_GAME: {
 		// 지금은 클라한테 위치정보를 받지만 방이 생성되면 안받게 할거임
-		CS_START_GAME_PACKET* packet = reinterpret_cast<CS_START_GAME_PACKET*>(p);
+		/*CS_START_GAME_PACKET* packet = reinterpret_cast<CS_START_GAME_PACKET*>(p);
 		players[id].SetPostion(packet->pos);
 		players[id].SetVelocity(packet->vel);
 		players[id].SetYaw(packet->yaw);
@@ -293,6 +294,18 @@ void ProcessPacket(int id, char* p)
 
 		}
 
+		SendStartGame(id);*/
+
+		for (int ply_id : gamerooms[players[id].GetRoomID()].GetPlyId()) {
+			if (ply_id == -1) continue;
+			if (ply_id == id) continue;
+			if (!players[ply_id].GetReady()) return;
+		}
+		SHORT room_id = players[id].GetRoomID();
+		if (gamerooms[room_id].SetStartGame()) {
+			build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
+
+		}
 		SendStartGame(id);
 		break;
 	}
@@ -375,7 +388,7 @@ void ProcessPacket(int id, char* p)
 		if (gamerooms[players[id].GetRoomID()].GetPlyId()[0] == id) {
 			players[id].SetHost(false);
 			// 여기에 이 방이 폭파되었다는 메세지 알리는거 넣으면 됨
-			SendDeleteRoom(id, players[id].GetRoomID());
+			SendDeleteRoom(players[id].GetRoomID());
 			SendBreakRoom(id);			
 			players[id].SetRoomID(-1);
 			players[id].SetReady(false);
@@ -395,7 +408,7 @@ void ProcessPacket(int id, char* p)
 		else {
 			players[id].SetReady(true);
 		}
-		SC_READY_ROOM_PACKET packet;
+		/*SC_READY_ROOM_PACKET packet;
 		packet.size = sizeof(SC_READY_ROOM_PACKET);
 		packet.type = SC_PACKET_READY_ROOM;
 		packet.ready = players[id].GetReady();
@@ -404,7 +417,7 @@ void ProcessPacket(int id, char* p)
 			if (ply_id == -1) continue;
 			if (ply_id == id) continue;
 			players[ply_id].DoSend(&packet, packet.size);
-		}
+		}*/
 		break;
 	case CS_DEMO_MONSTER_SETPOS: {
 		int room_id = players[id].GetRoomID();
@@ -459,96 +472,105 @@ void SendLoginFail(int id)
 	players[id].SetState(S_STATE::LOG_OUT);
 }
 
-void SendStartGame(int id)
-{
-	int retval;
-	int room_id = players[id].GetRoomID();
-
-	// 내 정보를 인게임 상태인 상대에게 보냄
-	SC_ADD_PLAYER_PACKET sub_packet;
-	sub_packet.size = sizeof(sub_packet);
-	sub_packet.type = SC_PACKET_ADD_PLAYER;
-	strcpy(sub_packet.name, players[id].GetName().c_str());
-	sub_packet.player_data = players[id].GetPlayerData();
-	sub_packet.weapon = players[id].GetWeapon();
-
-	for (int ply_id : gamerooms[room_id].GetPlyId()) {
-		if (ply_id < 0) continue;
-		if (ply_id == id) continue;
-		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-		retval = players[ply_id].DoSend(&sub_packet, sub_packet.size);
-		if (retval == SOCKET_ERROR) {
-			players[ply_id].SetState(S_STATE::LOG_OUT);
-		}
-	}
-
-	// 상대의 정보를 인게임 상태가 될려는 나한테 보냄
-	for (int ply_id : gamerooms[room_id].GetPlyId()) {
-		if (ply_id < 0) continue;
-		if (ply_id == id) continue;
-		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-		SC_ADD_PLAYER_PACKET sub_packet2;
-		sub_packet2.size = sizeof(sub_packet2);
-		sub_packet2.type = SC_PACKET_ADD_PLAYER;
-		strcpy(sub_packet2.name, players[ply_id].GetName().c_str());
-		sub_packet2.player_data = players[ply_id].GetPlayerData();
-		sub_packet2.weapon = players[ply_id].GetWeapon();
-
-		retval = players[id].DoSend(&sub_packet2, sub_packet2.size);
-		if (retval == SOCKET_ERROR) {
-			players[ply_id].SetState(S_STATE::LOG_OUT);
-		}
-	}
-
-	// 몬스터의 정보도 나한테 보냄
-	SC_ADD_MONSTER_PACKET sub_packet3;
-	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
-	sub_packet3.type = SC_PACKET_ADD_MONSTER;
-	sub_packet3.monster = souleaters[room_id].GetData();
-
-	players[id].DoSend(&sub_packet3, sub_packet3.size);
-
-	players[id].SetState(S_STATE::IN_GAME);
-}
-
-//void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 사람들한테도 모두 게임이 시작이 되었다는 신호가 먼저 가야함
+//void SendStartGame(int id)
 //{
 //	int retval;
+//	int room_id = players[id].GetRoomID();
 //
-//	int gameroom_id = players[id].GetRoomID();
-//	auto plys_id = gamerooms[gameroom_id].GetPlyId();
+//	// 내 정보를 인게임 상태인 상대에게 보냄
+//	SC_ADD_PLAYER_PACKET sub_packet;
+//	sub_packet.size = sizeof(sub_packet);
+//	sub_packet.type = SC_PACKET_ADD_PLAYER;
+//	strcpy(sub_packet.name, players[id].GetName().c_str());
+//	sub_packet.player_data = players[id].GetPlayerData();
+//	sub_packet.weapon = players[id].GetWeapon();
 //
-//	SC_GAME_START_PACKET start_p;
-//	start_p.size = sizeof(start_p);
-//	start_p.type = SC_PACKET_GAME_START;
-//
-//	// 방이 다 만들어지면 지금은 클라에서 위치를 받아서 이를 다른 플레이어들에게 넘겨줬으나
-//	// 이것은 서버에서 플레이어 첫 위치를 설정해서 내 자신에게도 첫 시작지점이 어디인지 보내줄 것임
-//	// 이거 구현 다하면 주석은 지우거나 다 구현했다는 식으로 다시 메모할것
-//	// 패킷 소통을 줄이기 위해 방장소켓을 관리하는 쓰레드에서 다른 클라이언트의 위치정보등을 리셋하고 보내는것을 다 전담할거임
-//	for (int send_id : plys_id) {
-//		if (send_id == -1) continue;
-//		players[send_id].PlayerInit();
-//
-//		SC_ADD_PLAYER_PACKET add_p;
-//		add_p.size = sizeof(add_p);
-//		add_p.type = SC_PACKET_ADD_PLAYER;
-//		strcpy(add_p.name, players[send_id].GetName().c_str());
-//		add_p.player_data = players[send_id].GetPlayerData();
-//		add_p.weapon = players[send_id].GetWeapon();
-//		for (int recv_id : plys_id) {
-//			retval = players[recv_id].DoSend(&add_p, add_p.size);
-//
+//	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+//		if (ply_id < 0) continue;
+//		if (ply_id == id) continue;
+//		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//		retval = players[ply_id].DoSend(&sub_packet, sub_packet.size);
+//		if (retval == SOCKET_ERROR) {
+//			players[ply_id].SetState(S_STATE::LOG_OUT);
 //		}
-//		SC_ADD_MONSTER_PACKET monster_p;
-//		monster_p.size = sizeof(SC_ADD_MONSTER_PACKET);
-//		monster_p.type = SC_PACKET_ADD_MONSTER;
-//		monster_p.monster = souleaters[gameroom_id].GetData();
-//
-//		players[send_id].DoSend(&monster_p, monster_p.size);
-//
 //	}
+//
+//	// 상대의 정보를 인게임 상태가 될려는 나한테 보냄
+//	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+//		if (ply_id < 0) continue;
+//		if (ply_id == id) continue;
+//		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//		SC_ADD_PLAYER_PACKET sub_packet2;
+//		sub_packet2.size = sizeof(sub_packet2);
+//		sub_packet2.type = SC_PACKET_ADD_PLAYER;
+//		strcpy(sub_packet2.name, players[ply_id].GetName().c_str());
+//		sub_packet2.player_data = players[ply_id].GetPlayerData();
+//		sub_packet2.weapon = players[ply_id].GetWeapon();
+//
+//		retval = players[id].DoSend(&sub_packet2, sub_packet2.size);
+//		if (retval == SOCKET_ERROR) {
+//			players[ply_id].SetState(S_STATE::LOG_OUT);
+//		}
+//	}
+//
+//	// 몬스터의 정보도 나한테 보냄
+//	SC_ADD_MONSTER_PACKET sub_packet3;
+//	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
+//	sub_packet3.type = SC_PACKET_ADD_MONSTER;
+//	sub_packet3.monster = souleaters[room_id].GetData();
+//
+//	players[id].DoSend(&sub_packet3, sub_packet3.size);
+//
+//	players[id].SetState(S_STATE::IN_GAME);
 //}
+
+void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 사람들한테도 모두 게임이 시작이 되었다는 신호가 먼저 가야함
+{
+	int retval;
+
+	int gameroom_id = players[id].GetRoomID();
+	auto plys_id = gamerooms[gameroom_id].GetPlyId();
+
+	SC_GAME_START_PACKET start_p;
+	start_p.size = sizeof(start_p);
+	start_p.type = SC_PACKET_GAME_START;
+	for (int ply_id : plys_id) {
+		if (ply_id == -1) continue;
+		retval = players[ply_id].DoSend(&start_p, start_p.size);
+	}
+
+	// 방이 다 만들어지면 지금은 클라에서 위치를 받아서 이를 다른 플레이어들에게 넘겨줬으나
+	// 이것은 서버에서 플레이어 첫 위치를 설정해서 내 자신에게도 첫 시작지점이 어디인지 보내줄 것임
+	// 이거 구현 다하면 주석은 지우거나 다 구현했다는 식으로 다시 메모할것
+	// 패킷 소통을 줄이기 위해 방장소켓을 관리하는 쓰레드에서 다른 클라이언트의 위치정보등을 리셋하고 보내는것을 다 전담할거임
+	for (int send_id : plys_id) {
+		if (send_id == -1) continue;
+		players[send_id].PlayerInit();
+
+		SC_ADD_PLAYER_PACKET add_p;
+		add_p.size = sizeof(add_p);
+		add_p.type = SC_PACKET_ADD_PLAYER;
+		strcpy(add_p.name, players[send_id].GetName().c_str());
+		add_p.player_data = players[send_id].GetPlayerData();
+		add_p.weapon = players[send_id].GetWeapon();
+		for (int recv_id : plys_id) {
+			if (recv_id == -1) continue;
+			if (recv_id == send_id) continue;
+			retval = players[recv_id].DoSend(&add_p, add_p.size);
+
+		}
+		SC_ADD_MONSTER_PACKET monster_p;
+		monster_p.size = sizeof(SC_ADD_MONSTER_PACKET);
+		monster_p.type = SC_PACKET_ADD_MONSTER;
+		monster_p.monster = souleaters[gameroom_id].GetData();
+
+		players[send_id].DoSend(&monster_p, monster_p.size);
+
+		players[send_id].SetState(S_STATE::IN_GAME);
+	}
+
+	
+}
 
 void SendPlayerMove(int id)
 {
@@ -744,7 +766,7 @@ void SendBreakRoom(int id)
 	gamerooms[room_num].InitGameRoom();
 }
 
-void SendDeleteRoom(int id, short room_num)
+void SendDeleteRoom(short room_num)
 {
 	int retval;
 
