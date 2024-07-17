@@ -4,6 +4,7 @@
 #include "Object_Entity.h"
 #include "ObjectManager.h"
 #include "Sever_Sysyem.h"
+#include "Collision_Sysytem.h"
 #include "PlayerControl_System.h"
 #include "Render_Sysytem.h"
 
@@ -40,6 +41,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<ChoiceItem_Event>(this);
 	world->subscribe<Refresh_Scene>(this);
 	world->subscribe<ChoiceEquip_Event>(this);
+	world->subscribe<CreateObject_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -75,8 +77,8 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 			break;
 		case INROOM:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				world->emit< ChangeScene_Event>({ GAME });
-				world->emit<Game_Start>({});
+				//world->emit< ChangeScene_Event>({ GAME });
+				//world->emit<Game_Start>({});
 			}
 			else if (pKeysBuffer[VK_BACK] & 0xF0) {
 				world->emit<Quit_Room>({});
@@ -167,7 +169,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		imageRect = { 0, 0, 340, 70 };
 
 		ent = world->create();
-		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(RoomBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		
 
@@ -581,8 +583,6 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	}
 	break;
 
-
-
 	case GAME:
 	{
 		world->reset();
@@ -595,7 +595,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			SOLDIER);
 		auto box = m_pPawn->assign<BoundingBox_Component>(2.f, 6.f, 2.f);
 		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
-
+		world->emit<AddObjectlayer_Event>({"Player",m_pPawn});
 
 		cout << m_pPawn->get<player_Component>()->id << endl;
 		Entity* ent = world->create();
@@ -611,6 +611,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			MONSTER);
 		auto monster_id = ent->get<player_Component>();
 		ent->assign<BoundingBox_Component>(30.f, 30.f, 30.f);
+		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+		world->emit<AddObjectlayer_Event>({ "Monster",ent });
 
 		monster_id->id = -2;
 
@@ -670,7 +672,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		camera->m_pCamera->SetPosition(XMFLOAT3(310.0f,
 			m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f) , 600.0f - 30.f));
 
-		world->emit<GetPlayerPtr_Event>({ m_pPawn });
+		world->emit<GetPlayerPtr_Event>({ m_pPawn, true });
 
 	}
 		break;
@@ -702,6 +704,32 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 		(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
 		(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
+	D2D1_RECT_F imageRect;
+	imageRect = { 0, 0, 340, 70 };
+
+	D2D1_RECT_F sRect;
+
+	float width = FRAME_BUFFER_WIDTH / 10;
+	float height = FRAME_BUFFER_HEIGHT / 10;
+	float offset = FRAME_BUFFER_HEIGHT / 45;
+
+	sRect.left = FRAME_BUFFER_WIDTH / 2 - width;
+	sRect.right = FRAME_BUFFER_WIDTH / 2 + width;
+	sRect.top = FRAME_BUFFER_HEIGHT / 2;
+	sRect.bottom = sRect.top + height;
+
+	if (event.is_host) {
+		ent = world->create();
+		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", NEEDLE_FONT, L"GameStart", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+	}
+	else {
+		ent = world->create();
+		ent->assign<Button_Component>(GameReadyBtn, L"image/null.png", NEEDLE_FONT, L"Ready", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+	}
+	
+
 }
 
 void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
@@ -719,6 +747,46 @@ void Scene_Sysytem::receive(World* world, const ChoiceItem_Event& event)
 {
 	m_item_num = event.item_num;
 	world->emit<ChangeScene_Event>({ SHOP });
+}
+
+void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
+{
+	switch (event.object) {
+	case GRANADE:
+	case FLASHBANG:
+		Entity* ent = world->create();
+		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
+		ent->assign<Rotation_Component>(event.Rotate.x, 90.f, event.Rotate.z);
+		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
+		ComponentHandle<Velocity_Component> vel = ent->assign<Velocity_Component>();
+		DirectX::XMVECTOR rotationVec = DirectX::XMLoadFloat3(&event.Rotate);
+
+		// Convert rotation (in degrees) to radians
+		DirectX::XMVECTOR rotationRad = DirectX::XMVectorScale(rotationVec, DirectX::XM_PI / 180.0f);
+
+		// Calculate the forward direction based on rotation
+		DirectX::XMVECTOR forward = DirectX::XMVectorSet(0.f, 0.f, 1.f, 0.f); // Assuming forward is along the z-axis
+		DirectX::XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(
+			XMConvertToRadians(event.Rotate.x - 20.f),
+			XMConvertToRadians(event.Rotate.y),
+			XMConvertToRadians(event.Rotate.z));
+
+		DirectX::XMVECTOR direction = DirectX::XMVector3TransformNormal(forward, rotationMatrix);
+
+		// Scale the direction by speed
+		DirectX::XMVECTOR velocity = DirectX::XMVectorScale(direction, 30.f);
+		DirectX::XMStoreFloat3(&vel->m_velocity, velocity);
+		string pstrGameObjectName = "BP_building60_SM_wall2_StaticMeshComponent0";
+		ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName),
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
+		ComponentHandle<BoundingBox_Component> box = ent->assign<BoundingBox_Component>(
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
+		ent->assign<Grande_Component>(event.object,20.f,100.f)->coolTime=100.f;
+
+		world->emit<AddObjectlayer_Event>({ "Granade", ent });
+		break;
+	}
 }
 
 void Scene_Sysytem::receive(World* world, const Refresh_Scene& event)
@@ -849,6 +917,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 				// BoundingOrientedBox 변환
 				box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
+				world->emit<AddObjectlayer_Event>({ "Object",ent });
 
 				box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 			}
@@ -873,7 +942,7 @@ void Scene_Sysytem::AddRoom(int room_num)
 		FRAME_BUFFER_HEIGHT / 8 + (float)(num+1)*FRAME_BUFFER_HEIGHT / 7 + 10.0f };
 	imageRect = { 0, 0, 1000, 563 };
 
-	Rooms.push_back(Button_Component(RoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+	Rooms.push_back(Button_Component(SelectRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
 }
 

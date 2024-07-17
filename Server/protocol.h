@@ -98,9 +98,9 @@ struct CS_START_GAME_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 vel;
-	FLOAT yaw;
+	//DirectX::XMFLOAT3 pos;
+	//DirectX::XMFLOAT3 vel;
+	//FLOAT yaw;
 };
 
 struct CS_PLAYER_MOVE_PACKET

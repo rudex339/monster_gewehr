@@ -18,14 +18,16 @@ enum {
 
 enum {
 	ExitBtn = -1,
-	GameStartBtn,
+	RoomBtn,
 	ShopBtn,
 	EquipBtn,
 	MakeRoomBtn,
-	RoomBtn,
+	SelectRoomBtn,
 	JoinRoomBtn,
 	ItemBtn,
 	BuyBtn,
+	GameReadyBtn,
+	GameStartBtn,
 	EquipLeftBtn,
 	EquipRightBtn,
 	EquipUpBtn,
@@ -57,6 +59,7 @@ struct ChoiceRoom_Event {
 struct EnterRoom_Event {
 	UINT State;
 	int room_num = 0;
+	BOOL is_host;
 };
 
 struct LoginCheck_Event {
@@ -73,6 +76,11 @@ struct ChoiceItem_Event {
 	int item_num = -1;
 };
 
+struct CreateObject_Event {
+	int object = 0;
+
+	XMFLOAT3 Position, Rotate, direct;
+};
 struct Refresh_Scene {
 	UINT State;
 };
@@ -89,6 +97,7 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<EnterRoom_Event>,
 	public EventSubscriber<LoginCheck_Event>,
 	public EventSubscriber<ChoiceRoom_Event>,
+	public EventSubscriber<CreateObject_Event>,
 	public EventSubscriber<ChoiceItem_Event>,
 	public EventSubscriber<Refresh_Scene>,
 	public EventSubscriber<ChoiceEquip_Event>
@@ -155,6 +164,8 @@ public:
 	virtual void receive(class World* world, const Refresh_Scene& event);
 	virtual void receive(class World* world, const ChoiceEquip_Event& event);
 
+	virtual void receive(class World* world, const CreateObject_Event& event);
+	
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수

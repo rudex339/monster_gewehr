@@ -16,6 +16,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Join_Room>(this);	
 	world->subscribe<Quit_Room>(this);
 	world->subscribe<Select_Room>(this);
+	world->subscribe<Ready_Room>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -107,35 +108,45 @@ void Sever_System::receive(World* world, const Login_Event& event)
 
 void Sever_System::receive(World* world, const Game_Start& event)
 {
+	CS_START_GAME_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_START_GAME;
 
-	world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
-		[&](Entity* ent,
-			ComponentHandle<player_Component> Player,
-			ComponentHandle<Position_Component> Position,
-			ComponentHandle< Velocity_Component> Velocity,
-			ComponentHandle<Rotation_Component> Rotation) ->
-		void {
-			if (ent->has<Camera_Component>()) {
-				Player->id = m_id;
-
-				CS_START_GAME_PACKET p;
-				p.size = sizeof(p);
-				p.type = CS_PACKET_START_GAME;
-				p.pos = Position->Position;
-				p.vel = Velocity->m_velocity;
-				p.yaw = Rotation->mfYaw;
-
-				send(g_socket, (char*)&p, p.size, 0);
-			}
-
-		});
+	send(g_socket, (char*)&p, p.size, 0);
 }
+
+// 원본
+//void Sever_System::receive(World* world, const Game_Start& event)
+//{
+//
+//	world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
+//		[&](Entity* ent,
+//			ComponentHandle<player_Component> Player,
+//			ComponentHandle<Position_Component> Position,
+//			ComponentHandle< Velocity_Component> Velocity,
+//			ComponentHandle<Rotation_Component> Rotation) ->
+//		void {
+//			if (ent->has<Camera_Component>()) {
+//				Player->id = m_id;
+//
+//				CS_START_GAME_PACKET p;
+//				p.size = sizeof(p);
+//				p.type = CS_PACKET_START_GAME;
+//				p.pos = Position->Position;
+//				p.vel = Velocity->m_velocity;
+//				p.yaw = Rotation->mfYaw;
+//
+//				send(g_socket, (char*)&p, p.size, 0);
+//			}
+//
+//		});
+//}
 
 void Sever_System::receive(class World* world, const Create_Room& event)
 {
 	CS_CREATE_ROOM_PACKET p;
 	p.size = sizeof(p);
-	p.type = CS_PACKET_CREATE_ROOM;
+	p.type = CS_PACKET_CREATE_ROOM;	
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
@@ -166,6 +177,24 @@ void Sever_System::receive(class World* world, const Select_Room& event)
 	p.size = sizeof(p);
 	p.type = CS_PACKET_SELECT_ROOM;
 	p.room_num = event.room_num;
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(World* world, const Ready_Room& event)
+{
+	static bool ready = false;
+	ready = !ready;
+	if (ready) {
+		cout << "레디함" << endl;
+	} 
+	else {
+		cout << "레디안함" << endl;
+	}
+	CS_READY_ROOM_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_READY_ROOM;
+	
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
@@ -209,9 +238,24 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 {
 	switch (packet[1])
 	{
+	case SC_PACKET_GAME_START: {
+		world->emit< ChangeScene_Event>({ GAME });
+		world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
+				ComponentHandle< Velocity_Component> Velocity,
+				ComponentHandle<Rotation_Component> Rotation) ->
+			void {
+				if (ent->has<Camera_Component>()) {
+					Player->id = m_id;
+				}
+			});
+		break;
+	}
 	case SC_PACKET_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* pk = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet);
-
+		cout << "add id : " << (int)pk->player_data.id << endl;
 		world->each<player_Component, Position_Component, Rotation_Component>(
 			[&](Entity* ent,
 				ComponentHandle<player_Component> Player,
@@ -376,7 +420,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		cout << pk->room_num << endl;
 		m_scene->AddRoom(pk->room_num);
 		//world->emit< ChangeScene_Event>({ ROOMS });
-		world->emit<EnterRoom_Event>({ INROOM, pk->room_num });
+		world->emit<EnterRoom_Event>({ INROOM, pk->room_num, true });
 		break;
 	}
 	case SC_PACKET_ADD_ROOM: {

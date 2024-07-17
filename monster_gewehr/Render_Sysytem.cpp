@@ -30,7 +30,7 @@ bool is_camera_far(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 	float distance;
 	DirectX::XMStoreFloat(&distance, DirectX::XMVector3Length(DirectX::XMVectorSubtract(object_pos, camera_pos)));
 
-	if (distance > 700.0f) {
+	if (distance > 500.0f) {
 		return true;
 	}
 
@@ -309,20 +309,22 @@ void Render_System::tick(World* world, float deltaTime)
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
 					Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
 				}
-				else if (ent->has<AnimationController_Component>() &&
-					ent->has<Rotation_Component>() &&
+				else if (ent->has<Rotation_Component>() &&
 					ent->has<Scale_Component>()) {
 					if (ent->has<player_Component>()) {
 						ComponentHandle<player_Component> data = ent->get<player_Component>();
 						if (data->id == -1)
 							return;
 					}
-					ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
+					
+					
 					ComponentHandle<Rotation_Component> rotation = ent->get<Rotation_Component>();
 					ComponentHandle<Scale_Component> Scale = ent->get<Scale_Component>();
-
-					AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel->m_pModelRootObject);
-					Model->m_MeshModel->m_pModelRootObject->Animate(deltaTime);
+					if (ent->has<AnimationController_Component>()) {
+						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
+						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel->m_pModelRootObject);
+						Model->m_MeshModel->m_pModelRootObject->Animate(deltaTime);
+					}
 
 					XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
 					xmf4x4World = Matrix4x4::Multiply(XMMatrixScaling(Scale->mx,
@@ -343,6 +345,10 @@ void Render_System::tick(World* world, float deltaTime)
 
 							box->m_bounding_box.Center = pos->Position;
 							box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2 + 5.f;
+							/*box->m_bounding_box.Orientation.x = rotation->mfPitch;
+							box->m_bounding_box.Orientation.y = rotation->mfYaw;
+							box->m_bounding_box.Orientation.z = rotation->mfRoll;*/
+
 
 							//m_pBox->UpdateTransform(&Matrix4x4::Identity());
 							if (box->m_pMesh) {
@@ -359,7 +365,11 @@ void Render_System::tick(World* world, float deltaTime)
 
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
 
-					AnimationController->m_AnimationController->UpdateShaderVariables();
+					if (ent->has<AnimationController_Component>()) {
+						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
+						AnimationController->m_AnimationController->UpdateShaderVariables();
+					}
+					
 					if(Model->draw)
 						Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
 
@@ -385,12 +395,14 @@ void Render_System::tick(World* world, float deltaTime)
 						//test
 						if (m_pBox) {
 							if (ent->has<BoundingBox_Component>()) {
-								ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
-								//box->m_bounding_box.Center = pos->Position;
-								//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
 								
-								m_pBox->m_pMesh = box->m_pMesh;
-								m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+									ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
+									//box->m_bounding_box.Center = pos->Position;
+									//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
+									if (box->m_pMesh) {
+									m_pBox->m_pMesh = box->m_pMesh;
+									m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+								}
 							}
 						}
 					}
@@ -572,7 +584,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case ExitBtn:
 					exit(0);
 					break;
-				case GameStartBtn:
+				case RoomBtn:
 					world->emit< ChangeScene_Event>({ ROOMS });
 					break;
 				case ShopBtn:
@@ -584,14 +596,14 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case MakeRoomBtn:
 					world->emit<Create_Room>({});
 					break;
-				case RoomBtn:
+				case SelectRoomBtn:
 					m_scene->InitRoomPlayers();
 					select_room_num = button->m_room_num;
 					world->emit<Select_Room>({ (SHORT)select_room_num });
 					world->emit<ChoiceRoom_Event>({ button->m_room_num });
 					break;
 				case JoinRoomBtn:
-					world->emit<EnterRoom_Event>({ INROOM, select_room_num });
+					world->emit<EnterRoom_Event>({ INROOM, select_room_num, false });
 					world->emit<Join_Room>({ (SHORT)select_room_num });
 					break;
 				case ItemBtn:
@@ -599,6 +611,16 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case BuyBtn:
 					cout << "구메/강화" << endl;
+					break;
+				case GameReadyBtn:
+					world->emit<Ready_Room>({});
+					cout << "레디" << endl;
+
+					break;
+				case GameStartBtn:
+					//world->emit< ChangeScene_Event>({ GAME });
+					world->emit<Game_Start>({});
+					cout << "시작" << endl;
 					break;
 				case EquipLeftBtn:
 					world->emit<ChoiceEquip_Event>({ EquipLeftBtn, button->item_num });
