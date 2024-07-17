@@ -395,12 +395,14 @@ void Render_System::tick(World* world, float deltaTime)
 						//test
 						if (m_pBox) {
 							if (ent->has<BoundingBox_Component>()) {
-								ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
-								//box->m_bounding_box.Center = pos->Position;
-								//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
 								
-								m_pBox->m_pMesh = box->m_pMesh;
-								m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+									ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
+									//box->m_bounding_box.Center = pos->Position;
+									//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
+									if (box->m_pMesh) {
+									m_pBox->m_pMesh = box->m_pMesh;
+									m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+								}
 							}
 						}
 					}

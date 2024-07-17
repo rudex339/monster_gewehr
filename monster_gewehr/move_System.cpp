@@ -92,8 +92,8 @@ void Move_System::tick(World* world, float deltaTime)
                         
                 });
             BBox->m_bounding_box.Center = cur_Center;
-    cout << endl << "final: ";
-            cout << velocity->m_velocity.x <<" " << velocity->m_velocity.y << " " << velocity->m_velocity.z <<endl;
+    //cout << endl << "final: ";
+            //cout << velocity->m_velocity.x <<" " << velocity->m_velocity.y << " " << velocity->m_velocity.z <<endl;
         });
     
 

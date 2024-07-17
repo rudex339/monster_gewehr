@@ -4,6 +4,7 @@
 #include "Object_Entity.h"
 #include "ObjectManager.h"
 #include "Sever_Sysyem.h"
+#include "Collision_Sysytem.h"
 #include "PlayerControl_System.h"
 #include "Render_Sysytem.h"
 
@@ -319,7 +320,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 				L"image/Flashbang.png",
 				L"image/Bandage.png",
 				L"image/FirstAidKit.png",
-				L"image/Flashbang.png"
+				L"image/Injector.png"
 		};
 
 		world->reset();
@@ -469,8 +470,6 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	}
 	break;
 
-
-
 	case GAME:
 	{
 		world->reset();
@@ -483,7 +482,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			SOLDIER);
 		auto box = m_pPawn->assign<BoundingBox_Component>(2.f, 6.f, 2.f);
 		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
-
+		world->emit<AddObjectlayer_Event>({"Player",m_pPawn});
 
 		cout << m_pPawn->get<player_Component>()->id << endl;
 		Entity* ent = world->create();
@@ -499,6 +498,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			MONSTER);
 		auto monster_id = ent->get<player_Component>();
 		ent->assign<BoundingBox_Component>(30.f, 30.f, 30.f);
+		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+		world->emit<AddObjectlayer_Event>({ "Monster",ent });
 
 		monster_id->id = -2;
 
@@ -558,7 +559,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		camera->m_pCamera->SetPosition(XMFLOAT3(310.0f,
 			m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f) , 600.0f - 30.f));
 
-		world->emit<GetPlayerPtr_Event>({ m_pPawn });
+		world->emit<GetPlayerPtr_Event>({ m_pPawn, true });
 
 	}
 		break;
@@ -616,7 +617,7 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 	case FLASHBANG:
 		Entity* ent = world->create();
 		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
-		ent->assign<Rotation_Component>(event.Rotate.x, event.Rotate.y, event.Rotate.z);
+		ent->assign<Rotation_Component>(event.Rotate.x, 90.f, event.Rotate.z);
 		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
 		ComponentHandle<Velocity_Component> vel = ent->assign<Velocity_Component>();
 		DirectX::XMVECTOR rotationVec = DirectX::XMLoadFloat3(&event.Rotate);
@@ -636,9 +637,15 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		// Scale the direction by speed
 		DirectX::XMVECTOR velocity = DirectX::XMVectorScale(direction, 30.f);
 		DirectX::XMStoreFloat3(&vel->m_velocity, velocity);
+		string pstrGameObjectName = "BP_building60_SM_wall2_StaticMeshComponent0";
+		ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName),
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
+		ComponentHandle<BoundingBox_Component> box = ent->assign<BoundingBox_Component>(
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
+		ent->assign<Grande_Component>(event.object,20.f,100.f)->coolTime=100.f;
 
-		ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo("BP_building60_SM_wall2_StaticMeshComponent0"),
-			m_pObjectManager->Get_ModelInfo("BP_building60_SM_wall2_StaticMeshComponent0")->m_pModelRootObject->m_pstrFrameName);
+		world->emit<AddObjectlayer_Event>({ "Granade", ent });
 		break;
 	}
 }
@@ -726,6 +733,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 				// BoundingOrientedBox º¯È¯
 				box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
+				world->emit<AddObjectlayer_Event>({ "Object",ent });
 
 				box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 			}

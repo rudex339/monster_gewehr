@@ -279,4 +279,16 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 //grande component
 struct Grande_Component {
 	UINT property = 0;
+	DirectX::BoundingSphere sphere;
+	float damage;
+	float range;
+	bool Boom = false;
+	float coolTime = 0.f;
+	Grande_Component() = default;
+
+	Grande_Component(const UINT& property,float range, float damage)
+		: property(property), range(range), damage(damage)
+	{
+		sphere.Radius = range;
+	}
 };

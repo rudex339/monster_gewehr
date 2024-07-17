@@ -336,15 +336,21 @@ void PlayerControl_System::receive(World* world, const CursorPos_Event& event)
 
 void PlayerControl_System::receive(World* world, const GetPlayerPtr_Event& event)
 {
-	world->enableSystem(this);
-	m_Pawn = event.Pawn;
-	//ComponentHandle<EulerAngle_Component> eulerangle =
-	//	m_Pawn->get<EulerAngle_Component>();
-	if (m_Pawn) {
-		if (m_Pawn->has<Camera_Component>())
-			world->emit<SetCamera_Event>({ m_Pawn->get<Camera_Component>()->m_pCamera });
-		else {
-			world->emit<SetCamera_Event>({ NULL });
+	if (event.enable) {
+		world->enableSystem(this);
+		m_Pawn = event.Pawn;
+		//ComponentHandle<EulerAngle_Component> eulerangle =
+		//	m_Pawn->get<EulerAngle_Component>();
+		if (m_Pawn) {
+			if (m_Pawn->has<Camera_Component>())
+				world->emit<SetCamera_Event>({ m_Pawn->get<Camera_Component>()->m_pCamera });
+			else {
+				world->emit<SetCamera_Event>({ NULL });
+			}
 		}
+	}
+	else {
+		m_Pawn = NULL;
+		world->disableSystem(this);
 	}
 }
