@@ -621,6 +621,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					//world->emit< ChangeScene_Event>({ GAME });
 					world->emit<Game_Start>({});
 					cout << "����" << endl;
+					break;
 				case EquipLeftBtn:
 					world->emit<ChoiceEquip_Event>({ EquipLeftBtn, button->item_num });
 					break;
