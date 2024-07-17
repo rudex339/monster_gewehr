@@ -99,7 +99,7 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChoiceRoom_Event>,
 	public EventSubscriber<ChoiceItem_Event>,
 	public EventSubscriber<Refresh_Scene>,
-	public EventSubscriber<ChoiceEquip_Event>
+	public EventSubscriber<ChoiceEquip_Event>,
 	public EventSubscriber<CreateObject_Event>
 {
 private:
