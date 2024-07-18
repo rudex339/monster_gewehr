@@ -99,6 +99,7 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 			break;
 		case END:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
+				world->emit<Clearlayer_Event>({});
 				world->emit< ChangeScene_Event>({ LOBBY });
 			}
 			break;
