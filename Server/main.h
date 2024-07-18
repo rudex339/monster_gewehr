@@ -23,6 +23,8 @@ void SendRoomCreate(int ply_id, int room_num);
 void SendRoomSelect(int id, short room_num);
 void SendBreakRoom(int id);
 void SendDeleteRoom(short room_num);
+void SendRoomJoin(int id);
+void SendRoomQuit(int id);
 
 
 std::unordered_map<INT, Player> players;

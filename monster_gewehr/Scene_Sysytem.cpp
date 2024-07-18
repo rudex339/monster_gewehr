@@ -92,6 +92,8 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 			break;
 		case EQUIPMENT:
 			if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
+				// 나갈때 내가 어떤 장비를 선택했는지 서버에 알려줄거임
+				world->emit<Set_Equipment>({ (char)equipments[0], (char)equipments[1], (char)equipments[2] });
 				world->emit< ChangeScene_Event>({ LOBBY });
 			}
 			break;

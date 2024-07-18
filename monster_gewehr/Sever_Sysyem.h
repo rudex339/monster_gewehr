@@ -43,6 +43,12 @@ struct Ready_Room {
 	
 };
 
+struct Set_Equipment{
+	CHAR weapon;
+	CHAR armor;
+	CHAR grenade;
+};
+
 struct Demo_Event {
 	CHAR type;
 };
@@ -57,6 +63,7 @@ class Sever_System : public EntitySystem,
 	public EventSubscriber<Quit_Room>,
 	public EventSubscriber<Select_Room>,
 	public EventSubscriber<Ready_Room>,
+	public EventSubscriber<Set_Equipment>,
 	public EventSubscriber<Demo_Event>
 {
 private:
@@ -82,6 +89,7 @@ public:
 	virtual void receive(class World* world, const Quit_Room& event);
 	virtual void receive(class World* world, const Select_Room& event);
 	virtual void receive(class World* world, const Ready_Room& event);
+	virtual void receive(class World* world, const Set_Equipment& event);
 	virtual void receive(class World* world, const Demo_Event& event);
 	void PacketReassembly(World* world, char* recv_buf, size_t recv_size);
 	void ProcessPacket(World* world, char* packet);

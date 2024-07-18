@@ -83,6 +83,7 @@ Player::Player(int id, SOCKET socket)
 
 	m_wepon = 0;
 	m_armor = 0;
+	m_grenade = 0;
 
 	m_remain_size = 0;
 	m_state = S_STATE::LOG_IN;
@@ -92,6 +93,11 @@ Player::Player(int id, SOCKET socket)
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 
 	m_is_host = false;
+
+	// 나중에 데이터베이스 연동하면 삭제해라
+	m_bandage = 10;
+	m_fat = 10;
+	m_injector = 10;
 }
 
 void Player::PlayerInit()

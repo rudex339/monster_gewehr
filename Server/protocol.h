@@ -28,6 +28,11 @@ constexpr char CS_PACKET_SELECT_ROOM = 7;
 constexpr char CS_PACKET_JOIN_ROOM = 8;
 constexpr char CS_PACKET_QUIT_ROOM = 9;
 constexpr char CS_PACKET_READY_ROOM = 10;
+constexpr char CS_PACKET_SET_EQUIPMENT = 11;
+// 클라에서 따로 아이템 구매를 구현해서 서버에 알리기만 할건지
+// 아니면 클라에서는 아이템을 구매버튼만 누르면 이를 서버에서 구매기능을 구현해서 구매됬다고 클라에 다시 알릴건지 고민중
+constexpr char CS_PACKET_BUY = 12;
+constexpr char CS_PACKET_UPGRADE = 13;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -52,6 +57,10 @@ constexpr char SC_PACKET_SELECT_ROOM = 15;
 constexpr char SC_PACKET_READY_ROOM = 16;
 constexpr char SC_PACKET_BREAK_ROOM = 17;
 constexpr char SC_PACKET_DELETE_ROOM = 18;
+constexpr char SC_PACKET_JOIN_ROOM = 19;
+constexpr char SC_PACKET_QUIT_ROOM = 20;
+constexpr char SC_PACKET_BUY = 21;
+constexpr char SC_PACKET_UPGRADE = 22;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -160,25 +169,19 @@ struct CS_READY_ROOM_PACKET
 	UCHAR type;
 };
 
+struct CS_SET_EQUIPMENT_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR weapon;
+	CHAR armor;
+	CHAR grenade;
+};
+
 struct CS_DEMO_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-};
-
-// 로비상태에서 상점이나, 게임방에 들어갔을때 보낼 패킷을 나눠둠
-struct CS_LOBBY_PACKET
-{
-	UCHAR size;
-	UCHAR type;
-};
-
-struct CS_SHOP_PACKET
-{
-	UCHAR size;
-	UCHAR type;
-	UCHAR item;
-	SHORT amount;
 };
 
 
@@ -285,6 +288,7 @@ struct SC_SELECT_ROOM_PACKET	// 게임방 선택하면 누가 있는지 어떤 장비인지 알려줌
 {
 	UCHAR size;
 	UCHAR type;
+	INT id;
 	CHAR name[20];
 	CHAR weapon;
 	CHAR armor;
@@ -308,6 +312,23 @@ struct SC_DELETE_ROOM_PACKET
 	UCHAR size;
 	UCHAR type;
 	SHORT room_num;
+};
+
+struct SC_JOIN_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR id;
+	CHAR name[20];
+	CHAR weapon;
+	CHAR armor;
+};
+
+struct SC_QUIT_ROOM_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR id;
 };
 #pragma pack (pop)
 

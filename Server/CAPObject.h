@@ -61,6 +61,7 @@ public:
 	void SetMag(float mag) { m_mag = mag; }
 	void SetWepon(char wepon) { m_wepon = wepon; }
 	void SetArmor(char armor) { m_armor = armor; }
+	void SetGrenade(char grenade) { m_grenade = grenade; }
 	void SetByWeapon(char aromor);
 	void SetRemainSize(int remain_size) { m_remain_size = remain_size; }
 	void SetState(S_STATE state) { m_state = state; }
@@ -75,6 +76,8 @@ public:
 
 	int GetRemainSize() { return m_remain_size; }
 	char GetWeapon() { return m_wepon; }
+	char GetArmor() { return m_armor; }
+	char Getgrenade() { return m_grenade; }
 	char GetAnimaition() { return m_animation; }
 	S_STATE GetState() { return m_state; }
 	std::string GetName() { return m_name; }
@@ -120,9 +123,14 @@ protected:
 	DirectX::XMFLOAT3 m_atk_pos;
 
 
-	CHAR m_wepon;
-	CHAR m_armor;	
+	CHAR m_wepon;	
+	CHAR m_armor;
+	CHAR m_grenade;	// º∂±§¿Œ¡ˆ Ω¥∑˘≈∫¿Œ¡ˆ
 	CHAR m_animation;
+
+	INT m_bandage;
+	INT m_fat;
+	INT m_injector;
 
 	INT m_remain_size;
 

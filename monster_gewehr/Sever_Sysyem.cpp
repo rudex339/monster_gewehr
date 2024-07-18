@@ -17,6 +17,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Quit_Room>(this);
 	world->subscribe<Select_Room>(this);
 	world->subscribe<Ready_Room>(this);
+	world->subscribe<Set_Equipment>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -195,6 +196,18 @@ void Sever_System::receive(World* world, const Ready_Room& event)
 	p.size = sizeof(p);
 	p.type = CS_PACKET_READY_ROOM;
 	
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(World* world, const Set_Equipment& event)
+{
+	CS_SET_EQUIPMENT_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_SET_EQUIPMENT;
+	p.weapon = event.weapon;
+	p.armor = event.armor;
+	p.grenade = event.grenade;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
@@ -431,7 +444,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_SELECT_ROOM: {
 		SC_SELECT_ROOM_PACKET* pk = reinterpret_cast<SC_SELECT_ROOM_PACKET*>(packet);
-
+		// 만약 여기에 있는 정보로 방에 들어갈때 누가 들어가있는지 알고있다면 새로 추가된 pk->id도 인자로 넣어주셈 (나중에 누군가 나갈때 누가 나간건지 알고싶음)
 		int len = MultiByteToWideChar(CP_ACP, 0, pk->name, -1, nullptr, 0);
 		std::wstring wstr(len, L'\0');
 		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
@@ -452,6 +465,16 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		SC_DELETE_ROOM_PACKET* pk = reinterpret_cast<SC_DELETE_ROOM_PACKET*>(packet);
 		m_scene->DeleteRoom(pk->room_num);
 		world->emit<Refresh_Scene>({ ROOMS });
+		break;
+	}
+	case SC_PACKET_JOIN_ROOM: {
+		SC_JOIN_ROOM_PACKET* pk = reinterpret_cast<SC_JOIN_ROOM_PACKET*>(packet);
+		// 여기에 새롭게 방에 들어온 애 정보 추가해주면됨
+		break;
+	}
+	case SC_PACKET_QUIT_ROOM: {
+		SC_QUIT_ROOM_PACKET* pk = reinterpret_cast<SC_QUIT_ROOM_PACKET*>(packet);
+		// 여기에 방에서 방금 나간에 누군지 pk->id로 알아내고 삭제하면 됨
 		break;
 	}
 

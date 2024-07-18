@@ -373,19 +373,13 @@ void ProcessPacket(int id, char* p)
 		players[id].SetRoomID(packet->room_num);
 		gamerooms[packet->room_num].SetPlayerId(id);
 
-		std::cout << "플레이어 id : " << id << " 방 선택 : " << players[id].GetRoomID() << std::endl;
-		for (auto i : gamerooms[packet->room_num].GetPlyId()) {
-			std::cout << i << " ";
-		}
-		std::cout << std::endl;
-
+		SendRoomJoin(id);
 		break;
 	}
 	case CS_PACKET_QUIT_ROOM: {
-		CS_QUIT_ROOM_PACKET *packet = reinterpret_cast<CS_QUIT_ROOM_PACKET*>(p);
+		CS_QUIT_ROOM_PACKET *packet = reinterpret_cast<CS_QUIT_ROOM_PACKET*>(p);		
 		
-		
-		if (gamerooms[players[id].GetRoomID()].GetPlyId()[0] == id) {
+		if (gamerooms[players[id].GetRoomID()].GetPlyId()[0] == id) { // 방장이 나가면
 			players[id].SetHost(false);
 			// 여기에 이 방이 폭파되었다는 메세지 알리는거 넣으면 됨
 			SendDeleteRoom(players[id].GetRoomID());
@@ -401,7 +395,7 @@ void ProcessPacket(int id, char* p)
 		}
 		break;
 	}
-	case CS_PACKET_READY_ROOM:
+	case CS_PACKET_READY_ROOM: {
 		if (players[id].GetReady()) {
 			players[id].SetReady(false);
 		}
@@ -419,6 +413,16 @@ void ProcessPacket(int id, char* p)
 			players[ply_id].DoSend(&packet, packet.size);
 		}*/
 		break;
+	}
+	case CS_PACKET_SET_EQUIPMENT: {
+		CS_SET_EQUIPMENT_PACKET *packet = reinterpret_cast<CS_SET_EQUIPMENT_PACKET*>(p);
+		players[id].SetWepon(packet->weapon);
+		players[id].SetArmor(packet->armor);
+		players[id].SetGrenade(packet->grenade);
+
+		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].Getgrenade() << std::endl;
+		break;
+	}
 	case CS_DEMO_MONSTER_SETPOS: {
 		int room_id = players[id].GetRoomID();
 		souleaters[room_id].m_lock.lock();
@@ -472,58 +476,6 @@ void SendLoginFail(int id)
 	players[id].SetState(S_STATE::LOG_OUT);
 }
 
-//void SendStartGame(int id)
-//{
-//	int retval;
-//	int room_id = players[id].GetRoomID();
-//
-//	// 내 정보를 인게임 상태인 상대에게 보냄
-//	SC_ADD_PLAYER_PACKET sub_packet;
-//	sub_packet.size = sizeof(sub_packet);
-//	sub_packet.type = SC_PACKET_ADD_PLAYER;
-//	strcpy(sub_packet.name, players[id].GetName().c_str());
-//	sub_packet.player_data = players[id].GetPlayerData();
-//	sub_packet.weapon = players[id].GetWeapon();
-//
-//	for (int ply_id : gamerooms[room_id].GetPlyId()) {
-//		if (ply_id < 0) continue;
-//		if (ply_id == id) continue;
-//		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-//		retval = players[ply_id].DoSend(&sub_packet, sub_packet.size);
-//		if (retval == SOCKET_ERROR) {
-//			players[ply_id].SetState(S_STATE::LOG_OUT);
-//		}
-//	}
-//
-//	// 상대의 정보를 인게임 상태가 될려는 나한테 보냄
-//	for (int ply_id : gamerooms[room_id].GetPlyId()) {
-//		if (ply_id < 0) continue;
-//		if (ply_id == id) continue;
-//		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-//		SC_ADD_PLAYER_PACKET sub_packet2;
-//		sub_packet2.size = sizeof(sub_packet2);
-//		sub_packet2.type = SC_PACKET_ADD_PLAYER;
-//		strcpy(sub_packet2.name, players[ply_id].GetName().c_str());
-//		sub_packet2.player_data = players[ply_id].GetPlayerData();
-//		sub_packet2.weapon = players[ply_id].GetWeapon();
-//
-//		retval = players[id].DoSend(&sub_packet2, sub_packet2.size);
-//		if (retval == SOCKET_ERROR) {
-//			players[ply_id].SetState(S_STATE::LOG_OUT);
-//		}
-//	}
-//
-//	// 몬스터의 정보도 나한테 보냄
-//	SC_ADD_MONSTER_PACKET sub_packet3;
-//	sub_packet3.size = sizeof(SC_ADD_MONSTER_PACKET);
-//	sub_packet3.type = SC_PACKET_ADD_MONSTER;
-//	sub_packet3.monster = souleaters[room_id].GetData();
-//
-//	players[id].DoSend(&sub_packet3, sub_packet3.size);
-//
-//	players[id].SetState(S_STATE::IN_GAME);
-//}
-
 void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 사람들한테도 모두 게임이 시작이 되었다는 신호가 먼저 가야함
 {
 	int retval;
@@ -539,9 +491,7 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 		retval = players[ply_id].DoSend(&start_p, start_p.size);
 	}
 
-	// 방이 다 만들어지면 지금은 클라에서 위치를 받아서 이를 다른 플레이어들에게 넘겨줬으나
 	// 이것은 서버에서 플레이어 첫 위치를 설정해서 내 자신에게도 첫 시작지점이 어디인지 보내줄 것임
-	// 이거 구현 다하면 주석은 지우거나 다 구현했다는 식으로 다시 메모할것
 	// 패킷 소통을 줄이기 위해 방장소켓을 관리하는 쓰레드에서 다른 클라이언트의 위치정보등을 리셋하고 보내는것을 다 전담할거임
 	for (int send_id : plys_id) {
 		if (send_id == -1) continue;
@@ -582,15 +532,6 @@ void SendPlayerMove(int id)
 
 	int room_id = players[id].GetRoomID();
 
-	/*for (auto& client : players) {
-		if (client.second.GetID() == id) continue;
-		if (client.second.GetState() != S_STATE::IN_GAME) continue;
-		retval = client.second.DoSend(&packet, packet.size);
-		if (retval == SOCKET_ERROR) {
-			client.second.SetState(S_STATE::LOG_OUT);
-		}
-	}*/
-
 	// 같은 게임룸 안의 사람들 한테만 보내기
 	for (int ply_id : gamerooms[room_id].GetPlyId()) {
 		if (ply_id < 0) continue;
@@ -613,15 +554,6 @@ void SendAnimaition(int id)
 	packet.animation = players[id].GetAnimaition();
 
 	int room_id = players[id].GetRoomID();
-
-	/*for (auto& client : players) {
-		if (client.second.GetID() == id) continue;
-		if (client.second.GetState() != S_STATE::IN_GAME) continue;
-		retval = client.second.DoSend(&packet, packet.size);
-		if (retval == SOCKET_ERROR) {
-			client.second.SetState(S_STATE::LOG_OUT);
-		}
-	}*/
 
 	// 같은 게임룸 안의 사람들 한테만 보내기
 	for (int ply_id : gamerooms[room_id].GetPlyId()) {
@@ -664,11 +596,6 @@ void SendHitPlayer(int id)
 	packet.hp = players[id].GetHp();
 
 	int room_id = players[id].GetRoomID();
-
-	/*for (auto& client : players) {
-		if (client.second.GetState() != S_STATE::IN_GAME) continue;
-		client.second.DoSend(&packet, packet.size);
-	}*/
 
 	for (int ply_id : gamerooms[room_id].GetPlyId()) {
 		if (ply_id < 0) continue;
@@ -736,9 +663,10 @@ void SendRoomSelect(int id, short room_num)
 		SC_SELECT_ROOM_PACKET packet;
 		packet.size = sizeof(packet);
 		packet.type = SC_PACKET_SELECT_ROOM;
+		packet.id = ply_id;
 		strcpy_s(packet.name, players[ply_id].GetName().c_str());
 		packet.weapon = players[ply_id].GetWeapon();
-		//packet.armor = players[ply_id].GetArmor();
+		packet.armor = players[ply_id].GetArmor();
 		// 이제 위의 방에 있는 플레이어 정보들을 선택한 놈한테 다시 보냄
 		retval = players[id].DoSend(&packet, packet.size);
 		if (retval == SOCKET_ERROR) {
@@ -782,4 +710,42 @@ void SendDeleteRoom(short room_num)
 			client.second.SetState(S_STATE::LOG_OUT);
 		}
 	}
+}
+
+// 지금 자신한테는 다른 클라이언트의 정보를 보낼지 아니면 select에서 받은걸 저장했다가 나타낼지 고민중
+// 물론 방에 들어있는 사람한테는 내가 들어왔고 어떤 놈인지를 알려줘야함
+void SendRoomJoin(int id)
+{
+	short room_num = players[id].GetRoomID();
+
+	SC_JOIN_ROOM_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_JOIN_ROOM;
+	packet.id = id;
+	strcpy_s(packet.name, players[id].GetName().c_str());
+	packet.weapon = players[id].GetWeapon();
+	packet.armor = players[id].GetArmor();
+
+	for (int ply_id : gamerooms[room_num].GetPlyId()) {
+		if (ply_id == -1) continue;
+		if (ply_id == id) continue;
+		players[ply_id].DoSend(&packet, packet.size);
+	}
+}
+
+void SendRoomQuit(int id)
+{
+	short room_num = players[id].GetRoomID();
+
+	SC_QUIT_ROOM_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_QUIT_ROOM;
+	packet.id = id;
+
+	for (int ply_id : gamerooms[room_num].GetPlyId()) {
+		if (ply_id == -1) continue;
+		if (ply_id == id) continue;
+		players[ply_id].DoSend(&packet, packet.size);
+	}
+
 }
