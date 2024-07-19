@@ -5,6 +5,7 @@
 #include "Player_Entity.h"
 #include "Sever_Sysyem.h"
 #include "Scene_Sysytem.h"
+#include <math.h>
 
 struct LIGHTS
 {
@@ -726,10 +727,10 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			// 오른쪽가면 x증가 앞으로 가면 z증가
 			float x = (int)(position->Position.x - 883) / 4.67;
 			float z = 300 - (int)(position->Position.z - 1328) / 6.07;
-			cout << "x: " << position->Position.x << ",  z : " << position->Position.z << endl;
+			// cout << "x: " << position->Position.x << ",  z : " << position->Position.z << endl;
 			D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 17 / 20, FRAME_BUFFER_HEIGHT / 15, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 3 / 15 };
-			imageRect = { x - 100.0f, z - 100.0f , x + 100.0f, z + 100.0f };
-			// imageRect = { 0, 0 , 100, 100 };
+			imageRect = { x - 50.0f, z - 50.0f , x + 50.0f, z + 50.0f };
+			//imageRect = { -100, -100 , 400, 400 };
 			ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 			m_d2dDeviceContext->DrawBitmap(
 				image.m_bitmap,
@@ -738,6 +739,34 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				image.m_mode,
 				image.m_imageRect
 			);
+
+			// 보스 x: 2289.f z: 895.f;
+			float bossX = 1014;
+			float bossZ = 1429;
+			float bossMapX, bossMapZ;
+
+			float Xdiff = (bossX - position->Position.x) / 4.67;
+			float Zdiff = (bossZ - position->Position.z) / 6.07;
+
+			if (Xdiff <= 0) {
+				bossMapX = max(-FRAME_BUFFER_WIDTH / 20, Xdiff);
+			}
+			else {
+				bossMapX = min(FRAME_BUFFER_WIDTH / 20, Xdiff);
+			}
+			if (Zdiff <= 0) {
+				bossMapZ = max(-FRAME_BUFFER_HEIGHT / 15, Zdiff);
+			}
+			else {
+				bossMapZ = min(FRAME_BUFFER_HEIGHT / 15, Zdiff);
+			}
+
+
+
+			D2D1_ELLIPSE bossPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + bossMapX, FRAME_BUFFER_HEIGHT * 2 / 15 - bossMapZ}, 2.0f, 2.0f };
+			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+			m_d2dDeviceContext->FillEllipse(&bossPos, m_textBrush.Get());
+
 			{
 				if (player->aim_mode) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Blue));
