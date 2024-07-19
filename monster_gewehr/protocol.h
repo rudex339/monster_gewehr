@@ -208,6 +208,8 @@ struct SC_ADD_PLAYER_PACKET
 	CHAR name[MAX_ID_LENGTH];
 	PLAYER_DATA player_data;
 	CHAR weapon;
+	CHAR armor;
+	CHAR grenade;
 };
 
 struct SC_REMOVE_PLAYER_PACKET

@@ -851,6 +851,13 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 			void {
 				if (ent->has<Camera_Component>()) {
 					Player->id = event.ply_id;
+					auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
+					for (int i = 0; i < 3; ++i) {
+						if (i == equipments[0]) {
+							weapon[i]->draw = true;
+						}
+						else weapon[i]->draw = false;
+					}
 				}
 			});
 	}
