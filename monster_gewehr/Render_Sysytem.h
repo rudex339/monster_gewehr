@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include "Timer.h"
 #include "Scene_Sysytem.h"
 
@@ -106,6 +107,9 @@ private:
 	//boundingbox
 	Box* m_pBox;
 
+	// user info
+	// key : userID, value : coordinate
+	map <int, POINT> UserPositionXZ;
 
 public:
 	Render_System() = default;
@@ -122,7 +126,10 @@ public:
 	virtual void receive(class World* world, const Mouse_Event& event);
 	virtual void receive(class World* world, const InputId_Event& event);
 
-	void Clicked() { clicked = false; };
+	void Clicked() { clicked = false; }
+	void SetUserInfo(int uid, POINT coordinate);
+	map <int, POINT> GetUserInfo() { return UserPositionXZ; }
+	void ClearUserInfo() { UserPositionXZ.clear(); }
 
 	void SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList);
 };

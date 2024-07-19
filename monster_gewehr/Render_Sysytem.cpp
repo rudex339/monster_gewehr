@@ -621,6 +621,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case GameStartBtn:
 					//world->emit< ChangeScene_Event>({ GAME });
 					world->emit<Game_Start>({});
+					ClearUserInfo(); // 방의 유저들 좌표를 저장하던 map 초기화
 					cout << "시작" << endl;
 					break;
 				case EquipLeftBtn:
@@ -647,7 +648,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
-	world->each< player_Component, Camera_Component, ControllAngle_Component, Position_Component>([&](
+	world->each<player_Component, Camera_Component, ControllAngle_Component, Position_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
 		ComponentHandle<Camera_Component> camera,
@@ -741,31 +742,41 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			);
 
 			// 보스 x: 2289.f z: 895.f;
-			float bossX = 1014;
-			float bossZ = 1429;
-			float bossMapX, bossMapZ;
+			float MapX, MapZ;
 
-			float Xdiff = (bossX - position->Position.x) / 4.67;
-			float Zdiff = (bossZ - position->Position.z) / 6.07;
+			for (auto& pos : GetUserInfo()) {
+				cout << "UID : " << pos.first << "|| Position : " << pos.second.x << ", " << pos.second.y << endl;
+				float Xdiff = (pos.second.x - position->Position.x) / 4.67;
+				float Zdiff = (pos.second.y - position->Position.z) / 6.07;
 
-			if (Xdiff <= 0) {
-				bossMapX = max(-FRAME_BUFFER_WIDTH / 20, Xdiff);
+				if (Xdiff <= 0) {
+					MapX = max(-FRAME_BUFFER_WIDTH / 20, Xdiff);
+				}
+				else {
+					MapX = min(FRAME_BUFFER_WIDTH / 20, Xdiff);
+				}
+				if (Zdiff <= 0) {
+					MapZ = max(-FRAME_BUFFER_HEIGHT / 15, Zdiff);
+				}
+				else {
+					MapZ = min(FRAME_BUFFER_HEIGHT / 15, Zdiff);
+				}
+
+
+
+				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + MapX, FRAME_BUFFER_HEIGHT * 2 / 15 - MapZ}, 2.0f, 2.0f };
+				if (pos.first == -1) continue;
+				if (pos.first == -2) {
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+					m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
+				}
+				else {
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+					m_d2dDeviceContext->FillEllipse(&playerPos, m_textBrush.Get());
+				}
 			}
-			else {
-				bossMapX = min(FRAME_BUFFER_WIDTH / 20, Xdiff);
-			}
-			if (Zdiff <= 0) {
-				bossMapZ = max(-FRAME_BUFFER_HEIGHT / 15, Zdiff);
-			}
-			else {
-				bossMapZ = min(FRAME_BUFFER_HEIGHT / 15, Zdiff);
-			}
 
-
-
-			D2D1_ELLIPSE bossPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + bossMapX, FRAME_BUFFER_HEIGHT * 2 / 15 - bossMapZ}, 2.0f, 2.0f };
-			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-			m_d2dDeviceContext->FillEllipse(&bossPos, m_textBrush.Get());
+			
 
 			{
 				if (player->aim_mode) {
@@ -774,6 +785,16 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				}
 			}
+		}
+	);
+
+	world->each<player_Component, Position_Component>([&](
+		Entity* ent,
+		ComponentHandle<player_Component> player,
+		ComponentHandle<Position_Component> position
+		) -> void {
+			POINT PosXZ = { position->Position.x, position->Position.z };
+			SetUserInfo(player->id, PosXZ);
 		}
 	);
 }
@@ -839,4 +860,15 @@ void Render_System::receive(World* world, const InputId_Event& event)
 	id.assign(text[0].begin(), text[0].end());
 	cout << id.c_str() << endl;
 	world->emit<Login_Event>({ id });
+}
+
+void Render_System::SetUserInfo(int uid, POINT coordinate)
+{
+	auto& user = UserPositionXZ.find(uid);
+	if (user == UserPositionXZ.end()) {
+		UserPositionXZ.insert(make_pair(uid, coordinate));
+	}
+	else {
+		user->second = coordinate;
+	}
 }
