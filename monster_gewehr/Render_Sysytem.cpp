@@ -646,11 +646,12 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
-	world->each< player_Component, Camera_Component, ControllAngle_Component>([&](
+	world->each< player_Component, Camera_Component, ControllAngle_Component, Position_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
 		ComponentHandle<Camera_Component> camera,
-		ComponentHandle<ControllAngle_Component> cc
+		ComponentHandle<ControllAngle_Component> cc,
+		ComponentHandle<Position_Component> position
 		) -> void {
 			{
 				textRect = D2D1::RectF(0, 0, 390, 100);
@@ -719,7 +720,24 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 
 			}
-
+			// x: 883.49,  z : 1328.4	왼쪽 하단
+			// x: 2285.07,  z : 3149.47 우측 상단
+			// 1014.f, 1024.f, 1429.f
+			// 오른쪽가면 x증가 앞으로 가면 z증가
+			float x = (int)(position->Position.x - 883) / 4.67;
+			float z = 300 - (int)(position->Position.z - 1328) / 6.07;
+			cout << "x: " << position->Position.x << ",  z : " << position->Position.z << endl;
+			D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 17 / 20, FRAME_BUFFER_HEIGHT / 15, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 3 / 15 };
+			imageRect = { x - 100.0f, z - 100.0f , x + 100.0f, z + 100.0f };
+			// imageRect = { 0, 0 , 100, 100 };
+			ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+			m_d2dDeviceContext->DrawBitmap(
+				image.m_bitmap,
+				image.m_Rect,
+				image.m_opacity,
+				image.m_mode,
+				image.m_imageRect
+			);
 			{
 				if (player->aim_mode) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Blue));
