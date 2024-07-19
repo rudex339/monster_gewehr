@@ -621,7 +621,6 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case GameStartBtn:
 					//world->emit< ChangeScene_Event>({ GAME });
 					world->emit<Game_Start>({});
-					ClearUserInfo(); // 방의 유저들 좌표를 저장하던 map 초기화
 					cout << "시작" << endl;
 					break;
 				case EquipLeftBtn:
@@ -642,6 +641,16 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 				Clicked(); // 버튼이 눌리고 나면 clicked를 false로 변경(원래 마우스를 움직여야만 false로 바뀌기 때문에 생기는 버그 해결용)
 			}
+		}
+	);
+
+	world->each<player_Component, Position_Component>([&](
+		Entity* ent,
+		ComponentHandle<player_Component> player,
+		ComponentHandle<Position_Component> position
+		) -> void {
+			POINT PosXZ = { position->Position.x, position->Position.z };
+			SetUserInfo(player->id, PosXZ);
 		}
 	);
 
@@ -729,8 +738,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			float x = (int)(position->Position.x - 883) / 4.67;
 			float z = 300 - (int)(position->Position.z - 1328) / 6.07;
 			// cout << "x: " << position->Position.x << ",  z : " << position->Position.z << endl;
-			D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 17 / 20, FRAME_BUFFER_HEIGHT / 15, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 3 / 15 };
-			imageRect = { x - 50.0f, z - 50.0f , x + 50.0f, z + 50.0f };
+			D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 17 / 20, FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_WIDTH * 3 / 20 };
+			imageRect = { x - FRAME_BUFFER_WIDTH / 40, z - FRAME_BUFFER_WIDTH / 40 , x + FRAME_BUFFER_WIDTH / 40, z + FRAME_BUFFER_WIDTH / 40 };
 			//imageRect = { -100, -100 , 400, 400 };
 			ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 			m_d2dDeviceContext->DrawBitmap(
@@ -756,15 +765,15 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					MapX = min(FRAME_BUFFER_WIDTH / 20, Xdiff);
 				}
 				if (Zdiff <= 0) {
-					MapZ = max(-FRAME_BUFFER_HEIGHT / 15, Zdiff);
+					MapZ = max(-FRAME_BUFFER_WIDTH / 20, Zdiff);
 				}
 				else {
-					MapZ = min(FRAME_BUFFER_HEIGHT / 15, Zdiff);
+					MapZ = min(FRAME_BUFFER_WIDTH / 20, Zdiff);
 				}
 
 
 
-				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + MapX, FRAME_BUFFER_HEIGHT * 2 / 15 - MapZ}, 2.0f, 2.0f };
+				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + MapX, FRAME_BUFFER_WIDTH * 2 / 20 - MapZ}, 2.0f, 2.0f };
 				if (pos.first == -1) continue;
 				if (pos.first == -2) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
@@ -785,18 +794,12 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				}
 			}
+			ClearUserInfo(); // 방의 유저들 좌표를 저장하던 map 초기화
 		}
 	);
 
-	world->each<player_Component, Position_Component>([&](
-		Entity* ent,
-		ComponentHandle<player_Component> player,
-		ComponentHandle<Position_Component> position
-		) -> void {
-			POINT PosXZ = { position->Position.x, position->Position.z };
-			SetUserInfo(player->id, PosXZ);
-		}
-	);
+
+	
 }
 
 void Render_System::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)
