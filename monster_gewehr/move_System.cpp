@@ -33,68 +33,68 @@ void Move_System::tick(World* world, float deltaTime)
     });
     //collision
     //같은 콜리전을 두번 반복하지 않도록하자. 그렇다면 플레이어만
-    world->each<BoundingBox_Component, player_Component, Velocity_Component, Position_Component>([&](Entity* ent,
-        ComponentHandle<BoundingBox_Component> BBox,
-        ComponentHandle<player_Component> p,
-        ComponentHandle<Velocity_Component> velocity,
-        ComponentHandle<Position_Component> position) {
-            XMFLOAT3 cur_Center = BBox->m_bounding_box.Center;
-            
-           
-            world->each<BoundingBox_Component>([&](Entity* another,
-            ComponentHandle<BoundingBox_Component> another_BBox) {
-                    if (another == ent)
-                        return;
-                    XMFLOAT3 next_Center = BBox->m_bounding_box.Center;
-                    next_Center.x += velocity->m_velocity.x;
-                    next_Center.y += velocity->m_velocity.y;
-                    next_Center.z += velocity->m_velocity.z;
-                    BBox->m_bounding_box.Center = next_Center;
-                    if (another_BBox->m_bounding_box.Intersects(BBox->m_bounding_box)) {
-                        //BBox->m_bounding_box.Center = cur_Center;
-                        cout << ent->get<Model_Component>()->model_name;
-                        cout << " hit " << another->get<Model_Component>()->model_name << endl;
+    //world->each<BoundingBox_Component, player_Component, Velocity_Component, Position_Component>([&](Entity* ent,
+    //    ComponentHandle<BoundingBox_Component> BBox,
+    //    ComponentHandle<player_Component> p,
+    //    ComponentHandle<Velocity_Component> velocity,
+    //    ComponentHandle<Position_Component> position) {
+    //        XMFLOAT3 cur_Center = BBox->m_bounding_box.Center;
+    //        
+    //       
+    //        world->each<BoundingBox_Component>([&](Entity* another,
+    //        ComponentHandle<BoundingBox_Component> another_BBox) {
+    //                if (another == ent)
+    //                    return;
+    //                XMFLOAT3 next_Center = BBox->m_bounding_box.Center;
+    //                next_Center.x += velocity->m_velocity.x;
+    //                next_Center.y += velocity->m_velocity.y;
+    //                next_Center.z += velocity->m_velocity.z;
+    //                BBox->m_bounding_box.Center = next_Center;
+    //                if (another_BBox->m_bounding_box.Intersects(BBox->m_bounding_box)) {
+    //                    //BBox->m_bounding_box.Center = cur_Center;
+    //                    cout << ent->get<Model_Component>()->model_name;
+    //                    cout << " hit " << another->get<Model_Component>()->model_name << endl;
 
-                        // Find the minimal translation vector (MTV)
-                        XMVECTOR center1 = XMLoadFloat3(&BBox->m_bounding_box.Center);
-                        XMVECTOR center2 = XMLoadFloat3(&another_BBox->m_bounding_box.Center);
+    //                    // Find the minimal translation vector (MTV)
+    //                    XMVECTOR center1 = XMLoadFloat3(&BBox->m_bounding_box.Center);
+    //                    XMVECTOR center2 = XMLoadFloat3(&another_BBox->m_bounding_box.Center);
 
-                        // Calculate the difference vector
-                        XMVECTOR delta = XMVectorSubtract(center2, center1);
+    //                    // Calculate the difference vector
+    //                    XMVECTOR delta = XMVectorSubtract(center2, center1);
 
-                        // Calculate the extents along the delta vector
-                        float distance = XMVectorGetX(XMVector3Length(delta));
-                        float extent1 = XMVectorGetX(XMVector3Dot(delta, XMVector3Normalize(XMLoadFloat3(&BBox->m_bounding_box.Extents))));
-                        float extent2 = XMVectorGetX(XMVector3Dot(delta, XMVector3Normalize(XMLoadFloat3(&another_BBox->m_bounding_box.Extents))));
+    //                    // Calculate the extents along the delta vector
+    //                    float distance = XMVectorGetX(XMVector3Length(delta));
+    //                    float extent1 = XMVectorGetX(XMVector3Dot(delta, XMVector3Normalize(XMLoadFloat3(&BBox->m_bounding_box.Extents))));
+    //                    float extent2 = XMVectorGetX(XMVector3Dot(delta, XMVector3Normalize(XMLoadFloat3(&another_BBox->m_bounding_box.Extents))));
 
-                        // Calculate the penetration depth
-                        float penetrationDepth = extent1 + extent2 - distance;
+    //                    // Calculate the penetration depth
+    //                    float penetrationDepth = extent1 + extent2 - distance;
 
-                        // Calculate the minimum translation vector (MTV) to resolve collision
-                        XMFLOAT3 outmovement = XMFLOAT3(0.f, 0.f, 0.f);
-                        DirectX::XMStoreFloat3(&outmovement, XMVectorScale(XMVector3Normalize(delta), penetrationDepth));
+    //                    // Calculate the minimum translation vector (MTV) to resolve collision
+    //                    XMFLOAT3 outmovement = XMFLOAT3(0.f, 0.f, 0.f);
+    //                    DirectX::XMStoreFloat3(&outmovement, XMVectorScale(XMVector3Normalize(delta), penetrationDepth));
 
-                        
-                        
+    //                    
+    //                    
 
 
-                        // 미끄러짐 벡터 계산
-                        //const DirectX::XMVECTOR velocityVec = DirectX::XMLoadFloat3(&velocity->m_velocity);
-                        //const DirectX::XMVECTOR dotProduct = DirectX::XMVector3Dot(velocityVec, normal);
-                        //const DirectX::XMVECTOR slidingVector = DirectX::XMVectorSubtract(velocityVec, DirectX::XMVectorMultiply(normal, dotProduct));
-                        // 속도 및 위치 업데이트
-                        //DirectX::XMStoreFloat3(&veloOcity->m_velocity, slidingVector);
-                        velocity->m_velocity.x += outmovement.x;
-                        velocity->m_velocity.y += outmovement.y;
-                        velocity->m_velocity.z += outmovement.z;
-                        cout << velocity->m_velocity.x << " " << velocity->m_velocity.y << " " << velocity->m_velocity.z << endl;
-                    }
-                        
-                });
-            BBox->m_bounding_box.Center = cur_Center;
-    //cout << endl << "final: ";
-            //cout << velocity->m_velocity.x <<" " << velocity->m_velocity.y << " " << velocity->m_velocity.z <<endl;
-        });
+    //                    // 미끄러짐 벡터 계산
+    //                    //const DirectX::XMVECTOR velocityVec = DirectX::XMLoadFloat3(&velocity->m_velocity);
+    //                    //const DirectX::XMVECTOR dotProduct = DirectX::XMVector3Dot(velocityVec, normal);
+    //                    //const DirectX::XMVECTOR slidingVector = DirectX::XMVectorSubtract(velocityVec, DirectX::XMVectorMultiply(normal, dotProduct));
+    //                    // 속도 및 위치 업데이트
+    //                    //DirectX::XMStoreFloat3(&veloOcity->m_velocity, slidingVector);
+    //                    velocity->m_velocity.x += outmovement.x;
+    //                    velocity->m_velocity.y += outmovement.y;
+    //                    velocity->m_velocity.z += outmovement.z;
+    //                    cout << velocity->m_velocity.x << " " << velocity->m_velocity.y << " " << velocity->m_velocity.z << endl;
+    //                }
+    //                    
+    //            });
+    //        BBox->m_bounding_box.Center = cur_Center;
+    ////cout << endl << "final: ";
+    //        //cout << velocity->m_velocity.x <<" " << velocity->m_velocity.y << " " << velocity->m_velocity.z <<endl;
+    //    });
     
 
 
