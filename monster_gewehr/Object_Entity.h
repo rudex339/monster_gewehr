@@ -25,6 +25,7 @@ struct Terrain_Component {
 
 struct Model_Component {
 	CLoadedModelInfo* m_MeshModel;
+	
 	string model_name;
 
 	GameObjectModel* socket = NULL;
@@ -291,4 +292,9 @@ struct Grande_Component {
 	{
 		sphere.Radius = range;
 	}
+};
+
+struct Emitter_Componet {
+	float coolTime = 0.f;
+	GameObjectModel* m_Model = NULL;
 };
