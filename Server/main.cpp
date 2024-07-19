@@ -135,8 +135,7 @@ void ProcessClient(SOCKET sock)
 	}
 
 
-	Disconnect(id);
-	gamerooms[players[id].GetRoomID()].DeletePlayerId(id);
+	Disconnect(id);	
 
 	// 소켓 닫기
 	closesocket(client_sock);
@@ -282,20 +281,6 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_PACKET_START_GAME: {
-		// 지금은 클라한테 위치정보를 받지만 방이 생성되면 안받게 할거임
-		/*CS_START_GAME_PACKET* packet = reinterpret_cast<CS_START_GAME_PACKET*>(p);
-		players[id].SetPostion(packet->pos);
-		players[id].SetVelocity(packet->vel);
-		players[id].SetYaw(packet->yaw);
-		SHORT room_id = players[id].GetRoomID();
-
-		if (gamerooms[room_id].SetStartGame()) {
-			build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
-
-		}
-
-		SendStartGame(id);*/
-
 		for (int ply_id : gamerooms[players[id].GetRoomID()].GetPlyId()) {
 			if (ply_id == -1) continue;
 			if (ply_id == id) continue;
@@ -383,7 +368,7 @@ void ProcessPacket(int id, char* p)
 			players[id].SetHost(false);
 			// 여기에 이 방이 폭파되었다는 메세지 알리는거 넣으면 됨
 			SendDeleteRoom(players[id].GetRoomID());
-			SendBreakRoom(id);			
+			SendBreakRoom(id);
 			players[id].SetRoomID(-1);
 			players[id].SetReady(false);
 		}
@@ -507,6 +492,8 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 		strcpy(add_p.name, players[send_id].GetName().c_str());
 		add_p.player_data = players[send_id].GetPlayerData();
 		add_p.weapon = players[send_id].GetWeapon();
+		add_p.armor = players[send_id].GetArmor();
+		add_p.grenade = players[send_id].Getgrenade();
 		for (int recv_id : plys_id) {
 			if (recv_id == -1) continue;
 			if (recv_id == send_id) continue;
@@ -576,16 +563,24 @@ void Disconnect(int id)
 	players[id].PlayerInit();
 	players[id].SetState(S_STATE::LOG_OUT);
 
-	if (gamerooms[0].IsPlayerIn(id)) {
+	short room_num = players[id].GetRoomID();
 
+	if (room_num > -1) {
 		SC_LOGOUT_PACKET packet;
 		packet.size = sizeof(packet);
 		packet.type = SC_PACKET_LOGOUT;
 		packet.id = id;
-		for (auto& client : players) {
-			if (client.second.GetID() == id) continue;
-			if (client.second.GetState() != S_STATE::IN_GAME) continue;
-			client.second.DoSend(&packet, packet.size);
+		for (int i : gamerooms[room_num].GetPlyId()) {
+			if (i < 0) continue;
+			if (players[i].GetID() == id) continue;
+			players[i].DoSend(&packet, packet.size);
+		}
+
+		gamerooms[room_num].DeletePlayerId(id);
+		if (gamerooms[room_num].IsRoomEmpty()) {
+			souleaters[room_num].InitMonster(); 
+			gamerooms[room_num].InitGameRoom();
+			SendDeleteRoom(room_num);
 		}
 	}
 

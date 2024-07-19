@@ -14,7 +14,7 @@ public:
 
 	BOOL SetPlayerId(int c_id);
 	BOOL IsPlayerIn(int c_id);
-	BOOL IsPlayerEmpty();
+	BOOL IsRoomEmpty();
 	void DeletePlayerId(int c_id);
 
 	BOOL SetStartGame();
