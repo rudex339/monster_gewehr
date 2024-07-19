@@ -591,7 +591,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
-			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f) + 10.f/*2000.f*/, 1429.0f,
+			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f) + 10.f/*2000.f*/ - 8.0f , 1429.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
@@ -719,6 +719,62 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 	sRect.right = FRAME_BUFFER_WIDTH / 2 + width;
 	sRect.top = FRAME_BUFFER_HEIGHT / 2;
 	sRect.bottom = sRect.top + height;
+
+	//world->reset();
+	//Entity* ent = world->create();
+
+	//D2D1_RECT_F imageRect, sRect;
+	int selected[2] = { 0, 0 };
+
+	ent = world->create();
+	ent->assign<TextUI_Component>(NEEDLE_FONT, L"ROOM NO. " + to_wstring(m_room_num),
+		FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+
+	{ // 플레이어를 그린다
+		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+			m_pObjectManager,
+			-16.f, -8.0f, 25.0f,
+			0.f, 145.f, 0.f,
+			6.0f, 6.0f, 6.0f,
+			SOLDIER);
+		ent->get<player_Component>()->id = 1;
+
+
+		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+			m_pObjectManager,
+			-5.f, -8.0f, 25.0f,
+			0.f, 160.f, 0.f,
+			6.0f, 6.0f, 6.0f,
+			SOLDIER);
+		ent->get<player_Component>()->id = 1;
+
+
+		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+			m_pObjectManager,
+			6.f, -8.0f, 25.0f,
+			0.f, 190.f, 0.f,
+			6.0f, 6.0f, 6.0f,
+			SOLDIER);
+		ent->get<player_Component>()->id = 1;
+
+		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+			m_pObjectManager,
+			17.f, -8.0f, 25.0f,
+			0.f, 215.f, 0.f,
+			6.0f, 6.0f, 6.0f,
+			SOLDIER);
+
+		ent->get<player_Component>()->id = 1;
+
+
+		CCamera* temp = new CThirdPersonCamera(NULL);
+		temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
+
+		ComponentHandle<Camera_Component> camera = ent->assign<Camera_Component>(temp);
+
+		world->emit<SetCamera_Event>({ ent->get<Camera_Component>().get().m_pCamera });
+
+	}
 
 	if (event.is_host) {
 		ent = world->create();
