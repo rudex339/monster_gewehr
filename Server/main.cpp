@@ -402,7 +402,7 @@ void ProcessPacket(int id, char* p)
 		else {
 			players[id].SetReady(true);
 		}
-		/*SC_READY_ROOM_PACKET packet;
+		SC_READY_ROOM_PACKET packet;
 		packet.size = sizeof(SC_READY_ROOM_PACKET);
 		packet.type = SC_PACKET_READY_ROOM;
 		packet.ready = players[id].GetReady();
@@ -411,7 +411,7 @@ void ProcessPacket(int id, char* p)
 			if (ply_id == -1) continue;
 			if (ply_id == id) continue;
 			players[ply_id].DoSend(&packet, packet.size);
-		}*/
+		}
 		break;
 	}
 	case CS_PACKET_SET_EQUIPMENT: {
@@ -486,9 +486,13 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 	SC_GAME_START_PACKET start_p;
 	start_p.size = sizeof(start_p);
 	start_p.type = SC_PACKET_GAME_START;
-	for (int ply_id : plys_id) {
-		if (ply_id == -1) continue;
-		retval = players[ply_id].DoSend(&start_p, start_p.size);
+	start_p.room_num = (SHORT)gameroom_id;
+	for (auto& ply : players) {
+		if (ply.second.GetID() == -1) continue;
+		retval = ply.second.DoSend(&start_p, start_p.size);
+		if (retval == SOCKET_ERROR) {
+			ply.second.SetState(S_STATE::LOG_OUT);
+		}
 	}
 
 	// 이것은 서버에서 플레이어 첫 위치를 설정해서 내 자신에게도 첫 시작지점이 어디인지 보내줄 것임
@@ -623,6 +627,9 @@ void SendRoomList(int id)
 			sub_packet.size = sizeof(sub_packet);
 			sub_packet.type = SC_PACKET_ADD_ROOM;
 			sub_packet.room_num = i;
+			sub_packet.start = false;
+			if (gamerooms[i].GetState() == G_INGAME)
+				sub_packet.start = true;
 
 			players[id].DoSend(&sub_packet, sub_packet.size);
 		}
@@ -643,6 +650,7 @@ void SendRoomCreate(int ply_id, int room_num)
 	sub_packet.size = sizeof(sub_packet);
 	sub_packet.type = SC_PACKET_ADD_ROOM;
 	sub_packet.room_num = room_num;
+	sub_packet.start = false;
 
 	for (auto& client : players) {
 		if (client.second.GetID() == ply_id) continue;

@@ -42,6 +42,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<Refresh_Scene>(this);
 	world->subscribe<ChoiceEquip_Event>(this);
 	world->subscribe<CreateObject_Event>(this);
+	world->subscribe<StartRoom_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -55,7 +56,6 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 		switch (m_State) {
 		case LOGIN:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				cout << "실행됨22" << endl;
 				world->emit<InputId_Event>({});
 				if (loginCheck)
 					world->emit< ChangeScene_Event>({ LOBBY });
@@ -202,6 +202,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 	case ROOMS:
 	{
+		m_join_room = -1;
+
 		world->reset();
 		Entity* ent = world->create();
 
@@ -293,7 +295,6 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			Button_Component joinBtn = Button_Component(JoinRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방입장", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-			//cout << m_room_num << endl;
 
 			if (m_room_num >= 0) {
 				joinBtn.Activate();
@@ -315,8 +316,6 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	
 	case SHOP:
 	{
-		
-
 		world->reset();
 		Entity* ent = world->create();
 
@@ -600,7 +599,6 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 		world->emit<AddObjectlayer_Event>({"Player",m_pPawn});
 
-		cout << m_pPawn->get<player_Component>()->id << endl;
 		Entity* ent = world->create();
 		ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
@@ -700,6 +698,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 {
 	m_State = event.State;
 	m_room_num = event.room_num;
+	m_join_room = m_room_num;
 
 	world->reset();
 	Entity* ent = world->create();
@@ -837,6 +836,38 @@ void Scene_Sysytem::receive(World* world, const ChoiceEquip_Event& event)
 	world->emit<ChangeScene_Event>({ EQUIPMENT });
 }
 
+void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
+{
+	int room_num = event.room_num;
+
+	if (room_num == m_join_room) {
+		world->emit< ChangeScene_Event>({ GAME });
+		world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
+			[&](Entity* ent,
+				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
+				ComponentHandle< Velocity_Component> Velocity,
+				ComponentHandle<Rotation_Component> Rotation) ->
+			void {
+				if (ent->has<Camera_Component>()) {
+					Player->id = event.ply_id;
+				}
+			});
+	}
+	else {
+		auto room = find_if(Rooms.begin(), Rooms.end(), [room_num](const Button_Component& b) {
+			return b.m_room_num == room_num;
+			});
+		if (room != Rooms.end()) {
+			room->Disable();
+			if (room_num == m_room_num) {
+				initSelect();
+			}
+		}
+		world->emit<Refresh_Scene>({ROOMS});
+	}
+}
+
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 {
 	FILE* pFile = NULL;
@@ -933,20 +964,23 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 	::fclose(pFile);
 }
 
-void Scene_Sysytem::AddRoom(int room_num)
+void Scene_Sysytem::AddRoom(int room_num, bool disable)
 {
 	int num = room_num;
 	D2D1_RECT_F sRect, imageRect;
 
 	// FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_HEIGHT / 8, FRAME_BUFFER_WIDTH * 13 / 20, FRAME_BUFFER_HEIGHT * 9 / 10
 	sRect = { FRAME_BUFFER_WIDTH / 20 + 10.0f, 
-		FRAME_BUFFER_HEIGHT / 8 + (float)num * FRAME_BUFFER_HEIGHT / 7 + 20.0f, 
+		FRAME_BUFFER_HEIGHT / 8 + (float)num * FRAME_BUFFER_HEIGHT / 7 + 20.0f,
 		FRAME_BUFFER_WIDTH * 13 / 20 - 10.0f, 
 		FRAME_BUFFER_HEIGHT / 8 + (float)(num+1)*FRAME_BUFFER_HEIGHT / 7 + 10.0f };
 	imageRect = { 0, 0, 1000, 563 };
-
-	Rooms.push_back(Button_Component(SelectRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num));
+	Button_Component room_btn = Button_Component(SelectRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num);
+	if (disable) {
+		room_btn.Disable();
+	}	
+	Rooms.push_back(room_btn);
 }
 
 void Scene_Sysytem::DeleteRoom(int room_num)
@@ -981,4 +1015,5 @@ void Scene_Sysytem::initSelect()
 {
 	m_item_num = -1;
 	m_room_num = -1;
+	m_join_room = -1;
 }

@@ -90,6 +90,11 @@ struct ChoiceEquip_Event {
 	int equipType;
 };
 
+struct StartRoom_Event {
+	UINT ply_id;
+	int room_num;
+};
+
 
 
 class Scene_Sysytem :public EntitySystem,
@@ -100,7 +105,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<CreateObject_Event>,
 	public EventSubscriber<ChoiceItem_Event>,
 	public EventSubscriber<Refresh_Scene>,
-	public EventSubscriber<ChoiceEquip_Event>
+	public EventSubscriber<ChoiceEquip_Event>,
+	public EventSubscriber<StartRoom_Event>
 {
 private:
 	UINT m_State = 0;
@@ -141,6 +147,7 @@ private:
 	bool loginCheck = false;
 	int m_item_num = -1;
 	int m_item_info[10];
+	int m_join_room = -1;
 
 	int equipments[4] = { 0, 3, 5, 7 };
 	int choicedHealItem = 0;
@@ -163,13 +170,13 @@ public:
 	virtual void receive(class World* world, const ChoiceItem_Event& event);
 	virtual void receive(class World* world, const Refresh_Scene& event);
 	virtual void receive(class World* world, const ChoiceEquip_Event& event);
-
 	virtual void receive(class World* world, const CreateObject_Event& event);
+	virtual void receive(class World* world, const StartRoom_Event& event);
 	
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수
-	void AddRoom(int room_num);
+	void AddRoom(int room_num, bool disable);
 	void DeleteRoom(int room_num);
 	void AddRoomPlayers(wstring name, int weapon);
 	void InitRoomPlayers();

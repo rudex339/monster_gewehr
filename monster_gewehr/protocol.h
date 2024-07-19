@@ -198,6 +198,7 @@ struct SC_GAME_START_PACKET	// 방장이 게임을 시작했으면 클라이언트들이 add_playe
 {
 	UCHAR size;
 	UCHAR type;
+	SHORT room_num;
 };
 
 struct SC_ADD_PLAYER_PACKET
@@ -282,6 +283,7 @@ struct SC_ADD_ROOM_PACKET
 	UCHAR type;
 	//CHAR room_name[15];
 	SHORT room_num;
+	BOOL start;
 };
 
 struct SC_SELECT_ROOM_PACKET	// 게임방 선택하면 누가 있는지 어떤 장비인지 알려줌

@@ -92,7 +92,6 @@ void Sever_System::receive(World* world, const Login_Event& event)
 		if (retval > 0) {
 			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
 				m_id = (int)sub_packet.id;
-				std::cout << "성공했음 일단 " << (int)sub_packet.id << std::endl;
 				m_login = true;
 				world->emit<LoginCheck_Event>({ m_login });
 				break;
@@ -158,7 +157,6 @@ void Sever_System::receive(class World* world, const Join_Room& event)
 	p.size = sizeof(p);
 	p.type = CS_PACKET_JOIN_ROOM;
 	p.room_num = event.room_num;
-	cout << p.room_num << endl;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
@@ -183,15 +181,7 @@ void Sever_System::receive(class World* world, const Select_Room& event)
 }
 
 void Sever_System::receive(World* world, const Ready_Room& event)
-{
-	static bool ready = false;
-	ready = !ready;
-	if (ready) {
-		cout << "레디함" << endl;
-	} 
-	else {
-		cout << "레디안함" << endl;
-	}
+{	
 	CS_READY_ROOM_PACKET p;
 	p.size = sizeof(p);
 	p.type = CS_PACKET_READY_ROOM;
@@ -252,23 +242,12 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	switch (packet[1])
 	{
 	case SC_PACKET_GAME_START: {
-		world->emit< ChangeScene_Event>({ GAME });
-		world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
-			[&](Entity* ent,
-				ComponentHandle<player_Component> Player,
-				ComponentHandle<Position_Component> Position,
-				ComponentHandle< Velocity_Component> Velocity,
-				ComponentHandle<Rotation_Component> Rotation) ->
-			void {
-				if (ent->has<Camera_Component>()) {
-					Player->id = m_id;
-				}
-			});
+		SC_GAME_START_PACKET* pk = reinterpret_cast<SC_GAME_START_PACKET*>(packet);
+		world->emit<StartRoom_Event>({ m_id, pk->room_num });
 		break;
 	}
 	case SC_PACKET_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* pk = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet);
-		cout << "add id : " << (int)pk->player_data.id << endl;
 		world->each<player_Component, Position_Component, Rotation_Component>(
 			[&](Entity* ent,
 				ComponentHandle<player_Component> Player,
@@ -430,15 +409,14 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_CREATE_ROOM: {
 		SC_CREATE_ROOM_PACKET* pk = reinterpret_cast<SC_CREATE_ROOM_PACKET*>(packet);
-		cout << pk->room_num << endl;
-		m_scene->AddRoom(pk->room_num);
+		m_scene->AddRoom(pk->room_num, false);
 		//world->emit< ChangeScene_Event>({ ROOMS });
 		world->emit<EnterRoom_Event>({ INROOM, pk->room_num, true });
 		break;
 	}
 	case SC_PACKET_ADD_ROOM: {
 		SC_ADD_ROOM_PACKET* pk = reinterpret_cast<SC_ADD_ROOM_PACKET*>(packet);
-		m_scene->AddRoom(pk->room_num);
+		m_scene->AddRoom(pk->room_num, pk->start);
 		world->emit<Refresh_Scene>({ ROOMS });
 		break;
 	}
@@ -454,6 +432,9 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		break;
 	}
 	case SC_PACKET_READY_ROOM: {
+		SC_READY_ROOM_PACKET* pk = reinterpret_cast<SC_READY_ROOM_PACKET*>(packet);
+		pk->ready; // 이게 bool 타입이라서 이걸 써서 레디인지 아닌지 확인(true면 레디상태, false면 레디 안한거)
+		// 여기에 다른 사람이 레디했는지 안했는지 바뀐걸 감지함
 		break;
 	}
 	case SC_PACKET_BREAK_ROOM: {
