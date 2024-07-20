@@ -301,6 +301,7 @@ struct SC_READY_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
+	CHAR id;
 	BOOL ready;
 };
 
@@ -338,6 +339,8 @@ struct SC_ADD_ROOM_PLAYER_PACKET
 	CHAR name[20];
 	CHAR weapon;
 	CHAR armor;
+	BOOL host;
+	BOOL ready;
 };
 #pragma pack (pop)
 

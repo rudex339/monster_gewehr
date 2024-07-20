@@ -11,7 +11,7 @@ class Box;
 enum FontType {
 	DEFAULT_FONT,
 	SMALL_FONT,
-	GARMULI_FONT,
+	MEDIUM_FONT,
 	NEEDLE_FONT
 };
 
