@@ -442,8 +442,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			ComPtr<IDWriteTextFormat> textformat;
 			switch (textUI->m_fontType)
 			{
-			case GARMULI_FONT:
-				textformat = m_smalltextFormat;
+			case MEDIUM_FONT:
+				textformat = pTextFormat;
 				break;
 			case NEEDLE_FONT:
 				textformat = Needleteeth[0];
@@ -531,7 +531,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				ComPtr<IDWriteTextFormat> textformat[2];
 				switch (button->m_fontType)
 				{
-				case GARMULI_FONT:
+				case MEDIUM_FONT:
 					textformat[0] = m_smalltextFormat;
 					textformat[1] = m_textFormat;
 					break;
@@ -615,13 +615,12 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case GameReadyBtn:
 					world->emit<Ready_Room>({});
-					cout << "레디" << endl;
+					world->emit<Ready_Event>({});
 
 					break;
 				case GameStartBtn:
 					//world->emit< ChangeScene_Event>({ GAME });
 					world->emit<Game_Start>({});
-					cout << "시작" << endl;
 					break;
 				case EquipLeftBtn:
 					world->emit<ChoiceEquip_Event>({ EquipLeftBtn, button->item_num });

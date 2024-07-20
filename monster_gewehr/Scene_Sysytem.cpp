@@ -43,6 +43,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<ChoiceEquip_Event>(this);
 	world->subscribe<CreateObject_Event>(this);
 	world->subscribe<StartRoom_Event>(this);
+	world->subscribe<Ready_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -712,9 +713,6 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 
 	world->reset();
 	Entity* ent = world->create();
-	ent->assign<TextUI_Component>(DEFAULT_FONT, to_wstring(m_room_num) + L"번 방",
-		(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-		(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
 
 	D2D1_RECT_F imageRect;
 	imageRect = { 0, 0, 340, 70 };
@@ -741,12 +739,14 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 		FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
 
 	{ // 플레이어를 그린다
+		// 나 자신 그리기
 		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
-			-16.f, -8.0f, 25.0f,
+			-12.f, -8.0f, 20.0f,
 			0.f, 145.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
+
 		ent->get<player_Component>()->id = m_id;
 
 		auto& my_weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
@@ -755,6 +755,30 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 				my_weapon[i]->draw = true;
 			}
 			else my_weapon[i]->draw = false;
+		}
+
+		// // 이름 및 레디 상태 출력
+		// 방장이면 MASTER가, 아니라면 READY or 아무것도 안그리기
+		if (m_is_host) {
+			Entity* ent = world->create();
+			TextUI_Component text = TextUI_Component(MEDIUM_FONT, L" HOST",
+				FRAME_BUFFER_HEIGHT * 9 / 10, FRAME_BUFFER_WIDTH / 6,
+				FRAME_BUFFER_HEIGHT , FRAME_BUFFER_WIDTH * 2 / 6);
+			text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
+			text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+
+			ent->assign<TextUI_Component>(text);
+		}
+		else {
+			if (m_ready) {
+				ent = world->create();
+				TextUI_Component text = TextUI_Component(MEDIUM_FONT, L" READY",
+					FRAME_BUFFER_HEIGHT * 9 / 10, FRAME_BUFFER_WIDTH / 6,
+					FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 2 / 6);
+				text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
+				text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+				ent->assign<TextUI_Component>(text);
+			}
 		}
 
 		for (int i = 0; i < InRoomPlayers.size(); i++) {
@@ -773,34 +797,24 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 				}
 				else weapon[j]->draw = false;
 			}
+
+			if (InRoomPlayers[i].host) {
+				ent = world->create();
+				TextUI_Component text = TextUI_Component(MEDIUM_FONT, L"HOST",
+					FRAME_BUFFER_HEIGHT * 8 / 10, FRAME_BUFFER_WIDTH * (1.8 + i * 1.4) / 6,
+					FRAME_BUFFER_HEIGHT * 9 / 10, FRAME_BUFFER_WIDTH * (3.0 + i * 1.2) / 6);
+				ent->assign<TextUI_Component>(text);
+			}
+			else {
+				if (InRoomPlayers[i].ready) {
+					ent = world->create();
+					TextUI_Component text = TextUI_Component(MEDIUM_FONT, L"READY",
+						FRAME_BUFFER_HEIGHT * 8 / 10, FRAME_BUFFER_WIDTH * (1.8 + i * 1.4) / 6,
+						FRAME_BUFFER_HEIGHT * 9 / 10, FRAME_BUFFER_WIDTH * (3.0 + i * 1.2) / 6);
+					ent->assign<TextUI_Component>(text);
+				}
+			}
 		}
-
-		/*ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager,
-			-5.f, -8.0f, 25.0f,
-			0.f, 160.f, 0.f,
-			6.0f, 6.0f, 6.0f,
-			SOLDIER);
-		ent->get<player_Component>()->id = 1;
-
-
-		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager,
-			6.f, -8.0f, 25.0f,
-			0.f, 190.f, 0.f,
-			6.0f, 6.0f, 6.0f,
-			SOLDIER);
-		ent->get<player_Component>()->id = 1;
-
-		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager,
-			17.f, -8.0f, 25.0f,
-			0.f, 215.f, 0.f,
-			6.0f, 6.0f, 6.0f,
-			SOLDIER);
-
-		ent->get<player_Component>()->id = 1;*/
-
 
 		CCamera* temp = new CThirdPersonCamera(NULL);
 		temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
@@ -967,6 +981,12 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 	}
 }
 
+void Scene_Sysytem::receive(World* world, const Ready_Event& event)
+{
+	m_ready = !m_ready;
+	world->emit<Refresh_Scene>({ INROOM });
+}
+
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 {
 	FILE* pFile = NULL;
@@ -1117,9 +1137,9 @@ void Scene_Sysytem::initSelect()
 	m_join_room = -1;
 }
 
-void Scene_Sysytem::AddInRoomPlayers(int id, wstring name, int weapon, int armor)
+void Scene_Sysytem::AddInRoomPlayers(RoomPlayer_Info info)
 {
-	InRoomPlayers.push_back({ id, name, weapon, armor });
+	InRoomPlayers.push_back(info);
 }
 
 void Scene_Sysytem::RemoveInRoomPlayers(int id)
@@ -1132,4 +1152,15 @@ void Scene_Sysytem::RemoveInRoomPlayers(int id)
 void Scene_Sysytem::InitInRoomPlayers() 
 {
 	InRoomPlayers.clear();
+	m_ready = false;
+}
+
+void Scene_Sysytem::ReadyCheck(int id, bool ready)
+{
+	for (int i = 0; i < InRoomPlayers.size(); i++) {
+		if (InRoomPlayers[i].id == id) {
+			InRoomPlayers[i].ready = !InRoomPlayers[i].ready;
+			break;
+		}
+	}
 }

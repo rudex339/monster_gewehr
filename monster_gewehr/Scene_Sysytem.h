@@ -102,8 +102,12 @@ struct RoomPlayer_Info {
 	wstring name;
 	int weapon;
 	int armor;
+	bool ready = false;
+	bool host = false;
 };
 
+struct Ready_Event {
+};
 
 
 class Scene_Sysytem :public EntitySystem,
@@ -115,7 +119,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChoiceItem_Event>,
 	public EventSubscriber<Refresh_Scene>,
 	public EventSubscriber<ChoiceEquip_Event>,
-	public EventSubscriber<StartRoom_Event>
+	public EventSubscriber<StartRoom_Event>,
+	public EventSubscriber<Ready_Event>
 {
 private:
 	UINT m_State = 0;
@@ -133,6 +138,7 @@ private:
 	short m_score = 0;
 
 	int m_id = -1;
+	bool m_ready = false;
 
 	// ¹æ ¸ñ·Ï
 	vector<Button_Component> Rooms;
@@ -168,7 +174,7 @@ private:
 	int haveHealItems[3];
 	int equipHealItems[3] = { 0, 1, 2 };
 
-	float roomPlayerSet[3] = { 160, 190, 215 };
+	float roomPlayerSet[3] = { 160, 180, 190 };
 	float roomPlayerAngle[3][3] = { {-5.f, -8.0f, 25.0f}, {6.f, -8.0f, 25.0f}, {17.f, -8.0f, 25.0f} };
 
 
@@ -190,6 +196,7 @@ public:
 	virtual void receive(class World* world, const ChoiceEquip_Event& event);
 	virtual void receive(class World* world, const CreateObject_Event& event);
 	virtual void receive(class World* world, const StartRoom_Event& event);
+	virtual void receive(class World* world, const Ready_Event& event);
 	
 	void BuildScene(World* world, char* pstrFileName);
 
@@ -199,8 +206,9 @@ public:
 	void AddRoomPlayers(wstring name, int weapon);
 	void InitRoomPlayers();
 	void initSelect();
-	void AddInRoomPlayers(int id, wstring name, int weapon, int armor);
+	void AddInRoomPlayers(RoomPlayer_Info info);
 	void RemoveInRoomPlayers(int id);
 	void InitInRoomPlayers();
+	void ReadyCheck(int id, bool ready);
 };
 

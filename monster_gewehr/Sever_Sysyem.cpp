@@ -441,8 +441,8 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_READY_ROOM: {
 		SC_READY_ROOM_PACKET* pk = reinterpret_cast<SC_READY_ROOM_PACKET*>(packet);
-		pk->ready; // 이게 bool 타입이라서 이걸 써서 레디인지 아닌지 확인(true면 레디상태, false면 레디 안한거)
-		// 여기에 다른 사람이 레디했는지 안했는지 바뀐걸 감지함
+		m_scene->ReadyCheck(pk->id, pk->ready);
+		world->emit<Refresh_Scene>({ INROOM });
 		break;
 	}
 	case SC_PACKET_BREAK_ROOM: {
@@ -476,7 +476,14 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
 
 		cout << "name : " << pk->name << " weapon : " << (int)pk->weapon << endl;
-		m_scene->AddInRoomPlayers(pk->id, wstr, (int)pk->weapon, (int)pk->armor);
+		RoomPlayer_Info info;
+		info.id = pk->id;
+		info.name = wstr;
+		info.weapon = (int)pk->weapon;
+		info.armor = pk->armor;
+		info.host = pk->host;
+		info.ready = pk->ready;
+		m_scene->AddInRoomPlayers(info);
 		world->emit<Refresh_Scene>({ INROOM });
 		break;
 	}

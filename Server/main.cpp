@@ -391,6 +391,7 @@ void ProcessPacket(int id, char* p)
 		SC_READY_ROOM_PACKET packet;
 		packet.size = sizeof(SC_READY_ROOM_PACKET);
 		packet.type = SC_PACKET_READY_ROOM;
+		packet.id = id;
 		packet.ready = players[id].GetReady();
 
 		for (int ply_id : gamerooms[players[id].GetRoomID()].GetPlyId()) {
@@ -751,6 +752,8 @@ void SendRoomJoin(int id)
 		strcpy_s(add_p2.name, players[ply_id].GetName().c_str());
 		add_p2.weapon = players[ply_id].GetWeapon();
 		add_p2.armor = players[ply_id].GetArmor();
+		add_p2.host = players[ply_id].GetHost();
+		add_p2.ready = players[ply_id].GetReady();
 
 		players[id].DoSend(&add_p2, add_p2.size);
 	}
