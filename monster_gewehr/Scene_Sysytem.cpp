@@ -82,7 +82,7 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 			}
 			else if (pKeysBuffer[VK_BACK] & 0xF0) {
 				world->emit<Quit_Room>({});
-				world->emit< ChangeScene_Event>({ ROOMS });
+				world->emit< ChangeScene_Event>({ ROOMS });				
 			}
 			break;
 		case SHOP:
@@ -202,7 +202,11 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 	case ROOMS:
 	{
+		// 방에 들어가 있을때 가지고 있던 정보들 다 초기화
 		m_join_room = -1;
+		m_is_host = false;
+		InitInRoomPlayers();
+		//----------------------------------
 
 		world->reset();
 		Entity* ent = world->create();
@@ -296,7 +300,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 
-			if (m_room_num >= 0) {
+			if (m_room_num >= 0 && RoomPlayers.size() < 4) {
 				joinBtn.Activate();
 			}
 			else {
@@ -313,7 +317,11 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		}
 	}
 	break;
-	
+	case INROOM:
+	{
+		world->emit<EnterRoom_Event>({ INROOM, m_room_num, m_is_host });
+	}
+	break;
 	case SHOP:
 	{
 		world->reset();
@@ -700,6 +708,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 	m_State = event.State;
 	m_room_num = event.room_num;
 	m_join_room = m_room_num;
+	m_is_host = event.is_host;
 
 	world->reset();
 	Entity* ent = world->create();
@@ -738,10 +747,35 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 			0.f, 145.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
-		ent->get<player_Component>()->id = 1;
+		ent->get<player_Component>()->id = m_id;
 
+		auto& my_weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
+		for (int i = 0; i < 3; ++i) {
+			if (i == equipments[0]) {
+				my_weapon[i]->draw = true;
+			}
+			else my_weapon[i]->draw = false;
+		}
 
-		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		for (int i = 0; i < InRoomPlayers.size(); i++) {
+			ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+				m_pObjectManager,
+				roomPlayerAngle[i][0], roomPlayerAngle[i][1], roomPlayerAngle[i][2],
+				0.f, roomPlayerSet[i], 0.f,
+				6.0f, 6.0f, 6.0f,
+				SOLDIER);
+			ent->get<player_Component>()->id = InRoomPlayers[i].id;
+
+			auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
+			for (int j = 0; j < 3; ++j) {
+				if (j == InRoomPlayers[i].weapon) {
+					weapon[j]->draw = true;
+				}
+				else weapon[j]->draw = false;
+			}
+		}
+
+		/*ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			-5.f, -8.0f, 25.0f,
 			0.f, 160.f, 0.f,
@@ -765,7 +799,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
 
-		ent->get<player_Component>()->id = 1;
+		ent->get<player_Component>()->id = 1;*/
 
 
 		CCamera* temp = new CThirdPersonCamera(NULL);
@@ -794,6 +828,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
 {
 	loginCheck = event.logincheck;
+	m_id = event.id;
 }
 
 void Scene_Sysytem::receive(World* world, const ChoiceRoom_Event& event)
@@ -1080,4 +1115,21 @@ void Scene_Sysytem::initSelect()
 	m_item_num = -1;
 	m_room_num = -1;
 	m_join_room = -1;
+}
+
+void Scene_Sysytem::AddInRoomPlayers(int id, wstring name, int weapon, int armor)
+{
+	InRoomPlayers.push_back({ id, name, weapon, armor });
+}
+
+void Scene_Sysytem::RemoveInRoomPlayers(int id)
+{
+	InRoomPlayers.erase(remove_if(InRoomPlayers.begin(), InRoomPlayers.end(), [id](const RoomPlayer_Info& p) {
+		return p.id == id;
+		}), InRoomPlayers.end());
+}
+
+void Scene_Sysytem::InitInRoomPlayers() 
+{
+	InRoomPlayers.clear();
 }

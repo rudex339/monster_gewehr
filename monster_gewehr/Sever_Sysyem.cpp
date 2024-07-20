@@ -93,7 +93,7 @@ void Sever_System::receive(World* world, const Login_Event& event)
 			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
 				m_id = (int)sub_packet.id;
 				m_login = true;
-				world->emit<LoginCheck_Event>({ m_login });
+				world->emit<LoginCheck_Event>({ m_login, (int)m_id });
 				break;
 			}
 			else if (sub_packet.type == SC_PACKET_LOGIN_FAIL) {
@@ -458,12 +458,26 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_JOIN_ROOM: {
 		SC_JOIN_ROOM_PACKET* pk = reinterpret_cast<SC_JOIN_ROOM_PACKET*>(packet);
-		// 여기에 새롭게 방에 들어온 애 정보 추가해주면됨
+		world->emit<ChangeScene_Event>({ INROOM });
 		break;
 	}
 	case SC_PACKET_QUIT_ROOM: {
 		SC_QUIT_ROOM_PACKET* pk = reinterpret_cast<SC_QUIT_ROOM_PACKET*>(packet);
 		// 여기에 방에서 방금 나간에 누군지 pk->id로 알아내고 삭제하면 됨
+		m_scene->RemoveInRoomPlayers(pk->id);
+		world->emit<Refresh_Scene>({ INROOM });
+		break;
+	}
+	case SC_PACKET_ADD_ROOM_PLAYER: {
+		SC_ADD_ROOM_PLAYER_PACKET* pk = reinterpret_cast<SC_ADD_ROOM_PLAYER_PACKET*>(packet);
+
+		int len = MultiByteToWideChar(CP_ACP, 0, pk->name, -1, nullptr, 0);
+		std::wstring wstr(len, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
+
+		cout << "name : " << pk->name << " weapon : " << (int)pk->weapon << endl;
+		m_scene->AddInRoomPlayers(pk->id, wstr, (int)pk->weapon, (int)pk->armor);
+		world->emit<Refresh_Scene>({ INROOM });
 		break;
 	}
 

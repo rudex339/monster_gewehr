@@ -59,8 +59,7 @@ constexpr char SC_PACKET_BREAK_ROOM = 17;
 constexpr char SC_PACKET_DELETE_ROOM = 18;
 constexpr char SC_PACKET_JOIN_ROOM = 19;
 constexpr char SC_PACKET_QUIT_ROOM = 20;
-constexpr char SC_PACKET_BUY = 21;
-constexpr char SC_PACKET_UPGRADE = 22;
+constexpr char SC_PACKET_ADD_ROOM_PLAYER = 21;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -322,10 +321,6 @@ struct SC_JOIN_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	CHAR id;
-	CHAR name[20];
-	CHAR weapon;
-	CHAR armor;
 };
 
 struct SC_QUIT_ROOM_PACKET
@@ -333,6 +328,16 @@ struct SC_QUIT_ROOM_PACKET
 	UCHAR size;
 	UCHAR type;
 	CHAR id;
+};
+
+struct SC_ADD_ROOM_PLAYER_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR id;
+	CHAR name[20];
+	CHAR weapon;
+	CHAR armor;
 };
 #pragma pack (pop)
 

@@ -354,11 +354,12 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_PACKET_JOIN_ROOM: {
-		CS_JOIN_ROOM_PACKET *packet = reinterpret_cast<CS_JOIN_ROOM_PACKET*>(p);
-		players[id].SetRoomID(packet->room_num);
-		gamerooms[packet->room_num].SetPlayerId(id);
-
-		SendRoomJoin(id);
+		CS_JOIN_ROOM_PACKET *packet = reinterpret_cast<CS_JOIN_ROOM_PACKET*>(p);		
+		// 만약 풀방이 아니면 조인 성공했다고 보냄
+		if (gamerooms[packet->room_num].SetPlayerId(id)) {
+			players[id].SetRoomID(packet->room_num);
+			SendRoomJoin(id);
+		}
 		break;
 	}
 	case CS_PACKET_QUIT_ROOM: {
@@ -373,10 +374,10 @@ void ProcessPacket(int id, char* p)
 			players[id].SetReady(false);
 		}
 		else {
+			SendRoomQuit(id);
 			gamerooms[players[id].GetRoomID()].DeletePlayerId(id);
 			players[id].SetRoomID(-1);
-			players[id].SetReady(false);
-			// 다른 플레이어들에게 내가 나갔다는것도 알려줘야함
+			players[id].SetReady(false);			
 		}
 		break;
 	}
@@ -715,24 +716,43 @@ void SendDeleteRoom(short room_num)
 	}
 }
 
-// 지금 자신한테는 다른 클라이언트의 정보를 보낼지 아니면 select에서 받은걸 저장했다가 나타낼지 고민중
 // 물론 방에 들어있는 사람한테는 내가 들어왔고 어떤 놈인지를 알려줘야함
 void SendRoomJoin(int id)
 {
 	short room_num = players[id].GetRoomID();
 
-	SC_JOIN_ROOM_PACKET packet;
-	packet.size = sizeof(packet);
-	packet.type = SC_PACKET_JOIN_ROOM;
-	packet.id = id;
-	strcpy_s(packet.name, players[id].GetName().c_str());
-	packet.weapon = players[id].GetWeapon();
-	packet.armor = players[id].GetArmor();
+	// 이 밑은 클라이언트에게 방 들어갈수 있다고 알려주는 패킷(풀방이면 이 함수자체가 실행 안됨)
+	SC_JOIN_ROOM_PACKET join_p;
+	join_p.size = sizeof(join_p);
+	join_p.type = SC_PACKET_JOIN_ROOM;
+
+	players[id].DoSend(&join_p, join_p.size);
+
+
+	// 내가 방에 들어와서 기존에 들어와있던 애들한테 신병왔다고 알려주는 패킷
+	SC_ADD_ROOM_PLAYER_PACKET add_p;
+	add_p.size = sizeof(add_p);
+	add_p.type = SC_PACKET_ADD_ROOM_PLAYER;
+	add_p.id = id;
+	strcpy_s(add_p.name, players[id].GetName().c_str());
+	add_p.weapon = players[id].GetWeapon();
+	add_p.armor = players[id].GetArmor();
 
 	for (int ply_id : gamerooms[room_num].GetPlyId()) {
 		if (ply_id == -1) continue;
 		if (ply_id == id) continue;
-		players[ply_id].DoSend(&packet, packet.size);
+		players[ply_id].DoSend(&add_p, add_p.size);
+
+		// 신병한테 고참들 정보 알려주는 패킷
+		SC_ADD_ROOM_PLAYER_PACKET add_p2;
+		add_p2.size = sizeof(add_p2);
+		add_p2.type = SC_PACKET_ADD_ROOM_PLAYER;
+		add_p2.id = ply_id;
+		strcpy_s(add_p2.name, players[ply_id].GetName().c_str());
+		add_p2.weapon = players[ply_id].GetWeapon();
+		add_p2.armor = players[ply_id].GetArmor();
+
+		players[id].DoSend(&add_p2, add_p2.size);
 	}
 }
 

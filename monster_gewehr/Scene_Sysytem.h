@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 #include <unordered_set>
+#include <unordered_map>
 #include "Object_Entity.h"
 
 class ObjectManager;
@@ -64,6 +65,7 @@ struct EnterRoom_Event {
 
 struct LoginCheck_Event {
 	bool logincheck = false;
+	int id;
 };
 
 struct Player_Info {
@@ -95,6 +97,13 @@ struct StartRoom_Event {
 	int room_num;
 };
 
+struct RoomPlayer_Info {
+	int id;
+	wstring name;
+	int weapon;
+	int armor;
+};
+
 
 
 class Scene_Sysytem :public EntitySystem,
@@ -123,12 +132,16 @@ private:
 
 	short m_score = 0;
 
+	int m_id = -1;
+
 	// ¹æ ¸ñ·Ï
 	vector<Button_Component> Rooms;
 	queue<int> Room_ids;
 
 	vector<Player_Info> RoomPlayers;
 	unordered_set<wstring> RoomPlayerNames;
+
+	vector<RoomPlayer_Info> InRoomPlayers;
 
 	wstring imagefiles[10] = {
 				L"image/M4.png",
@@ -148,11 +161,16 @@ private:
 	int m_item_num = -1;
 	int m_item_info[10];
 	int m_join_room = -1;
+	bool m_is_host = false;
 
 	int equipments[4] = { 0, 3, 5, 7 };
 	int choicedHealItem = 0;
 	int haveHealItems[3];
 	int equipHealItems[3] = { 0, 1, 2 };
+
+	float roomPlayerSet[3] = { 160, 190, 215 };
+	float roomPlayerAngle[3][3] = { {-5.f, -8.0f, 25.0f}, {6.f, -8.0f, 25.0f}, {17.f, -8.0f, 25.0f} };
+
 
 public:
 
@@ -181,5 +199,8 @@ public:
 	void AddRoomPlayers(wstring name, int weapon);
 	void InitRoomPlayers();
 	void initSelect();
+	void AddInRoomPlayers(int id, wstring name, int weapon, int armor);
+	void RemoveInRoomPlayers(int id);
+	void InitInRoomPlayers();
 };
 

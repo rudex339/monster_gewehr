@@ -604,7 +604,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<ChoiceRoom_Event>({ button->m_room_num });
 					break;
 				case JoinRoomBtn:
-					world->emit<EnterRoom_Event>({ INROOM, select_room_num, false });
+					//world->emit<EnterRoom_Event>({ INROOM, select_room_num, false });
 					world->emit<Join_Room>({ (SHORT)select_room_num });
 					break;
 				case ItemBtn:
