@@ -271,7 +271,9 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StaticMeshActor482.bin", NULL) });
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	m_EmitterList.insert({ "explosion",
+		 (std::shared_ptr<GameObjectModel>)
+		(new MultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature))});
 
 	m_nHierarchicalGameObjects = 0;
 

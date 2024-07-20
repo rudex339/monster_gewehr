@@ -306,8 +306,8 @@ void Render_System::tick(World* world, float deltaTime)
 			ComponentHandle<Position_Component> pos
 			) -> void {
 				if (ent->has<Terrain_Component>()) {
-					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
-					Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
+					Model->m_MeshModel->UpdateTransform(&pos->m_xmf4x4World);
+					Model->m_MeshModel->Render(	m_pd3dCommandList, m_pCamera);
 				}
 				else if (ent->has<Rotation_Component>() &&
 					ent->has<Scale_Component>()) {
@@ -322,8 +322,8 @@ void Render_System::tick(World* world, float deltaTime)
 					ComponentHandle<Scale_Component> Scale = ent->get<Scale_Component>();
 					if (ent->has<AnimationController_Component>()) {
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
-						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel->m_pModelRootObject);
-						Model->m_MeshModel->m_pModelRootObject->Animate(deltaTime);
+						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel);
+						Model->m_MeshModel->Animate(deltaTime);
 					}
 
 					XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
@@ -363,7 +363,7 @@ void Render_System::tick(World* world, float deltaTime)
 					}
 
 
-					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
+					Model->m_MeshModel->UpdateTransform(&xmf4x4World);
 
 					if (ent->has<AnimationController_Component>()) {
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
@@ -371,26 +371,26 @@ void Render_System::tick(World* world, float deltaTime)
 					}
 					
 					if(Model->draw)
-						Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
+						Model->m_MeshModel->Render(	m_pd3dCommandList, m_pCamera);
 
 					for (auto child : Model->m_pchildObjects) {
 						if (child->socket) {
-							child->m_MeshModel->m_pModelRootObject->UpdateTransform(&child->socket->m_xmf4x4World);
+							child->m_MeshModel->UpdateTransform(&child->socket->m_xmf4x4World);
 						}
 						else {
-							child->m_MeshModel->m_pModelRootObject->UpdateTransform(&xmf4x4World);
+							child->m_MeshModel->UpdateTransform(&xmf4x4World);
 						}
 						if (child->draw)
-							child->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
+							child->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 					}
 
 
 				}
 				else{
-					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
+					Model->m_MeshModel->UpdateTransform(&pos->m_xmf4x4World);
 					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {						
 						if (Model->draw){
-							Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
+							Model->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 						}
 						//test
 						if (m_pBox) {

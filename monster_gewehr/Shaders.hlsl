@@ -36,7 +36,7 @@ cbuffer cbGameObjectInfo : register(b2)
 
 Texture2D gtxtAlbedoTexture : register(t6);
 Texture2D gtxtSpecularTexture : register(t7);
-Texture2D gtxtNormalTexture : register(t8);
+Texture2D gtxtNormalTexture : register(t8);	
 Texture2D gtxtMetallicTexture : register(t9);
 Texture2D gtxtEmissionTexture : register(t10);
 Texture2D gtxtDetailAlbedoTexture : register(t11);
@@ -105,6 +105,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	float4 cIllumination = Lighting(input.positionW, normalW);	
 	//standard
     //return (lerp(cColor, cIllumination, 0.5f));
+	
 	//flog
 	float4 FlogColor = float4(0.5f, 0.3f, 0.2f, 1.0f);
     float3 disttoEye = length(gvCameraPosition - input.positionW);
@@ -115,6 +116,48 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     return (lerp(lerp(cColor, cIllumination, 0.5f), FlogColor, flogAmount));
 }
 
+float4 EmittorStandard(VS_STANDARD_OUTPUT input)
+{
+	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
+		cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
+		cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+		cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_METALLIC_MAP)
+		cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
+	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_EMISSION_MAP)
+		cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+
+	float3 normalW;
+	float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+	{
+		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		normalW = normalize(mul(vNormal, TBN));
+	}
+	else
+	{
+		normalW = normalize(input.normalW);
+	}
+	//standard
+    //return (lerp(cColor, cIllumination, 0.5f));
+	
+	//flog
+	float4 FlogColor = float4(0.5f, 0.3f, 0.2f, 1.0f);
+	float3 disttoEye = length(gvCameraPosition - input.positionW);
+	float flogstart;
+	float flogrange;
+	
+	float flogAmount = saturate((disttoEye - 50.f) / 500.f);
+	return (lerp(cColor, FlogColor, flogAmount));
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 #define MAX_VERTEX_INFLUENCES			4
@@ -269,3 +312,48 @@ float4 PSBoundingBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 	return (FlogColor);
 
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//Texture2D gtxtTexture : register(t0);
+
+//SamplerState gWrapSamplerState : register(s0);
+//SamplerState gClampSamplerState : register(s1);
+
+//struct VS_TEXTURED_INPUT
+//{
+//	float3 position : POSITION;
+//	float2 uv : TEXCOORD;
+//};
+
+//struct VS_TEXTURED_OUTPUT
+//{
+//	float4 position : SV_POSITION;
+//	float2 uv : TEXCOORD;
+//};
+
+//VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
+//{
+//	VS_TEXTURED_OUTPUT output;
+
+//	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+//	output.uv = input.uv;
+
+//	return (output);
+//}
+
+//VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
+//{
+//	VS_TEXTURED_OUTPUT output;
+
+//	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+//	output.uv = mul(float3(input.uv, 1.0f), (float3x3) (gMaterial.gmtxTexture)).xy;
+
+//	return (output);
+//}
+
+//float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+//{
+//	float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+
+//	return (cColor);
+//}

@@ -1587,3 +1587,29 @@ void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOr
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : GameObjectModel(1)
+{
+	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 100);
+	SetMesh(pMesh);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CTexture* Texture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	Texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+
+	CStandardShader* pShader = new  CStandardShader();
+	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+
+	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 10);
+
+	CMaterial* pBoxMaterial = new CMaterial(1);
+	pBoxMaterial->SetTexture(Texture);
+	pBoxMaterial->SetShader(pShader);
+
+
+	SetMaterial(0, pBoxMaterial);
+}
