@@ -260,12 +260,10 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_LOGIN: {
 		CS_LOGIN_PACKET* packet = reinterpret_cast<CS_LOGIN_PACKET*>(p);
 		players[id].SetName(packet->name);
-		players[id].SetWepon(packet->weapon);
+		players[id].SetWeapon(packet->weapon);
 		players[id].SetRoomID(-1);
 
 		std::cout << players[id].GetName().c_str() << std::endl;
-
-		players[id].SetByWeapon(0);
 		SendLoginInfo(id);
 		SendRoomList(id);
 
@@ -324,7 +322,7 @@ void ProcessPacket(int id, char* p)
 		int room_id = players[id].GetRoomID();
 		if (souleaters[room_id].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
 			souleaters[room_id].m_lock.lock();
-			souleaters[room_id].SetHp(souleaters[room_id].GetHp() - 10);
+			souleaters[room_id].SetHp(souleaters[room_id].GetHp() - players[id].GetAtk());
 			if (souleaters[room_id].GetState() == idle_state) {
 				souleaters[room_id].SetState(fight_state);
 				souleaters[room_id].SetTarget(&players[id]);
@@ -402,11 +400,11 @@ void ProcessPacket(int id, char* p)
 	}
 	case CS_PACKET_SET_EQUIPMENT: {
 		CS_SET_EQUIPMENT_PACKET *packet = reinterpret_cast<CS_SET_EQUIPMENT_PACKET*>(p);
-		players[id].SetWepon(packet->weapon);
+		players[id].SetWeapon(packet->weapon);
 		players[id].SetArmor(packet->armor);
 		players[id].SetGrenade(packet->grenade);
 
-		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].Getgrenade() << std::endl;
+		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].Getgrenade() << std::endl;		
 		break;
 	}
 	case CS_DEMO_MONSTER_SETPOS: {

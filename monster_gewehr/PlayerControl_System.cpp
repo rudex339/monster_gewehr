@@ -165,6 +165,17 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 		}
 
+		if (player->reload) {
+			if (player->reload_coolTime <= 0) {
+				cout << "리로드 완료" << endl;
+				player->ammo = weapon_ammo[player->m_weapon];
+				player->reload_coolTime = 3.5f;
+				player->reload = false;
+			}
+			else {
+				player->reload_coolTime -= deltaTime;
+			}
+		}
 
 		UCHAR pKeysBuffer[256];
 		if (GetKeyboardState(pKeysBuffer)) {
@@ -172,10 +183,10 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			float speed = 50.25f * deltaTime;
 
 			bool run_on = false; // 달리기 상태인지 아닌지 확인해 주는거
-			static float roll_timer = 0; // 구르기 하는 시간(?)
-			static short roll_on = 0; // 구르기상태가 어떤지 0 일때는 안구르고 1일때는 방금 구르기 버튼 눌러서 방향 정해주는거, 2일때는 구르기 중임
+			//static float roll_timer = 0; // 구르기 하는 시간(?)
+			//static short roll_on = 0; // 구르기상태가 어떤지 0 일때는 안구르고 1일때는 방금 구르기 버튼 눌러서 방향 정해주는거, 2일때는 구르기 중임
 
-			static float shot_cooltime = 0;
+			//static float shot_cooltime = 0;
 
 			XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 
@@ -280,7 +291,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload) {
 				AnimationController->next_State = (UINT)SHOOT;
 				if (shot_cooltime <= 0) {
-					shot_cooltime = 0.1f;
+					shot_cooltime = shot_cooltime_list[player->m_weapon];
 					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
 					player->ammo--;
 					if (player->ammo <= 0) {
@@ -296,7 +307,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->aim_mode = true;
 			}
 			else {
-				shot_cooltime = 0;
+				shot_cooltime -= deltaTime;
 				player->aim_mode = false;
 			}
 
@@ -308,7 +319,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			if (!run_on && !roll_on && player->stamina <= 100) {
-				player->stamina += 0.1;				
+				player->stamina += 0.1;
 			}
 #ifdef DEMO_VER
 			if (pKeysBuffer[VK_F1] & 0xF0) {

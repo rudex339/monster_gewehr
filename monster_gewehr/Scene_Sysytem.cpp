@@ -775,32 +775,6 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 			}
 		}
 
-		/*ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager,
-			-5.f, -8.0f, 25.0f,
-			0.f, 160.f, 0.f,
-			6.0f, 6.0f, 6.0f,
-			SOLDIER);
-		ent->get<player_Component>()->id = 1;
-
-
-		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager,
-			6.f, -8.0f, 25.0f,
-			0.f, 190.f, 0.f,
-			6.0f, 6.0f, 6.0f,
-			SOLDIER);
-		ent->get<player_Component>()->id = 1;
-
-		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
-			m_pObjectManager,
-			17.f, -8.0f, 25.0f,
-			0.f, 215.f, 0.f,
-			6.0f, 6.0f, 6.0f,
-			SOLDIER);
-
-		ent->get<player_Component>()->id = 1;*/
-
 
 		CCamera* temp = new CThirdPersonCamera(NULL);
 		temp->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
@@ -950,6 +924,10 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 						}
 						else weapon[i]->draw = false;
 					}
+					Player->m_weapon = equipments[0];
+					Player->ammo = weapon_ammo[Player->m_weapon];
+					Player->mag = weapon_mag[Player->m_weapon];
+
 				}
 			});
 	}

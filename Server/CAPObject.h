@@ -59,10 +59,9 @@ public:
 	void SetDef(float def) { m_def = def; }
 	void SetAmmo(float ammo) { m_ammo = ammo; }
 	void SetMag(float mag) { m_mag = mag; }
-	void SetWepon(char wepon) { m_wepon = wepon; }
+	void SetWeapon(char wepon);
 	void SetArmor(char armor) { m_armor = armor; }
 	void SetGrenade(char grenade) { m_grenade = grenade; }
-	void SetByWeapon(char aromor);
 	void SetRemainSize(int remain_size) { m_remain_size = remain_size; }
 	void SetState(S_STATE state) { m_state = state; }
 	void SetAnimaition(char ani) { m_animation = ani; }
@@ -75,7 +74,7 @@ public:
 	void UnLock() { m_lock.unlock(); }
 
 	int GetRemainSize() { return m_remain_size; }
-	char GetWeapon() { return m_wepon; }
+	char GetWeapon() { return m_weapon; }
 	char GetArmor() { return m_armor; }
 	char Getgrenade() { return m_grenade; }
 	char GetAnimaition() { return m_animation; }
@@ -88,6 +87,8 @@ public:
 	float GetRange() { return m_range; }
 	bool GetHost() { return m_is_host; }
 	bool GetReady() { return m_is_ready; }
+
+	int GetAtk() { return m_atk; }
 
 	int RecvData();
 	int DoSend(void* p, size_t size);
@@ -123,7 +124,7 @@ protected:
 	DirectX::XMFLOAT3 m_atk_pos;
 
 
-	CHAR m_wepon;	
+	CHAR m_weapon;	
 	CHAR m_armor;
 	CHAR m_grenade;	// º∂±§¿Œ¡ˆ Ω¥∑˘≈∫¿Œ¡ˆ
 	CHAR m_animation;

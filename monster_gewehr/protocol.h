@@ -10,9 +10,9 @@ constexpr int MAX_ID_LENGTH = 20;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
+constexpr char ASSAULT_RIFLE = 0;
 constexpr char SHOT_GUN = 1;
-constexpr char ASSAULT_RIFLE = 2;
-constexpr char SNIPER = 3;
+constexpr char SNIPER = 2;
 
 // 몬스터 데이터
 constexpr float MONSTER_MAX_HP = 1000;

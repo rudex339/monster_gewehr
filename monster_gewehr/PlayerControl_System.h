@@ -30,6 +30,15 @@ private:
 	bool Capture = false;
 	bool R_btn = false;
 
+	int weapon_ammo[3] = {30, 12, 7};
+	int weapon_mag[3] = {120, 60, 21};
+
+	float roll_timer = 0; // 구르기 하는 시간(?)
+	short roll_on = 0; // 구르기상태가 어떤지 0 일때는 안구르고 1일때는 방금 구르기 버튼 눌러서 방향 정해주는거, 2일때는 구르기 중임
+
+	float shot_cooltime = 0;
+	float shot_cooltime_list[3] = { 0.1f, 0.5f, 1.0f };
+
 public:
 	PlayerControl_System() = default;
 

@@ -169,7 +169,7 @@ void Move_System::tick(World* world, float deltaTime)
                                     rotation->mfYaw, state, 0 });
                             }
 #endif
-                            if (p->reload) {
+                            /*if (p->reload) {
                                 if (p->reload_coolTime <= 0) {
                                     cout << "리로드 완료" << endl;
                                     p->ammo = 30;
@@ -179,7 +179,7 @@ void Move_System::tick(World* world, float deltaTime)
                                 else {
                                     p->reload_coolTime -= deltaTime;
                                 }
-                            }
+                            }*/
                         }
                         velocity->m_velocity = XMFLOAT3(0, 0, 0);
                         velocity->m_velRotate = XMFLOAT3(0, 0, 0);

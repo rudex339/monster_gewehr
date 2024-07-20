@@ -44,7 +44,8 @@ struct player_Component {
 
 	FLOAT stamina = 100;
 
-	FLOAT ammo = 30;
+	INT ammo;
+	INT mag;
 
 	BOOL aim_mode = false;
 

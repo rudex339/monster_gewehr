@@ -171,6 +171,8 @@ private:
 	float roomPlayerSet[3] = { 160, 190, 215 };
 	float roomPlayerAngle[3][3] = { {-5.f, -8.0f, 25.0f}, {6.f, -8.0f, 25.0f}, {17.f, -8.0f, 25.0f} };
 
+	int weapon_ammo[3] = { 30, 12, 7 };
+	int weapon_mag[3] = { 120, 60, 21 };
 
 public:
 
