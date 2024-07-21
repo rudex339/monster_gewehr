@@ -173,17 +173,20 @@ private:
 	int m_room_num = -1;
 	bool loginCheck = false;
 	int m_item_num = -1;
-	int m_item_info[10];
+	int m_item_info[10] = { 0, 0, 0, 0, 0, 0, 0, 10, 1, 10 };
 	int m_join_room = -1;
 	bool m_is_host = false;
 
 	int money = 1000;
 	int cost = 100;
 
+	//0: ∫ÿ¥Î, 1: FAK, 2: ¡÷ªÁ±‚
+	int costs[3] = { 100, 250, 500 };
+
 	int equipments[4] = { 0, 3, 5, 7 };
 	int choicedHealItem = 0;
 	int haveHealItems[3];
-	int equipHealItems[3] = { 0, 1, 2 };
+	int equipHealItems[3] = { 0, 0, 0 };
 
 	float roomPlayerSet[3] = { 160, 180, 190 };
 	float roomPlayerAngle[3][3] = { {-5.f, -8.0f, 25.0f}, {6.f, -8.0f, 25.0f}, {17.f, -8.0f, 25.0f} };

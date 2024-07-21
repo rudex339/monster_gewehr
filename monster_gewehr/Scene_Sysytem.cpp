@@ -475,7 +475,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 				// 강화와 관련된 정보 표시 
 				// 비용이나 텍스트는 추후 추가 예정
 				ent = world->create();
-				if (m_item_num < 7) {
+				if (m_item_num < BANDAGE) {
 					for (int i = 0; i < m_item_info[m_item_num]; ++i) {
 						cost *= 2;
 					}
@@ -486,6 +486,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 				}
 				else {
+					cost = costs[m_item_num - BANDAGE];
 					TextUI_Component text = TextUI_Component(SMALL_FONT, L"비용 : " + to_wstring(cost), FRAME_BUFFER_HEIGHT * 2 / 8 + height - margin, FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_WIDTH * 8 / 20 + margin, FRAME_BUFFER_WIDTH * 12 / 20);
 					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
@@ -609,12 +610,20 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			}
 
 			// 힐 아이템 정보 및 추가/제거
+			
+			// 장비한 힐템 양
 			ent = world->create();
 			TextUI_Component healtem = TextUI_Component(SMALL_FONT, to_wstring(equipHealItems[choicedHealItem]) , sRect.top, sRect.left, sRect.bottom, sRect.right);
-
 			healtem.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_FAR;
 			healtem.m_text_alignment = DWRITE_TEXT_ALIGNMENT_TRAILING;
 			ent->assign<TextUI_Component>(healtem);
+
+			// 보유한 힐템 양
+			ent = world->create();
+			TextUI_Component Totalhealtem = TextUI_Component(SMALL_FONT, to_wstring(m_item_info[choicedHealItem + BANDAGE]), sRect.top, sRect.left, sRect.bottom, sRect.right);
+			Totalhealtem.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
+			Totalhealtem.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+			ent->assign<TextUI_Component>(Totalhealtem);
 
 			sRect = { sRect.left , sRect.bottom + x_margin / 4, sRect.right, sRect.bottom + x_margin / 4 + height / 4 };
 			D2D1_RECT_F Rect = { sRect.left, sRect.top, sRect.right - ((sRect.right - sRect.left) / 2), sRect.bottom };
@@ -644,19 +653,19 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			{
 			case 0:
 				upBtn.Activate();
-				if (equipHealItems[0] == 10) {
+				if (equipHealItems[0] == 10 || m_item_info[BANDAGE] == equipHealItems[0]) {
 					upBtn.Disable();
 				}
 				break;
 			case 1:
 				upBtn.Activate();
-				if (equipHealItems[1] == 5) {
+				if (equipHealItems[1] == 5 || m_item_info[FAK] == equipHealItems[1]) {
 					upBtn.Disable();
 				}
 				break;
 			case 2:
 				upBtn.Activate();
-				if (equipHealItems[2] == 3) {
+				if (equipHealItems[2] == 3 || m_item_info[INJECTOR] == equipHealItems[2]) {
 					upBtn.Disable();
 				}
 				break;
