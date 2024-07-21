@@ -79,9 +79,8 @@ void Sever_System::receive(World* world, const Login_Event& event)
 	CS_LOGIN_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
-	int weapon = 0;
+
 	strcpy_s(packet.name, event.text.c_str());
-	packet.weapon = weapon;
 
 
 	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);

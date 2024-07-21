@@ -110,7 +110,7 @@ void ProcessClient(SOCKET sock)
 			PacketReassembly(id, retval);			
 		}
 		else if (retval == -1) {
-			std::cout << "실행됨" << std::endl;
+			std::cout << "나감" << std::endl;
 			break;
 		}
 		
@@ -260,10 +260,11 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_LOGIN: {
 		CS_LOGIN_PACKET* packet = reinterpret_cast<CS_LOGIN_PACKET*>(p);
 		players[id].SetName(packet->name);
-		players[id].SetWeapon(packet->weapon);
+		players[id].SetPassword(packet->password);
+		players[id].SetWeapon(0);
 		players[id].SetRoomID(-1);
 
-		std::cout << players[id].GetName().c_str() << std::endl;
+		std::cout << "입장 : " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
 		SendLoginInfo(id);
 		SendRoomList(id);
 

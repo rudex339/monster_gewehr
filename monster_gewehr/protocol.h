@@ -99,7 +99,7 @@ struct CS_LOGIN_PACKET
 	UCHAR size;
 	UCHAR type;
 	CHAR name[20];
-	CHAR weapon;
+	CHAR password[50];
 };
 
 struct CS_START_GAME_PACKET

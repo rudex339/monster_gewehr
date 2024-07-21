@@ -39,10 +39,11 @@ DataBase::DataBase() : m_hdbc{}, m_henv{}, m_hstmt{}
 				SQLSetConnectAttr(m_hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
 
 				// Connect to data source  
-				retcode = SQLConnect(m_hdbc, (SQLWCHAR*)L"Test_DB", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
+				retcode = SQLConnect(m_hdbc, (SQLWCHAR*)L"Monster_gewehr", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);				
 				if (!(SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode)) {
 					std::cout << "실패함" << std::endl;
 				}
+				std::cout << "데이터베이스 연결 칸료" << std::endl;
 			}
 			else {
 				std::cout << "실패함" << std::endl;
@@ -65,16 +66,19 @@ DataBase::~DataBase()
 	SQLFreeHandle(SQL_HANDLE_ENV, m_henv);
 }
 
-void DataBase::Createaccount(const char* id, const char* password)
+bool DataBase::Createaccount(Player* player)
 {
 	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
 
-	std::wstring c_id{ id, id + strlen(id) };
-	std::wstring c_password{ password, password + strlen(password) };
+	std::wstring c_id{ player->GetName().c_str(), player->GetName().c_str() + player->GetName().length()};
+	std::wstring c_password{ player->GetPassword().c_str(), player->GetPassword().c_str() + player->GetPassword().length()};
 
 	std::wcout << c_id << " " << c_password << std::endl;
 
-	std::wstring query = std::format(L"INSERT INTO user_data (user_id, user_password, user_level, possion, grenade) VALUES ('{0}', '{1}', 1, 10, 10)",
+	/*std::wstring query = std::format(L"INSERT INTO user_data (user_id, user_password, user_level, possion, grenade) VALUES ('{0}', '{1}', 1, 10, 10)",
+		c_id, c_password);*/
+
+	std::wstring query = std::format(L"CALL register_user ('{0}', '{1}')",
 		c_id, c_password);
 
 	retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
@@ -83,11 +87,12 @@ void DataBase::Createaccount(const char* id, const char* password)
 		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
 		SQLCancel(m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
-		return;
+		return false;
 	}
 
 	SQLCancel(m_hstmt);
 	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+	return true;
 }
 
 bool DataBase::Login(const char* id, const char* password)
@@ -97,8 +102,6 @@ bool DataBase::Login(const char* id, const char* password)
 	std::wstring c_id{ id, id + strlen(id) };
 	std::wstring c_password{ password, password + strlen(password) };
 
-	/*std::wstring query = std::format(L"SELECT * FROM user_data WHERE user_id = '{0}' AND user_password = '{1}'",
-		c_id, c_password);*/
 	std::wstring query = std::format(L"CALL try_login ('{0}', '{1}')",
 		c_id, c_password);
 
@@ -139,12 +142,6 @@ bool DataBase::Login(const char* id, const char* password)
 				std::cout << "id / password가 일치하지 않습니다." << std::endl;
 				return false;
 			}
-
-			std::wcout << "id : " << player_data.user_id << std::endl;
-			std::wcout << "pass : " << player_data.user_password << std::endl;
-			std::cout << "user_level : " << player_data.user_level << std::endl;
-			std::cout << "possion : " << player_data.possion << std::endl;
-			std::cout << "grenade : " << player_data.grenade << std::endl;
 			
 		}
 		else {

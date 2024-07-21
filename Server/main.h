@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CAPObject.h"
 #include "GameRoom.h"
+#include "database.h"
 
 void ProcessClient(SOCKET sock);
 void BossThread();
@@ -31,5 +32,7 @@ std::unordered_map<INT, Player> players;
 std::array<Monster, MAX_GAME_ROOM> souleaters;
 
 std::array<GameRoom, MAX_GAME_ROOM> gamerooms;
+
+DataBase database;
 
 int global_id = 0;

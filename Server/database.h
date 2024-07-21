@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include <sqlext.h>
+#include "CAPObject.h"
 
 struct PLAYER_INFO
 {
@@ -27,7 +28,7 @@ public:
 	DataBase();
 	~DataBase();
 
-	void Createaccount(const char* id, const char* password);
+	bool Createaccount(Player* player);
 	bool Login(const char* id, const char* password);
 
 private:

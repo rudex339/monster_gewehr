@@ -52,7 +52,8 @@ public:
 	void PlayerInit();
 
 	void SetSocket(SOCKET& sock) { m_socket = sock; }
-	void SetName(std::string name) { m_name = name; }	
+	void SetName(std::string name) { m_name = name; }
+	void SetPassword(std::string password) { m_password = password; }
 	void SetHp(float hp) { m_hp = hp; }
 	void SetMaxHp(float max_hp) { m_max_hp = max_hp; }
 	void SetAtk(float atk) { m_atk = atk; }
@@ -80,6 +81,7 @@ public:
 	char GetAnimaition() { return m_animation; }
 	S_STATE GetState() { return m_state; }
 	std::string GetName() { return m_name; }
+	std::string GetPassword() { return m_password; }
 	PLAYER_DATA GetPlayerData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
 	DirectX::XMFLOAT3 GetAtkDir() { return m_atk_dir; }
 	DirectX::XMFLOAT3 GetAtkPos() { return m_atk_pos; }
@@ -106,6 +108,7 @@ protected:
 	ITEM_DATA items;
 
 	std::string m_name;
+	std::string m_password;
 
 	std::mutex m_lock;
 
