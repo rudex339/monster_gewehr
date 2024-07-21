@@ -618,6 +618,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 
 				case ChangeSceneBtn:
+					if (button->Next_Scene == ROOMS) {
+						world->emit<Quit_Room>({});
+					}
 					world->emit<ChangeScene_Event>({ button->Next_Scene });
 					break;
 				case MakeRoomBtn:
@@ -638,6 +641,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case BuyBtn:
 					cout << "구메/강화" << endl;
+					m_scene->Purchase();
+					world->emit<Refresh_Scene>({ SHOP });
 					break;
 				case GameReadyBtn:
 					world->emit<Ready_Room>({});

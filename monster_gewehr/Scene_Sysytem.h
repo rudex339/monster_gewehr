@@ -177,6 +177,9 @@ private:
 	int m_join_room = -1;
 	bool m_is_host = false;
 
+	int money = 1000;
+	int cost = 100;
+
 	int equipments[4] = { 0, 3, 5, 7 };
 	int choicedHealItem = 0;
 	int haveHealItems[3];
@@ -221,5 +224,6 @@ public:
 	void RemoveInRoomPlayers(int id);
 	void InitInRoomPlayers();
 	void ReadyCheck(int id, bool ready);
+	void Purchase();
 };
 

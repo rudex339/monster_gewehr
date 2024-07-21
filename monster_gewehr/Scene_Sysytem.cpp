@@ -143,7 +143,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		// 로그인 버튼
 		ent = world->create();
 		sRect = { FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 7 / 10, FRAME_BUFFER_WIDTH * 7 / 10, FRAME_BUFFER_HEIGHT * 7 / 10 + LOGIN_FONT_SIZE};
-		Button_Component login = Button_Component(LoginBtn, L"image/monster_hunter_login.png", SMALL_FONT, L"로그인", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		Button_Component login = Button_Component(LoginBtn, L"image/button/loginEn.png", SMALL_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		login.Disable();
 		if (textboxlen[0] > 2 && textboxlen[1] > 2) {
@@ -154,7 +154,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		// 회원가입 버튼
 		ent = world->create();
 		sRect = { FRAME_BUFFER_WIDTH * 8 / 10, FRAME_BUFFER_HEIGHT * 7 / 10, FRAME_BUFFER_WIDTH * 9 / 10, FRAME_BUFFER_HEIGHT * 7 / 10 + LOGIN_FONT_SIZE };
-		Button_Component regist = Button_Component(RegisterBtn, L"image/monster_hunter_login.png", SMALL_FONT, L"회원가입", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		Button_Component regist = Button_Component(RegisterBtn, L"image/button/registerEn.png", SMALL_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		regist.Disable();
 		if (textboxlen[0] > 2 && textboxlen[1] > 2) {
@@ -323,15 +323,15 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		// 방생성 & 방입장 버튼
 		{
 			imageRect = { 0, 0, 1000, 563 };
-			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 15 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 16 / 20 };
+			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 15 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 17 / 20 };
 
 			ent = world->create();
-			ent->assign<Button_Component>(MakeRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방생성", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			ent->assign<Button_Component>(MakeRoomBtn, L"image/button/newRoomEn.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 17 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 18 / 20 };
+			sRect = { FRAME_BUFFER_WIDTH * 14 / 20, FRAME_BUFFER_HEIGHT * 18 / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_HEIGHT * 20 / 20 };
 			ent = world->create();
-			Button_Component joinBtn = Button_Component(JoinRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"방입장", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			Button_Component joinBtn = Button_Component(JoinRoomBtn, L"image/button/JoinEn.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 
@@ -458,6 +458,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			float margin = 1.0f;
 			float height = FRAME_BUFFER_HEIGHT * 3.2 / 15;
 
+			cost = 100;
 
 			if (m_item_num >= 0) {
 				//선택한 아이템이 있는 경우만 이미지를 출력한다.
@@ -474,10 +475,22 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 				// 강화와 관련된 정보 표시 
 				// 비용이나 텍스트는 추후 추가 예정
 				ent = world->create();
-				TextUI_Component text = TextUI_Component(SMALL_FONT, L"비용 : " + to_wstring(100), FRAME_BUFFER_HEIGHT * 2 / 8 + height - margin, FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_WIDTH * 8 / 20 + margin, FRAME_BUFFER_WIDTH * 12 / 20);
-				text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
-				text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
-				ent->assign<TextUI_Component>(text);
+				if (m_item_num < 7) {
+					for (int i = 0; i < m_item_info[m_item_num]; ++i) {
+						cost *= 2;
+					}
+					TextUI_Component text = TextUI_Component(SMALL_FONT, L"비용 : " + to_wstring(cost), FRAME_BUFFER_HEIGHT * 2 / 8 + height - margin, FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_WIDTH * 8 / 20 + margin, FRAME_BUFFER_WIDTH * 12 / 20);
+					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
+					ent->assign<TextUI_Component>(text);
+
+				}
+				else {
+					TextUI_Component text = TextUI_Component(SMALL_FONT, L"비용 : " + to_wstring(cost), FRAME_BUFFER_HEIGHT * 2 / 8 + height - margin, FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_WIDTH * 8 / 20 + margin, FRAME_BUFFER_WIDTH * 12 / 20);
+					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
+					ent->assign<TextUI_Component>(text);
+				}
 
 			}
 
@@ -490,11 +503,13 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			imageRect = { 0, 0, 1000, 563 };
 			sRect = { FRAME_BUFFER_WIDTH * 8 / 20 + margin, FRAME_BUFFER_HEIGHT * 12 / 16 , FRAME_BUFFER_WIDTH * 12 / 20 - margin, FRAME_BUFFER_HEIGHT * 14 / 16 - margin };
 
-			Button_Component buyBtn = Button_Component(BuyBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"구매/강화", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			Button_Component buyBtn = Button_Component(BuyBtn, L"image/button/purchaseEn.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 			buyBtn.Disable();
 
 			if (m_item_num >= 0) buyBtn.Activate();
+			if (cost > money) buyBtn.Disable();
+
 			ent->assign<Button_Component>(buyBtn);
 		}
 	}
@@ -1233,4 +1248,10 @@ void Scene_Sysytem::ReadyCheck(int id, bool ready)
 			break;
 		}
 	}
+}
+
+void Scene_Sysytem::Purchase()
+{
+	money -= cost;
+	m_item_info[m_item_num] += 1;
 }
