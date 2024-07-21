@@ -168,7 +168,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		if (player->reload) {
 			if (player->reload_coolTime <= 0) {
 				cout << "리로드 완료" << endl;
-				player->ammo = weapon_ammo[player->m_weapon];
+				player->mag -= (weapon_ammo[player->m_weapon] - player->ammo);
+				player->ammo = weapon_ammo[player->m_weapon];				
 				player->reload_coolTime = 3.5f;
 				player->reload = false;
 			}
@@ -288,13 +289,13 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 구르기 중이거나 달리는 중에는 총발사 금지해놓음
-			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload) {
+			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && player->ammo > 0) {
 				AnimationController->next_State = (UINT)SHOOT;
 				if (shot_cooltime <= 0) {
 					shot_cooltime = shot_cooltime_list[player->m_weapon];
 					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
 					player->ammo--;
-					if (player->ammo <= 0) {
+					if (player->ammo <= 0 && player->mag >= weapon_ammo[player->m_weapon]) {
 						AnimationController->next_State = (UINT)RELOAD;
 						player->reload = true;
 					}
@@ -311,7 +312,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->aim_mode = false;
 			}
 
-			if (pKeysBuffer[0x52] & 0xF0 && !player->reload) {
+			if (pKeysBuffer[0x52] & 0xF0 && !player->reload && player->mag >= weapon_ammo[player->m_weapon]) {
 				AnimationController->next_State = (UINT)RELOAD;
 				if (!player->reload) {
 					player->reload = true;
