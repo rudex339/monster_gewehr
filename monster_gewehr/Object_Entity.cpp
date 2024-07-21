@@ -170,11 +170,23 @@ ImageUI_Component::ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContex
 	LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
 }
 
-TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY, int num)
+TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY, float width, float height, int num)
 {
 	x = layoutX;
 	y = layoutY;
+	m_width = width;
+	m_height = height;
 	index = num;
+
+}
+
+bool TextBoxUI_Component::CursorInBox(POINT cursor)
+{
+	if (cursor.x > x && cursor.x < x + m_width && cursor.y > y && cursor.y < y + m_height) {
+		return true;
+	}
+
+	return false;
 }
 
 Button_Component::Button_Component(int id, const wchar_t* imagePath, int fontType, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int num)

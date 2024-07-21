@@ -136,7 +136,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 		DWRITE_FONT_WEIGHT_NORMAL,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		50,
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 18432,
 		L"en-us",
 		&m_textFormat
 	);
@@ -147,7 +147,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 		DWRITE_FONT_WEIGHT_NORMAL,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		18,
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 51200,
 		L"en-us",
 		&m_smalltextFormat
 	);
@@ -158,7 +158,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 		DWRITE_FONT_WEIGHT_REGULAR,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		26,                      
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 35446,
 		L"en-us",
 		&pTextFormat
 	);
@@ -206,7 +206,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 		DWRITE_FONT_WEIGHT_REGULAR,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		48,
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 19200,
 		L"en-us",
 		&Needleteeth[0]
 	);
@@ -217,7 +217,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 		DWRITE_FONT_WEIGHT_REGULAR,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		54,
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 17066,
 		L"en-us",
 		&Needleteeth[1]
 	);
@@ -476,34 +476,57 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<TextBoxUI_Component> editBox
 		)-> void {
 
+			if (editBox->CursorInBox(m_cursorPos) && clicked) {
+				textIndex = editBox->index;
+			}
+
 			// 텍스트 입력 박스
+			m_textBrush.Get()->SetOpacity(1.0f);
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 			m_d2dDeviceContext->FillRectangle(
-				{ editBox->x, editBox->y + 3.0f, editBox->x + 400.f, editBox->y + 35.0f },
+				{ editBox->x, editBox->y, editBox->x + editBox->m_width, editBox->y + editBox->m_height },
 				m_textBrush.Get()
 			);
-			// 텍스트 레이아웃
-			m_dwriteFactory->CreateTextLayout(
-				text[editBox->index].c_str(),
-				static_cast<UINT32>(text[editBox->index].length()),
-				pTextFormat.Get(),
-				500,
-				200,
-				&pTextLayout[editBox->index]
-			);
 
+			if (editBox->index == 1) {
+				Invisile_password = text[editBox->index];
+				for (int i = 0; i < Invisile_password.length(); ++i) {
+					Invisile_password[i] = '*';
+				}
+
+				// 텍스트 레이아웃
+				m_dwriteFactory->CreateTextLayout(
+					Invisile_password.c_str(),
+					static_cast<UINT32>(Invisile_password.length()),
+					pTextFormat.Get(),
+					editBox->m_width,
+					editBox->m_height,
+					&pTextLayout[editBox->index]
+				);
+			}
+			else {
+				// 텍스트 레이아웃
+				m_dwriteFactory->CreateTextLayout(
+					text[editBox->index].c_str(),
+					static_cast<UINT32>(text[editBox->index].length()),
+					pTextFormat.Get(),
+					editBox->m_width,
+					editBox->m_height,
+					&pTextLayout[editBox->index]
+				);
+			}
 			
 
 			// 텍스트
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 
+			
 			m_d2dDeviceContext->DrawTextLayout(
 				D2D1::Point2F(editBox->x, editBox->y),
 				pTextLayout[editBox->index],
 				m_textBrush.Get(),
 				D2D1_DRAW_TEXT_OPTIONS_NONE
 			);
-
 
 			// 커서 
 			if (cursorPosition[textIndex] <= text[textIndex].length() && textIndex == editBox->index)
@@ -585,14 +608,20 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case ExitBtn:
 					exit(0);
 					break;
-				case RoomBtn:
-					world->emit< ChangeScene_Event>({ ROOMS });
+
+				case LoginBtn:
+					// 여기서 아이디 비교하고, 성공하면 로비로 이동
 					break;
-				case ShopBtn:
-					world->emit< ChangeScene_Event>({ SHOP });
+
+				case RegisterBtn:
+					// 여기서 아이디랑 비밀번호를 DB에 저장 및 로비로 이동
 					break;
-				case EquipBtn:
-					world->emit< ChangeScene_Event>({ EQUIPMENT });
+
+				case ChangeSceneBtn:
+					if (button->Next_Scene == ROOMS) {
+						world->emit<Quit_Room>({});
+					}
+					world->emit<ChangeScene_Event>({ button->Next_Scene });
 					break;
 				case MakeRoomBtn:
 					world->emit<Create_Room>({});
@@ -612,6 +641,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 				case BuyBtn:
 					cout << "구메/강화" << endl;
+					m_scene->Purchase();
+					world->emit<Refresh_Scene>({ SHOP });
 					break;
 				case GameReadyBtn:
 					world->emit<Ready_Room>({});
@@ -772,11 +803,17 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 
 
-
 				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + MapX, FRAME_BUFFER_WIDTH * 2 / 20 - MapZ}, 2.0f, 2.0f };
+				
 				if (pos.first == -1) continue;
 				if (pos.first == -2) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+					m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
+				}
+				else if (pos.first == m_scene->getID()) {
+					playerPos.radiusX += 2.0f;
+					playerPos.radiusY += 2.0f;
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::GreenYellow));
 					m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
 				}
 				else {
@@ -843,6 +880,8 @@ void Render_System::receive(World* world, const KeyDown_Event& event)
 		text[textIndex].insert(text[textIndex].begin() + cursorPosition[textIndex], static_cast<wchar_t>(key));
 		cursorPosition[textIndex]++;
 	}
+	world->emit<LoginButton_Event>({ (int)text[textIndex].length() , textIndex });
+	world->emit<Refresh_Scene>({ LOGIN });
 }
 
 void Render_System::receive(World* world, const Tab_Event& event)

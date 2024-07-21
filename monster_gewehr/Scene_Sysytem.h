@@ -19,9 +19,9 @@ enum {
 
 enum {
 	ExitBtn = -1,
-	RoomBtn,
-	ShopBtn,
-	EquipBtn,
+	LoginBtn,
+	RegisterBtn,
+	ChangeSceneBtn,
 	MakeRoomBtn,
 	SelectRoomBtn,
 	JoinRoomBtn,
@@ -109,6 +109,11 @@ struct RoomPlayer_Info {
 struct Ready_Event {
 };
 
+struct LoginButton_Event {
+	int len;
+	int index;
+};
+
 
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
@@ -120,7 +125,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<Refresh_Scene>,
 	public EventSubscriber<ChoiceEquip_Event>,
 	public EventSubscriber<StartRoom_Event>,
-	public EventSubscriber<Ready_Event>
+	public EventSubscriber<Ready_Event>,
+	public EventSubscriber<LoginButton_Event>
 {
 private:
 	UINT m_State = 0;
@@ -136,6 +142,8 @@ private:
 	Entity* m_pPawn;
 
 	short m_score = 0;
+
+	int textboxlen[2] = { 0,0 };
 
 	int m_id = -1;
 	bool m_ready = false;
@@ -165,14 +173,20 @@ private:
 	int m_room_num = -1;
 	bool loginCheck = false;
 	int m_item_num = -1;
-	int m_item_info[10];
+	int m_item_info[10] = { 0, 0, 0, 0, 0, 0, 0, 10, 1, 10 };
 	int m_join_room = -1;
 	bool m_is_host = false;
+
+	int money = 1000;
+	int cost = 100;
+
+	//0: 붕대, 1: FAK, 2: 주사기
+	int costs[3] = { 100, 250, 500 };
 
 	int equipments[4] = { 0, 3, 5, 7 };
 	int choicedHealItem = 0;
 	int haveHealItems[3];
-	int equipHealItems[3] = { 0, 1, 2 };
+	int equipHealItems[3] = { 0, 0, 0 };
 
 	float roomPlayerSet[3] = { 160, 180, 190 };
 	float roomPlayerAngle[3][3] = { {-5.f, -8.0f, 25.0f}, {6.f, -8.0f, 25.0f}, {17.f, -8.0f, 25.0f} };
@@ -199,7 +213,8 @@ public:
 	virtual void receive(class World* world, const CreateObject_Event& event);
 	virtual void receive(class World* world, const StartRoom_Event& event);
 	virtual void receive(class World* world, const Ready_Event& event);
-	
+	virtual void receive(class World* world, const LoginButton_Event& event);
+
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수
@@ -212,5 +227,7 @@ public:
 	void RemoveInRoomPlayers(int id);
 	void InitInRoomPlayers();
 	void ReadyCheck(int id, bool ready);
+	void Purchase();
+	int getID() { return m_id; };
 };
 
