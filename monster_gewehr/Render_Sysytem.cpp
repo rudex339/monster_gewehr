@@ -802,11 +802,17 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 
 
-
 				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + MapX, FRAME_BUFFER_WIDTH * 2 / 20 - MapZ}, 2.0f, 2.0f };
+				
 				if (pos.first == -1) continue;
 				if (pos.first == -2) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+					m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
+				}
+				else if (pos.first == m_scene->getID()) {
+					playerPos.radiusX += 2.0f;
+					playerPos.radiusY += 2.0f;
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::GreenYellow));
 					m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
 				}
 				else {
