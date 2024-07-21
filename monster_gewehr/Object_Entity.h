@@ -233,10 +233,13 @@ struct TextUI_Component {
 
 struct TextBoxUI_Component {
 	float x, y;
+	float m_width, m_height;
 	int index;
 
 	TextBoxUI_Component() = default;
-	TextBoxUI_Component(float layoutX, float layoutY, int num);
+	TextBoxUI_Component(float layoutX, float layoutY, float width, float height, int num);
+	bool CursorInBox(POINT cursor);
+
 };
 
 struct ImageUI_Component {

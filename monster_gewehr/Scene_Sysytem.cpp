@@ -120,15 +120,20 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		Entity* ent = world->create();
 
 		D2D1_RECT_F sRect, imageRect;
+
+		// 배경 이미지
 		sRect = { 0,0,FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 		imageRect = { 0, 0, 1000, 563 };
 		ent->assign<ImageUI_Component>(L"image/monster_hunter_login.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
-		ent->assign<TextBoxUI_Component>(800.0f, 340.0f, 0);
-
+		// 아이디 입력창
 		ent = world->create();
-		ent->assign<TextBoxUI_Component>(800.0f, 380.0f, 1);
+		ent->assign<TextBoxUI_Component>(FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 5 / 10, FRAME_BUFFER_WIDTH * 3 / 10, LOGIN_FONT_SIZE, 0);
+
+		// 비밀번호 입력창
+		ent = world->create();
+		ent->assign<TextBoxUI_Component>(FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 6 / 10, FRAME_BUFFER_WIDTH * 3 / 10, LOGIN_FONT_SIZE, 1);
 
 	}
 	break;
@@ -220,7 +225,15 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		
-		
+		// 뒤로가기 버튼
+		sRect = { FRAME_BUFFER_WIDTH * 23 / 25 , FRAME_BUFFER_HEIGHT / 48, FRAME_BUFFER_WIDTH * 24 / 25, FRAME_BUFFER_HEIGHT * 4 / 48 };
+		imageRect = { 0, 0, 512, 512 };
+		ent = world->create();
+		Button_Component goToLobby = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		goToLobby.Next_Scene = LOBBY;
+		ent->assign<Button_Component>(goToLobby);
+
 		// 방 목록
 		{
 			ent = world->create();
@@ -336,6 +349,15 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<TextUI_Component>(NEEDLE_FONT, L"SHOP",
 			FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
 
+		// 뒤로가기 버튼
+		sRect = { FRAME_BUFFER_WIDTH * 23 / 25 , FRAME_BUFFER_HEIGHT / 48, FRAME_BUFFER_WIDTH * 24 / 25, FRAME_BUFFER_HEIGHT * 4 / 48 };
+		imageRect = { 0, 0, 512, 512 };
+		ent = world->create();
+		Button_Component goToLobby = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		goToLobby.Next_Scene = LOBBY;
+		ent->assign<Button_Component>(goToLobby);
+
 		{
 			// 상인 프레임 + 이미지
 			ent = world->create();
@@ -383,7 +405,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 					ent = world->create();
 					Button_Component info;
-					if(i == 0)
+					if(i == 0 || j <= 1)
 						info = Button_Component(ItemBtn, imagefiles[j + 5 * i].c_str(), SMALL_FONT, L"+" + to_wstring(m_item_info[j + 5 * i]), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 							itemRects[i][j], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, j + 5 * i);
 					else
@@ -464,6 +486,15 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<TextUI_Component>(NEEDLE_FONT, L"EQUIPMENT",
 			FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
 
+		// 뒤로가기 버튼
+		sRect = { FRAME_BUFFER_WIDTH * 23 / 25 , FRAME_BUFFER_HEIGHT / 48, FRAME_BUFFER_WIDTH * 24 / 25, FRAME_BUFFER_HEIGHT * 4 / 48 };
+		imageRect = { 0, 0, 512, 512 };
+		ent = world->create();
+		Button_Component goToLobby = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		goToLobby.Next_Scene = LOBBY;
+		ent->assign<Button_Component>(goToLobby);
+
 		{ // 플레이어를 그린다
 
 			ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
@@ -502,25 +533,34 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			float y_margin = FRAME_BUFFER_HEIGHT * 2 / 32;
 			float x_margin = FRAME_BUFFER_WIDTH / 40;
 
+			float frame_margin = FRAME_BUFFER_WIDTH / 100;
 			float button_width = FRAME_BUFFER_WIDTH * 2 / 40;
 
 			for (int i = 0; i < 4; ++i) {
 				D2D1_RECT_F Rect;
+				// 이미지 프레임
+				imageRect = { 0, 0, 1400, 900 };
+				Rect = { sRect.left - frame_margin, sRect.top - frame_margin, sRect.right + frame_margin, sRect.bottom + frame_margin };
+				ent->assign<ImageUI_Component>(L"image/silver_frame.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+					Rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+				
 				// 중앙 이미지
+				imageRect = { 0, 0, 500, 300 };
 				ent = world->create();
 				ent->assign<ImageUI_Component>(imagefiles[equipments[i]].c_str(), m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 					sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-
+				
 				// 왼쪽 버튼
+				imageRect = { 0, 0, 256, 512 };
 				ent = world->create();
 				Rect = { sRect.left - x_margin - button_width, sRect.top, sRect.left - x_margin, sRect.bottom };
-				ent->assign<Button_Component>(EquipLeftBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				ent->assign<Button_Component>(EquipLeftBtn, L"image/left.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 					Rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, i);
 
 				// 오른쪽 버튼
 				ent = world->create();
 				Rect = { sRect.right + x_margin, sRect.top, sRect.right + x_margin + button_width, sRect.bottom };
-				ent->assign<Button_Component>(EquipRightBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				ent->assign<Button_Component>(EquipRightBtn, L"image/right.png", DEFAULT_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 					Rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, i);
 
 				if (i == 3) break;
@@ -563,19 +603,19 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			{
 			case 0:
 				upBtn.Activate();
-				if (equipHealItems[0] == 9) {
+				if (equipHealItems[0] == 10) {
 					upBtn.Disable();
 				}
 				break;
 			case 1:
 				upBtn.Activate();
-				if (equipHealItems[1] == 4) {
+				if (equipHealItems[1] == 5) {
 					upBtn.Disable();
 				}
 				break;
 			case 2:
 				upBtn.Activate();
-				if (equipHealItems[2] == 2) {
+				if (equipHealItems[2] == 3) {
 					upBtn.Disable();
 				}
 				break;
@@ -714,24 +754,20 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 
 	D2D1_RECT_F sRect;
 
-	float width = FRAME_BUFFER_WIDTH / 10;
-	float height = FRAME_BUFFER_HEIGHT / 10;
-	float offset = FRAME_BUFFER_HEIGHT / 45;
-
-	sRect.left = FRAME_BUFFER_WIDTH / 2 - width;
-	sRect.right = FRAME_BUFFER_WIDTH / 2 + width;
-	sRect.top = FRAME_BUFFER_HEIGHT / 2;
-	sRect.bottom = sRect.top + height;
-
-	//world->reset();
-	//Entity* ent = world->create();
-
-	//D2D1_RECT_F imageRect, sRect;
-	int selected[2] = { 0, 0 };
+	
 
 	ent = world->create();
 	ent->assign<TextUI_Component>(NEEDLE_FONT, L"ROOM NO. " + to_wstring(m_room_num),
 		FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
+
+	// 뒤로가기 버튼
+	sRect = { FRAME_BUFFER_WIDTH * 23 / 25 , FRAME_BUFFER_HEIGHT / 48, FRAME_BUFFER_WIDTH * 24 / 25, FRAME_BUFFER_HEIGHT * 4 / 48 };
+	imageRect = { 0, 0, 512, 512 };
+	ent = world->create();
+	Button_Component goToRooms = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+	goToRooms.Next_Scene = ROOMS;
+	ent->assign<Button_Component>(goToRooms);
 
 	{ // 플레이어를 그린다
 		// 나 자신 그리기
@@ -820,6 +856,9 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 		world->emit<SetCamera_Event>({ ent->get<Camera_Component>().get().m_pCamera });
 
 	}
+
+
+	sRect = { FRAME_BUFFER_WIDTH * 12 / 25 , FRAME_BUFFER_HEIGHT * 44 / 48, FRAME_BUFFER_WIDTH * 15 / 25, FRAME_BUFFER_HEIGHT };
 
 	if (event.is_host) {
 		ent = world->create();

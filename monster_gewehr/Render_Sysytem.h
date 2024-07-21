@@ -73,7 +73,7 @@ private:
 	//editbox
 	IDWriteTextLayout* pTextLayout[2];
 	wstring	text[2];
-
+	wstring Invisile_password;
 	int textIndex = 0;
 	size_t cursorPosition[2] = { 0, 0 };
 	wchar_t inputKey;
