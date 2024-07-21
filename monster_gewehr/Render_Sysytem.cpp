@@ -707,7 +707,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 			{
 				wstring text = std::to_wstring((int)player->ammo);
-				text += std::wstring(" / 30", " / 30" + strlen(" / 30"));
+				text += std::wstring(" / ", " / " + strlen(" / "));
+				text += std::to_wstring((int)player->mag);
 
 				D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH - 300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 				m_d2dDeviceContext->DrawTextW(
