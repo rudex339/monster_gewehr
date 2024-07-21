@@ -908,16 +908,16 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 	}
 
 
-	sRect = { FRAME_BUFFER_WIDTH * 12 / 25 , FRAME_BUFFER_HEIGHT * 44 / 48, FRAME_BUFFER_WIDTH * 15 / 25, FRAME_BUFFER_HEIGHT };
-
+	sRect = { FRAME_BUFFER_WIDTH * 12 / 25 , FRAME_BUFFER_HEIGHT * 1 / 48, FRAME_BUFFER_WIDTH * 15 / 25,  FRAME_BUFFER_HEIGHT * 5 / 48 };
+	imageRect = { 0, 0, 784, 251 };
 	if (event.is_host) {
 		ent = world->create();
-		ent->assign<Button_Component>(GameStartBtn, L"image/null.png", NEEDLE_FONT, L"GameStart", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameStartBtn, L"image/button/StartEn.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
 	else {
 		ent = world->create();
-		ent->assign<Button_Component>(GameReadyBtn, L"image/null.png", NEEDLE_FONT, L"Ready", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent->assign<Button_Component>(GameReadyBtn, L"image/button/ReadyEn.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	}
 	
