@@ -585,14 +585,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case ExitBtn:
 					exit(0);
 					break;
-				case RoomBtn:
-					world->emit< ChangeScene_Event>({ ROOMS });
-					break;
-				case ShopBtn:
-					world->emit< ChangeScene_Event>({ SHOP });
-					break;
-				case EquipBtn:
-					world->emit< ChangeScene_Event>({ EQUIPMENT });
+				case ChangeSceneBtn:
+					world->emit<ChangeScene_Event>({ button->Next_Scene });
 					break;
 				case MakeRoomBtn:
 					world->emit<Create_Room>({});

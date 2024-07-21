@@ -19,9 +19,7 @@ enum {
 
 enum {
 	ExitBtn = -1,
-	RoomBtn,
-	ShopBtn,
-	EquipBtn,
+	ChangeSceneBtn,
 	MakeRoomBtn,
 	SelectRoomBtn,
 	JoinRoomBtn,

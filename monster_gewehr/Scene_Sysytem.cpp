@@ -172,32 +172,27 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		
 		imageRect = { 0, 0, 340, 70 };
 
-		ent = world->create();
-		ent->assign<Button_Component>(RoomBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		ent = world->create();		
+		Button_Component goToRooms = Button_Component(ChangeSceneBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-		
+		goToRooms.Next_Scene = ROOMS;
+		ent->assign<Button_Component>(goToRooms);
 
 		ent = world->create();
-		ent->assign<Button_Component>(ShopBtn, L"image/null.png", NEEDLE_FONT, L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		Button_Component goToSHOP = Button_Component(ChangeSceneBtn, L"image/null.png", NEEDLE_FONT, L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		goToSHOP.Next_Scene = SHOP;
+		ent->assign<Button_Component>(goToSHOP);
 
 		ent = world->create();
-		ent->assign<Button_Component>(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		Button_Component goToEquipment = Button_Component(ChangeSceneBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-
-		// 버튼 비활성화 테스트 임시로 장비창에 가는 버튼을 비활성화 했다.
-		/*ent = world->create();
-		Button_Component test = Button_Component(EquipBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
-			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-		test.Disable();
-		ent->assign<Button_Component>(test);*/
-
+		goToEquipment.Next_Scene = EQUIPMENT;
+		ent->assign<Button_Component>(goToEquipment);
 
 		ent = world->create();
 		ent->assign<Button_Component>(ExitBtn, L"image/null.png", NEEDLE_FONT, L"EXIT", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[3], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-
-
 	}
 	break;
 
