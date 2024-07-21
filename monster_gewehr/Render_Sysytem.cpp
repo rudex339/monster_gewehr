@@ -880,7 +880,6 @@ void Render_System::receive(World* world, const KeyDown_Event& event)
 		text[textIndex].insert(text[textIndex].begin() + cursorPosition[textIndex], static_cast<wchar_t>(key));
 		cursorPosition[textIndex]++;
 	}
-	cout << "넣은 값(길이, index) : " << (int)text[textIndex].length() << " , " << textIndex << endl;
 	world->emit<LoginButton_Event>({ (int)text[textIndex].length() , textIndex });
 	world->emit<Refresh_Scene>({ LOGIN });
 }

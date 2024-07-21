@@ -228,5 +228,6 @@ public:
 	void InitInRoomPlayers();
 	void ReadyCheck(int id, bool ready);
 	void Purchase();
+	int getID() { return m_id; };
 };
 

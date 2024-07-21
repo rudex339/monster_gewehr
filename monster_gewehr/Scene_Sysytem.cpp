@@ -124,9 +124,9 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		D2D1_RECT_F sRect, imageRect;
 
 		// 배경 이미지
-		sRect = { 0,0,FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		imageRect = { 0, 0, 1000, 563 };
-		ent->assign<ImageUI_Component>(L"image/monster_hunter_login.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+		sRect = { 0,0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+		imageRect = { 0, 0, 2276, 1532 };
+		ent->assign<ImageUI_Component>(L"image/loginTitle.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 
 		// 아이디 입력창
