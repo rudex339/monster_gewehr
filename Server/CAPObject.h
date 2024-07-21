@@ -62,7 +62,7 @@ public:
 	void SetMag(float mag) { m_mag = mag; }
 	void SetWeapon(char wepon);
 	void SetArmor(char armor) { m_armor = armor; }
-	void SetGrenade(char grenade) { m_grenade = grenade; }
+	void SetThrowWp(char throw_wp) { m_throw_wp = throw_wp; }
 	void SetRemainSize(int remain_size) { m_remain_size = remain_size; }
 	void SetState(S_STATE state) { m_state = state; }
 	void SetAnimaition(char ani) { m_animation = ani; }
@@ -77,7 +77,7 @@ public:
 	int GetRemainSize() { return m_remain_size; }
 	char GetWeapon() { return m_weapon; }
 	char GetArmor() { return m_armor; }
-	char Getgrenade() { return m_grenade; }
+	char GetThrowWp() { return m_throw_wp; }
 	char GetAnimaition() { return m_animation; }
 	S_STATE GetState() { return m_state; }
 	std::string GetName() { return m_name; }
@@ -114,6 +114,8 @@ protected:
 
 	S_STATE m_state;
 
+	INT m_money;
+
 	FLOAT m_hp;
 	FLOAT m_max_hp;
 	FLOAT m_atk;
@@ -126,11 +128,20 @@ protected:
 	DirectX::XMFLOAT3 m_atk_dir;
 	DirectX::XMFLOAT3 m_atk_pos;
 
-
 	CHAR m_weapon;	
 	CHAR m_armor;
-	CHAR m_grenade;	// º∂±§¿Œ¡ˆ Ω¥∑˘≈∫¿Œ¡ˆ
+	CHAR m_throw_wp;	// º∂±§¿Œ¡ˆ Ω¥∑˘≈∫¿Œ¡ˆ
 	CHAR m_animation;
+
+	INT m_rifle_upgrade;
+	INT m_shotgun_upgrade;
+	INT m_sniper_upgrade;
+
+	INT m_l_armor;
+	INT m_h_armor;
+
+	INT m_grenade;
+	INT m_flashbang;
 
 	INT m_bandage;
 	INT m_fat;

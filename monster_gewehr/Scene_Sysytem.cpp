@@ -58,9 +58,9 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 		switch (m_State) {
 		case LOGIN:
 			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				world->emit<InputId_Event>({});
+				/*world->emit<InputId_Event>({});
 				if (loginCheck)
-					world->emit< ChangeScene_Event>({ LOBBY });
+					world->emit< ChangeScene_Event>({ LOBBY });*/
 			}
 			break;
 		case LOBBY:
@@ -926,7 +926,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 
 void Scene_Sysytem::receive(World* world, const LoginCheck_Event& event)
 {
-	loginCheck = event.logincheck;
+	//loginCheck = event.logincheck;
 	m_id = event.id;
 }
 

@@ -611,6 +611,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				case LoginBtn:
 					// 여기서 아이디 비교하고, 성공하면 로비로 이동
+					world->emit<InputId_Event>({});
 					break;
 
 				case RegisterBtn:
@@ -898,10 +899,12 @@ void Render_System::receive(World* world, const Mouse_Event& event)
 void Render_System::receive(World* world, const InputId_Event& event)
 {
 	string id;
+	string password;
 
 	id.assign(text[0].begin(), text[0].end());
-	cout << id.c_str() << endl;
-	world->emit<Login_Event>({ id });
+	password.assign(text[1].begin(), text[1].end());
+
+	world->emit<Login_Event>({ id, password });
 }
 
 void Render_System::SetUserInfo(int uid, POINT coordinate)

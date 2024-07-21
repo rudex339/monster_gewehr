@@ -7,19 +7,19 @@ struct PLAYER_INFO
 {
 	std::wstring user_id;
 	std::wstring user_password;
-	
-	INT user_level;
-	INT possion;
-	INT grenade;
 };
 
 struct PLAYER_TABLE
 {
 	SQLWCHAR id[20];
-	SQLWCHAR password[50];
-	SQLINTEGER user_level, possion, grenade;
+	SQLWCHAR password[20];
 
-	SQLLEN cb_password = 0, cb_id = 0, cb_level = 0, cb_possion = 0, cb_grenade = 0;
+	SQLINTEGER money, rifle, shotgun, sniper, l_armor, h_armor, grenade, flashbang,
+		bandage, fat, reject;
+
+	SQLLEN cb_password = 0, cb_id = 0, cb_money = 0, cb_rifle = 0, cb_shotgun = 0, 
+		cb_sniper = 0, cb_l_armor = 0, cb_h_armor = 0, cb_grenade = 0, cb_flashbang = 0, 
+		cb_bandage = 0, cb_fat = 0, cb_reject = 0;
 };
 
 class DataBase
@@ -29,7 +29,7 @@ public:
 	~DataBase();
 
 	bool Createaccount(Player* player);
-	bool Login(const char* id, const char* password);
+	bool Login(Player* player);
 
 private:
 	

@@ -268,8 +268,8 @@ void ProcessPacket(int id, char* p)
 		SendLoginInfo(id);
 		SendRoomList(id);
 
-		/*if (gamerooms[players[id].GetRoomID()].SetPlayerId(id)) {
-			players[id].SetByWeapon(2);
+		// 데이터 베이스 연동시 사용
+		/*if (database.Login(&players[id])) {
 			SendLoginInfo(id);
 			SendRoomList(id);
 		}
@@ -362,7 +362,7 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_PACKET_QUIT_ROOM: {
-		CS_QUIT_ROOM_PACKET *packet = reinterpret_cast<CS_QUIT_ROOM_PACKET*>(p);		
+		CS_QUIT_ROOM_PACKET *packet = reinterpret_cast<CS_QUIT_ROOM_PACKET*>(p);
 		
 		if (gamerooms[players[id].GetRoomID()].GetPlyId()[0] == id) { // 방장이 나가면
 			players[id].SetHost(false);
@@ -404,9 +404,9 @@ void ProcessPacket(int id, char* p)
 		CS_SET_EQUIPMENT_PACKET *packet = reinterpret_cast<CS_SET_EQUIPMENT_PACKET*>(p);
 		players[id].SetWeapon(packet->weapon);
 		players[id].SetArmor(packet->armor);
-		players[id].SetGrenade(packet->grenade);
+		players[id].SetThrowWp(packet->grenade);
 
-		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].Getgrenade() << std::endl;		
+		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].GetThrowWp() << std::endl;		
 		break;
 	}
 	case CS_DEMO_MONSTER_SETPOS: {
@@ -459,7 +459,6 @@ void SendLoginFail(int id)
 	packet.id = -1;
 	retval = players[id].DoSend(&packet, packet.size);
 
-	players[id].SetState(S_STATE::LOG_OUT);
 }
 
 void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 사람들한테도 모두 게임이 시작이 되었다는 신호가 먼저 가야함
@@ -494,7 +493,7 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 		add_p.player_data = players[send_id].GetPlayerData();
 		add_p.weapon = players[send_id].GetWeapon();
 		add_p.armor = players[send_id].GetArmor();
-		add_p.grenade = players[send_id].Getgrenade();
+		add_p.grenade = players[send_id].GetThrowWp();
 		for (int recv_id : plys_id) {
 			if (recv_id == -1) continue;
 			if (recv_id == send_id) continue;

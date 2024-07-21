@@ -16,7 +16,8 @@ struct Shoot_Event {
 };
 
 struct Login_Event {
-	string text;
+	string id;
+	string password;
 };
 
 struct Game_Start {

@@ -83,7 +83,7 @@ Player::Player(int id, SOCKET socket)
 
 	m_weapon = 0;
 	m_armor = 0;
-	m_grenade = 0;
+	m_throw_wp = 0;
 
 	m_remain_size = 0;
 	m_state = S_STATE::LOG_IN;

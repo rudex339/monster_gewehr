@@ -64,7 +64,7 @@ struct EnterRoom_Event {
 };
 
 struct LoginCheck_Event {
-	bool logincheck = false;
+	//bool logincheck = false;
 	int id;
 };
 

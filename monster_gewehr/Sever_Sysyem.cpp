@@ -20,17 +20,29 @@ void Sever_System::configure(World* world)
 	world->subscribe<Set_Equipment>(this);
 }
 
+//void Sever_System::tick(World* world, float deltaTime)
+//{
+//	if (m_login) {
+//		char buf[BUF_SIZE] = { 0 };
+//
+//		int retval = recv(g_socket, buf, BUF_SIZE, 0);
+//
+//		if (retval > 0) {
+//			PacketReassembly(world, buf, retval);
+//		}
+//	}
+//
+//}
+
 void Sever_System::tick(World* world, float deltaTime)
-{
-	if (m_login) {
-		char buf[BUF_SIZE] = { 0 };
+{	
+	char buf[BUF_SIZE] = { 0 };
 
-		int retval = recv(g_socket, buf, BUF_SIZE, 0);
+	int retval = recv(g_socket, buf, BUF_SIZE, 0);
 
-		if (retval > 0) {
-			PacketReassembly(world, buf, retval);
-		}
-	}
+	if (retval > 0) {
+		PacketReassembly(world, buf, retval);
+	}	
 
 }
 
@@ -74,35 +86,45 @@ void Sever_System::receive(class World* world, const Shoot_Event& event)
 	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
 }
 
+//void Sever_System::receive(World* world, const Login_Event& event)
+//{
+//	CS_LOGIN_PACKET packet;
+//	packet.size = sizeof(packet);
+//	packet.type = CS_PACKET_LOGIN;
+//
+//	strcpy_s(packet.name, event.text.c_str());
+//
+//
+//	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
+//
+//	SC_LOGIN_INFO_PACKET sub_packet;
+//	while (1) {
+//		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
+//		if (retval > 0) {
+//			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
+//				m_id = (int)sub_packet.id;
+//				m_login = true;
+//				world->emit<LoginCheck_Event>({ m_login, (int)m_id });
+//				break;
+//			}
+//			else if (sub_packet.type == SC_PACKET_LOGIN_FAIL) {
+//				cout << "로그인 실패" << endl;
+//				break;
+//			}
+//		}
+//	}
+//}
+
 void Sever_System::receive(World* world, const Login_Event& event)
 {
 	CS_LOGIN_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_LOGIN;
 
-	strcpy_s(packet.name, event.text.c_str());
+	strcpy_s(packet.name, event.id.c_str());
+	strcpy_s(packet.password, event.password.c_str());
 
-
-	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
-
-	SC_LOGIN_INFO_PACKET sub_packet;
-	while (1) {
-		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
-		if (retval > 0) {
-			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
-				m_id = (int)sub_packet.id;
-				m_login = true;
-				world->emit<LoginCheck_Event>({ m_login, (int)m_id });
-				break;
-			}
-			else if (sub_packet.type == SC_PACKET_LOGIN_FAIL) {
-				cout << "로그인 실패" << endl;
-				break;
-			}
-		}
-	}
-	
-
+	send(g_socket, (char*)&packet, sizeof(packet), 0);
 }
 
 void Sever_System::receive(World* world, const Game_Start& event)
@@ -113,33 +135,6 @@ void Sever_System::receive(World* world, const Game_Start& event)
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
-
-// 원본
-//void Sever_System::receive(World* world, const Game_Start& event)
-//{
-//
-//	world->each<player_Component, Position_Component, Velocity_Component, Rotation_Component>(
-//		[&](Entity* ent,
-//			ComponentHandle<player_Component> Player,
-//			ComponentHandle<Position_Component> Position,
-//			ComponentHandle< Velocity_Component> Velocity,
-//			ComponentHandle<Rotation_Component> Rotation) ->
-//		void {
-//			if (ent->has<Camera_Component>()) {
-//				Player->id = m_id;
-//
-//				CS_START_GAME_PACKET p;
-//				p.size = sizeof(p);
-//				p.type = CS_PACKET_START_GAME;
-//				p.pos = Position->Position;
-//				p.vel = Velocity->m_velocity;
-//				p.yaw = Rotation->mfYaw;
-//
-//				send(g_socket, (char*)&p, p.size, 0);
-//			}
-//
-//		});
-//}
 
 void Sever_System::receive(class World* world, const Create_Room& event)
 {
@@ -240,6 +235,18 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 {
 	switch (packet[1])
 	{
+	case SC_PACKET_LOGIN_INFO: {
+		SC_LOGIN_INFO_PACKET* pk = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);;
+		m_id = (int)pk->id;
+		//m_login = true;
+		world->emit<LoginCheck_Event>({ (int)m_id });
+		world->emit< ChangeScene_Event>({ LOBBY });
+		break;
+	}
+	case SC_PACKET_LOGIN_FAIL: {
+		cout << "로그인 실패" << endl;
+		break;
+	}
 	case SC_PACKET_GAME_START: {
 		SC_GAME_START_PACKET* pk = reinterpret_cast<SC_GAME_START_PACKET*>(packet);
 		world->emit<StartRoom_Event>({ m_id, pk->room_num });
