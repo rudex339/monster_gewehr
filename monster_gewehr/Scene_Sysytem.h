@@ -19,6 +19,8 @@ enum {
 
 enum {
 	ExitBtn = -1,
+	LoginBtn,
+	RegisterBtn,
 	ChangeSceneBtn,
 	MakeRoomBtn,
 	SelectRoomBtn,
@@ -107,6 +109,11 @@ struct RoomPlayer_Info {
 struct Ready_Event {
 };
 
+struct LoginButton_Event {
+	int len;
+	int index;
+};
+
 
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
@@ -118,7 +125,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<Refresh_Scene>,
 	public EventSubscriber<ChoiceEquip_Event>,
 	public EventSubscriber<StartRoom_Event>,
-	public EventSubscriber<Ready_Event>
+	public EventSubscriber<Ready_Event>,
+	public EventSubscriber<LoginButton_Event>
 {
 private:
 	UINT m_State = 0;
@@ -134,6 +142,8 @@ private:
 	Entity* m_pPawn;
 
 	short m_score = 0;
+
+	int textboxlen[2] = { 0,0 };
 
 	int m_id = -1;
 	bool m_ready = false;
@@ -197,7 +207,8 @@ public:
 	virtual void receive(class World* world, const CreateObject_Event& event);
 	virtual void receive(class World* world, const StartRoom_Event& event);
 	virtual void receive(class World* world, const Ready_Event& event);
-	
+	virtual void receive(class World* world, const LoginButton_Event& event);
+
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수

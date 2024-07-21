@@ -481,6 +481,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			}
 
 			// 텍스트 입력 박스
+			m_textBrush.Get()->SetOpacity(1.0f);
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 			m_d2dDeviceContext->FillRectangle(
 				{ editBox->x, editBox->y, editBox->x + editBox->m_width, editBox->y + editBox->m_height },
@@ -526,7 +527,6 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get(),
 				D2D1_DRAW_TEXT_OPTIONS_NONE
 			);
-
 
 			// 커서 
 			if (cursorPosition[textIndex] <= text[textIndex].length() && textIndex == editBox->index)
@@ -608,6 +608,15 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case ExitBtn:
 					exit(0);
 					break;
+
+				case LoginBtn:
+					// 여기서 아이디 비교하고, 성공하면 로비로 이동
+					break;
+
+				case RegisterBtn:
+					// 여기서 아이디랑 비밀번호를 DB에 저장 및 로비로 이동
+					break;
+
 				case ChangeSceneBtn:
 					world->emit<ChangeScene_Event>({ button->Next_Scene });
 					break;
@@ -859,6 +868,9 @@ void Render_System::receive(World* world, const KeyDown_Event& event)
 		text[textIndex].insert(text[textIndex].begin() + cursorPosition[textIndex], static_cast<wchar_t>(key));
 		cursorPosition[textIndex]++;
 	}
+	cout << "넣은 값(길이, index) : " << (int)text[textIndex].length() << " , " << textIndex << endl;
+	world->emit<LoginButton_Event>({ (int)text[textIndex].length() , textIndex });
+	world->emit<Refresh_Scene>({ LOGIN });
 }
 
 void Render_System::receive(World* world, const Tab_Event& event)

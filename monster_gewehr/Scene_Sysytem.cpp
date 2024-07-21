@@ -44,6 +44,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<CreateObject_Event>(this);
 	world->subscribe<StartRoom_Event>(this);
 	world->subscribe<Ready_Event>(this);
+	world->subscribe<LoginButton_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -117,6 +118,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	m_State = event.State;
 	switch (m_State) {
 	case LOGIN: {
+		world->reset();
 		Entity* ent = world->create();
 
 		D2D1_RECT_F sRect, imageRect;
@@ -129,12 +131,36 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		// 아이디 입력창
 		ent = world->create();
-		ent->assign<TextBoxUI_Component>(FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 5 / 10, FRAME_BUFFER_WIDTH * 3 / 10, LOGIN_FONT_SIZE, 0);
+		TextBoxUI_Component idBox = TextBoxUI_Component(FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 5 / 10, FRAME_BUFFER_WIDTH * 3 / 10, LOGIN_FONT_SIZE, 0);
+		ent->assign<TextBoxUI_Component>(idBox);
 
 		// 비밀번호 입력창
 		ent = world->create();
-		ent->assign<TextBoxUI_Component>(FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 6 / 10, FRAME_BUFFER_WIDTH * 3 / 10, LOGIN_FONT_SIZE, 1);
+		TextBoxUI_Component pwBox = TextBoxUI_Component(FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 6 / 10, FRAME_BUFFER_WIDTH * 3 / 10, LOGIN_FONT_SIZE, 1);
+		ent->assign<TextBoxUI_Component>(pwBox);
 
+
+		// 로그인 버튼
+		ent = world->create();
+		sRect = { FRAME_BUFFER_WIDTH * 6 / 10, FRAME_BUFFER_HEIGHT * 7 / 10, FRAME_BUFFER_WIDTH * 7 / 10, FRAME_BUFFER_HEIGHT * 7 / 10 + LOGIN_FONT_SIZE};
+		Button_Component login = Button_Component(LoginBtn, L"image/monster_hunter_login.png", SMALL_FONT, L"로그인", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		login.Disable();
+		if (textboxlen[0] > 2 && textboxlen[1] > 2) {
+			login.Activate();
+		}
+		ent->assign<Button_Component>(login);
+		
+		// 회원가입 버튼
+		ent = world->create();
+		sRect = { FRAME_BUFFER_WIDTH * 8 / 10, FRAME_BUFFER_HEIGHT * 7 / 10, FRAME_BUFFER_WIDTH * 9 / 10, FRAME_BUFFER_HEIGHT * 7 / 10 + LOGIN_FONT_SIZE };
+		Button_Component regist = Button_Component(RegisterBtn, L"image/monster_hunter_login.png", SMALL_FONT, L"회원가입", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		regist.Disable();
+		if (textboxlen[0] > 2 && textboxlen[1] > 2) {
+			regist.Activate();
+		}
+		ent->assign<Button_Component>(regist);
 	}
 	break;
 
@@ -1024,6 +1050,11 @@ void Scene_Sysytem::receive(World* world, const Ready_Event& event)
 {
 	m_ready = !m_ready;
 	world->emit<Refresh_Scene>({ INROOM });
+}
+
+void Scene_Sysytem::receive(World* world, const LoginButton_Event& event)
+{
+	textboxlen[event.index] = event.len;
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
