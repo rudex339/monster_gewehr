@@ -245,6 +245,8 @@ public:
 	void InitInRoomPlayers();
 	void ReadyCheck(int id, bool ready);
 	void Purchase();
+	int* GetEquipments() { return equipments; }
+
 	int getID() { return m_id; };
 };
 

@@ -621,6 +621,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case ChangeSceneBtn:
 					if (button->Next_Scene == ROOMS) {
 						world->emit<Quit_Room>({});
+						world->emit<Set_Equipment>({ (char)m_scene->GetEquipments()[0], (char)m_scene->GetEquipments()[1], (char)m_scene->GetEquipments()[2]});
 					}
 					world->emit<ChangeScene_Event>({ button->Next_Scene });
 					break;
