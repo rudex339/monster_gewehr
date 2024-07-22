@@ -30,6 +30,7 @@ public:
 
 	bool Createaccount(Player* player);
 	bool Login(Player* player);
+	void Update(Player* player);
 
 private:
 	

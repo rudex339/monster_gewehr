@@ -134,8 +134,8 @@ void ProcessClient(SOCKET sock)
 		fps_timer = std::chrono::steady_clock::now();
 	}
 
-
-	Disconnect(id);	
+	//database.Update(&players[id]);
+	Disconnect(id);
 
 	// 소켓 닫기
 	closesocket(client_sock);
@@ -219,6 +219,7 @@ void BossThread()
 						if (ply_id == -1) continue;
 						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 						SendEndGame(players[ply_id].GetID());
+						//database.Update(&players[ply_id]);
 						players[ply_id].PlayerInit();
 					}
 					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
@@ -378,7 +379,7 @@ void ProcessPacket(int id, char* p)
 			SendRoomQuit(id);
 			gamerooms[players[id].GetRoomID()].DeletePlayerId(id);
 			players[id].SetRoomID(-1);
-			players[id].SetReady(false);			
+			players[id].SetReady(false);
 		}
 		break;
 	}
@@ -411,11 +412,21 @@ void ProcessPacket(int id, char* p)
 		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].GetThrowWp() << std::endl;		
 		break;
 	}
+	case CS_PACKET_BUY: {
+		CS_BUY_PACKET* packet = reinterpret_cast<CS_BUY_PACKET*>(p);
+
+		players[id].SetMoney(packet->money);
+		players[id].SetItem(packet->item_type, players[id].GetItem(packet->item_type) + 1);
+
+
+		//database.Update(&players[id]);
+		break;
+	}
 	case CS_PACKET_HEAL: {
 		CS_HEAL_PACKET* packet = reinterpret_cast<CS_HEAL_PACKET*>(p);
 		players[id].SetHp(packet->hp);
 
-		int use_item = packet->item_type + (int)S_BANDAGE;
+		int use_item = packet->item_type + S_BANDAGE;
 
 		players[id].SetItem(use_item, players[id].GetItem(use_item) - 1);
 		std::cout << "힐 완료 : " << players[id].GetHp() << ", 힐템 : " << players[id].GetItem(use_item) << std::endl;

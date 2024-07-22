@@ -10,16 +10,16 @@ constexpr int MAX_ID_LENGTH = 20;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
-constexpr char S_RIFLE = 0;
-constexpr char S_SHOT_GUN = 1;
-constexpr char S_SNIPER = 2;
-constexpr char S_L_ARMOR = 3;
-constexpr char S_H_ARMOR = 4;
-constexpr char S_GRENADE = 5;
-constexpr char S_FLASH_BANG = 6;
-constexpr char S_BANDAGE = 7;
-constexpr char S_FAK = 8;
-constexpr char S_INJECTOR = 9;
+constexpr int S_RIFLE = 0;
+constexpr int S_SHOT_GUN = 1;
+constexpr int S_SNIPER = 2;
+constexpr int S_L_ARMOR = 3;
+constexpr int S_H_ARMOR = 4;
+constexpr int S_GRENADE = 5;
+constexpr int S_FLASH_BANG = 6;
+constexpr int S_BANDAGE = 7;
+constexpr int S_FAK = 8;
+constexpr int S_INJECTOR = 9;
 
 // 몬스터 데이터
 constexpr float MONSTER_MAX_HP = 1000;
@@ -39,8 +39,7 @@ constexpr char CS_PACKET_SET_EQUIPMENT = 11;
 // 클라에서 따로 아이템 구매를 구현해서 서버에 알리기만 할건지
 // 아니면 클라에서는 아이템을 구매버튼만 누르면 이를 서버에서 구매기능을 구현해서 구매됬다고 클라에 다시 알릴건지 고민중
 constexpr char CS_PACKET_BUY = 12;
-constexpr char CS_PACKET_UPGRADE = 13;
-constexpr char CS_PACKET_HEAL = 14;
+constexpr char CS_PACKET_HEAL = 13;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -184,6 +183,15 @@ struct CS_SET_EQUIPMENT_PACKET
 	CHAR weapon;
 	CHAR armor;
 	CHAR grenade;
+};
+
+struct CS_BUY_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	INT money;
+	INT item_type;
+	INT amount;
 };
 
 struct CS_HEAL_PACKET

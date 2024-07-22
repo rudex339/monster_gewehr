@@ -145,16 +145,16 @@ bool DataBase::Login(Player* player)
 			player_data.user_id = player_table.id;
 			player_data.user_password = player_table.password;
 			player->SetMoney(player_table.money);
-			player->SetItem((int)S_RIFLE, player_table.rifle);
-			player->SetItem((int)S_SHOT_GUN, player_table.shotgun);
-			player->SetItem((int)S_SNIPER, player_table.sniper);
-			player->SetItem((int)S_L_ARMOR, player_table.l_armor);
-			player->SetItem((int)S_H_ARMOR, player_table.h_armor);
-			player->SetItem((int)S_GRENADE, player_table.grenade);
-			player->SetItem((int)S_FLASH_BANG, player_table.flashbang);
-			player->SetItem((int)S_BANDAGE, player_table.bandage);
-			player->SetItem((int)S_FAK, player_table.fak);
-			player->SetItem((int)S_INJECTOR, player_table.injector);
+			player->SetItem(S_RIFLE, player_table.rifle);
+			player->SetItem(S_SHOT_GUN, player_table.shotgun);
+			player->SetItem(S_SNIPER, player_table.sniper);
+			player->SetItem(S_L_ARMOR, player_table.l_armor);
+			player->SetItem(S_H_ARMOR, player_table.h_armor);
+			player->SetItem(S_GRENADE, player_table.grenade);
+			player->SetItem(S_FLASH_BANG, player_table.flashbang);
+			player->SetItem(S_BANDAGE, player_table.bandage);
+			player->SetItem(S_FAK, player_table.fak);
+			player->SetItem(S_INJECTOR, player_table.injector);
 			
 			std::wstring temp_id{ L"null" };
 			std::wstring temp_password{ L"null" };
@@ -178,4 +178,34 @@ bool DataBase::Login(Player* player)
 	SQLCancel(m_hstmt);
 	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 	return false;
+}
+
+void DataBase::Update(Player* player)
+{
+	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
+
+	std::wstring c_id;
+	std::string u_id = player->GetName();
+
+	c_id.assign(u_id.begin(), u_id.end());
+
+
+	std::wstring query = std::format(L"CALL update_data ('{0}', {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11})",
+		c_id, player->GetMoney(), player->GetItem(S_RIFLE), player->GetItem(S_SHOT_GUN), player->GetItem(S_SNIPER),
+		player->GetItem(S_L_ARMOR), player->GetItem(S_H_ARMOR), player->GetItem(S_GRENADE), player->GetItem(S_FLASH_BANG),
+		player->GetItem(S_BANDAGE), player->GetItem(S_FAK), player->GetItem(S_INJECTOR));
+	
+	std::cout << "업데이트됨 : " << player->GetItem(S_BANDAGE) << std::endl;
+	retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
+	if (!(SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode)) {
+		std::cout << "실패함" << std::endl;
+		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
+		SQLCancel(m_hstmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+		return;
+	}
+
+	SQLCancel(m_hstmt);
+	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+	return;
 }
