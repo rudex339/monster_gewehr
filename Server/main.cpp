@@ -762,10 +762,12 @@ void SendRoomJoin(int id)
 	SC_ADD_ROOM_PLAYER_PACKET add_p;
 	add_p.size = sizeof(add_p);
 	add_p.type = SC_PACKET_ADD_ROOM_PLAYER;
-	add_p.id = id;
+	add_p.id = id;	
 	strcpy_s(add_p.name, players[id].GetName().c_str());
 	add_p.weapon = players[id].GetWeapon();
 	add_p.armor = players[id].GetArmor();
+	add_p.host = players[id].GetHost();
+	add_p.ready = players[id].GetReady();
 
 	for (int ply_id : gamerooms[room_num].GetPlyId()) {
 		if (ply_id == -1) continue;

@@ -793,7 +793,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 	Button_Component goToRooms = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	goToRooms.Next_Scene = ROOMS;
-	goToRooms.Next_Scene = INROOM;
+	goToRooms.Curr_Scene = INROOM;
 	ent->assign<Button_Component>(goToRooms);
 
 	{ // 플레이어를 그린다

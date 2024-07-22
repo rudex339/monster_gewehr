@@ -459,7 +459,9 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		std::wstring wstr(len, L'\0');
 		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
 
-		cout << "name : " << pk->name << " weapon : " << (int)pk->weapon << endl;
+		if(!pk->ready)
+			cout << "name : " << pk->name << " weapon : " << (int)pk->weapon << endl;
+
 		RoomPlayer_Info info;
 		info.id = pk->id;
 		info.name = wstr;

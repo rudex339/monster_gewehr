@@ -93,6 +93,7 @@ Player::Player(int id, SOCKET socket)
 	m_bounding_box.Orientation = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
 
 	m_is_host = false;
+	m_is_ready = false;
 
 	// 나중에 데이터베이스 연동하면 삭제해라
 	m_item_info[0] = 0;
@@ -117,7 +118,7 @@ void Player::PlayerInit()
 	m_hp = 100;
 	m_max_hp = 100;
 
-	m_ammo = 30;
+	m_ammo = 0;
 	m_mag = 0;
 
 	m_state = S_STATE::LOBBY;
