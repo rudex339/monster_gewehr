@@ -299,7 +299,7 @@ struct SC_CREATE_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	//CHAR room_name[15];
+	CHAR name[20];
 	SHORT room_num;
 };
 
@@ -307,7 +307,7 @@ struct SC_ADD_ROOM_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	//CHAR room_name[15];
+	CHAR name[20];
 	SHORT room_num;
 	BOOL start;
 };

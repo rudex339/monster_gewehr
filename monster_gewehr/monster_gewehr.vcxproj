@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="Animate_System.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collision_Sysytem.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="ECS.h" />
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="Animate_System.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Collision_Sysytem.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="Mesh.cpp" />

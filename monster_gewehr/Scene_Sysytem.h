@@ -235,7 +235,7 @@ public:
 	void BuildScene(World* world, char* pstrFileName);
 
 	// 방 생성 함수
-	void AddRoom(int room_num, bool disable);
+	void AddRoom(int room_num, bool disable, wstring name);
 	void DeleteRoom(int room_num);
 	void AddRoomPlayers(wstring name, int weapon);
 	void InitRoomPlayers();
@@ -245,6 +245,8 @@ public:
 	void InitInRoomPlayers();
 	void ReadyCheck(int id, bool ready);
 	void Purchase();
+	int* GetEquipments() { return equipments; }
+
 	int getID() { return m_id; };
 };
 

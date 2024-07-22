@@ -25,6 +25,9 @@ public:
 	void SetStateLock() { m_state_lock.lock(); }
 	void SetStateUnLock() { m_state_lock.unlock(); }
 
+	void SetHostName(std::string name) { m_host_name = name; }
+	std::string GetHostName() { return m_host_name; }
+
 	std::array<INT, MAX_CLIENT_ROOM> GetPlyId() { return m_player_ids; }
 
 	GameRoomState GetState() { return m_state; }
@@ -32,6 +35,7 @@ public:
 private:
 	std::array<INT, MAX_CLIENT_ROOM> m_player_ids;
 	GameRoomState m_state;
+	std::string m_host_name;
 
 	std::mutex m_player_lock;
 	std::mutex m_state_lock;

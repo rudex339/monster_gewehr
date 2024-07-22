@@ -342,6 +342,7 @@ void ProcessPacket(int id, char* p)
 			if (gamerooms[i].GetState() == G_FREE) {
 				gamerooms[i].SetCreateRoom();
 				gamerooms[i].SetPlayerId(id);
+				gamerooms[i].SetHostName(players[id].GetName());
 				players[id].SetRoomID(i);
 				players[id].SetHost(true);
 				SendRoomCreate(id, i);
@@ -649,6 +650,7 @@ void SendRoomList(int id)
 			sub_packet.type = SC_PACKET_ADD_ROOM;
 			sub_packet.room_num = i;
 			sub_packet.start = false;
+			strcpy(sub_packet.name, gamerooms[i].GetHostName().c_str());
 			if (gamerooms[i].GetState() == G_INGAME)
 				sub_packet.start = true;
 
@@ -672,6 +674,7 @@ void SendRoomCreate(int ply_id, int room_num)
 	sub_packet.type = SC_PACKET_ADD_ROOM;
 	sub_packet.room_num = room_num;
 	sub_packet.start = false;
+	strcpy(sub_packet.name, players[ply_id].GetName().c_str());
 
 	for (auto& client : players) {
 		if (client.second.GetID() == ply_id) continue;
