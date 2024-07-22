@@ -866,7 +866,6 @@ void Render_System::receive(World* world, const KeyDown_Event& event)
 	bool isShiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
 	bool isCapsLockOn = (GetKeyState(VK_CAPITAL) & 0x0001) != 0;
 	wchar_t key = event.key;
-
 	if ((isShiftPressed && !isCapsLockOn) || (!isShiftPressed && isCapsLockOn))
 	{
 		key = toupper(key);
@@ -892,6 +891,7 @@ void Render_System::receive(World* world, const KeyDown_Event& event)
 
 	else if(0x30 <= event.key && 0x39 >= event.key ||
 			0x41 <= event.key && 0x5A >= event.key) {
+		if (text[textIndex].size() >= 20) return;
 		text[textIndex].insert(text[textIndex].begin() + cursorPosition[textIndex], static_cast<wchar_t>(key));
 		cursorPosition[textIndex]++;
 	}
