@@ -976,14 +976,18 @@ TextureRectMesh::TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_d3dTextureCoord1BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
 	}
 
-
 }
 
 TextureRectMesh::~TextureRectMesh()
 {
 }
 
-bool TextureRectMesh::changeRowCol(int row, int col)
+bool TextureRectMesh::changeRowCol(int row, int col, int rows, int cols)
 {
+	//float 
+	float height = 1.0f / float(rows);
+	float lenght = 1.0f / float(cols);
+	float y = float(row) / float(rows);
+	float x = float(col) / float(cols);
 	return false;
 }
