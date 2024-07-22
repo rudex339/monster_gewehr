@@ -409,6 +409,13 @@ void ProcessPacket(int id, char* p)
 		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].GetThrowWp() << std::endl;		
 		break;
 	}
+	case CS_PACKET_HEAL: {
+		CS_HEAL_PACKET* packet = reinterpret_cast<CS_HEAL_PACKET*>(p);
+		players[id].SetHp(packet->hp);
+		// 나중에 친구들 체력 보일때 여기다가 친구들한테도 체력 상태 보내는거 만들기
+		// SendHitPlayer 재활용 하면 될듯?
+		break;
+	}
 	case CS_DEMO_MONSTER_SETPOS: {
 		int room_id = players[id].GetRoomID();
 		souleaters[room_id].m_lock.lock();
@@ -599,7 +606,7 @@ void SendHitPlayer(int id)
 	for (int ply_id : gamerooms[room_id].GetPlyId()) {
 		if (ply_id < 0) continue;
 		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-		players[ply_id].DoSend(&packet, packet.size);		
+		players[ply_id].DoSend(&packet, packet.size);
 	}
 }
 

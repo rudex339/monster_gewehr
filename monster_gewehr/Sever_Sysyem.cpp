@@ -18,6 +18,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Select_Room>(this);
 	world->subscribe<Ready_Room>(this);
 	world->subscribe<Set_Equipment>(this);
+	world->subscribe<Heal_Event>(this);
 }
 
 //void Sever_System::tick(World* world, float deltaTime)
@@ -85,35 +86,6 @@ void Sever_System::receive(class World* world, const Shoot_Event& event)
 
 	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
 }
-
-//void Sever_System::receive(World* world, const Login_Event& event)
-//{
-//	CS_LOGIN_PACKET packet;
-//	packet.size = sizeof(packet);
-//	packet.type = CS_PACKET_LOGIN;
-//
-//	strcpy_s(packet.name, event.text.c_str());
-//
-//
-//	int retval = send(g_socket, (char*)&packet, sizeof(packet), 0);
-//
-//	SC_LOGIN_INFO_PACKET sub_packet;
-//	while (1) {
-//		int retval = recv(g_socket, (char*)&sub_packet, sizeof(sub_packet), 0);
-//		if (retval > 0) {
-//			if (sub_packet.type == SC_PACKET_LOGIN_INFO) {
-//				m_id = (int)sub_packet.id;
-//				m_login = true;
-//				world->emit<LoginCheck_Event>({ m_login, (int)m_id });
-//				break;
-//			}
-//			else if (sub_packet.type == SC_PACKET_LOGIN_FAIL) {
-//				cout << "로그인 실패" << endl;
-//				break;
-//			}
-//		}
-//	}
-//}
 
 void Sever_System::receive(World* world, const Login_Event& event)
 {
@@ -192,6 +164,16 @@ void Sever_System::receive(World* world, const Set_Equipment& event)
 	p.weapon = event.weapon;
 	p.armor = event.armor;
 	p.grenade = event.grenade;
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(World* world, const Heal_Event& event)
+{
+	CS_HEAL_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_HEAL;
+	p.hp = event.hp;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }

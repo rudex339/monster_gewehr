@@ -33,6 +33,7 @@ constexpr char CS_PACKET_SET_EQUIPMENT = 11;
 // 아니면 클라에서는 아이템을 구매버튼만 누르면 이를 서버에서 구매기능을 구현해서 구매됬다고 클라에 다시 알릴건지 고민중
 constexpr char CS_PACKET_BUY = 12;
 constexpr char CS_PACKET_UPGRADE = 13;
+constexpr char CS_PACKET_HEAL = 14;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -175,6 +176,13 @@ struct CS_SET_EQUIPMENT_PACKET
 	CHAR weapon;
 	CHAR armor;
 	CHAR grenade;
+};
+
+struct CS_HEAL_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	FLOAT hp;
 };
 
 struct CS_DEMO_PACKET

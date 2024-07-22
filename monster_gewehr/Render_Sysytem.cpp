@@ -786,7 +786,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			float MapX, MapZ;
 
 			for (auto& pos : GetUserInfo()) {
-				cout << "UID : " << pos.first << "|| Position : " << pos.second.x << ", " << pos.second.y << endl;
+				//cout << "UID : " << pos.first << "|| Position : " << pos.second.x << ", " << pos.second.y << endl;
 				float Xdiff = (pos.second.x - position->Position.x) / 4.67;
 				float Zdiff = (pos.second.y - position->Position.z) / 6.07;
 

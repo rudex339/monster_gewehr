@@ -33,7 +33,6 @@ std::array<Monster, MAX_GAME_ROOM> souleaters;
 
 std::array<GameRoom, MAX_GAME_ROOM> gamerooms;
 
-DataBase 
-;
+DataBase database;
 
 int global_id = 0;
