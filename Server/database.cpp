@@ -134,17 +134,27 @@ bool DataBase::Login(Player* player)
 	retcode = SQLBindCol(m_hstmt, 9, SQL_C_SLONG, &player_table.grenade, 4, &player_table.cb_grenade);
 	retcode = SQLBindCol(m_hstmt, 10, SQL_C_SLONG, &player_table.flashbang, 4, &player_table.cb_flashbang);
 	retcode = SQLBindCol(m_hstmt, 11, SQL_C_SLONG, &player_table.bandage, 4, &player_table.cb_bandage);
-	retcode = SQLBindCol(m_hstmt, 12, SQL_C_SLONG, &player_table.fat, 4, &player_table.cb_fat);
-	retcode = SQLBindCol(m_hstmt, 13, SQL_C_SLONG, &player_table.reject, 4, &player_table.cb_reject);
+	retcode = SQLBindCol(m_hstmt, 12, SQL_C_SLONG, &player_table.fak, 4, &player_table.cb_fat);
+	retcode = SQLBindCol(m_hstmt, 13, SQL_C_SLONG, &player_table.injector, 4, &player_table.cb_reject);
 
 
 	while (true) {
 		retcode = SQLFetch(m_hstmt);
-		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
 
 		if (SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode) {
 			player_data.user_id = player_table.id;
 			player_data.user_password = player_table.password;
+			player->SetMoney(player_table.money);
+			player->SetItem((int)S_RIFLE, player_table.rifle);
+			player->SetItem((int)S_SHOT_GUN, player_table.shotgun);
+			player->SetItem((int)S_SNIPER, player_table.sniper);
+			player->SetItem((int)S_L_ARMOR, player_table.l_armor);
+			player->SetItem((int)S_H_ARMOR, player_table.h_armor);
+			player->SetItem((int)S_GRENADE, player_table.grenade);
+			player->SetItem((int)S_FLASH_BANG, player_table.flashbang);
+			player->SetItem((int)S_BANDAGE, player_table.bandage);
+			player->SetItem((int)S_FAK, player_table.fak);
+			player->SetItem((int)S_INJECTOR, player_table.injector);
 			
 			std::wstring temp_id{ L"null" };
 			std::wstring temp_password{ L"null" };

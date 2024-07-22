@@ -95,9 +95,19 @@ Player::Player(int id, SOCKET socket)
 	m_is_host = false;
 
 	// 나중에 데이터베이스 연동하면 삭제해라
-	m_bandage = 10;
-	m_fat = 10;
-	m_injector = 10;
+	m_item_info[0] = 0;
+	m_item_info[1] = 0;
+	m_item_info[2] = 0;
+
+	m_item_info[3] = 0;
+	m_item_info[4] = 0;
+
+	m_item_info[5] = 0;
+	m_item_info[6] = 0;
+
+	m_item_info[7] = 10;
+	m_item_info[8] = 10;
+	m_item_info[9] = 10;
 }
 
 void Player::PlayerInit()
@@ -124,17 +134,17 @@ void Player::SetWeapon(char weapon)
 	m_weapon = weapon;
 	switch (weapon)
 	{
-	case ASSAULT_RIFLE:
+	case S_RIFLE:
 		m_atk = 10;
 		m_ammo = 30;
 		m_range = 500.0f;
 		break;
-	case SHOT_GUN:
+	case S_SHOT_GUN:
 		m_atk = 25;
 		m_ammo = 7;
 		m_range = 200.0f;
 		break;	
-	case SNIPER:
+	case S_SNIPER:
 		m_atk = 100;
 		m_ammo = 5;
 		m_range = 1000.0f;

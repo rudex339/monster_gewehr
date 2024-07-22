@@ -267,11 +267,13 @@ void ProcessPacket(int id, char* p)
 		std::cout << "입장 : " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
 		SendLoginInfo(id);
 		SendRoomList(id);
+		SendItemInfo(id);
 
 		// 데이터 베이스 연동시 사용
 		/*if (database.Login(&players[id])) {
 			SendLoginInfo(id);
 			SendRoomList(id);
+			SendItemInfo(id);
 		}
 		else {
 			SendLoginFail(id);
@@ -412,6 +414,12 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_HEAL: {
 		CS_HEAL_PACKET* packet = reinterpret_cast<CS_HEAL_PACKET*>(p);
 		players[id].SetHp(packet->hp);
+
+		int use_item = packet->item_type + (int)S_BANDAGE;
+
+		players[id].SetItem(use_item, players[id].GetItem(use_item) - 1);
+		std::cout << "힐 완료 : " << players[id].GetHp() << ", 힐템 : " << players[id].GetItem(use_item) << std::endl;
+
 		// 나중에 친구들 체력 보일때 여기다가 친구들한테도 체력 상태 보내는거 만들기
 		// SendHitPlayer 재활용 하면 될듯?
 		break;
@@ -779,4 +787,17 @@ void SendRoomQuit(int id)
 		players[ply_id].DoSend(&packet, packet.size);
 	}
 
+}
+
+void SendItemInfo(int id)
+{
+	SC_ITEM_INFO_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_ITEM_INFO;
+	packet.money = players[id].GetMoney();
+	for (int i = 0; i < 10; i++) {
+		packet.item_info[i] = players[id].GetItem(i);
+	}
+
+	players[id].DoSend(&packet, packet.size);
 }

@@ -63,16 +63,6 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 
 	send(g_socket, (char*)&sub_packet, sub_packet.size, 0);
 
-	//if (event.State == (UINT)SHOOT) {
-	//	CS_PLAYER_ATTACK_PACKET atk_packet;
-	//	atk_packet.size = sizeof(atk_packet);
-	//	atk_packet.type = CS_PACKET_PLAYER_ATTACK;
-	//	atk_packet.dir = event.c_dir;
-	//	atk_packet.pos = event.c_pos;
-	//	//cout << atk_packet.dir.x << endl;
-
-	//	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
-	//}
 
 }
 
@@ -174,6 +164,7 @@ void Sever_System::receive(World* world, const Heal_Event& event)
 	p.size = sizeof(p);
 	p.type = CS_PACKET_HEAL;
 	p.hp = event.hp;
+	p.item_type = event.item_type;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
@@ -473,6 +464,12 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		info.ready = pk->ready;
 		m_scene->AddInRoomPlayers(info);
 		world->emit<Refresh_Scene>({ INROOM });
+		break;
+	}
+	case SC_PACKET_ITEM_INFO: {
+		SC_ITEM_INFO_PACKET* pk = reinterpret_cast<SC_ITEM_INFO_PACKET*>(packet);
+
+		world->emit<GetUserData_Event>({ pk->money, pk->item_info });
 		break;
 	}
 

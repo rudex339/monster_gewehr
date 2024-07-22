@@ -54,6 +54,8 @@ struct player_Component {
 
 	UINT m_weapon = RIFLE;
 
+	INT heal_item[3];
+
 	player_Component() = default;
 };
 

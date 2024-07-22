@@ -7,6 +7,8 @@
 
 class GameRoom;
 
+
+
 class CAPObject
 {
 public:
@@ -43,6 +45,8 @@ protected:
 	SHORT m_room_id;
 };
 
+
+
 class Player : public CAPObject
 {
 public:
@@ -70,6 +74,8 @@ public:
 	void SetAtkPos(const DirectX::XMFLOAT3& pos) { m_atk_pos = pos; }
 	void SetHost(bool is_host) { m_is_host = is_host; }
 	void SetReady(bool is_ready) { m_is_ready = is_ready; }
+	void SetMoney(int money) { m_money = money; }
+	void SetItem(int type, int val) { m_item_info[type] = val; }
 
 	void Lock() { m_lock.lock(); }
 	void UnLock() { m_lock.unlock(); }
@@ -89,8 +95,9 @@ public:
 	float GetRange() { return m_range; }
 	bool GetHost() { return m_is_host; }
 	bool GetReady() { return m_is_ready; }
-
 	int GetAtk() { return m_atk; }
+	int GetMoney() { return m_money; }
+	int GetItem(int type) { return m_item_info[type]; }
 
 	int RecvData();
 	int DoSend(void* p, size_t size);
@@ -112,9 +119,7 @@ protected:
 
 	std::mutex m_lock;
 
-	S_STATE m_state;
-
-	INT m_money;
+	S_STATE m_state;	
 
 	FLOAT m_hp;
 	FLOAT m_max_hp;
@@ -133,20 +138,11 @@ protected:
 	CHAR m_throw_wp;	// º∂±§¿Œ¡ˆ Ω¥∑˘≈∫¿Œ¡ˆ
 	CHAR m_animation;
 
-	INT m_rifle_upgrade;
-	INT m_shotgun_upgrade;
-	INT m_sniper_upgrade;
+	// µ•¿Ã≈Õ ∫£¿ÃΩ∫ ø¨µø «ÿ¡‡æﬂ«‘
+	INT m_money;
 
-	INT m_l_armor;
-	INT m_h_armor;
-
-	INT m_grenade;
-	INT m_flashbang;
-
-	INT m_bandage;
-	INT m_fat;
-	INT m_injector;
-
+	INT m_item_info[10];
+	//------------------------
 	INT m_remain_size;
 
 	BOOL m_is_host;

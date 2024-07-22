@@ -45,6 +45,8 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<StartRoom_Event>(this);
 	world->subscribe<Ready_Event>(this);
 	world->subscribe<LoginButton_Event>(this);
+	world->subscribe<GetUserData_Event>(this);
+	world->subscribe<UseItem_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -945,7 +947,7 @@ void Scene_Sysytem::receive(World* world, const ChoiceItem_Event& event)
 void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 {
 	switch (event.object) {
-	case GRANADE:
+	case GRENADE:
 	case FLASHBANG:
 		Entity* ent = world->create();
 		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
@@ -1053,6 +1055,10 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 					Player->ammo = weapon_ammo[Player->m_weapon];
 					Player->mag = weapon_mag[Player->m_weapon];
 
+					Player->heal_item[0] = equipHealItems[0];
+					Player->heal_item[1] = equipHealItems[1];
+					Player->heal_item[2] = equipHealItems[2];
+
 				}
 			});
 	}
@@ -1079,6 +1085,20 @@ void Scene_Sysytem::receive(World* world, const Ready_Event& event)
 void Scene_Sysytem::receive(World* world, const LoginButton_Event& event)
 {
 	textboxlen[event.index] = event.len;
+}
+
+void Scene_Sysytem::receive(World* world, const GetUserData_Event& event)
+{
+	money = event.money;
+	for (int i = 0; i < 10; i++) {
+		m_item_info[i] = event.item_info[i];
+	}
+}
+
+void Scene_Sysytem::receive(World* world, const UseItem_Event& event)
+{
+	m_item_info[event.item_type + Items::BANDAGE] -= 1;
+	equipHealItems[event.item_type] -= 1;
 }
 
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)

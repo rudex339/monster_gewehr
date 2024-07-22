@@ -44,10 +44,10 @@ private:
 	bool heal_on = false;
 
 	// 힐 하는 시간 정의 0 : 붕대, 1 : 구급상자, 2 : 리젝트
-	float healtime[3] = { 15.0f, 30.0f, 5.0f };
+	float healtime[3] = { 10.0f, 20.0f, 2.0f };
 	float heal_amount[3] = { 25.f, 100.f, 50.f };
 
-
+	int heal_type; // 0, 1, 2
 
 public:
 	PlayerControl_System() = default;

@@ -10,9 +10,16 @@ constexpr int MAX_ID_LENGTH = 20;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
-constexpr char ASSAULT_RIFLE = 0;
-constexpr char SHOT_GUN = 1;
-constexpr char SNIPER = 2;
+constexpr char S_RIFLE = 0;
+constexpr char S_SHOT_GUN = 1;
+constexpr char S_SNIPER = 2;
+constexpr char S_L_ARMOR = 3;
+constexpr char S_H_ARMOR = 4;
+constexpr char S_GRENADE = 5;
+constexpr char S_FLASH_BANG = 6;
+constexpr char S_BANDAGE = 7;
+constexpr char S_FAK = 8;
+constexpr char S_INJECTOR = 9;
 
 // 몬스터 데이터
 constexpr float MONSTER_MAX_HP = 1000;
@@ -61,6 +68,7 @@ constexpr char SC_PACKET_DELETE_ROOM = 18;
 constexpr char SC_PACKET_JOIN_ROOM = 19;
 constexpr char SC_PACKET_QUIT_ROOM = 20;
 constexpr char SC_PACKET_ADD_ROOM_PLAYER = 21;
+constexpr char SC_PACKET_ITEM_INFO = 22;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -183,6 +191,7 @@ struct CS_HEAL_PACKET
 	UCHAR size;
 	UCHAR type;
 	FLOAT hp;
+	INT item_type;	// 0, 1, 2
 };
 
 struct CS_DEMO_PACKET
@@ -349,6 +358,14 @@ struct SC_ADD_ROOM_PLAYER_PACKET
 	CHAR armor;
 	BOOL host;
 	BOOL ready;
+};
+
+struct SC_ITEM_INFO_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	INT money;
+	INT item_info[10];
 };
 #pragma pack (pop)
 

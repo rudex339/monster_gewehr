@@ -52,6 +52,12 @@ struct Set_Equipment{
 
 struct Heal_Event {
 	FLOAT hp;
+	INT item_type;
+};
+
+struct Buy_Item {
+	INT money;
+	INT type;
 };
 
 struct Demo_Event {

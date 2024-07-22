@@ -181,12 +181,16 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		if (heal_on) {
 			if (heal_timer <= 0) {
 				cout << "힐 완료" << endl;
-				player->hp += heal_amount[0];	// 이것도 치유한 힐템에 따라서 달라지게
+				player->hp += heal_amount[heal_type];	// 이것도 치유한 힐템에 따라서 달라지게
 				if (player->hp > 100) {
 					player->hp = 100.f;
-				}				
+				}
 				heal_on = false;
-				world->emit<Heal_Event>({ player->hp });
+				world->emit<Heal_Event>({ player->hp, heal_type });
+				world->emit<UseItem_Event>({ heal_type });
+				player->heal_item[heal_type]--;
+				cout << "남은 힐템 : " << player->heal_item[heal_type] << endl;
+
 			}
 			else {
 				heal_timer -= deltaTime;
@@ -228,9 +232,10 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->stamina -= 0.1;
 			}
 
-			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload) {
+			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0) {
 				heal_on = true;
 				heal_timer = healtime[0];
+				heal_type = 0;
 			}
 
 			if (pKeysBuffer[0x57] & 0xF0) {
@@ -274,7 +279,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if (pKeysBuffer[0x47] & 0xF0) {
 				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
 				;
-				world->emit<CreateObject_Event>({ GRANADE, 
+				world->emit<CreateObject_Event>({ GRENADE, 
 					XMFLOAT3(model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._41,
 						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._42,
 						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._43),

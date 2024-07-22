@@ -15,7 +15,7 @@ struct PLAYER_TABLE
 	SQLWCHAR password[20];
 
 	SQLINTEGER money, rifle, shotgun, sniper, l_armor, h_armor, grenade, flashbang,
-		bandage, fat, reject;
+		bandage, fak, injector;
 
 	SQLLEN cb_password = 0, cb_id = 0, cb_money = 0, cb_rifle = 0, cb_shotgun = 0, 
 		cb_sniper = 0, cb_l_armor = 0, cb_h_armor = 0, cb_grenade = 0, cb_flashbang = 0, 

@@ -41,7 +41,7 @@ enum Items {
 	M24,
 	L_ARMOR,
 	H_ARMOR,
-	GRANADE,
+	GRENADE,
 	FLASHBANG,
 	BANDAGE,
 	FAK,
@@ -114,6 +114,19 @@ struct LoginButton_Event {
 	int index;
 };
 
+struct GetUserData_Event {
+	int money;
+	int item_info[10];
+
+	GetUserData_Event(const int m, const int* item) {
+		money = m;
+		copy(item, item + 10, item_info);
+	}
+};
+
+struct UseItem_Event {
+	int item_type; // enum Items
+};
 
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
@@ -126,7 +139,9 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChoiceEquip_Event>,
 	public EventSubscriber<StartRoom_Event>,
 	public EventSubscriber<Ready_Event>,
-	public EventSubscriber<LoginButton_Event>
+	public EventSubscriber<LoginButton_Event>,
+	public EventSubscriber<GetUserData_Event>,
+	public EventSubscriber<UseItem_Event>
 {
 private:
 	UINT m_State = 0;
@@ -214,6 +229,8 @@ public:
 	virtual void receive(class World* world, const StartRoom_Event& event);
 	virtual void receive(class World* world, const Ready_Event& event);
 	virtual void receive(class World* world, const LoginButton_Event& event);
+	virtual void receive(class World* world, const GetUserData_Event& event);
+	virtual void receive(class World* world, const UseItem_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 
