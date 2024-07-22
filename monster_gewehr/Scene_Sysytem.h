@@ -128,6 +128,10 @@ struct UseItem_Event {
 	int item_type; // enum Items
 };
 
+struct Purchase_Event {
+
+};
+
 class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<ChangeScene_Event>,
 	public EventSubscriber<EnterRoom_Event>,
@@ -141,7 +145,8 @@ class Scene_Sysytem :public EntitySystem,
 	public EventSubscriber<Ready_Event>,
 	public EventSubscriber<LoginButton_Event>,
 	public EventSubscriber<GetUserData_Event>,
-	public EventSubscriber<UseItem_Event>
+	public EventSubscriber<UseItem_Event>,
+	public EventSubscriber<Purchase_Event>
 {
 private:
 	UINT m_State = 0;
@@ -231,6 +236,7 @@ public:
 	virtual void receive(class World* world, const LoginButton_Event& event);
 	virtual void receive(class World* world, const GetUserData_Event& event);
 	virtual void receive(class World* world, const UseItem_Event& event);
+	virtual void receive(class World* world, const Purchase_Event& event);
 
 	void BuildScene(World* world, char* pstrFileName);
 

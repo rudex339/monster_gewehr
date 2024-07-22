@@ -13,27 +13,14 @@ void Sever_System::configure(World* world)
 	world->subscribe<Game_Start>(this);
 	world->subscribe<Demo_Event>(this);
 	world->subscribe<Create_Room>(this);
-	world->subscribe<Join_Room>(this);	
+	world->subscribe<Join_Room>(this);
 	world->subscribe<Quit_Room>(this);
 	world->subscribe<Select_Room>(this);
 	world->subscribe<Ready_Room>(this);
 	world->subscribe<Set_Equipment>(this);
 	world->subscribe<Heal_Event>(this);
+	world->subscribe<Buy_Item>(this);
 }
-
-//void Sever_System::tick(World* world, float deltaTime)
-//{
-//	if (m_login) {
-//		char buf[BUF_SIZE] = { 0 };
-//
-//		int retval = recv(g_socket, buf, BUF_SIZE, 0);
-//
-//		if (retval > 0) {
-//			PacketReassembly(world, buf, retval);
-//		}
-//	}
-//
-//}
 
 void Sever_System::tick(World* world, float deltaTime)
 {	
@@ -164,6 +151,17 @@ void Sever_System::receive(World* world, const Heal_Event& event)
 	p.size = sizeof(p);
 	p.type = CS_PACKET_HEAL;
 	p.hp = event.hp;
+	p.item_type = event.item_type;
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(World* world, const Buy_Item& event)
+{
+	CS_BUY_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_BUY;
+	p.money = event.money;
 	p.item_type = event.item_type;
 
 	send(g_socket, (char*)&p, p.size, 0);

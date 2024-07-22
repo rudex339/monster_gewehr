@@ -644,8 +644,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<ChoiceItem_Event>({ button->item_num });
 					break;
 				case BuyBtn:
-					cout << "구메/강화" << endl;
-					m_scene->Purchase();
+					cout << "구매/강화" << endl;
+					world->emit<Purchase_Event>({});
 					world->emit<Refresh_Scene>({ SHOP });
 					break;
 				case GameReadyBtn:

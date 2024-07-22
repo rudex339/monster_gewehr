@@ -47,6 +47,7 @@ void Scene_Sysytem::configure(World* world)
 	world->subscribe<LoginButton_Event>(this);
 	world->subscribe<GetUserData_Event>(this);
 	world->subscribe<UseItem_Event>(this);
+	world->subscribe<Purchase_Event>(this);
 }
 
 void Scene_Sysytem::unconfigure(World* world)
@@ -1075,6 +1076,13 @@ void Scene_Sysytem::receive(World* world, const UseItem_Event& event)
 	equipHealItems[event.item_type] -= 1;
 }
 
+void Scene_Sysytem::receive(World* world, const Purchase_Event& event)
+{
+	money -= cost;
+	m_item_info[m_item_num] += 1;
+	world->emit<Buy_Item>({ money, m_item_num });
+}
+
 void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 {
 	FILE* pFile = NULL;
@@ -1257,4 +1265,5 @@ void Scene_Sysytem::Purchase()
 {
 	money -= cost;
 	m_item_info[m_item_num] += 1;
+
 }
