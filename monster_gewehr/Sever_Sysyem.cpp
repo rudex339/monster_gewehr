@@ -396,14 +396,21 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	}
 	case SC_PACKET_CREATE_ROOM: {
 		SC_CREATE_ROOM_PACKET* pk = reinterpret_cast<SC_CREATE_ROOM_PACKET*>(packet);
-		m_scene->AddRoom(pk->room_num, false);
+		int len = MultiByteToWideChar(CP_ACP, 0, pk->name, -1, nullptr, 0);
+		std::wstring wstr(len, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
+
+		m_scene->AddRoom(pk->room_num, false, wstr);
 		//world->emit< ChangeScene_Event>({ ROOMS });
 		world->emit<EnterRoom_Event>({ INROOM, pk->room_num, true });
 		break;
 	}
 	case SC_PACKET_ADD_ROOM: {
 		SC_ADD_ROOM_PACKET* pk = reinterpret_cast<SC_ADD_ROOM_PACKET*>(packet);
-		m_scene->AddRoom(pk->room_num, pk->start);
+		int len = MultiByteToWideChar(CP_ACP, 0, pk->name, -1, nullptr, 0);
+		std::wstring wstr(len, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
+		m_scene->AddRoom(pk->room_num, pk->start, wstr);
 		world->emit<Refresh_Scene>({ ROOMS });
 		break;
 	}

@@ -108,6 +108,9 @@
     <ClInclude Include="Scene_Sysytem.h">
       <Filter>system\HeaderFile</Filter>
     </ClInclude>
+    <ClInclude Include="Collision_Sysytem.h">
+      <Filter>system\HeaderFile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="monster_gewehr.cpp">
@@ -168,6 +171,9 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="Scene_Sysytem.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision_Sysytem.cpp">
       <Filter>system</Filter>
     </ClCompile>
   </ItemGroup>

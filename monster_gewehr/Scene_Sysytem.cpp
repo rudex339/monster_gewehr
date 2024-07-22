@@ -1197,7 +1197,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 	::fclose(pFile);
 }
 
-void Scene_Sysytem::AddRoom(int room_num, bool disable)
+void Scene_Sysytem::AddRoom(int room_num, bool disable, wstring name)
 {
 	int num = room_num;
 	D2D1_RECT_F sRect, imageRect;
@@ -1207,8 +1207,8 @@ void Scene_Sysytem::AddRoom(int room_num, bool disable)
 		FRAME_BUFFER_HEIGHT / 8 + (float)num * FRAME_BUFFER_HEIGHT / 7 + 20.0f,
 		FRAME_BUFFER_WIDTH * 13 / 20 - 10.0f, 
 		FRAME_BUFFER_HEIGHT / 8 + (float)(num+1)*FRAME_BUFFER_HEIGHT / 7 + 10.0f };
-	imageRect = { 0, 0, 1000, 563 };
-	Button_Component room_btn = Button_Component(SelectRoomBtn, L"image/monster_hunter_login.png", DEFAULT_FONT, to_wstring(num) + L"번 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+	imageRect = { 0, 0, 784, 251 };
+	Button_Component room_btn = Button_Component(SelectRoomBtn, L"image/button/buttonBg.png", DEFAULT_FONT, name + L" 의 방", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect, num);
 	if (disable) {
 		room_btn.Disable();
