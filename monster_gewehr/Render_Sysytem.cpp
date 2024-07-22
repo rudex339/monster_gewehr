@@ -531,13 +531,24 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			// 커서 
 			if (cursorPosition[textIndex] <= text[textIndex].length() && textIndex == editBox->index)
 			{
-				DWRITE_TEXT_METRICS textMetrics;
-				pTextLayout[textIndex]->GetMetrics(&textMetrics);
-				float cursorX = textMetrics.widthIncludingTrailingWhitespace + editBox->x + 1.0f;
+				// 커서 위치를 기준으로 텍스트 폭 계산
+				DWRITE_HIT_TEST_METRICS hitTestMetrics;
+				float cursorX, cursorY;
 
+				pTextLayout[textIndex]->HitTestTextPosition(
+					static_cast<UINT32>(cursorPosition[textIndex]), // 커서 위치 인덱스
+					FALSE, // 커서가 문자 앞에 있는지 여부
+					&cursorX, // 커서의 X 좌표
+					&cursorY, // 커서의 Y 좌표
+					&hitTestMetrics // 커서 위치의 텍스트 메트릭스
+				);
+
+				cursorX += editBox->x; // editBox의 x 좌표를 더하여 커서의 절대 좌표 계산
+
+				// 커서를 계산된 위치에 그리기
 				m_d2dDeviceContext->DrawLine(
 					D2D1::Point2F(cursorX, editBox->y + 4.0f),
-					D2D1::Point2F(cursorX, editBox->y + textMetrics.height - 1.0f),
+					D2D1::Point2F(cursorX, editBox->y + hitTestMetrics.height - 1.0f),
 					m_textBrush.Get(),
 					1.0f
 				);
