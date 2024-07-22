@@ -839,6 +839,14 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 			}
 		}
 
+		ent = world->create();
+		TextUI_Component text = TextUI_Component(MEDIUM_FONT, m_name,
+			FRAME_BUFFER_HEIGHT * 1.2 / 9, 0,
+			FRAME_BUFFER_HEIGHT * 2 / 9, FRAME_BUFFER_WIDTH * 5 / 14);
+		text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+		text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
+		ent->assign<TextUI_Component>(text);
+
 		for (int i = 0; i < InRoomPlayers.size(); i++) {
 			ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 				m_pObjectManager,
@@ -872,6 +880,14 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 					ent->assign<TextUI_Component>(text);
 				}
 			}
+
+			ent = world->create();
+			TextUI_Component text = TextUI_Component(MEDIUM_FONT, InRoomPlayers[i].name,
+				FRAME_BUFFER_HEIGHT * 2 / 10, FRAME_BUFFER_WIDTH * (1.8 + i * 1.4) / 6,
+				FRAME_BUFFER_HEIGHT * 3 / 10, FRAME_BUFFER_WIDTH * (3.0 + i * 1.2) / 6);
+			text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+			text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
+			ent->assign<TextUI_Component>(text);
 		}
 
 

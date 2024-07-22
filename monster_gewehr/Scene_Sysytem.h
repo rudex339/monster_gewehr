@@ -197,6 +197,8 @@ private:
 	int m_join_room = -1;
 	bool m_is_host = false;
 
+	wstring m_name;
+
 	int money = 1000;
 	int cost = 100;
 
@@ -252,6 +254,7 @@ public:
 	void ReadyCheck(int id, bool ready);
 	void Purchase();
 	int* GetEquipments() { return equipments; }
+	void SetName(wstring name) { m_name = name; }
 
 	int getID() { return m_id; };
 };

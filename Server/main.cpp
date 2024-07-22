@@ -134,7 +134,7 @@ void ProcessClient(SOCKET sock)
 		fps_timer = std::chrono::steady_clock::now();
 	}
 
-	database.Update(&players[id]);
+	//database.Update(&players[id]);
 	Disconnect(id);
 
 	// 소켓 닫기
@@ -219,7 +219,7 @@ void BossThread()
 						if (ply_id == -1) continue;
 						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 						SendEndGame(players[ply_id].GetID());
-						database.Update(&players[ply_id]);
+						//database.Update(&players[ply_id]);
 						players[ply_id].PlayerInit();
 					}
 					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
@@ -266,19 +266,19 @@ void ProcessPacket(int id, char* p)
 		players[id].SetRoomID(-1);
 
 		std::cout << "입장 : " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
-		/*SendLoginInfo(id);
+		SendLoginInfo(id);
 		SendRoomList(id);
-		SendItemInfo(id);*/
+		SendItemInfo(id);
 
 		// 데이터 베이스 연동시 사용
-		if (database.Login(&players[id])) {
+		/*if (database.Login(&players[id])) {
 			SendLoginInfo(id);
 			SendRoomList(id);
 			SendItemInfo(id);
 		}
 		else {
 			SendLoginFail(id);
-		}
+		}*/
 
 		break;
 	}
@@ -421,7 +421,7 @@ void ProcessPacket(int id, char* p)
 		std::cout << "돈 : " << players[id].GetMoney() << std::endl;
 		std::cout << "구매한 아이템 : " << players[id].GetItem(packet->item_type) << std::endl;
 
-		database.Update(&players[id]);
+		//database.Update(&players[id]);
 		break;
 	}
 	case CS_PACKET_HEAL: {

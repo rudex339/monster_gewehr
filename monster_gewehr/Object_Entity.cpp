@@ -155,6 +155,8 @@ TextUI_Component::TextUI_Component(int fontType, wstring text, float top, float 
 	m_text = text;
 	m_Rect = D2D1::RectF(left, top, right, bottom);
 	m_fontType = fontType;
+	m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+	m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
 }
 
 ImageUI_Component::ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)

@@ -622,6 +622,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				case LoginBtn:
 					// 여기서 아이디 비교하고, 성공하면 로비로 이동
+					m_scene->SetName(text[0]);
 					world->emit<InputId_Event>({});
 					break;
 
