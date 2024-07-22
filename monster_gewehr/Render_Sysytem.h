@@ -87,6 +87,8 @@ private:
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;
 	ComPtr<IDWriteTextFormat> pTextFormat;
+	ComPtr<IDWriteTextFormat> m_ingametextFormat;
+	ComPtr<IDWriteTextFormat> m_ingametextFormat2;
 
 	IDWriteFontFile* pFontFile;
 	IDWriteFontFace* pFontFace;

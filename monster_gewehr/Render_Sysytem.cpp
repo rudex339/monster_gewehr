@@ -153,14 +153,36 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 	);
 
 	m_dwriteFactory->CreateTextFormat(
-		L"Garamond",               
-		NULL,                   
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 76800,
+		L"en-us",
+		&m_ingametextFormat
+	);
+
+	m_dwriteFactory->CreateTextFormat(
+		L"Garamond",
+		NULL,
 		DWRITE_FONT_WEIGHT_REGULAR,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
 		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 35446,
 		L"en-us",
 		&pTextFormat
+	);
+
+	m_dwriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_REGULAR,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 35446,
+		L"en-us",
+		&m_ingametextFormat2
 	);
 
 	// custom font
@@ -242,7 +264,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 
 	m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	
+
 }
 
 void Render_System::configure(World* world)
@@ -272,7 +294,7 @@ void Render_System::tick(World* world, float deltaTime)
 		//UpdateShaderVariables(pd3dCommandList);
 		int cur_point = 0;
 		world->each<Light_Component>([&](
-		Entity* ent,
+			Entity* ent,
 			ComponentHandle<Light_Component> light
 			) -> void {
 				if (cur_point < MAX_LIGHTS) {
@@ -308,7 +330,7 @@ void Render_System::tick(World* world, float deltaTime)
 			) -> void {
 				if (ent->has<Terrain_Component>()) {
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
-					Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
+					Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
 				}
 				else if (ent->has<Rotation_Component>() &&
 					ent->has<Scale_Component>()) {
@@ -317,8 +339,8 @@ void Render_System::tick(World* world, float deltaTime)
 						if (data->id == -1)
 							return;
 					}
-					
-					
+
+
 					ComponentHandle<Rotation_Component> rotation = ent->get<Rotation_Component>();
 					ComponentHandle<Scale_Component> Scale = ent->get<Scale_Component>();
 					if (ent->has<AnimationController_Component>()) {
@@ -370,9 +392,9 @@ void Render_System::tick(World* world, float deltaTime)
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
 						AnimationController->m_AnimationController->UpdateShaderVariables();
 					}
-					
-					if(Model->draw)
-						Model->m_MeshModel->m_pModelRootObject->Render(	m_pd3dCommandList, m_pCamera);
+
+					if (Model->draw)
+						Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
 
 					for (auto child : Model->m_pchildObjects) {
 						if (child->socket) {
@@ -387,20 +409,20 @@ void Render_System::tick(World* world, float deltaTime)
 
 
 				}
-				else{
+				else {
 					Model->m_MeshModel->m_pModelRootObject->UpdateTransform(&pos->m_xmf4x4World);
-					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {						
-						if (Model->draw){
+					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {
+						if (Model->draw) {
 							Model->m_MeshModel->m_pModelRootObject->Render(m_pd3dCommandList, m_pCamera);
 						}
 						//test
 						if (m_pBox) {
 							if (ent->has<BoundingBox_Component>()) {
-								
-									ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
-									//box->m_bounding_box.Center = pos->Position;
-									//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
-									if (box->m_pMesh) {
+
+								ComponentHandle<BoundingBox_Component> box = ent->get<BoundingBox_Component>();
+								//box->m_bounding_box.Center = pos->Position;
+								//box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2;
+								if (box->m_pMesh) {
 									m_pBox->m_pMesh = box->m_pMesh;
 									m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
 								}
@@ -419,7 +441,7 @@ void Render_System::receive(World* world, const SetCamera_Event& event)
 
 void Render_System::receive(World* world, const DrawUI_Event& event)
 {
-	
+
 	world->each<ImageUI_Component>([&](
 		Entity* ent,
 		ComponentHandle<ImageUI_Component> imageUI
@@ -456,7 +478,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				textformat = m_textFormat;
 				break;
 			}
-			
+
 			textformat.Get()->SetParagraphAlignment(textUI->m_paragraph_alignment);
 			textformat.Get()->SetTextAlignment(textUI->m_text_alignment);
 
@@ -515,12 +537,12 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					&pTextLayout[editBox->index]
 				);
 			}
-			
+
 
 			// 텍스트
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 
-			
+
 			m_d2dDeviceContext->DrawTextLayout(
 				D2D1::Point2F(editBox->x, editBox->y),
 				pTextLayout[editBox->index],
@@ -590,7 +612,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				m_d2dDeviceContext->DrawBitmap(
 					button->m_bitmap,
 					button->m_Rect,
-					button->m_opacity, 
+					button->m_opacity,
 					button->m_mode,
 					button->m_imageRect
 				);
@@ -700,9 +722,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		}
 	);
 
-	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH-300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH - 300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
-	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2 }, 4.0f, 4.0f);
+	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2 }, 4.0f, 4.0f);
 	world->each<player_Component, Camera_Component, ControllAngle_Component, Position_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
@@ -711,71 +733,94 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<Position_Component> position
 		) -> void {
 			{
-				textRect = D2D1::RectF(0, 0, 390, 100);
+				// 플레이어 정보 UI
+				// 테두리
+				textRect = D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH / 3.2 + 20, FRAME_BUFFER_HEIGHT / 7 + 20);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 				m_d2dDeviceContext->DrawRectangle(&textRect, m_textBrush.Get());
-			}
 
-			{
-				m_d2dDeviceContext->DrawBitmap(m_bitmaps[0], imageRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, {0,0,100,100});
-				//m_d2dDeviceContext->DrawBitmap(m_bitmaps[1], {400, 400, 500, 600}, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, {0,0,100,100});
-			}
-
-			{
-				wstring text = std::to_wstring((int)player->ammo);
-				text += std::wstring(" / ", " / " + strlen(" / "));
-				text += std::to_wstring((int)player->mag);
-
-				D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH - 300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-				m_d2dDeviceContext->DrawTextW(
-					text.data(),
-					text.size(),
-					m_textFormat.Get(),
-					&textRect,
-					m_textBrush.Get()
+				// 초상화
+				D2D1_RECT_F sRect = { 10, 10, FRAME_BUFFER_WIDTH / 13, FRAME_BUFFER_HEIGHT / 7 };
+				ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[0], sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+				m_d2dDeviceContext->DrawBitmap(
+					m_bitmaps[0],
+					image.m_Rect,
+					image.m_opacity,
+					image.m_mode,
+					image.m_imageRect
 				);
-			}
-			{
-				wstring text = std::wstring("HP ", "HP " + strlen("HP "));
-				text += std::to_wstring((int)player->hp);
-				textRect = D2D1::RectF(100, 10, 170, 50);
+
+				// HP 텍스트
+				TextUI_Component hp = TextUI_Component(DEFAULT_FONT, L"HP " + to_wstring((int)player->hp),
+					FRAME_BUFFER_HEIGHT / 35, FRAME_BUFFER_WIDTH / 13 + 5, FRAME_BUFFER_HEIGHT * 2 / 35 ,FRAME_BUFFER_WIDTH / 3.2);
+
 				m_d2dDeviceContext->DrawTextW(
-					text.data(),
-					text.size(),
-					m_smalltextFormat.Get(),
-					&textRect,
+					hp.m_text.c_str(),
+					hp.m_text.size(),
+					m_ingametextFormat.Get(),
+					hp.m_Rect,
 					m_textBrush.Get()
 				);
 
-				textRect = D2D1::RectF(170, 15, 370, 30);
+				// HP 바
+				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT / 35, FRAME_BUFFER_WIDTH / 3.2, FRAME_BUFFER_HEIGHT * 2 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
 				textRect = D2D1::RectF(170, 15, (int)player->hp * 2 + 170, 30);
+
+				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT / 35, (int)(player->hp * FRAME_BUFFER_WIDTH / 320), FRAME_BUFFER_HEIGHT * 2 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
-			}
 
-			{
-				wstring text = std::wstring("SP ", "SP " + strlen("SP "));
-				text += std::to_wstring((int)player->stamina);
+
+				// SP 텍스트
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
-				textRect = D2D1::RectF(100, 40, 170, 80);
+				TextUI_Component sp = TextUI_Component(DEFAULT_FONT, L"SP " + to_wstring((int)player->stamina),
+					FRAME_BUFFER_HEIGHT * 3 / 35, FRAME_BUFFER_WIDTH / 13 + 5, FRAME_BUFFER_HEIGHT * 4 / 35, FRAME_BUFFER_WIDTH / 3.2);
+
 				m_d2dDeviceContext->DrawTextW(
-					text.data(),
-					text.size(),
-					m_smalltextFormat.Get(),
-					&textRect,
+					sp.m_text.c_str(),
+					sp.m_text.size(),
+					m_ingametextFormat.Get(),
+					sp.m_Rect,
 					m_textBrush.Get()
 				);
-				textRect = D2D1::RectF(170, 45, 370, 60);
+
+				// SP 바
+				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT * 3 / 35, FRAME_BUFFER_WIDTH / 3.2, FRAME_BUFFER_HEIGHT * 4 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-				textRect = D2D1::RectF(170, 45, (int)player->stamina * 2 + 170, 60);
+				textRect = D2D1::RectF(170, 15, (int)player->hp * 2 + 170, 30);
+
+				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT * 3 / 35, (int)(player->stamina * FRAME_BUFFER_WIDTH / 320), FRAME_BUFFER_HEIGHT * 4 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::YellowGreen));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
+			}
+
+			{
+
+				TextUI_Component ammo = TextUI_Component(DEFAULT_FONT, to_wstring((int)player->ammo) + L"/" + to_wstring((int)player->mag),
+					FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 13 / 15, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH);
+				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+
+				m_d2dDeviceContext->DrawTextW(
+					ammo.m_text.c_str(),
+					ammo.m_text.size(),
+					m_ingametextFormat2.Get(),
+					&ammo.m_Rect,
+					m_textBrush.Get()
+				);
+			}
+			{
+
+
+
+			}
+
+			{
 
 			}
 			// x: 883.49,  z : 1328.4	왼쪽 하단
@@ -820,7 +865,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 
 				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + MapX, FRAME_BUFFER_WIDTH * 2 / 20 - MapZ}, 2.0f, 2.0f };
-				
+
 				if (pos.first == -1) continue;
 				if (pos.first == -2) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
@@ -838,7 +883,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
-			
+
 
 			{
 				if (player->aim_mode) {
@@ -852,7 +897,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 	);
 
 
-	
+
 }
 
 void Render_System::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -890,8 +935,8 @@ void Render_System::receive(World* world, const KeyDown_Event& event)
 		cursorPosition[textIndex]++;
 	}
 
-	else if(0x30 <= event.key && 0x39 >= event.key ||
-			0x41 <= event.key && 0x5A >= event.key) {
+	else if (0x30 <= event.key && 0x39 >= event.key ||
+		0x41 <= event.key && 0x5A >= event.key) {
 		if (text[textIndex].size() >= 20) return;
 		text[textIndex].insert(text[textIndex].begin() + cursorPosition[textIndex], static_cast<wchar_t>(key));
 		cursorPosition[textIndex]++;
