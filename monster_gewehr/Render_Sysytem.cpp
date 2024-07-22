@@ -31,7 +31,7 @@ bool is_camera_far(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 	float distance;
 	DirectX::XMStoreFloat(&distance, DirectX::XMVector3Length(DirectX::XMVectorSubtract(object_pos, camera_pos)));
 
-	if (distance > 500.0f) {
+	if (distance > 1500.0f) {
 		return true;
 	}
 
@@ -295,12 +295,12 @@ void Render_System::tick(World* world, float deltaTime)
 				SkyBox->m_SkyBox->Render(m_pd3dCommandList, m_pCamera);
 			});
 
-		/*world->each<Terrain_Component>([&](
+		world->each<Terrain_Component>([&](
 			Entity* ent,
 			ComponentHandle<Terrain_Component> Terrain
 			) -> void {
 				Terrain->m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
-			});*/
+			});
 		world->each< Model_Component, Position_Component>([&](
 			Entity* ent,
 			ComponentHandle<Model_Component> Model,
@@ -353,12 +353,12 @@ void Render_System::tick(World* world, float deltaTime)
 
 							//m_pBox->UpdateTransform(&Matrix4x4::Identity());
 							if (box->m_pMesh) {
-								m_pBox->m_pMesh = box->m_pMesh;
-								m_pBox->SetPosition(box->m_bounding_box.Center);
-								//cout << box->m_bounding_box.Center.x << " " << box->m_bounding_box.Center.z << endl;
-								//cout << pos->Position.x << " " << pos->Position.y << " " << pos->Position.z << endl;
-								m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
-								m_pBox->SetPosition(0.f, 0.f, 0.f);
+								//m_pBox->m_pMesh = box->m_pMesh;
+								//m_pBox->SetPosition(box->m_bounding_box.Center);
+								////cout << box->m_bounding_box.Center.x << " " << box->m_bounding_box.Center.z << endl;
+								////cout << pos->Position.x << " " << pos->Position.y << " " << pos->Position.z << endl;
+								//m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+								//m_pBox->SetPosition(0.f, 0.f, 0.f);
 							}
 						}
 					}
