@@ -295,12 +295,17 @@ struct Grande_Component {
 };
 
 struct Emitter_Componet {
+	float fTime=0.f;
 	float coolTime ;
+	int m_nRow = 0;
+	int m_nCol = 0;
+	int m_nRows = 1;
+	int m_nCols = 1;
 
 	Emitter_Componet() = default;
 
-	Emitter_Componet(float coolTime = 100.f)
-		: coolTime(coolTime)
+	Emitter_Componet(float coolTime = 100.f, int rows, int cols)
+		: coolTime(coolTime), m_nRows(rows),m_nCols(cols)
 	{
 	}
 };

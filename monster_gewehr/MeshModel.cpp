@@ -592,40 +592,7 @@ void CAnimationController::UpdateShaderVariables()
 		m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
 	}
 }
-/*
-void CAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel *pRootGameObject)
-{
-	m_fTime += fTimeElapsed;
-	if (m_pAnimationTracks)
-	{
-//		for (int k = 0; k < m_nAnimationTracks; k++) m_pAnimationTracks[k].m_fPosition += (fTimeElapsed * m_pAnimationTracks[k].m_fSpeed);
-		for (int k = 0; k < m_nAnimationTracks; k++) m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->UpdatePosition(fTimeElapsed * m_pAnimationTracks[k].m_fSpeed);
 
-		for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++)
-		{
-			XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Zero();
-			for (int k = 0; k < m_nAnimationTracks; k++)
-			{
-				if (m_pAnimationTracks[k].m_bEnable)
-				{
-					CAnimationSet *pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
-					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
-					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
-				}
-			}
-			m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = xmf4x4Transform;
-		}
-
-		pRootGameObject->UpdateTransform(NULL);
-
-		for (int k = 0; k < m_nAnimationTracks; k++)
-		{
-			if (m_pAnimationTracks[k].m_bEnable) m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->HandleCallback();
-		}
-	}
-}
-//*/
-//*
 void CAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel* pRootGameObject)
 {
 	m_fTime += fTimeElapsed;
@@ -976,6 +943,23 @@ void GameObjectModel::SetScale(float x, float y, float z)
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
+}
+
+inline void GameObjectModel::SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up)
+{
+	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
+	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(xmf3Position, xmf3Target, xmf3Up);
+	m_xmf4x4World._11 = mtxLookAt._11; m_xmf4x4World._12 = mtxLookAt._21; m_xmf4x4World._13 = mtxLookAt._31;
+	m_xmf4x4World._21 = mtxLookAt._12; m_xmf4x4World._22 = mtxLookAt._22; m_xmf4x4World._23 = mtxLookAt._32;
+	m_xmf4x4World._31 = mtxLookAt._13; m_xmf4x4World._32 = mtxLookAt._23; m_xmf4x4World._33 = mtxLookAt._33;
+	/*
+	XMFLOAT3 xmf3Look = Vector3::Normalize(Vector3::Subtract(xmf3Target, xmf3Position));
+	XMFLOAT3 xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
+	xmf3Up = Vector3::CrossProduct(xmf3Look, xmf3Right, true);
+	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
+	m_xmf4x4World._21 = xmf3Up.x; m_xmf4x4World._22 = xmf3Up.y; m_xmf4x4World._23 = xmf3Up.z;
+	m_xmf4x4World._31 = xmf3Look.x; m_xmf4x4World._32 = xmf3Look.y; m_xmf4x4World._33 = xmf3Look.z;
+	*/
 }
 
 XMFLOAT3 GameObjectModel::GetPosition()
@@ -1581,13 +1565,22 @@ Box::~Box()
 
 void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOrientedBox* box)
 {
-	
 
 	GameObjectModel::Render(pd3dCommandList);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MultiSpriteObject::Animate(float fTimeElapsed)
+{
+	if (m_ppMaterials[0] && m_ppMaterials[0]->m_ppTextures[0])
+	{
+		//m_fTime += fTimeElapsed * 0.5f;
+		//if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
+		//m_ppMaterials[0]->m_ppTextures[0]->AnimateRowColumn(m_fTime);
+	}
+}
 
 MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : GameObjectModel(1)
 {
@@ -1596,7 +1589,7 @@ MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CTexture* Texture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	CTexture* Texture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	Texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
 
 	CStandardShader* pShader = new  CStandardShader();
@@ -1604,12 +1597,19 @@ MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 
-	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 10);
+	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 3);
 
 	CMaterial* pBoxMaterial = new CMaterial(1);
+	//m_ppMaterials = new CMaterial * [m_nMaterials];
 	pBoxMaterial->SetTexture(Texture);
 	pBoxMaterial->SetShader(pShader);
-
+	pBoxMaterial->SetMaterialType(MATERIAL_ALBEDO_MAP);
 
 	SetMaterial(0, pBoxMaterial);
+}
+
+void MultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	SetLookAt(pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	GameObjectModel::Render(pd3dCommandList, pCamera);
 }

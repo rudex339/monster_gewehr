@@ -370,8 +370,10 @@ void Render_System::tick(World* world, float deltaTime)
 						AnimationController->m_AnimationController->UpdateShaderVariables();
 					}
 					
-					if(Model->draw)
-						Model->m_MeshModel->Render(	m_pd3dCommandList, m_pCamera);
+					if (Model->draw) {
+						Model->m_MeshModel->Animate(deltaTime);
+						Model->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
+					}
 
 					for (auto child : Model->m_pchildObjects) {
 						if (child->socket) {

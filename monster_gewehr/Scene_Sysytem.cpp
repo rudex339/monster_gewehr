@@ -755,8 +755,9 @@ void Scene_Sysytem::receive(World* world, const ChoiceItem_Event& event)
 void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 {
 	switch (event.object) {
-	case GRANADE:
-	case FLASHBANG:
+	case granade:
+	case flashBand:
+	{
 		Entity* ent = world->create();
 		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
 		ent->assign<Rotation_Component>(event.Rotate.x, 90.f, event.Rotate.z);
@@ -785,10 +786,28 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		ComponentHandle<BoundingBox_Component> box = ent->assign<BoundingBox_Component>(
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
-		ent->assign<Grande_Component>(event.object,20.f,100.f)->coolTime=100.f;
+		ent->assign<Grande_Component>(event.object, 20.f, 100.f)->coolTime = 100.f;
 
 		world->emit<AddObjectlayer_Event>({ "Granade", ent });
+	}
 		break;
+	case explotion:
+	{
+		Entity* ent = world->create();
+		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
+		ent->assign<Rotation_Component>(0.f, 0.f, 0.f);
+		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
+		
+		string pstrGameObjectName = "explosion";
+		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
+			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
+
+		ent->assign<Emitter_Componet>(100.f,8,8);
+
+		//world->emit<AddObjectlayer_Event>({ "Granade", ent });
+	}
+		break;
+
 	}
 }
 

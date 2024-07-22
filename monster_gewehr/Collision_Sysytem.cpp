@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Collision_Sysytem.h"
 #include "Object_Entity.h"
+#include "Scene_Sysytem.h"
 
 
 float DistancePointToPlane(const XMVECTOR& planeNormal, const XMVECTOR& planePoint, const XMVECTOR& point) {
@@ -67,6 +68,9 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                             granade->Boom = true;
                             Granade->get<Velocity_Component>()->gravity = false;
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
+
+                            world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
+                                ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
                             break;
                         }
 
@@ -157,8 +161,8 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                         XMVECTOR minNormal;
 
                         for (int i = 0; i < 6; ++i) {
-                            float depth = abs(DistancePointToPlane(normals[i], normals[i],XMLoadFloat3(&Vector3::Subtract(boundingBox->m_bounding_box.Center, Another_boundingBox->m_bounding_box.Center))));
-                            if (depth < minDepth) {
+                            float depth = (DistancePointToPlane(normals[i], normals[i],XMLoadFloat3(&Vector3::Subtract(boundingBox->m_bounding_box.Center, Another_boundingBox->m_bounding_box.Center))));
+                            if (depth < minDepth&&depth>0) {
                                 minDepth = depth;
                                 minNormal = normals[i];
                             }
