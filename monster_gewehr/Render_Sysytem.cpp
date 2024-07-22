@@ -619,9 +619,11 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 
 				case ChangeSceneBtn:
-					if (button->Next_Scene == ROOMS) {
+					if (button->Next_Scene == ROOMS && button->Curr_Scene == INROOM) {
 						world->emit<Quit_Room>({});
-						world->emit<Set_Equipment>({ (char)m_scene->GetEquipments()[0], (char)m_scene->GetEquipments()[1], (char)m_scene->GetEquipments()[2]});
+					}
+					else if (button->Next_Scene == LOBBY && button->Curr_Scene == EQUIPMENT) {
+						world->emit<Set_Equipment>({ (char)m_scene->GetEquipments()[0], (char)m_scene->GetEquipments()[1], (char)m_scene->GetEquipments()[2] });
 					}
 					world->emit<ChangeScene_Event>({ button->Next_Scene });
 					break;

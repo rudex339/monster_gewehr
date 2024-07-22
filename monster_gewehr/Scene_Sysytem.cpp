@@ -59,47 +59,14 @@ void Scene_Sysytem::tick(World* world, float deltaTime)
 	if (GetKeyboardState(pKeysBuffer)) {
 		switch (m_State) {
 		case LOGIN:
-			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				/*world->emit<InputId_Event>({});
-				if (loginCheck)
-					world->emit< ChangeScene_Event>({ LOBBY });*/
-			}
-			break;
-		case LOBBY:
-			if (pKeysBuffer[VK_SPACE] & 0xF0) {
-				/*world->emit< ChangeScene_Event>({ GAME });
-				world->emit<Game_Start>({});*/
-			}
 			break;
 		case ROOMS:
-			if (pKeysBuffer[VK_SPACE] & 0xF0) {
-				world->emit< ChangeScene_Event>({ INROOM });
-			}
-			else if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
-				world->emit< ChangeScene_Event>({ LOBBY });
-			}
 			break;
 		case INROOM:
-			if (pKeysBuffer[VK_RETURN] & 0xF0) {
-				//world->emit< ChangeScene_Event>({ GAME });
-				//world->emit<Game_Start>({});
-			}
-			else if (pKeysBuffer[VK_BACK] & 0xF0) {
-				world->emit<Quit_Room>({});
-				world->emit< ChangeScene_Event>({ ROOMS });				
-			}
 			break;
 		case SHOP:
-			if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
-				world->emit< ChangeScene_Event>({ LOBBY });
-			}
 			break;
 		case EQUIPMENT:
-			if (pKeysBuffer[VK_ESCAPE] & 0xF0) {
-				// 나갈때 내가 어떤 장비를 선택했는지 서버에 알려줄거임
-				world->emit<Set_Equipment>({ (char)equipments[0], (char)equipments[1], (char)equipments[2] });
-				world->emit< ChangeScene_Event>({ LOBBY });
-			}
 			break;
 		case GAME:
 			break;
@@ -209,18 +176,21 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		Button_Component goToRooms = Button_Component(ChangeSceneBtn, L"image/null.png", NEEDLE_FONT, L"Connect", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[0], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		goToRooms.Next_Scene = ROOMS;
+		goToRooms.Curr_Scene = LOBBY;
 		ent->assign<Button_Component>(goToRooms);
 
 		ent = world->create();
 		Button_Component goToSHOP = Button_Component(ChangeSceneBtn, L"image/null.png", NEEDLE_FONT, L"Shop", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[1], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		goToSHOP.Next_Scene = SHOP;
+		goToSHOP.Curr_Scene = LOBBY;
 		ent->assign<Button_Component>(goToSHOP);
 
 		ent = world->create();
 		Button_Component goToEquipment = Button_Component(ChangeSceneBtn, L"image/null.png", NEEDLE_FONT, L"Equipment", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect[2], 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		goToEquipment.Next_Scene = EQUIPMENT;
+		goToEquipment.Curr_Scene = LOBBY;
 		ent->assign<Button_Component>(goToEquipment);
 
 		ent = world->create();
@@ -260,6 +230,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		Button_Component goToLobby = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		goToLobby.Next_Scene = LOBBY;
+		goToLobby.Curr_Scene = ROOMS;
 		ent->assign<Button_Component>(goToLobby);
 
 		// 방 목록
@@ -384,6 +355,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		Button_Component goToLobby = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		goToLobby.Next_Scene = LOBBY;
+		goToLobby.Curr_Scene = SHOP;
 		ent->assign<Button_Component>(goToLobby);
 
 		{
@@ -537,6 +509,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		Button_Component goToLobby = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		goToLobby.Next_Scene = LOBBY;
+		goToLobby.Curr_Scene = EQUIPMENT;
 		ent->assign<Button_Component>(goToLobby);
 
 		{ // 플레이어를 그린다
@@ -819,6 +792,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 	Button_Component goToRooms = Button_Component(ChangeSceneBtn, L"image/back.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 		sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 	goToRooms.Next_Scene = ROOMS;
+	goToRooms.Next_Scene = INROOM;
 	ent->assign<Button_Component>(goToRooms);
 
 	{ // 플레이어를 그린다

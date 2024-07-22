@@ -272,6 +272,7 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 	bool activate;
 
 	UINT Next_Scene;
+	UINT Curr_Scene;
 
 	Button_Component() = default;
 	Button_Component(int id, const wchar_t* imagePath, int fontType, wstring m_text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int num = -1);
