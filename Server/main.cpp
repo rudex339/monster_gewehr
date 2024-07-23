@@ -638,6 +638,8 @@ void SendEndGame(int id)
 	packet.type = SC_PACKET_END_GAME;
 	packet.score = 1000 - players[id].death_count * 100;
 
+	players[id].SetMoney(players[id].GetMoney() + packet.score);
+
 	players[id].DoSend(&packet, packet.size);
 }
 

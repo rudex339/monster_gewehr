@@ -232,10 +232,22 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->stamina -= 0.1;
 			}
 
-			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0) {
+			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
 				heal_on = true;
 				heal_timer = healtime[0];
 				heal_type = 0;
+			}
+
+			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
+				heal_on = true;
+				heal_timer = healtime[1];
+				heal_type = 1;
+			}
+
+			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
+				heal_on = true;
+				heal_timer = healtime[2];
+				heal_type = 2;
 			}
 
 			if (pKeysBuffer[0x57] & 0xF0) {
