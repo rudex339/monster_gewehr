@@ -816,7 +816,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			{
 				if (player->heal_timer > 0) {
 					TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"È¸º¹Áß",
-						FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 54 / 100);
+						FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 
 					m_d2dDeviceContext->DrawTextW(
