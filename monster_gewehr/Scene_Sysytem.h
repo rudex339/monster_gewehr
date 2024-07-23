@@ -48,6 +48,12 @@ enum Items {
 	INJECTOR
 };
 
+enum createObject {
+	flashBand,
+	granade,
+	explotion
+};
+
 struct ChangeScene_Event {
 	UINT State;
 	short score = 0;

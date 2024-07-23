@@ -306,10 +306,10 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if (pKeysBuffer[0x47] & 0xF0) {
 				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
 				;
-				world->emit<CreateObject_Event>({ GRENADE, 
-					XMFLOAT3(model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._41,
-						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._42,
-						model->m_MeshModel->m_pModelRootObject->FindFrame("Bip001_R_Hand")->m_xmf4x4World._43),
+				world->emit<CreateObject_Event>({ granade, 
+					XMFLOAT3(model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._41,
+						model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._42,
+						model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._43),
 					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
 					model_vector->m_xmf3Look});
 			}

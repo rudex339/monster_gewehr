@@ -26,6 +26,7 @@ class GameObjectModel;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
 class CMesh
 {
 public:
@@ -56,6 +57,7 @@ protected:
 
 protected:
 	int								m_nVertices = 0;
+	UINT							m_nStride = 0;
 
 	
 
@@ -167,6 +169,8 @@ public:
 	virtual ~CBoxMesh();
 };
 
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CStandardMesh : public CMesh
@@ -214,6 +218,25 @@ public:
 	void SetTileTexture2d(float x, float y);
 };
 
+class TextureRectMesh : public CStandardMesh
+{
+protected:
+	//XMFLOAT4* m_pxmf4Colors = NULL;
+
+	ID3D12Resource* m_pd3dColorBuffer = NULL;
+	ID3D12Resource* m_pd3dColorUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dColorBufferView;
+public:
+	TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f);
+	virtual ~TextureRectMesh();
+	bool changeRowCol(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int row, int col, int rows, int cols);
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+	{
+
+		D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[4] = { m_d3dPositionBufferView, m_d3dColorBufferView, m_d3dTextureCoord0BufferView, m_d3dTextureCoord1BufferView };
+		pd3dCommandList->IASetVertexBuffers(m_nSlot, 4, pVertexBufferViews);
+	}
+};
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 #define SKINNED_ANIMATION_BONES		256
@@ -265,3 +288,5 @@ public:
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

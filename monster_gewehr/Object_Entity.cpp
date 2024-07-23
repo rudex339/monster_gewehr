@@ -10,19 +10,20 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	float sx, float sy, float sz)
 {
 	CLoadedModelInfo* model = OM->Get_ModelInfo("Soldier");
-	auto Mcomponent = ent->assign<Model_Component>(model, model->m_pModelRootObject->m_pstrFrameName);
-	Model_Component* temp_mComponet = new Model_Component(OM->Get_ModelInfo("M4A1"), 
+	auto Mcomponent = ent->assign<Model_Component>(model->m_pModelRootObject, model->m_pModelRootObject->m_pstrFrameName);
+
+	Model_Component* temp_mComponet = new Model_Component(OM->Get_ModelInfo("M4A1")->m_pModelRootObject,
 		OM->Get_ModelInfo("M4A1")->m_pModelRootObject->m_pstrFrameName);
 	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Hand");
 	Mcomponent.get().addChildComponent(temp_mComponet);
 
-	temp_mComponet = new Model_Component(OM->Get_ModelInfo("benelliM4"),
+	temp_mComponet = new Model_Component(OM->Get_ModelInfo("benelliM4")->m_pModelRootObject,
 		OM->Get_ModelInfo("benelliM4")->m_pModelRootObject->m_pstrFrameName);
 	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Hand");
 	Mcomponent.get().addChildComponent(temp_mComponet);
 	temp_mComponet->draw = false;
 
-	temp_mComponet = new Model_Component(OM->Get_ModelInfo("M110"),
+	temp_mComponet = new Model_Component(OM->Get_ModelInfo("M110")->m_pModelRootObject,
 		OM->Get_ModelInfo("M110")->m_pModelRootObject->m_pstrFrameName);
 	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_R_Hand");
 	Mcomponent.get().addChildComponent(temp_mComponet);
@@ -51,7 +52,7 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	float sx, float sy, float sz)
 {
 	CLoadedModelInfo* model = OM->Get_ModelInfo("Souleater");
-	ent->assign<Model_Component>(model, model->m_pModelRootObject->m_pstrFrameName);
+	ent->assign<Model_Component>(model->m_pModelRootObject, model->m_pModelRootObject->m_pstrFrameName);
 	auto controller = ent->assign<AnimationController_Component>(
 		new CAnimationController(pd3dDevice, pd3dCommandList, 10, model), 0);
 	for (int i = 0; i < 10; i++) {

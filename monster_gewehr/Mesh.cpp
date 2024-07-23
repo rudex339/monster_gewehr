@@ -908,3 +908,127 @@ CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 CBoxMesh::~CBoxMesh()
 {
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+TextureRectMesh::TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CStandardMesh(pd3dDevice, pd3dCommandList)
+{
+	{
+		m_nVertices = 6;
+		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+
+		//VERTEXT_POSITION;
+		m_pxmf3Positions = new XMFLOAT3[m_nVertices];
+		m_pxmf4Colors = new XMFLOAT4[m_nVertices];
+		m_pxmf2TextureCoords0 = new XMFLOAT2[m_nVertices];
+		m_pxmf2TextureCoords1 = new XMFLOAT2[m_nVertices];
+		//요기에 저장
+		float fx = fWidth * 1.0f, fy = fHeight * 1.0f, fz = fDepth * 1.0f;
+		m_pxmf3Positions[0] = XMFLOAT3(-fx, +fy, 0.f);
+		m_pxmf3Positions[1] = XMFLOAT3(-fx, -fy, 0.f);
+		m_pxmf3Positions[2] = XMFLOAT3(+fx, +fy, 0.f);
+		m_pxmf3Positions[3] = XMFLOAT3(-fx, -fy, 0.f);
+		m_pxmf3Positions[4] = XMFLOAT3(+fx, -fy, 0.f);
+		m_pxmf3Positions[5] = XMFLOAT3(+fx, +fy, 0.f);
+
+
+		m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+
+		m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+		m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
+		m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+
+
+
+
+		m_pxmf2TextureCoords0 = new XMFLOAT2[m_nVertices];
+		//요기에 저장
+		m_pxmf2TextureCoords0[0] = XMFLOAT2(0.0f, 0.0f);
+		m_pxmf2TextureCoords0[1] = XMFLOAT2(0.0f, 1.0f);
+		m_pxmf2TextureCoords0[2] = XMFLOAT2(1.0f, 0.0f);
+		m_pxmf2TextureCoords0[3] = XMFLOAT2(0.0f, 1.0f);
+		m_pxmf2TextureCoords0[4] = XMFLOAT2(1.0f, 1.0f);
+		m_pxmf2TextureCoords0[5] = XMFLOAT2(1.0f, 0.0f);
+
+		// Add missing texture coordinate
+
+
+		m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
+
+		m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
+		m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
+		m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+
+		m_pxmf2TextureCoords1 = new XMFLOAT2[m_nVertices];
+		//요기에 저장
+		m_pxmf2TextureCoords1[0] = XMFLOAT2(0.0f, 0.0f);
+		m_pxmf2TextureCoords1[1] = XMFLOAT2(0.0f, 1.0f);
+		m_pxmf2TextureCoords1[2] = XMFLOAT2(1.0f, 0.0f);
+		m_pxmf2TextureCoords1[3] = XMFLOAT2(0.0f, 1.0f);
+		m_pxmf2TextureCoords1[4] = XMFLOAT2(1.0f, 1.0f);
+		m_pxmf2TextureCoords1[5] = XMFLOAT2(1.0f, 0.0f);
+
+		m_pd3dTextureCoord1Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords1, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord1UploadBuffer);
+
+		m_d3dTextureCoord1BufferView.BufferLocation = m_pd3dTextureCoord1Buffer->GetGPUVirtualAddress();
+		m_d3dTextureCoord1BufferView.StrideInBytes = sizeof(XMFLOAT2);
+		m_d3dTextureCoord1BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+
+		m_pxmf4Colors[0] = XMFLOAT4(-fx, +fy, 0.f, 0.f);
+		m_pxmf4Colors[1] = XMFLOAT4(-fx, -fy, 0.f, 0.f);
+		m_pxmf4Colors[2] = XMFLOAT4(+fx, +fy, 0.f, 0.f);
+		m_pxmf4Colors[3] = XMFLOAT4(-fx, -fy, 0.f, 0.f);
+		m_pxmf4Colors[4] = XMFLOAT4(+fx, -fy, 0.f, 0.f);
+		m_pxmf4Colors[5] = XMFLOAT4(+fx, +fy, 0.f, 0.f);
+
+		m_pd3dColorBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf4Colors, sizeof(XMFLOAT4) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord1UploadBuffer);
+
+
+		m_d3dColorBufferView.BufferLocation = m_pd3dColorBuffer->GetGPUVirtualAddress();
+		m_d3dColorBufferView.StrideInBytes = sizeof(XMFLOAT4);
+		m_d3dColorBufferView.SizeInBytes = sizeof(XMFLOAT4) * m_nVertices;
+	}
+
+}
+
+TextureRectMesh::~TextureRectMesh()
+{
+	//if (m_pd3dTextureCoord0Buffer) m_pd3dTextureCoord0Buffer->Release();
+	//if (m_pd3dTextureCoord1Buffer) m_pd3dTextureCoord1Buffer->Release();
+
+	//if (m_pxmf2TextureCoords0) delete[] m_pxmf2TextureCoords0;
+	//if (m_pxmf2TextureCoords1) delete[] m_pxmf2TextureCoords1;
+}
+
+bool TextureRectMesh::changeRowCol(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int row, int col, int rows, int cols)
+{
+	//float 
+	float height = 1.0f / float(rows);
+	float lenght = 1.0f / float(cols);
+	float y = float(row) / float(rows);
+	float x = float(col) / float(cols);
+
+	m_pxmf2TextureCoords0[0] = XMFLOAT2(x, y);
+	m_pxmf2TextureCoords0[1] = XMFLOAT2(x, y+height);
+	m_pxmf2TextureCoords0[2] = XMFLOAT2(x+lenght, y);
+	m_pxmf2TextureCoords0[3] = XMFLOAT2(x, y+height);
+	m_pxmf2TextureCoords0[4] = XMFLOAT2(x+lenght, y+height);
+	m_pxmf2TextureCoords0[5] = XMFLOAT2(x + lenght, y);
+
+	if (m_pd3dTextureCoord0Buffer) {
+		m_pd3dTextureCoord0Buffer->Release();
+	}
+	if (m_pd3dTextureCoord0UploadBuffer) {
+		m_pd3dTextureCoord0UploadBuffer->Release();
+	}
+
+	// 새로운 리소스 생성
+	m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
+
+	m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
+	m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
+	m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+
+	return false;
+}

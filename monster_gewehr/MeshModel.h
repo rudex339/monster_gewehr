@@ -119,7 +119,7 @@ public:
 public:
 	CShader							*m_pShader = NULL;
 
-	XMFLOAT4						m_xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4						m_xmf4AlbedoColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4SpecularColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4AmbientColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -415,6 +415,7 @@ public:
 	virtual void SetPosition(float x, float y, float z);
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
+	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -503,5 +504,20 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOrientedBox* box);
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+class MultiSpriteObject : public GameObjectModel
+{
+public:
+	float m_fSpeed = 0.1f;
+	float m_fTime = 0.0f;
+
+	MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature
+		, float x = 1.0f, float y = 1.0f, float z = 1.0f);
+	virtual void Animate(float fTimeElapsed);
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+};
 
 

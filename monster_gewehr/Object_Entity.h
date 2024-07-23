@@ -24,7 +24,8 @@ struct Terrain_Component {
 //----------------------------------------------------------------------------------------------
 
 struct Model_Component {
-	CLoadedModelInfo* m_MeshModel;
+	GameObjectModel* m_MeshModel;
+	
 	string model_name;
 
 	GameObjectModel* socket = NULL;
@@ -34,7 +35,7 @@ struct Model_Component {
 
 	bool draw = true;
 	Model_Component() = default;
-	Model_Component(CLoadedModelInfo* MeshModel, string name)
+	Model_Component(GameObjectModel* MeshModel, string name)
 		:m_MeshModel(MeshModel), model_name(name) {}
 
 	void addChildComponent(Model_Component* child);
@@ -296,5 +297,22 @@ struct Grande_Component {
 		: property(property), range(range), damage(damage)
 	{
 		sphere.Radius = range;
+	}
+};
+
+struct Emitter_Componet {
+	float fTime=0.f;
+	float speed = 0.f;
+	float coolTime ;
+	int m_nRow = 0;
+	int m_nCol = 0;
+	int m_nRows = 1;
+	int m_nCols = 1;
+
+	Emitter_Componet() = default;
+
+	Emitter_Componet(float coolTime = 100.f, float speed=0.1f, int rows = 1, int cols = 1)
+		: coolTime(coolTime), m_nRows(rows),m_nCols(cols),speed(speed)
+	{
 	}
 };

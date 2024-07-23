@@ -225,9 +225,9 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 
-    float3 hsv = RGBtoHSV(cColor.rgb);
-    hsv.y *= saturationFactor; // Adjust the saturation factor as needed
-    cColor.rgb = HSVtoRGB(hsv);
+    //float3 hsv = RGBtoHSV(cColor.rgb);
+    //hsv.y *= saturationFactor; // Adjust the saturation factor as needed
+    //cColor.rgb = HSVtoRGB(hsv);
 	
 	return(cColor);
 }

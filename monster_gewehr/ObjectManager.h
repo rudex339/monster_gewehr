@@ -71,6 +71,7 @@ public:
 	float								m_fElapsedTime = 0.0f;
 
 	unordered_map<string, shared_ptr<CLoadedModelInfo>> m_ModelList;
+	unordered_map<string, shared_ptr<GameObjectModel>> m_EmitterList;
 
 
 	int									m_nGameObjects = 0;
