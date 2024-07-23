@@ -174,6 +174,7 @@ private:
 	int m_id = -1;
 	bool m_ready = false;
 
+
 	// ¹æ ¸ñ·Ï
 	vector<Button_Component> Rooms;
 	queue<int> Room_ids;
@@ -260,6 +261,7 @@ public:
 	void ReadyCheck(int id, bool ready);
 	void Purchase();
 	int* GetEquipments() { return equipments; }
+	int* GetHealItems() { return equipHealItems; }
 	void SetName(wstring name) { m_name = name; }
 
 	int getID() { return m_id; };

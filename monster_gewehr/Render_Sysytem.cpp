@@ -158,6 +158,17 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 		DWRITE_FONT_WEIGHT_NORMAL,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
+		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 102400,
+		L"en-us",
+		&m_verysmalltextFormat
+	);
+
+	m_dwriteFactory->CreateTextFormat(
+		L"Verdana",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
 		FRAME_BUFFER_HEIGHT * FRAME_BUFFER_WIDTH / 76800,
 		L"en-us",
 		&m_ingametextFormat
@@ -246,6 +257,21 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 
 
 	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[0]);
+	LoadBitmapFromFile(L"image/icons/m4.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[2]);
+	LoadBitmapFromFile(L"image/icons/Benelli.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[3]);
+	LoadBitmapFromFile(L"image/icons/sr.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[4]);
+	LoadBitmapFromFile(L"image/icons/band.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[5]);
+	LoadBitmapFromFile(L"image/icons/fak.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[6]);
+	LoadBitmapFromFile(L"image/icons/injector.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[7]);
+	LoadBitmapFromFile(L"image/icons/grenade.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[8]);
+	LoadBitmapFromFile(L"image/icons/flashbang.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[9]);
+	LoadBitmapFromFile(L"image/icons/key1.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[10]);
+	LoadBitmapFromFile(L"image/icons/key2.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[11]);
+	LoadBitmapFromFile(L"image/icons/key3.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[12]);
+
+
+
+
 
 	float dashes[] = { 1.0f, 2.0f, 2.0f, 3.0f, 2.0f, 2.0f };
 	//m_d2dFactory->CreateStrokeStyle(
@@ -480,6 +506,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				break;
 			case SMALL_FONT:
 				textformat = m_smalltextFormat;
+				break;
+			case NANO_FONT:
+				textformat = m_verysmalltextFormat;
 				break;
 			case DEFAULT_FONT:
 			default:
@@ -782,7 +811,6 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-
 				// SP 텍스트
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 				TextUI_Component sp = TextUI_Component(DEFAULT_FONT, L"SP " + to_wstring((int)player->stamina),
@@ -807,8 +835,20 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 			}
 
+			// 무기 종류와 탄창 표시
 			{
+				// 무기 아이콘
+				D2D1_RECT_F sRect = {  FRAME_BUFFER_WIDTH * 25 / 30, FRAME_BUFFER_HEIGHT * 19 / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * 21 / 24 };
+				imageRect = {0,0,450,150};
+				m_d2dDeviceContext->DrawBitmap(
+					m_bitmaps[m_scene->GetEquipments()[0]+2],
+					sRect,
+					1.0f,
+					D2D1_INTERPOLATION_MODE_LINEAR,
+					imageRect
+				);
 
+				// 탄창
 				TextUI_Component ammo = TextUI_Component(DEFAULT_FONT, to_wstring((int)player->ammo) + L"/" + to_wstring((int)player->mag),
 					FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 13 / 15, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
@@ -821,6 +861,66 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					m_textBrush.Get()
 				);
 			}
+
+			// 힐 아이템 아이콘 및 보유량
+			{
+				D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 25 / 30, FRAME_BUFFER_HEIGHT * 19 / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * 21 / 24 };
+				imageRect = { 0,0,200,200 };
+
+				for (int i = 0; i < 4; ++i) {
+					if (i < 3) {
+						float opacity = m_scene->GetHealItems()[i] > 0 ? 1.0f : 0.4f;
+						// 아이템 사용 키 아이콘 출력
+						sRect = { FRAME_BUFFER_WIDTH * 26.7 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 27.7 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
+						m_d2dDeviceContext->DrawBitmap(
+							m_bitmaps[10+i],
+							sRect,
+							opacity,
+							D2D1_INTERPOLATION_MODE_LINEAR,
+							imageRect
+						);
+
+						// 아이템 아이콘 출력
+						sRect = { FRAME_BUFFER_WIDTH * 28 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
+						m_d2dDeviceContext->DrawBitmap(
+							m_bitmaps[i + 5],
+							sRect,
+							opacity,
+							D2D1_INTERPOLATION_MODE_LINEAR,
+							imageRect
+						);
+
+						// 아이템 보유 개수 출력
+						TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, to_wstring(m_scene->GetHealItems()[i]),
+							FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29.2 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 30 / 30);
+						m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+
+						m_verysmalltextFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+						m_d2dDeviceContext->DrawTextW(
+							heal_text.m_text.c_str(),
+							heal_text.m_text.size(),
+							m_verysmalltextFormat.Get(),
+							&heal_text.m_Rect,
+							m_textBrush.Get()
+						);
+					}
+
+					else {
+						// if() 수류탄 보유 중일때만 출력하도록
+						// 투척무기 아이콘 출력
+						sRect = { FRAME_BUFFER_WIDTH * 28 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
+						m_d2dDeviceContext->DrawBitmap(
+							m_bitmaps[m_scene->GetEquipments()[2] + 3],
+							sRect,
+							1.0f,
+							D2D1_INTERPOLATION_MODE_LINEAR,
+							imageRect
+						);
+					}
+				}
+			}
+
+			// 회복 표시
 			{
 				if (player->heal_timer > 0) {
 					TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"회복중",
@@ -851,67 +951,70 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
+			
+
+			// 미니맵
 			{
+				// 오른쪽가면 z증가 앞으로 가면 x감소
+				float mapscale = 3960 / 396;
+				int margin = 54 / 2;
+				float x = margin + (int)(position->Position.z / mapscale);
+				float y = margin + 50 + (int)(position->Position.x / mapscale);
 
+				// cout << "x: " << position->Position.x << ",  z : " << position->Position.z << endl;
+				D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 18 / 20 - margin, margin, FRAME_BUFFER_WIDTH - margin, FRAME_BUFFER_WIDTH * 2 / 20 + margin };
+				imageRect = { x - FRAME_BUFFER_WIDTH / 20, y - FRAME_BUFFER_WIDTH / 20 , x + FRAME_BUFFER_WIDTH / 20, y + FRAME_BUFFER_WIDTH / 20 };
+
+				ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+				m_d2dDeviceContext->DrawBitmap(
+					image.m_bitmap,
+					image.m_Rect,
+					image.m_opacity,
+					image.m_mode,
+					image.m_imageRect
+				);
+
+				float MapX, MapZ;
+
+				for (auto& pos : GetUserInfo()) {
+					float Xdiff = (pos.second.y - position->Position.z) / mapscale;
+					float Zdiff = (pos.second.x - position->Position.x) / mapscale;
+
+					if (Xdiff <= 0) {
+						MapX = max(-FRAME_BUFFER_WIDTH / 20, Xdiff);
+					}
+					else {
+						MapX = min(FRAME_BUFFER_WIDTH / 20, Xdiff);
+					}
+					if (Zdiff <= 0) {
+						MapZ = max(-FRAME_BUFFER_WIDTH / 20, Zdiff);
+					}
+					else {
+						MapZ = min(FRAME_BUFFER_WIDTH / 20, Zdiff);
+					}
+
+
+					D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 19 / 20 - margin + MapX, FRAME_BUFFER_WIDTH / 20 + margin + MapZ}, 2.0f, 2.0f };
+
+					if (pos.first == -1) continue;
+					if (pos.first == -2) {
+						m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+						m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
+					}
+					else if (pos.first == m_scene->getID()) {
+						playerPos.radiusX += 2.0f;
+						playerPos.radiusY += 2.0f;
+						m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::GreenYellow));
+						m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
+					}
+					else {
+						m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+						m_d2dDeviceContext->FillEllipse(&playerPos, m_textBrush.Get());
+					}
+				}
 			}
-			// 오른쪽가면 z증가 앞으로 가면 x감소
-			float mapscale = 3960 / 396;
-			int margin = 54 / 2;
-			float x = margin + (int) (position->Position.z / mapscale);
-			float y = margin + 50 + (int)(position->Position.x / mapscale);
 
-			// cout << "x: " << position->Position.x << ",  z : " << position->Position.z << endl;
-			D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 18 / 20 - margin, margin, FRAME_BUFFER_WIDTH - margin, FRAME_BUFFER_WIDTH * 2 / 20 + margin };
-			imageRect = { x - FRAME_BUFFER_WIDTH / 20, y - FRAME_BUFFER_WIDTH / 20 , x + FRAME_BUFFER_WIDTH / 20, y + FRAME_BUFFER_WIDTH / 20 };
-
-			ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
-			m_d2dDeviceContext->DrawBitmap(
-				image.m_bitmap,
-				image.m_Rect,
-				image.m_opacity,
-				image.m_mode,
-				image.m_imageRect
-			);
-
-			float MapX, MapZ;
-
-			for (auto& pos : GetUserInfo()) {
-				float Xdiff = (pos.second.y - position->Position.z) / mapscale;
-				float Zdiff = (pos.second.x - position->Position.x) / mapscale;
-
-				if (Xdiff <= 0) {
-					MapX = max(-FRAME_BUFFER_WIDTH / 20, Xdiff);
-				}
-				else {
-					MapX = min(FRAME_BUFFER_WIDTH / 20, Xdiff);
-				}
-				if (Zdiff <= 0) {
-					MapZ = max(-FRAME_BUFFER_WIDTH / 20, Zdiff);
-				}
-				else {
-					MapZ = min(FRAME_BUFFER_WIDTH / 20, Zdiff);
-				}
-
-
-				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 19 / 20 - margin + MapX, FRAME_BUFFER_WIDTH / 20 + margin + MapZ}, 2.0f, 2.0f };
-
-				if (pos.first == -1) continue;
-				if (pos.first == -2) {
-					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-					m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
-				}
-				else if (pos.first == m_scene->getID()) {
-					playerPos.radiusX += 2.0f;
-					playerPos.radiusY += 2.0f;
-					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::GreenYellow));
-					m_d2dDeviceContext->FillRectangle({ playerPos.point.x - playerPos.radiusX, playerPos.point.y - playerPos.radiusY , playerPos.point.x + playerPos.radiusX, playerPos.point.y + playerPos.radiusY }, m_textBrush.Get());
-				}
-				else {
-					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
-					m_d2dDeviceContext->FillEllipse(&playerPos, m_textBrush.Get());
-				}
-			}
-
+			
 
 
 			{
@@ -924,7 +1027,6 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			ClearUserInfo(); // 방의 유저들 좌표를 저장하던 map 초기화
 		}
 	);
-
 
 
 }
