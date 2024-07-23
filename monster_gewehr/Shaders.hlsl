@@ -81,13 +81,13 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
-	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
-	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
-	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 
 	float3 normalW;
@@ -106,13 +106,13 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//standard
     //return (lerp(cColor, cIllumination, 0.5f));
 	//flog
-	float4 FlogColor = float4(0.5f, 0.3f, 0.2f, 1.0f);
+	float4 FlogColor = float4(0.28f, 0.27f, 0.31f, 0.5f);
     float3 disttoEye = length(gvCameraPosition - input.positionW);
     float flogstart;
     float flogrange;
 	
-    float flogAmount = saturate((disttoEye - 50.f) / 500.f);
-    return (lerp(lerp(cColor, cIllumination, 0.5f), FlogColor, flogAmount));
+    float flogAmount = saturate((disttoEye - 200.f) / 900.f);
+    return (lerp(lerp(cColor, cIllumination, 0.4f), FlogColor, flogAmount));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,6 +193,7 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
+    float3 positionW : POSITION;
 	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
@@ -203,6 +204,7 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 	VS_TERRAIN_OUTPUT output;
 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
 	output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
@@ -215,8 +217,18 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv0);
 	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
 //	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
+	float4 cColor =  saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 
+	
+	
+    float4 FlogColor = float4(0.28f, 0.27f, 0.31f, 0.5f);
+    float3 disttoEye = length(gvCameraPosition - input.positionW);
+    float flogstart;
+    float flogrange;
+	
+    float flogAmount = saturate((disttoEye - 200.f) / 900.f);
+    return (lerp(cColor, FlogColor, flogAmount));
+	
 	return(cColor);
 }
 
@@ -251,9 +263,9 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
 
 	//standard
-	//return(cColor);
+	return(cColor);
 	//flog
-	float4 FlogColor = float4(0.5f, 0.3f, 0.2f, 1.0f);
+    float4 FlogColor = float4(0.45f, 0.45f, 0.46f, 1.0f);
     return (FlogColor);
 
 }

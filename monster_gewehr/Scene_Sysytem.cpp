@@ -658,10 +658,10 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	case GAME:
 	{
 		world->reset();
-
+		//
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
-			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f) + 10.f/*2000.f*/ - 8.0f , 1429.0f,
+			0.0f, m_pObjectManager->m_pTerrain->GetHeight(1014.0f, 1429.f) + 10.f/*2000.f*/ - 8.0f , 0.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
@@ -673,7 +673,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<SkyBox_Component>(m_pObjectManager->m_pSkyBox, "default");
 
 		BuildScene(world, (char*)"Scene/Scene.bin");
-
+		//
 		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
@@ -693,26 +693,24 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
 		light->m_pLight->m_bEnable = true;
 		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
-		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.3f, 0.2f, 0.1f, 0.5f);
-		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.8f, 0.7f, 0.6f, 1.0f);
-		light->m_pLight->m_xmf4Specular = XMFLOAT4(1.0f, 0.9f, 0.8f, 0.0f);
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.45f, 0.45f, 0.46f, 1.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.32f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 
-		//ent = world->create();
-		//light = ent->assign<Light_Component>();
-		//light->m_pLight = new LIGHT;
-		//light->m_pLight->m_bEnable = true;
-		//light->m_pLight->m_nType = SPOT_LIGHT;
-		//light->m_pLight->m_fRange = 400.0f;
-		//light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		//light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-		//light->m_pLight->m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+		ent = world->create();
+		light = ent->assign<Light_Component>();
+		light->m_pLight = new LIGHT;
+		light->m_pLight->m_bEnable = true;
+		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
+		light->m_pLight->m_fRange = 5000.0f;
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
 		//light->m_pLight->m_xmf3Position = XMFLOAT3(1646.0f, 1164.0f, 2246.0f);
-		//light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-		//light->m_pLight->m_xmf3Attenuation = XMFLOAT3(0.5f, 0.01f, 0.0001f);
-		//light->m_pLight->m_fFalloff = 8.0f;
-		//light->m_pLight->m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-		//light->m_pLight->m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+		light->m_pLight->m_xmf3Attenuation = XMFLOAT3(0.5f, 0.01f, 0.0001f);
+		
 
 
 
@@ -1136,9 +1134,9 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 
 
-			xmf4x4World._41 *= (4104 / 330);
-			xmf4x4World._42 *= (4104 / 330);
-			xmf4x4World._43 *= (4104 / 330);
+			xmf4x4World._41 *= (12.44f);
+			xmf4x4World._42 *= (12.44f);
+			xmf4x4World._43 *= (12.44f);
 			xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(
 				XMConvertToRadians(0.f),
 				XMConvertToRadians(0.f),
@@ -1147,16 +1145,16 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 			XMVECTOR translation = XMVectorSet(xmf4x4World._41, xmf4x4World._42, xmf4x4World._43, 1.0f);
 			translation = XMVector3Transform(translation, XMMatrixRotationRollPitchYaw(
 				XMConvertToRadians(0.f),
-				XMConvertToRadians(180.f),
+				XMConvertToRadians(0.f),
 				XMConvertToRadians(0.f)));
 
 			xmf4x4World._41 = XMVectorGetX(translation);
 			xmf4x4World._42 = XMVectorGetY(translation);
 			xmf4x4World._43 = XMVectorGetZ(translation);
-
-			xmf4x4World._41 += 2783.f;
-			xmf4x4World._42 += 1024.f;
-			xmf4x4World._43 += 1852.f;
+			//- -.02
+			xmf4x4World._41 += 1153.56f;
+			//xmf4x4World._42 += 1024.f;
+			xmf4x4World._43 += 2112.f;
 
 			ent->assign<Position_Component>(xmf4x4World);
 
@@ -1184,7 +1182,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 				box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
 				world->emit<AddObjectlayer_Event>({ "Object",ent });
 
-				box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+				//box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 			}
 			//box->m_bounding_box.Extents *= m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
 
