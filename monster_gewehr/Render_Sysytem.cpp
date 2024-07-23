@@ -742,7 +742,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				// 초상화
 				D2D1_RECT_F sRect = { 10, 10, FRAME_BUFFER_WIDTH / 13, FRAME_BUFFER_HEIGHT / 7 };
-				ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[0], sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+				ImageUI_Component image = ImageUI_Component(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[0], sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 				m_d2dDeviceContext->DrawBitmap(
 					m_bitmaps[0],
 					image.m_Rect,
@@ -768,9 +768,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-				textRect = D2D1::RectF(170, 15, (int)player->hp * 2 + 170, 30);
+				float width = (FRAME_BUFFER_WIDTH / 3.2 - FRAME_BUFFER_WIDTH * 5 / 36) / 100;
 
-				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT / 35, (int)(player->hp * FRAME_BUFFER_WIDTH / 320), FRAME_BUFFER_HEIGHT * 2 / 35);
+				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT / 35, FRAME_BUFFER_WIDTH * 5 / 36 + player->hp * width, FRAME_BUFFER_HEIGHT * 2 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
@@ -793,9 +793,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-				textRect = D2D1::RectF(170, 15, (int)player->hp * 2 + 170, 30);
-
-				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT * 3 / 35, (int)(player->stamina * FRAME_BUFFER_WIDTH / 320), FRAME_BUFFER_HEIGHT * 4 / 35);
+				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT * 3 / 35, FRAME_BUFFER_WIDTH * 5 / 36 + player->stamina * width, FRAME_BUFFER_HEIGHT * 4 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::YellowGreen));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
@@ -840,16 +838,16 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			{
 
 			}
-			// x: 883.49,  z : 1328.4	왼쪽 하단
-			// x: 2285.07,  z : 3149.47 우측 상단
-			// 1014.f, 1024.f, 1429.f
-			// 오른쪽가면 x증가 앞으로 가면 z증가
-			float x = (int)(position->Position.x - 883) / 4.67;
-			float z = 300 - (int)(position->Position.z - 1328) / 6.07;
+			// 오른쪽가면 z증가 앞으로 가면 x감소
+			float mapscale = 3960 / 396;
+			int margin = 54 / 2;
+			float x = margin + (int) (position->Position.z / mapscale);
+			float y = margin + 50 + (int)(position->Position.x / mapscale);
+
 			// cout << "x: " << position->Position.x << ",  z : " << position->Position.z << endl;
-			D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 17 / 20, FRAME_BUFFER_WIDTH / 20, FRAME_BUFFER_WIDTH * 19 / 20, FRAME_BUFFER_WIDTH * 3 / 20 };
-			imageRect = { x - FRAME_BUFFER_WIDTH / 40, z - FRAME_BUFFER_WIDTH / 40 , x + FRAME_BUFFER_WIDTH / 40, z + FRAME_BUFFER_WIDTH / 40 };
-			//imageRect = { -100, -100 , 400, 400 };
+			D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 18 / 20 - margin, margin, FRAME_BUFFER_WIDTH - margin, FRAME_BUFFER_WIDTH * 2 / 20 + margin };
+			imageRect = { x - FRAME_BUFFER_WIDTH / 20, y - FRAME_BUFFER_WIDTH / 20 , x + FRAME_BUFFER_WIDTH / 20, y + FRAME_BUFFER_WIDTH / 20 };
+
 			ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 			m_d2dDeviceContext->DrawBitmap(
 				image.m_bitmap,
@@ -859,13 +857,11 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				image.m_imageRect
 			);
 
-			// 보스 x: 2289.f z: 895.f;
 			float MapX, MapZ;
 
 			for (auto& pos : GetUserInfo()) {
-				//cout << "UID : " << pos.first << "|| Position : " << pos.second.x << ", " << pos.second.y << endl;
-				float Xdiff = (pos.second.x - position->Position.x) / 4.67;
-				float Zdiff = (pos.second.y - position->Position.z) / 6.07;
+				float Xdiff = (pos.second.y - position->Position.z) / mapscale;
+				float Zdiff = (pos.second.x - position->Position.x) / mapscale;
 
 				if (Xdiff <= 0) {
 					MapX = max(-FRAME_BUFFER_WIDTH / 20, Xdiff);
@@ -881,7 +877,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 
 
-				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 18 / 20 + MapX, FRAME_BUFFER_WIDTH * 2 / 20 - MapZ}, 2.0f, 2.0f };
+				D2D1_ELLIPSE playerPos = { {FRAME_BUFFER_WIDTH * 19 / 20 - margin + MapX, FRAME_BUFFER_WIDTH / 20 + margin + MapZ}, 2.0f, 2.0f };
 
 				if (pos.first == -1) continue;
 				if (pos.first == -2) {
