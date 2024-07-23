@@ -796,13 +796,13 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		Entity* ent = world->create();
 		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
 		ent->assign<Rotation_Component>(0.f, 0.f, 0.f);
-		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
+		ent->assign<Scale_Component>(50.f, 50.f, 50.f);
 		
 		string pstrGameObjectName = "explosion";
 		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
-		ent->assign<Emitter_Componet>(100.f,8,8);
+		ent->assign<Emitter_Componet>(6.4f, 0.1f,8,8);
 
 		//world->emit<AddObjectlayer_Event>({ "Granade", ent });
 	}

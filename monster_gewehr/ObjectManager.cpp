@@ -35,7 +35,7 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,450+1); //사용되는 텍스쳐 갯수 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,455+1); //사용되는 텍스쳐 갯수 
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 

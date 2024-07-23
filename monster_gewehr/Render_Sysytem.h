@@ -52,6 +52,7 @@ class Render_System : public EntitySystem,
 {
 private:
 	CCamera* m_pCamera = NULL;
+	ID3D12Device* m_pd3dDevice;
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = NULL;

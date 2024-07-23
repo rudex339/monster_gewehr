@@ -107,7 +107,7 @@ HRESULT LoadBitmapFromFile(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDev
 Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, Scene_Sysytem* scene)
 {
 	SetRootSignANDDescriptorANDCammandlist(manager, pd3dCommandList);
-
+	m_pd3dDevice = pd3dDevice;
 	m_d2dDeviceContext = d2dDeviceContext;
 	m_dwriteFactory = dwriteFactory;
 	m_d2dFactory = d2dFactory;
@@ -369,6 +369,11 @@ void Render_System::tick(World* world, float deltaTime)
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
 						AnimationController->m_AnimationController->UpdateShaderVariables();
 					}
+					if (ent->has<Emitter_Componet>()) {
+						ComponentHandle<Emitter_Componet> emiiter = ent->get<Emitter_Componet>();
+						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(m_pd3dDevice, m_pd3dCommandList, emiiter->m_nRow, emiiter->m_nCol, 
+							emiiter->m_nRows, emiiter->m_nCols);
+					}
 					
 					if (Model->draw) {
 						Model->m_MeshModel->Animate(deltaTime);
@@ -390,7 +395,8 @@ void Render_System::tick(World* world, float deltaTime)
 				}
 				else{
 					Model->m_MeshModel->UpdateTransform(&pos->m_xmf4x4World);
-					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {						
+					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {		
+						
 						if (Model->draw){
 							Model->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 						}

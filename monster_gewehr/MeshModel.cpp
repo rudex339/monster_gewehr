@@ -1576,9 +1576,7 @@ void MultiSpriteObject::Animate(float fTimeElapsed)
 {
 	if (m_ppMaterials[0] && m_ppMaterials[0]->m_ppTextures[0])
 	{
-		//m_fTime += fTimeElapsed * 0.5f;
-		//if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
-		//m_ppMaterials[0]->m_ppTextures[0]->AnimateRowColumn(m_fTime);
+		//((TextureRectMesh*)m_pMesh)->changeRowCol(0,0,8,8);
 	}
 }
 
@@ -1590,14 +1588,14 @@ MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CTexture* Texture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	Texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	Texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"image/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
 
-	CStandardShader* pShader = new  CStandardShader();
+	EmitterShader* pShader = new EmitterShader();
 	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 
-	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 3);
+	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 13);
 
 	CMaterial* pBoxMaterial = new CMaterial(1);
 	//m_ppMaterials = new CMaterial * [m_nMaterials];

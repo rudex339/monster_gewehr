@@ -113,6 +113,8 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     float flogrange;
 	
     float flogAmount = saturate((disttoEye - 50.f) / 500.f);
+    float4 Finalcolor = (lerp(cColor * cIllumination, FlogColor, flogAmount));
+    Finalcolor.w = 1.0f;
     return (lerp(cColor*cIllumination, FlogColor, flogAmount));
 }
 
@@ -207,28 +209,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 	return(cColor);
 }
-///////////////////////////////////////////////////////////////////////////
-VS_TERRAIN_OUTPUT VSEmitter(VS_STANDARD_INPUT input)
-{
-    VS_TERRAIN_OUTPUT output;
 
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-    output.color = float4(0.f,0.f,0.f,0.f);
-    output.uv0 = input.uv;
-    //output.uv1 = input.uv1;
-
-    return (output);
-}
-
-float4 PSEmitter(VS_TERRAIN_OUTPUT input) : SV_TARGET
-{
-    float4 cBaseTexColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv0);
-    // float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
-//	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-    float4 cColor =  cBaseTexColor;
-
-    return (cColor);
-}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 struct VS_SKYBOX_CUBEMAP_INPUT
@@ -279,3 +260,25 @@ float4 PSBoundingBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+VS_TERRAIN_OUTPUT VSEmitter(VS_TERRAIN_INPUT input)
+{
+    VS_TERRAIN_OUTPUT output;
+
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    //output.color = float4(0.f,0.f,0.f,0.f);
+    output.uv0 = input.uv0;
+    output.uv1 = input.uv1;
+
+    return (output);
+}
+
+float4 PSEmitter(VS_TERRAIN_OUTPUT input) : SV_TARGET
+{
+    float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv0);
+    // float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
+//	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
+    float4 cColor = cBaseTexColor;
+
+    return (cColor);
+}
