@@ -232,24 +232,38 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->stamina -= 0.1;
 			}
 
+			// 힐키 (1 : 붕대, 2 : 구상, 3 : 주사기)
 			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
 				heal_on = true;
 				player->heal_timer = healtime[0];
+				player->heal_all_time = healtime[0];
 				heal_type = 0;
 			}
 
 			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on) {
 				heal_on = true;
 				player->heal_timer = healtime[1];
+				player->heal_all_time = healtime[1];
 				heal_type = 1;
 			}
 
-			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on) {
+			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on) {
 				heal_on = true;
 				player->heal_timer = healtime[2];
+				player->heal_all_time = healtime[2];
 				heal_type = 2;
 			}
 
+			// 상호작용 f키(보급 받는 키 or 회복 취소 키)
+			if (pKeysBuffer[0x46] & 0xF0) {
+				if (heal_on) {
+					heal_on = false;
+					player->heal_timer = 0;
+				}
+			}
+
+
+			// 움직이는키 wsad
 			if (pKeysBuffer[0x57] & 0xF0) {
 				xmf3Shift = Vector3::Add(xmf3Shift, controller_vector->m_xmf3Look, speed);
 				if (roll_on == 1) { // 구르기 키를 처음 눌렀으면 어디로 굴러야 하는지 방향을 정해줌
@@ -288,6 +302,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					AnimationController->next_State = (UINT)RUN;
 			}
 
+			// 투척 g키
 			if (pKeysBuffer[0x47] & 0xF0) {
 				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
 				;
@@ -337,6 +352,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					shot_cooltime -= deltaTime;
 				}
 			}
+			// 우클릭 조준
 			else if ((pKeysBuffer[VK_RBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && !heal_on) {
 				player->aim_mode = true;
 			}

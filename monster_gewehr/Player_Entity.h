@@ -57,6 +57,7 @@ struct player_Component {
 	INT heal_item[3];
 
 	FLOAT heal_timer;
+	FLOAT heal_all_time;
 
 	player_Component() = default;
 };

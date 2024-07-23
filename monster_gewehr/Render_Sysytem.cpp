@@ -814,25 +814,33 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				);
 			}
 			{
-				//if (player->heal_timer) {
-					TextUI_Component heal = TextUI_Component(DEFAULT_FONT, L"회복중",
-						FRAME_BUFFER_HEIGHT * 19.9 / 24, FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_HEIGHT * 20.9 / 24, FRAME_BUFFER_WIDTH * 11 / 20);
+				if (player->heal_timer > 0) {
+					TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"회복중",
+						FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 54 / 100);
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 
 					m_d2dDeviceContext->DrawTextW(
-						heal.m_text.c_str(),
-						heal.m_text.size(),
+						heal_text.m_text.c_str(),
+						heal_text.m_text.size(),
 						m_ingametextFormat2.Get(),
-						&heal.m_Rect,
+						&heal_text.m_Rect,
 						m_textBrush.Get()
 					);
 
-					D2D1::ArcSegment
-					/*textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 10 / 21, FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 16 / 20, FRAME_BUFFER_HEIGHT * 21 / 24);
-					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
-					m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());*/
+					float width = (FRAME_BUFFER_WIDTH * 70 / 100 - FRAME_BUFFER_WIDTH * 30 / 100) / 100 ;
 
-				//}
+					// 회복 진행 바
+					textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 30 / 100, FRAME_BUFFER_HEIGHT * 43 / 48, FRAME_BUFFER_WIDTH * 70 / 100, FRAME_BUFFER_HEIGHT * 45 / 48);
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
+					m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+
+					float time_per = 100.f - player->heal_timer * 100.f / player->heal_all_time;
+
+					textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 30 / 100, FRAME_BUFFER_HEIGHT * 43 / 48, FRAME_BUFFER_WIDTH * 30 / 100 + time_per * width, FRAME_BUFFER_HEIGHT * 45 / 48);
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+					m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+
+				}
 			}
 
 			{
