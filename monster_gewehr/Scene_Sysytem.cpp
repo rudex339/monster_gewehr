@@ -374,6 +374,23 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		goToLobby.Curr_Scene = SHOP;
 		ent->assign<Button_Component>(goToLobby);
 
+		// 돈 출력하기
+		{
+			ent = world->create();
+			TextUI_Component coin = TextUI_Component(SMALL_FONT, to_wstring(money),
+				FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_WIDTH * 2 / 4 + FRAME_BUFFER_WIDTH / 25, FRAME_BUFFER_WIDTH * 3 / 50, FRAME_BUFFER_WIDTH * 3 / 4);
+			coin.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+			coin.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+			ent->assign<TextUI_Component>(coin);
+
+			ent = world->create();
+			imageRect = { 0, 0, 200, 200 };
+			sRect = { FRAME_BUFFER_WIDTH / 2 - FRAME_BUFFER_WIDTH / 50 , FRAME_BUFFER_WIDTH / 50,  FRAME_BUFFER_WIDTH / 2 + FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_WIDTH * 3 / 50 };
+			ent->assign<ImageUI_Component>(L"image/icons/coins.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+		}
+
 		{
 			// 상인 프레임 + 이미지
 			ent = world->create();

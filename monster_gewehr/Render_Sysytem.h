@@ -12,7 +12,8 @@ enum FontType {
 	DEFAULT_FONT,
 	SMALL_FONT,
 	MEDIUM_FONT,
-	NEEDLE_FONT
+	NEEDLE_FONT,
+	NANO_FONT
 };
 
 struct SetCamera_Event {
@@ -86,9 +87,11 @@ private:
 
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextFormat> m_smalltextFormat;
+	ComPtr<IDWriteTextFormat> m_verysmalltextFormat;
 	ComPtr<IDWriteTextFormat> pTextFormat;
 	ComPtr<IDWriteTextFormat> m_ingametextFormat;
 	ComPtr<IDWriteTextFormat> m_ingametextFormat2;
+
 
 	IDWriteFontFile* pFontFile;
 	IDWriteFontFace* pFontFace;

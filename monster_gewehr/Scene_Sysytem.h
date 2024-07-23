@@ -168,6 +168,7 @@ private:
 	int m_id = -1;
 	bool m_ready = false;
 
+
 	// ¹æ ¸ñ·Ï
 	vector<Button_Component> Rooms;
 	queue<int> Room_ids;
