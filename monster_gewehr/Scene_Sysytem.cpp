@@ -661,7 +661,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		//
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
-			0.0f, m_pObjectManager->m_pTerrain->GetHeight(1014.0f, 1429.f) + 10.f/*2000.f*/ - 8.0f , 0.0f,
+			2465.0f, m_pObjectManager->m_pTerrain->GetHeight(1014.0f, 1429.f) + 10.f/*2000.f*/ - 8.0f , 826.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);

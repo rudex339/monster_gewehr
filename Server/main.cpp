@@ -300,7 +300,7 @@ void ProcessPacket(int id, char* p)
 		CS_PLAYER_MOVE_PACKET* packet = reinterpret_cast<CS_PLAYER_MOVE_PACKET*>(p);
 		players[id].SetPostion(packet->pos);
 		players[id].SetYaw(packet->yaw);
-		//std::cout << id << "에서 만큼 받아옴 " << packet->pos.x << std::endl;
+		std::cout << id << "에서 만큼 받아옴 " << packet->pos.y << std::endl;
 		players[id].SetBoundingBox();
 		players[id].RotateBoundingBox();
 
@@ -440,7 +440,7 @@ void ProcessPacket(int id, char* p)
 	case CS_DEMO_MONSTER_SETPOS: {
 		int room_id = players[id].GetRoomID();
 		souleaters[room_id].m_lock.lock();
-		souleaters[room_id].SetPostion(XMFLOAT3(1014.f, 1024.f, 1429.f));
+		souleaters[room_id].SetPostion(XMFLOAT3(2465.f, 0.f, 826.f));
 		souleaters[room_id].SetBoundingBox();
 		souleaters[room_id].m_lock.unlock();
 		souleaters[room_id].SetState(idle_state);

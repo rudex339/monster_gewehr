@@ -1,7 +1,7 @@
 #include "CAPObject.h"
 #include <random>
 
-#define LAND_Y 1024.f
+#define LAND_Y 0.f
 #define RUNAWAY_POINT 3
 
 std::random_device rd;
@@ -113,7 +113,7 @@ Player::Player(int id, SOCKET socket)
 
 void Player::PlayerInit()
 {
-	m_position = XMFLOAT3(1014.f, 1024.f, 1429.f);
+	m_position = XMFLOAT3(2465.f, 0.f, 826.f);
 	m_yaw = 0.f;
 	m_hp = 100;
 	m_max_hp = 100;
@@ -208,9 +208,9 @@ Monster::Monster()
 	m_position.y = 1024.f;
 	m_position.z = 1429.f;*/
 
-	m_position.x = 2289.f;
-	m_position.y = 1024.f;
-	m_position.z = 895.f;
+	m_position.x = 2200.f;
+	m_position.y = 0.0f;
+	m_position.z = 3100.f;
 
 	m_animation = idle_ani;
 	m_state = idle_state;
@@ -325,9 +325,9 @@ void Monster::InitMonster()
 	m_position.y = 1024.f;
 	m_position.z = 1429.f;*/
 
-	m_position.x = 2289.f;
-	m_position.y = 1024.f;
-	m_position.z = 895.f;
+	m_position.x = 2200.f;
+	m_position.y = 0.f;
+	m_position.z = 3100.f;
 
 	m_animation = idle_ani;
 	m_state = idle_state;
@@ -420,9 +420,9 @@ Sequence	runaway_sequence;
 Leaf	die_node;
 
 // runaway points
-XMFLOAT3 runaway_point01 = XMFLOAT3(2256.0f, LAND_Y, 890.0f);
-XMFLOAT3 runaway_point02 = XMFLOAT3(2809.f, LAND_Y, 3329.f);
-XMFLOAT3 runaway_point03 = XMFLOAT3(1754.f, LAND_Y, 2795.f);
+XMFLOAT3 runaway_point01 = XMFLOAT3(2200.0f, LAND_Y, 3100.0f);
+XMFLOAT3 runaway_point02 = XMFLOAT3(410.f, LAND_Y, 3055.f);
+XMFLOAT3 runaway_point03 = XMFLOAT3(340.f, LAND_Y, 1450.f);
 
 XMFLOAT3 runaway_point[RUNAWAY_POINT] = { runaway_point01, runaway_point02, runaway_point03 };
 
