@@ -200,7 +200,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		UCHAR pKeysBuffer[256];
 		if (GetKeyboardState(pKeysBuffer)) {
 
-			float speed = 50.25f * deltaTime;
+//			float speed = 50.25f * deltaTime;
+			float speed = 1050.25f * deltaTime;
 
 			bool run_on = false; // 달리기 상태인지 아닌지 확인해 주는거
 
