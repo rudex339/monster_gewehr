@@ -179,7 +179,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		}
 
 		if (heal_on) {
-			if (heal_timer <= 0) {
+			if (player->heal_timer <= 0) {
 				cout << "힐 완료" << endl;
 				player->hp += heal_amount[heal_type];	// 이것도 치유한 힐템에 따라서 달라지게
 				if (player->hp > 100) {
@@ -190,10 +190,9 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				world->emit<UseItem_Event>({ heal_type });
 				player->heal_item[heal_type]--;
 				cout << "남은 힐템 : " << player->heal_item[heal_type] << endl;
-
 			}
 			else {
-				heal_timer -= deltaTime;
+				player->heal_timer -= deltaTime;
 			}
 		}
 
@@ -234,19 +233,19 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
 				heal_on = true;
-				heal_timer = healtime[0];
+				player->heal_timer = healtime[0];
 				heal_type = 0;
 			}
 
-			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
+			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on) {
 				heal_on = true;
-				heal_timer = healtime[1];
+				player->heal_timer = healtime[1];
 				heal_type = 1;
 			}
 
-			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
+			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on) {
 				heal_on = true;
-				heal_timer = healtime[2];
+				player->heal_timer = healtime[2];
 				heal_type = 2;
 			}
 

@@ -725,6 +725,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 	D2D1_RECT_F textRect = D2D1::RectF(FRAME_BUFFER_WIDTH - 300, FRAME_BUFFER_HEIGHT - 100, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	D2D1_RECT_F imageRect = D2D1::RectF(10, 5, 90, 90);
 	D2D1_ELLIPSE ellipse = D2D1::Ellipse({ FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2 }, 4.0f, 4.0f);
+	D2D1_ARC_SEGMENT arcSegment = D2D1::ArcSegment({ FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2 }, {10.f, 10.f}, 10.f, D2D1_SWEEP_DIRECTION_CLOCKWISE, D2D1_ARC_SIZE_SMALL);
 	world->each<player_Component, Camera_Component, ControllAngle_Component, Position_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,
@@ -815,9 +816,25 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				);
 			}
 			{
+				//if (player->heal_timer) {
+					TextUI_Component heal = TextUI_Component(DEFAULT_FONT, L"È¸º¹Áß",
+						FRAME_BUFFER_HEIGHT * 19.9 / 24, FRAME_BUFFER_WIDTH * 8 / 20, FRAME_BUFFER_HEIGHT * 20.9 / 24, FRAME_BUFFER_WIDTH * 11 / 20);
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 
+					m_d2dDeviceContext->DrawTextW(
+						heal.m_text.c_str(),
+						heal.m_text.size(),
+						m_ingametextFormat2.Get(),
+						&heal.m_Rect,
+						m_textBrush.Get()
+					);
 
+					D2D1::ArcSegment
+					/*textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 10 / 21, FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 16 / 20, FRAME_BUFFER_HEIGHT * 21 / 24);
+					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
+					m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());*/
 
+				//}
 			}
 
 			{
