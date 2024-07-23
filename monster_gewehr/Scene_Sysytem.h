@@ -255,6 +255,7 @@ public:
 	void ReadyCheck(int id, bool ready);
 	void Purchase();
 	int* GetEquipments() { return equipments; }
+	int* GetHealItems() { return equipHealItems; }
 	void SetName(wstring name) { m_name = name; }
 
 	int getID() { return m_id; };

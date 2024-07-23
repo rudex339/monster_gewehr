@@ -260,6 +260,17 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 	LoadBitmapFromFile(L"image/icons/m4.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[2]);
 	LoadBitmapFromFile(L"image/icons/Benelli.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[3]);
 	LoadBitmapFromFile(L"image/icons/sr.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[4]);
+	LoadBitmapFromFile(L"image/icons/band.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[5]);
+	LoadBitmapFromFile(L"image/icons/fak.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[6]);
+	LoadBitmapFromFile(L"image/icons/injector.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[7]);
+	LoadBitmapFromFile(L"image/icons/grenade.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[8]);
+	LoadBitmapFromFile(L"image/icons/flashbang.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[9]);
+	LoadBitmapFromFile(L"image/icons/key1.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[10]);
+	LoadBitmapFromFile(L"image/icons/key2.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[11]);
+	LoadBitmapFromFile(L"image/icons/key3.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[12]);
+
+
+
 
 
 	float dashes[] = { 1.0f, 2.0f, 2.0f, 3.0f, 2.0f, 2.0f };
@@ -842,6 +853,66 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					m_textBrush.Get()
 				);
 			}
+
+			// 힐 아이템 아이콘 및 보유량
+			{
+				D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 25 / 30, FRAME_BUFFER_HEIGHT * 19 / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * 21 / 24 };
+				imageRect = { 0,0,200,200 };
+
+				for (int i = 0; i < 4; ++i) {
+					if (i < 3) {
+						float opacity = m_scene->GetHealItems()[i] > 0 ? 1.0f : 0.4f;
+						// 아이템 사용 키 아이콘 출력
+						sRect = { FRAME_BUFFER_WIDTH * 26.7 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 27.7 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
+						m_d2dDeviceContext->DrawBitmap(
+							m_bitmaps[10+i],
+							sRect,
+							opacity,
+							D2D1_INTERPOLATION_MODE_LINEAR,
+							imageRect
+						);
+
+						// 아이템 아이콘 출력
+						sRect = { FRAME_BUFFER_WIDTH * 28 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
+						m_d2dDeviceContext->DrawBitmap(
+							m_bitmaps[i + 5],
+							sRect,
+							opacity,
+							D2D1_INTERPOLATION_MODE_LINEAR,
+							imageRect
+						);
+
+						// 아이템 보유 개수 출력
+						TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, to_wstring(m_scene->GetHealItems()[i]),
+							FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29.2 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 30 / 30);
+						m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+
+						m_verysmalltextFormat.Get()->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+						m_d2dDeviceContext->DrawTextW(
+							heal_text.m_text.c_str(),
+							heal_text.m_text.size(),
+							m_verysmalltextFormat.Get(),
+							&heal_text.m_Rect,
+							m_textBrush.Get()
+						);
+					}
+
+					else {
+						// if() 수류탄 보유 중일때만 출력하도록
+						// 투척무기 아이콘 출력
+						sRect = { FRAME_BUFFER_WIDTH * 28 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
+						m_d2dDeviceContext->DrawBitmap(
+							m_bitmaps[m_scene->GetEquipments()[2] + 3],
+							sRect,
+							1.0f,
+							D2D1_INTERPOLATION_MODE_LINEAR,
+							imageRect
+						);
+					}
+				}
+			}
+
+			// 회복 표시
 			{
 				if (player->heal_timer > 0) {
 					TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"회복중",
@@ -872,9 +943,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
-			{
-
-			}
+			
 
 			// 미니맵
 			{
@@ -937,6 +1006,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
+			
+
 
 			{
 				if (player->aim_mode) {
@@ -948,7 +1019,6 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			ClearUserInfo(); // 방의 유저들 좌표를 저장하던 map 초기화
 		}
 	);
-
 
 
 }
