@@ -281,12 +281,27 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
 					ent->assign<TextUI_Component>(text);
-
-					ent = world->create();
-					text = TextUI_Component(SMALL_FONT, to_wstring(player.weapon) + L" ", sRect.top, sRect.left, sRect.bottom, sRect.right);
-					text.m_paragraph_alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
-					text.m_text_alignment = DWRITE_TEXT_ALIGNMENT_TRAILING;
-					ent->assign<TextUI_Component>(text);
+					D2D1_RECT_F rect;
+					float gap = (sRect.bottom - sRect.top) / 4;
+					rect = { sRect.right - (gap*2) * 3 , sRect.top + gap, sRect.right, sRect.bottom - gap};
+					imageRect = { 0,0,450, 150 };;
+					switch (player.weapon)
+					{
+					case 0:
+						ent->assign<ImageUI_Component>(L"image/icons/m4.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+							rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+						break;
+					case 1:
+						ent->assign<ImageUI_Component>(L"image/icons/Benelli.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+							rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+						break;
+					case 2:
+						ent->assign<ImageUI_Component>(L"image/icons/sr.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+							rect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+						break;
+					default:
+						break;
+					}
 
 					sRect.top = sRect.bottom;
 					sRect.bottom += FRAME_BUFFER_HEIGHT / 15;
