@@ -304,7 +304,7 @@ struct Emitter_Componet {
 
 	Emitter_Componet() = default;
 
-	Emitter_Componet(float coolTime = 100.f, int rows, int cols)
+	Emitter_Componet(float coolTime = 100.f, int rows = 1, int cols=1)
 		: coolTime(coolTime), m_nRows(rows),m_nCols(cols)
 	{
 	}
