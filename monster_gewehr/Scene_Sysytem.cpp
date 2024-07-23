@@ -725,7 +725,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
 		light->m_pLight->m_bEnable = true;
 		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
-		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.45f, 0.45f, 0.46f, 1.0f);
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.32f, 1.0f);
 		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
@@ -733,15 +733,13 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent = world->create();
 		light = ent->assign<Light_Component>();
 		light->m_pLight = new LIGHT;
+		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
 		light->m_pLight->m_bEnable = true;
 		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
-		light->m_pLight->m_fRange = 5000.0f;
-		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-		//light->m_pLight->m_xmf3Position = XMFLOAT3(1646.0f, 1164.0f, 2246.0f);
-		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-		light->m_pLight->m_xmf3Attenuation = XMFLOAT3(0.5f, 0.01f, 0.0001f);
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.45f, 0.45f, 0.46f, 1.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.32f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+		light->m_pLight->m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 		
 
 
@@ -993,7 +991,7 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		// Scale the direction by speed
 		DirectX::XMVECTOR velocity = DirectX::XMVectorScale(direction, 30.f);
 		DirectX::XMStoreFloat3(&vel->m_velocity, velocity);
-		string pstrGameObjectName = "BP_building60_SM_wall2_StaticMeshComponent0";
+		string pstrGameObjectName = "Cube";
 		ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject,
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
 		ComponentHandle<BoundingBox_Component> box = ent->assign<BoundingBox_Component>(
