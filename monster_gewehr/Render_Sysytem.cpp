@@ -740,6 +740,10 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case EquipDownBtn:
 					world->emit<ChoiceEquip_Event>({ EquipDownBtn, button->item_num });
 					break;
+				case EndGameBtn:
+					world->emit<Clearlayer_Event>({});
+					world->emit<ChangeScene_Event>({ LOBBY });
+					break;
 				default:
 					cout << "디폴트" << endl;
 					break;
@@ -771,6 +775,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<Position_Component> position
 		) -> void {
 			{
+				if (m_scene->GetState() == END) { return; }
 				// 플레이어 정보 UI
 				// 테두리
 				textRect = D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH / 3.2 + 20, FRAME_BUFFER_HEIGHT / 7 + 20);

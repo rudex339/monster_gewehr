@@ -779,15 +779,53 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	case END:
 		::ReleaseCapture();
 		Entity* ent = world->create();
-		ent->assign<TextUI_Component>(DEFAULT_FONT, L"return lobby, press enter",
-			(float)FRAME_BUFFER_HEIGHT / 2 + 200, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 280, (float)FRAME_BUFFER_WIDTH / 2 + 400);
-		wchar_t m_reportFileName[10];
+
+		D2D1_RECT_F imageRect, screenRect, sRect;
+		imageRect = { 0, 0, 1, 1 };
+		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+		if (event.score > 0) {
+			sRect = { FRAME_BUFFER_WIDTH / 10, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH * 9 / 10, FRAME_BUFFER_HEIGHT * 9 / 10 };
+			ent = world->create();
+			ent->assign<ImageUI_Component>(L"image/white.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				screenRect, 0.4f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			ent = world->create();
+			ent->assign<TextUI_Component>(DEFAULT_FONT, L"Misson Complete",
+				(float)FRAME_BUFFER_HEIGHT * 2 / 3, 0,
+				(float)FRAME_BUFFER_HEIGHT, (float)FRAME_BUFFER_WIDTH);
+
+			ent = world->create();
+			ent->assign<TextUI_Component>(DEFAULT_FONT, to_wstring(event.score),
+				(float)FRAME_BUFFER_HEIGHT / 2, 0,
+				(float)FRAME_BUFFER_HEIGHT / 2, (float)FRAME_BUFFER_WIDTH);
+			world->emit<GetPlayerPtr_Event>({ NULL });
+		}
+
+		else {
+			sRect = { FRAME_BUFFER_WIDTH / 10, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH * 9 / 10, FRAME_BUFFER_HEIGHT * 9 / 10 };
+			ent = world->create();
+			ent->assign<ImageUI_Component>(L"image/black.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+				screenRect, 0.4f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+
+			ent = world->create();
+			ent->assign<TextUI_Component>(DEFAULT_FONT, L"Misson Fail",
+				(float)FRAME_BUFFER_HEIGHT * 2 / 3, 0,
+				(float)FRAME_BUFFER_HEIGHT, (float)FRAME_BUFFER_WIDTH);
+
+			ent = world->create();
+			ent->assign<TextUI_Component>(DEFAULT_FONT, to_wstring(event.score),
+				(float)FRAME_BUFFER_HEIGHT / 2, 0,
+				(float)FRAME_BUFFER_HEIGHT / 2, (float)FRAME_BUFFER_WIDTH);
+			world->emit<GetPlayerPtr_Event>({ NULL });
+		}
 		ent = world->create();
-		ent->assign<TextUI_Component>(DEFAULT_FONT, to_wstring(event.score),
-			(float)FRAME_BUFFER_HEIGHT / 2 -20, (float)FRAME_BUFFER_WIDTH / 2 - 400,
-			(float)FRAME_BUFFER_HEIGHT / 2 + 60, (float)FRAME_BUFFER_WIDTH / 2 + 400);
-		world->emit<GetPlayerPtr_Event>({ NULL });
+		// 로비로 가기 버튼
+		sRect = { FRAME_BUFFER_WIDTH * 7.5 / 10, FRAME_BUFFER_HEIGHT  / 10, FRAME_BUFFER_WIDTH * 9 / 10, FRAME_BUFFER_HEIGHT * 2 / 10 };
+		imageRect = { 0, 0, 784, 251 };
+		ent = world->create();
+		Button_Component goToLobby = Button_Component(EndGameBtn, L"image/button/GTLobby.png", NEEDLE_FONT, L"", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
+			sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+		ent->assign<Button_Component>(goToLobby);
 		break;
 	}
 	

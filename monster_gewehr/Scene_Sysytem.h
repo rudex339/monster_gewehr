@@ -32,7 +32,8 @@ enum {
 	EquipLeftBtn,
 	EquipRightBtn,
 	EquipUpBtn,
-	EquipDownBtn
+	EquipDownBtn,
+	EndGameBtn
 };
 
 enum Items {
@@ -204,6 +205,8 @@ private:
 	int m_join_room = -1;
 	bool m_is_host = false;
 
+	int m_room_hp = 3;
+
 	wstring m_name;
 
 	int money = 1000;
@@ -222,7 +225,6 @@ private:
 
 	int weapon_ammo[3] = { 30, 12, 7 };
 	int weapon_mag[3] = { 120, 60, 21 };
-
 public:
 
 	Scene_Sysytem() = default;
@@ -263,7 +265,6 @@ public:
 	int* GetEquipments() { return equipments; }
 	int* GetHealItems() { return equipHealItems; }
 	void SetName(wstring name) { m_name = name; }
-
+	UINT GetState() { return m_State; }
 	int getID() { return m_id; };
 };
-
