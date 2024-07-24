@@ -1026,24 +1026,24 @@ void TextureRectMesh::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Grap
 	UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbtexture = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pcbMappedtexture = new cbTextureInfo;
-	//m_pd3dcbtexture->Map(0, NULL, (void**)&m_pcbMappedtexture);
+	m_pd3dcbtexture->Map(0, NULL, (void**)&m_pcbMappedtexture);
 	
 	//UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
-	///D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = ObjectManager::GetCbvSrvDescriptorHeap()->m_d3dCbvGPUDescriptorNextHandle;
+	//D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = ObjectManager::GetCbvSrvDescriptorHeap()->m_d3dCbvGPUDescriptorNextHandle;
 	
-	//d3dCbvGPUDescriptorNextHandle.ptr = ObjectManager::CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbtexture, ncbElementBytes).ptr;
+	d3dCbvGPUDescriptorNextHandle.ptr = ObjectManager::CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbtexture, ncbElementBytes).ptr;
 }
 
 void TextureRectMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
+	/*UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
 	D3D12_RANGE d3dReadRange = { 0, 0 };
 	UINT8* pBufferDataBegin = NULL;
 	m_pd3dcbtexture->Map(0, &d3dReadRange, (void**)&pBufferDataBegin);
 	memcpy(pBufferDataBegin, &m_pcbMappedtexture, ncbElementBytes);
-	m_pd3dcbtexture->Unmap(0, NULL);
+	m_pd3dcbtexture->Unmap(0, NULL);*/
 
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2, m_pd3dcbtexture->GetGPUVirtualAddress());
+	pd3dCommandList->SetGraphicsRootConstantBufferView(15, m_pd3dcbtexture->GetGPUVirtualAddress());
 }
 
 void TextureRectMesh::ReleaseShaderVariables()
