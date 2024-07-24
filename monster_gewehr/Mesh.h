@@ -6,6 +6,13 @@
 
 class GameObjectModel;
 
+struct cbTextureInfo
+{
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	int        padding[2];
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 #define VERTEXT_POSITION				0x0001
@@ -36,6 +43,7 @@ public:
 private:
 	int								m_nReferences = 0;
 
+	
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
@@ -208,6 +216,9 @@ protected:
 	ID3D12Resource					*m_pd3dBiTangentUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dBiTangentBufferView;
 
+	ID3D12Resource* m_pd3dcbtexture = NULL;
+	cbTextureInfo* m_pcbMappedtexture = NULL;
+
 public:
 	void LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile,int TileX, int TileY);
 
@@ -226,16 +237,22 @@ protected:
 	ID3D12Resource* m_pd3dColorBuffer = NULL;
 	ID3D12Resource* m_pd3dColorUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dColorBufferView;
+	XMFLOAT4X4						m_xmf4x4Texture = Matrix4x4::Identity();
+
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle;
 public:
 	TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f);
 	virtual ~TextureRectMesh();
-	bool changeRowCol(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int row, int col, int rows, int cols);
+	bool changeRowCol(int row, int col, int rows, int cols);
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 	{
 
 		D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[4] = { m_d3dPositionBufferView, m_d3dColorBufferView, m_d3dTextureCoord0BufferView, m_d3dTextureCoord1BufferView };
 		pd3dCommandList->IASetVertexBuffers(m_nSlot, 4, pVertexBufferViews);
 	}
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
 };
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

@@ -18,6 +18,8 @@
 class CShader;
 class CStandardShader;
 
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 #define RESOURCE_TEXTURE2D			0x01
@@ -350,6 +352,8 @@ class GameObjectModel
 private:
 	int								m_nReferences = 0;
 
+	
+
 public:
 	void AddRef();
 	void Release();
@@ -360,6 +364,8 @@ public:
     virtual ~GameObjectModel();
 
 public:
+	
+
 	char							m_pstrFrameName[64];
 
 	CMesh							*m_pMesh = NULL;
