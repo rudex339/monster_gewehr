@@ -272,7 +272,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					roll_on = 2; // 그리고 다른 키가 구르기 방향을 망치지 않도록 하기 위해 2로 바꿔줌
 				}
 				if (!player->reload)
-					AnimationController->next_State = (UINT)RUN;
+					AnimationController->next_State = (UINT)8;
 			}
 			if ((pKeysBuffer[0x53] & 0xF0)) {
 				xmf3Shift = Vector3::Add(xmf3Shift, controller_vector->m_xmf3Look, -speed);

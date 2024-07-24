@@ -568,7 +568,19 @@ void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimat
 
 void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 {
-	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetEnable(bEnable);
+
+	if (m_pAnimationTracks) { 
+		if (!bEnable) {
+			for (int k = 0; k < m_nAnimationTracks; k++) {
+				if (!m_pAnimationTracks[k].m_bEnable) {
+					m_pAnimationTracks[k].m_fWeight = 0.f;
+				}
+				else {
+					m_pAnimationTracks[k].m_fWeight = 1.f;
+				}
+			}
+		}
+		m_pAnimationTracks[nAnimationTrack].SetEnable(bEnable); }
 }
 
 void CAnimationController::SetTrackPosition(int nAnimationTrack, float fPosition)
@@ -882,6 +894,7 @@ void GameObjectModel::Render(XMFLOAT4X4 Pos, XMMATRIX Rotate, XMMATRIX Scale,
 
 void GameObjectModel::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	
 }
 
 void GameObjectModel::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -901,6 +914,7 @@ void GameObjectModel::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dComman
 
 void GameObjectModel::ReleaseShaderVariables()
 {
+	
 }
 
 void GameObjectModel::ReleaseUploadBuffers()
@@ -1598,6 +1612,7 @@ MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 
 	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 13);
+	
 
 	CMaterial* pBoxMaterial = new CMaterial(1);
 	//m_ppMaterials = new CMaterial * [m_nMaterials];

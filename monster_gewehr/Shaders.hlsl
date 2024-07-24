@@ -20,6 +20,12 @@ cbuffer cbGameObjectInfo : register(b2)
 	uint					gnTexturesMask : packoffset(c8);
 };
 
+cbuffer cbTextureInfo : register(b3)
+{
+    matrix gmtxTexture : packoffset(c0);
+    int2 gi2TextureTiling : packoffset(c4);
+};
+
 #include "Light.hlsl"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +110,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 	float4 cIllumination = Lighting(input.positionW, normalW);	
 	//standard
-    //return (lerp(cColor, cIllumination, 0.5f));
+    return (lerp(cColor, cIllumination, 0.5f));
 	
 	//flog
 	float4 FlogColor = float4(0.28f, 0.27f, 0.31f, 0.5f);
@@ -116,6 +122,8 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     float4 Finalcolor = (lerp(cColor * cIllumination, FlogColor, flogAmount));
     Finalcolor.w = 1.0f;
     return (lerp(cColor*cIllumination, FlogColor, flogAmount));
+    //return (Finalcolor);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -279,7 +287,9 @@ VS_TERRAIN_OUTPUT VSEmitter(VS_TERRAIN_INPUT input)
 
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     //output.color = float4(0.f,0.f,0.f,0.f);
-    output.uv0 = input.uv0;
+	
+    output.uv0 = mul(float3(input.uv0, 1.0f), (float3x3) (gmtxTexture)).xy;
+    //output.uv0 = input.uv0;
     output.uv1 = input.uv1;
 
     return (output);

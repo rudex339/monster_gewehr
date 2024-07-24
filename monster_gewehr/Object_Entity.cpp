@@ -30,8 +30,8 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	temp_mComponet->draw = false;
 
 	auto controller = ent->assign<AnimationController_Component>(
-		new CAnimationController(pd3dDevice, pd3dCommandList, 6, model), 0);
-	for (int i = 0; i < 6; i++) {
+		new CAnimationController(pd3dDevice, pd3dCommandList, 9, model), 0);
+	for (int i = 0; i < 9; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		controller->m_AnimationController->SetTrackEnable(i, false);
 		//controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Mesh.h"
 #include "MeshModel.h"
+#include "ObjectManager.h"
 
 CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
@@ -988,6 +989,8 @@ TextureRectMesh::TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_d3dColorBufferView.BufferLocation = m_pd3dColorBuffer->GetGPUVirtualAddress();
 		m_d3dColorBufferView.StrideInBytes = sizeof(XMFLOAT4);
 		m_d3dColorBufferView.SizeInBytes = sizeof(XMFLOAT4) * m_nVertices;
+
+		CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	}
 
 }
@@ -1001,7 +1004,7 @@ TextureRectMesh::~TextureRectMesh()
 	//if (m_pxmf2TextureCoords1) delete[] m_pxmf2TextureCoords1;
 }
 
-bool TextureRectMesh::changeRowCol(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int row, int col, int rows, int cols)
+bool TextureRectMesh::changeRowCol(int row, int col, int rows, int cols)
 {
 	//float 
 	float height = 1.0f / float(rows);
@@ -1009,26 +1012,45 @@ bool TextureRectMesh::changeRowCol(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	float y = float(row) / float(rows);
 	float x = float(col) / float(cols);
 
-	m_pxmf2TextureCoords0[0] = XMFLOAT2(x, y);
-	m_pxmf2TextureCoords0[1] = XMFLOAT2(x, y+height);
-	m_pxmf2TextureCoords0[2] = XMFLOAT2(x+lenght, y);
-	m_pxmf2TextureCoords0[3] = XMFLOAT2(x, y+height);
-	m_pxmf2TextureCoords0[4] = XMFLOAT2(x+lenght, y+height);
-	m_pxmf2TextureCoords0[5] = XMFLOAT2(x + lenght, y);
+	m_xmf4x4Texture._11 = height;
+	m_xmf4x4Texture._22 = lenght;
+	m_xmf4x4Texture._31 = x / height;
+	m_xmf4x4Texture._32 = y / lenght;
 
-	if (m_pd3dTextureCoord0Buffer) {
-		m_pd3dTextureCoord0Buffer->Release();
-	}
-	if (m_pd3dTextureCoord0UploadBuffer) {
-		m_pd3dTextureCoord0UploadBuffer->Release();
-	}
-
-	// 货肺款 府家胶 积己
-	m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
-
-	m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
-	m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
-	m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
-
+	XMStoreFloat4x4(&m_pcbMappedtexture->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
 	return false;
+}
+
+void TextureRectMesh::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255); //256狼 硅荐
+	m_pd3dcbtexture = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pcbMappedtexture = new cbTextureInfo;
+	//m_pd3dcbtexture->Map(0, NULL, (void**)&m_pcbMappedtexture);
+	
+	//UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
+	///D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = ObjectManager::GetCbvSrvDescriptorHeap()->m_d3dCbvGPUDescriptorNextHandle;
+	
+	//d3dCbvGPUDescriptorNextHandle.ptr = ObjectManager::CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbtexture, ncbElementBytes).ptr;
+}
+
+void TextureRectMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
+	D3D12_RANGE d3dReadRange = { 0, 0 };
+	UINT8* pBufferDataBegin = NULL;
+	m_pd3dcbtexture->Map(0, &d3dReadRange, (void**)&pBufferDataBegin);
+	memcpy(pBufferDataBegin, &m_pcbMappedtexture, ncbElementBytes);
+	m_pd3dcbtexture->Unmap(0, NULL);
+
+	pd3dCommandList->SetGraphicsRootConstantBufferView(2, m_pd3dcbtexture->GetGPUVirtualAddress());
+}
+
+void TextureRectMesh::ReleaseShaderVariables()
+{
+	if (m_pd3dcbtexture)
+	{
+		m_pd3dcbtexture->Unmap(0, NULL);
+		m_pd3dcbtexture->Release();
+	}
 }

@@ -420,8 +420,8 @@ void Render_System::tick(World* world, float deltaTime)
 					}
 					if (ent->has<Emitter_Componet>()) {
 						ComponentHandle<Emitter_Componet> emiiter = ent->get<Emitter_Componet>();
-						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(m_pd3dDevice, m_pd3dCommandList, emiiter->m_nRow, emiiter->m_nCol, 
-							emiiter->m_nRows, emiiter->m_nCols);
+						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(emiiter->m_nRow, emiiter->m_nCol, emiiter->m_nRows, emiiter->m_nCols);				
+						
 					}
 					
 					if (Model->draw) {
@@ -444,8 +444,8 @@ void Render_System::tick(World* world, float deltaTime)
 				}
 				else{
 					Model->m_MeshModel->UpdateTransform(&pos->m_xmf4x4World);
-					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {		
-						
+					//if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {		
+					if (true) {
 						if (Model->draw){
 							Model->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 						}
