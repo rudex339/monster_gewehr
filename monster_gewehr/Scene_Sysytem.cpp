@@ -224,6 +224,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		ent->assign<ImageUI_Component>(L"image/bg.jpg", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
 			screenRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 		
+
+
 		// 뒤로가기 버튼
 		sRect = { FRAME_BUFFER_WIDTH * 23 / 25 , FRAME_BUFFER_HEIGHT / 48, FRAME_BUFFER_WIDTH * 24 / 25, FRAME_BUFFER_HEIGHT * 4 / 48 };
 		imageRect = { 0, 0, 512, 512 };
@@ -308,7 +310,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 				}
 			}
 		}
-
+		
 		// 방생성 & 방입장 버튼
 		{
 			imageRect = { 0, 0, 1000, 563 };
@@ -532,6 +534,17 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		int selected[2] = { 0, 0 };
 
 		ent = world->create();
+		auto light = ent->assign<Light_Component>();
+		light->m_pLight = new LIGHT;
+		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
+		light->m_pLight->m_bEnable = true;
+		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(1.f, 1.0f, 1.f, 1.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.62f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
+
+		ent = world->create();
 		ent->assign<TextUI_Component>(NEEDLE_FONT, L"EQUIPMENT",
 			FRAME_BUFFER_HEIGHT / 20, FRAME_BUFFER_WIDTH / 50, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH / 5);
 
@@ -726,8 +739,8 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		light->m_pLight->m_bEnable = true;
 		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
 		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.32f, 1.0f);
-		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.53f, 0.5f, 0.5f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.6f, 0.5f, 0.5f, 0.0f);
 		light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 
 		ent = world->create();
@@ -739,9 +752,18 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.45f, 0.45f, 0.46f, 1.0f);
 		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.32f, 1.0f);
 		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-		light->m_pLight->m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+		light->m_pLight->m_xmf3Direction = XMFLOAT3(-1.0f, -1.0f, -1.0f);
 		
-
+		ent = world->create();
+		light = ent->assign<Light_Component>();
+		light->m_pLight = new LIGHT;
+		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
+		light->m_pLight->m_bEnable = true;
+		light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.62f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+		light->m_pLight->m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 1.0f);
 
 
 		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
@@ -846,7 +868,16 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 
 	D2D1_RECT_F sRect;
 
-	
+	ent = world->create();
+	auto light = ent->assign<Light_Component>();
+	light->m_pLight = new LIGHT;
+	::ZeroMemory(light->m_pLight, sizeof(LIGHT));
+	light->m_pLight->m_bEnable = true;
+	light->m_pLight->m_nType = DIRECTIONAL_LIGHT;
+	light->m_pLight->m_xmf4Ambient = XMFLOAT4(1.f, 1.0f, 1.f, 1.0f);
+	light->m_pLight->m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.62f, 1.0f);
+	light->m_pLight->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	light->m_pLight->m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
 
 	ent = world->create();
 	ent->assign<TextUI_Component>(NEEDLE_FONT, L"ROOM NO. " + to_wstring(m_room_num),

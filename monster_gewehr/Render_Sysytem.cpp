@@ -444,8 +444,8 @@ void Render_System::tick(World* world, float deltaTime)
 				}
 				else{
 					Model->m_MeshModel->UpdateTransform(&pos->m_xmf4x4World);
-					//if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {		
-					if (true) {
+					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {		
+					//if (true) {
 						if (Model->draw){
 							Model->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 						}

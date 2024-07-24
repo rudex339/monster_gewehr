@@ -110,7 +110,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 	float4 cIllumination = Lighting(input.positionW, normalW);	
 	//standard
-    return (lerp(cColor, cIllumination, 0.5f));
+    //return (lerp(cColor, cIllumination, 0.5f));
 	
 	//flog
 	float4 FlogColor = float4(0.28f, 0.27f, 0.31f, 0.5f);
@@ -227,7 +227,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
     float flogAmount = saturate((disttoEye - 200.f) / 900.f);
     return (lerp(cColor, FlogColor, flogAmount));
 	
-	return(cColor);
+	//return(cColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
