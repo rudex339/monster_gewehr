@@ -420,13 +420,6 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	{
 		case WM_KEYDOWN:
 			m_pWorld->emit<KeyDown_Event>({ wParam });
-			/*switch (wParam)
-			{
-				case VK_RETURN:
-					cout << "½ÇÇàµÊ11" << endl;
-					m_pWorld->emit<InputId_Event>({});
-					break;
-			}*/
 			break;
 
 		case WM_KEYUP:

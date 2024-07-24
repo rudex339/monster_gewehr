@@ -8,7 +8,11 @@ enum Player_State {
 	SHOOT,
 	HEAL,
 	HIT,
-	RELOAD
+	RELOAD,
+	AIM,
+	GRANADE,
+	FASTRUN,
+	ROLLING
 };
 
 enum OM_Model {

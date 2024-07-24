@@ -168,10 +168,17 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		if (player->reload) {
 			if (player->reload_coolTime <= 0) {
 				cout << "리로드 완료" << endl;
-				player->mag -= (weapon_ammo[player->m_weapon] - player->ammo);
-				player->ammo = weapon_ammo[player->m_weapon];				
+				if (player->mag + player->ammo >= weapon_ammo[player->m_weapon]) {
+					player->mag -= (weapon_ammo[player->m_weapon] - player->ammo);
+					player->ammo = weapon_ammo[player->m_weapon];
+				}
+				else {
+					player->ammo += player->mag;
+					player->mag = 0;
+				}
 				player->reload_coolTime = 3.5f;
 				player->reload = false;
+				
 			}
 			else {
 				player->reload_coolTime -= deltaTime;
@@ -223,10 +230,11 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		UCHAR pKeysBuffer[256];
 		if (GetKeyboardState(pKeysBuffer)) {
 
-//			float speed = 50.25f * deltaTime;
-			float speed = 1050.25f * deltaTime;
+			float speed = 50.25f * deltaTime;
+			//float speed = 1050.25f * deltaTime;
 
 			bool run_on = false; // 달리기 상태인지 아닌지 확인해 주는거
+			bool shift_key_press = false;
 
 			XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 
@@ -249,11 +257,14 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				roll_on = 1;
 			}
 			// 달리기 키는 shift
-			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on && player->stamina > 0 && !heal_on) {
-				//cout << "쉬프트 눌림" << endl;
-				run_on = true;
-				speed *= 1.5;
-				player->stamina -= 0.1;
+			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on  && !heal_on && !player->reload) {
+				shift_key_press = true;
+				if (!stamina_empty && player->stamina > 0) {
+					run_on = true;
+					speed *= 1.5;
+					player->stamina -= 0.1;
+					AnimationController->next_State = (UINT)FASTRUN;
+				}
 			}
 
 			// 힐키 (1 : 붕대, 2 : 구상, 3 : 주사기)
@@ -262,6 +273,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->heal_timer = healtime[0];
 				player->heal_all_time = healtime[0];
 				heal_type = 0;
+				AnimationController->next_State = (UINT)HEAL;
 			}
 
 			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on && !supply_on) {
@@ -269,6 +281,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->heal_timer = healtime[1];
 				player->heal_all_time = healtime[1];
 				heal_type = 1;
+				AnimationController->next_State = (UINT)HEAL;
 			}
 
 			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on && !supply_on) {
@@ -276,6 +289,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->heal_timer = healtime[2];
 				player->heal_all_time = healtime[2];
 				heal_type = 2;
+				AnimationController->next_State = (UINT)HEAL;
 			}
 
 			// 상호작용 f키(보급 받는 키 or 회복 취소 키)
@@ -305,7 +319,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					player->stamina -= 25;
 					roll_on = 2; // 그리고 다른 키가 구르기 방향을 망치지 않도록 하기 위해 2로 바꿔줌
 				}
-				if (!player->reload)
+				if (!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if ((pKeysBuffer[0x53] & 0xF0)) {
@@ -314,7 +328,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, -speed * 3);
 					roll_on = 2;
 				}
-				if (!player->reload)
+				if (!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x41] & 0xF0) {
@@ -323,7 +337,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, -speed * 3);
 					roll_on = 2;
 				}
-				if (!player->reload)
+				if (!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x44] & 0xF0) {
@@ -332,7 +346,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, speed * 3);
 					roll_on = 2;
 				}
-				if(!player->reload)
+				if(!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
 			}
 
@@ -377,7 +391,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					shot_cooltime = shot_cooltime_list[player->m_weapon];
 					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
 					player->ammo--;
-					if (player->ammo <= 0 && player->mag >= weapon_ammo[player->m_weapon]) {
+					if (player->ammo <= 0 && player->mag > 0) {
 						AnimationController->next_State = (UINT)RELOAD;
 						player->reload = true;
 					}
@@ -396,16 +410,23 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// r키로 재장전
-			if (pKeysBuffer[0x52] & 0xF0 && !player->reload && player->mag >= weapon_ammo[player->m_weapon] && !roll_on && !heal_on ) {
+			if (pKeysBuffer[0x52] & 0xF0 && !player->reload && player->mag > 0 && !roll_on && !heal_on ) {
 				AnimationController->next_State = (UINT)RELOAD;
 				if (!player->reload) {
 					player->reload = true;
 				}
 			}
-
+			if (player->stamina <= 0) {
+				stamina_empty = true;
+			}
+			if (!shift_key_press) {
+				stamina_empty = false;
+			}
 			if (!run_on && !roll_on && player->stamina <= 100) {
 				player->stamina += 0.1;
 			}
+
+
 #ifdef DEMO_VER
 			if (pKeysBuffer[VK_F1] & 0xF0) {
 				world->emit<Demo_Event>({ CS_DEMO_MONSTER_SETPOS });

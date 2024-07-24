@@ -55,6 +55,8 @@ private:
 	// 보급 받는 중인지 체크
 	bool supply_on = false;
 
+	bool stamina_empty = false;	
+
 public:
 	PlayerControl_System() = default;
 
