@@ -237,6 +237,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					Player->id = pk->player_data.id;
 					Position->Position = pk->player_data.pos;
 					Rotation->mfYaw = pk->player_data.yaw;
+					Player->m_weapon = pk->weapon;
 
 					auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
 					for (int i = 0; i < 3; ++i) {

@@ -1098,6 +1098,22 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		}
 	);
 
+	// 무기 발사속도 지정
+	world->each<player_Component, AnimationController_Component>([&](
+		Entity* ent,
+		ComponentHandle<player_Component> player,
+		ComponentHandle<AnimationController_Component> animation
+		) -> void {
+			if (player->id >= 0) {
+				if (player->m_weapon == 0)
+					animation->m_AnimationController->SetTrackSpeed(2, 5.0f);
+				else if (player->m_weapon == 1)
+					animation->m_AnimationController->SetTrackSpeed(2, 1.0f);
+				else if (player->m_weapon == 2)
+					animation->m_AnimationController->SetTrackSpeed(2, 0.5f);
+			}
+		}
+	);
 
 }
 
