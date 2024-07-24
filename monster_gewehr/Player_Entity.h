@@ -59,6 +59,9 @@ struct player_Component {
 	FLOAT heal_timer;
 	FLOAT heal_all_time;
 
+	INT grenade_type;
+	INT grenade_amount = 1;
+
 	player_Component() = default;
 };
 

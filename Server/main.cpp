@@ -300,8 +300,9 @@ void ProcessPacket(int id, char* p)
 		CS_PLAYER_MOVE_PACKET* packet = reinterpret_cast<CS_PLAYER_MOVE_PACKET*>(p);
 		players[id].SetPostion(packet->pos);
 		players[id].SetYaw(packet->yaw);
-		std::cout << id << "에서 만큼 받아옴 " << packet->pos.y << std::endl;
+		//std::cout << id << "에서 만큼 받아옴 " << packet->pos.x << std::endl;
 		players[id].SetBoundingBox();
+		//std::cout << players[id].GetBoundingBox().Center.x << std::endl;
 		players[id].RotateBoundingBox();
 
 		SendPlayerMove(id);
@@ -315,6 +316,8 @@ void ProcessPacket(int id, char* p)
 		break;
 	}
 	case CS_PACKET_PLAYER_ATTACK: {
+		int room_id = players[id].GetRoomID();
+
 		CS_PLAYER_ATTACK_PACKET* packet = reinterpret_cast<CS_PLAYER_ATTACK_PACKET*>(p);
 		players[id].SetAtkDir(packet->dir);
 		players[id].SetAtkPos(packet->pos);
@@ -323,17 +326,27 @@ void ProcessPacket(int id, char* p)
 		DirectX::XMVECTOR directionVec = XMLoadFloat3(&packet->dir);
 		float shot_range = players[id].GetRange();
 
-		int room_id = players[id].GetRoomID();
-		if (souleaters[room_id].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
-			souleaters[room_id].m_lock.lock();
-			souleaters[room_id].SetHp(souleaters[room_id].GetHp() - players[id].GetAtk());
-			if (souleaters[room_id].GetState() == idle_state) {
-				souleaters[room_id].SetState(fight_state);
-				souleaters[room_id].SetTarget(&players[id]);
+		XMFLOAT3 souleaterPosition = souleaters[room_id].GetPosition();
+		DirectX::XMVECTOR souleaterPos = XMLoadFloat3(&souleaterPosition);
+		DirectX::XMVECTOR distanceVec = souleaterPos - positionVec;
+		float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
+
+		std::cout << "Player Position: " << packet->pos.x << ", " << packet->pos.y << ", " << packet->pos.z << std::endl;
+		std::cout << "Player Direction: " << packet->dir.x << ", " << packet->dir.y << ", " << packet->dir.z << std::endl;
+		std::cout << "Shot Range: " << shot_range << std::endl;
+
+		if (distance <= shot_range) {
+			if (souleaters[room_id].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
+				souleaters[room_id].m_lock.lock();
+				souleaters[room_id].SetHp(souleaters[room_id].GetHp() - players[id].GetAtk());
+				if (souleaters[room_id].GetState() == idle_state) {
+					souleaters[room_id].SetState(fight_state);
+					souleaters[room_id].SetTarget(&players[id]);
+				}
+				souleaters[room_id].m_lock.unlock();
+				std::cout << souleaters[room_id].GetHp() << std::endl;
+				build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 			}
-			souleaters[room_id].m_lock.unlock();
-			std::cout << souleaters[room_id].GetHp() << std::endl;
-			build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 		}
 		break;
 	}
