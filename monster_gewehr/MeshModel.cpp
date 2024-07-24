@@ -561,6 +561,8 @@ void CAnimationController::SetAnimationCallbackHandler(int nAnimationTrack, CAni
 	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetAnimationCallbackHandler(pCallbackHandler);
 }
 
+
+
 void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
 {
 	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
@@ -598,6 +600,11 @@ void CAnimationController::SetTrackWeight(int nAnimationTrack, float fWeight)
 	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetWeight(fWeight);
 }
 
+void CAnimationController::SetBlendingSpeed(int nAnimationTrack, float speed)
+{
+	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetBlendSpeed(speed);
+}
+
 void CAnimationController::UpdateShaderVariables()
 {
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
@@ -616,13 +623,13 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel* pRoo
 
 		for (int k = 0; k < m_nAnimationTracks; k++) {
 			if (m_pAnimationTracks[k].m_bEnable) {
-				m_pAnimationTracks[k].m_fWeight += 2.f * fTimeElapsed;
+				m_pAnimationTracks[k].m_fWeight += m_pAnimationTracks[k].m_blendingSpeed * fTimeElapsed;
 				if (m_pAnimationTracks[k].m_fWeight > 1.f) {
 					m_pAnimationTracks[k].m_fWeight = 1.f;
 				}
 			}
 			else {
-				m_pAnimationTracks[k].m_fWeight -= 2.f * fTimeElapsed;
+				m_pAnimationTracks[k].m_fWeight -= m_pAnimationTracks[k].m_blendingSpeed * fTimeElapsed;
 				if (m_pAnimationTracks[k].m_fWeight < 0.f) {
 					m_pAnimationTracks[k].m_fWeight = 0.f;
 				}

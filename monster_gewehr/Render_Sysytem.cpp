@@ -951,7 +951,79 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
-			
+
+			// 보급상자 근처에 가면 보급 가능 여부 및 남은 시간 출력
+			player->near_supply = false;
+			{
+				for (int i = 0; i < 5; ++i) {
+					if (Distance(position->Position, supplys[i]) <= 30.0f) {
+						player->near_supply = true;
+						
+						
+						// 보급 중일때
+						if (player->is_suppling) {
+							TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"보급중",
+								FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
+							m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+
+							m_d2dDeviceContext->DrawTextW(
+								heal_text.m_text.c_str(),
+								heal_text.m_text.size(),
+								m_ingametextFormat2.Get(),
+								&heal_text.m_Rect,
+								m_textBrush.Get()
+							);
+
+							float width = (FRAME_BUFFER_WIDTH * 70 / 100 - FRAME_BUFFER_WIDTH * 30 / 100) / 100;
+
+							// 보급 진행 바
+							textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 30 / 100, FRAME_BUFFER_HEIGHT * 43 / 48, FRAME_BUFFER_WIDTH * 70 / 100, FRAME_BUFFER_HEIGHT * 45 / 48);
+							m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
+							m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+
+							float time_per = 100.f - player->supply_timer * 100.f / player->supply_time;
+
+							textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 30 / 100, FRAME_BUFFER_HEIGHT * 43 / 48, FRAME_BUFFER_WIDTH * 30 / 100 + time_per * width, FRAME_BUFFER_HEIGHT * 45 / 48);
+							m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+							m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
+						}
+
+						// 보급 중이 아닐때 보급하라는 표시 
+						else {
+							// 보급 가능 여부 체크
+							if (player->can_supply < 0.f) {
+								TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"F키를 눌러 보급",
+									FRAME_BUFFER_HEIGHT * 15 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 16 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
+								m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+
+								m_d2dDeviceContext->DrawTextW(
+									heal_text.m_text.c_str(),
+									heal_text.m_text.size(),
+									m_ingametextFormat.Get(),
+									&heal_text.m_Rect,
+									m_textBrush.Get()
+								);
+							}
+
+							else {
+								TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"보급 쿨타임 중 (" + to_wstring((int)player->can_supply) + L"초)",
+									FRAME_BUFFER_HEIGHT * 15 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 16 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
+								m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+
+								m_d2dDeviceContext->DrawTextW(
+									heal_text.m_text.c_str(),
+									heal_text.m_text.size(),
+									m_ingametextFormat.Get(),
+									&heal_text.m_Rect,
+									m_textBrush.Get()
+								);
+							}
+						}
+						
+
+					}
+				}
+			}
 
 			// 미니맵
 			{
@@ -1014,8 +1086,6 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
-			
-
 
 			{
 				if (player->aim_mode) {
@@ -1028,7 +1098,28 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		}
 	);
 
+	// 무기 발사속도 지정
+	world->each<player_Component, AnimationController_Component>([&](
+		Entity* ent,
+		ComponentHandle<player_Component> player,
+		ComponentHandle<AnimationController_Component> animation
+		) -> void {
+			if (player->id >= 0) {
+				if (player->m_weapon == 0)
+					animation->m_AnimationController->SetTrackSpeed(2, 5.0f);
+				else if (player->m_weapon == 1)
+					animation->m_AnimationController->SetTrackSpeed(2, 1.0f);
+				else if (player->m_weapon == 2)
+					animation->m_AnimationController->SetTrackSpeed(2, 0.5f);
+			}
+		}
+	);
 
+}
+
+float Render_System::Distance(XMFLOAT3 posA, XMFLOAT3 posB)
+{
+	return sqrt(pow(posB.x - posA.x, 2) + pow(posB.y - posA.y, 2) + pow(posB.z - posA.z, 2));
 }
 
 void Render_System::SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList)

@@ -1097,6 +1097,8 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 					Player->heal_item[1] = equipHealItems[1];
 					Player->heal_item[2] = equipHealItems[2];
 
+					Player->grenade_amount = 1;
+					Player->grenade_type = equipments[3];
 				}
 			});
 	}

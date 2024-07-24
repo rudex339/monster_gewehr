@@ -246,6 +246,7 @@ public:
     float 							m_fSpeed = 1.0f;
     float 							m_fPosition = -ANIMATION_CALLBACK_EPSILON;
 	float 							m_fWeight = 0.0f;
+	float							m_blendingSpeed = 2.0f;
 
 	int 							m_nAnimationSet = 0;
 
@@ -264,6 +265,7 @@ public:
 	}
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
+	void SetBlendSpeed(float fBSpeed) { m_blendingSpeed = fBSpeed; }
 
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
 	float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
@@ -311,7 +313,6 @@ public:
 
 	ID3D12Resource					**m_ppd3dcbSkinningBoneTransforms = NULL; //[SkinnedMeshes]
 	XMFLOAT4X4						**m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL; //[SkinnedMeshes]
-
 public:
 	void UpdateShaderVariables();
 
@@ -327,6 +328,7 @@ public:
 	void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
 	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void *pData);
 	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler *pCallbackHandler);
+	void SetBlendingSpeed(int nAnimationTrack, float speed);
 
 	void AdvanceTime(float fElapsedTime, GameObjectModel *pRootGameObject);
 

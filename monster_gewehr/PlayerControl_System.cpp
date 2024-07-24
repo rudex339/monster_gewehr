@@ -196,6 +196,30 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 		}
 
+		player->is_suppling = false;
+		if (!player->near_supply) {
+			supply_on = false;
+		}
+		if (supply_on) {
+			player->is_suppling = true;
+			if (player->supply_timer <= 0) {
+				cout << "보급 완료" << endl;
+				supply_on = false;
+				player->can_supply = 180.0f; // 쿨타임 적용
+
+				player->ammo = weapon_ammo[player->m_weapon];
+				player->mag = weapon_mag[player->m_weapon];
+				
+				// 힐템 추가?
+			}
+			else {
+				player->supply_timer -= deltaTime;
+			}
+		}
+		
+		player->can_supply -= deltaTime;
+
+
 		UCHAR pKeysBuffer[256];
 		if (GetKeyboardState(pKeysBuffer)) {
 
@@ -233,21 +257,21 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 힐키 (1 : 붕대, 2 : 구상, 3 : 주사기)
-			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
+			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on && !supply_on) {
 				heal_on = true;
 				player->heal_timer = healtime[0];
 				player->heal_all_time = healtime[0];
 				heal_type = 0;
 			}
 
-			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on) {
+			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on && !supply_on) {
 				heal_on = true;
 				player->heal_timer = healtime[1];
 				player->heal_all_time = healtime[1];
 				heal_type = 1;
 			}
 
-			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on) {
+			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on && !supply_on) {
 				heal_on = true;
 				player->heal_timer = healtime[2];
 				player->heal_all_time = healtime[2];
@@ -256,12 +280,22 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 			// 상호작용 f키(보급 받는 키 or 회복 취소 키)
 			if (pKeysBuffer[0x46] & 0xF0) {
+
+				// 회복취소
 				if (heal_on) {
 					heal_on = false;
 					player->heal_timer = 0;
 				}
-			}
 
+				if (player->near_supply) {
+					// 보급이 가능한지 여부 체크(힐중이거나 보급 시간이 안되면 실행x)
+					if (player->can_supply < 0.f && !heal_on) {
+						supply_on = true;
+						player->supply_timer = player->supply_time;
+					}
+				}
+
+			}
 
 			// 움직이는키 wsad
 			if (pKeysBuffer[0x57] & 0xF0) {
@@ -303,15 +337,15 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 투척 g키
-			if (pKeysBuffer[0x47] & 0xF0) {
+			if (pKeysBuffer[0x47] & 0xF0 && player->grenade_amount) {
 				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
-				;
 				world->emit<CreateObject_Event>({ granade, 
 					XMFLOAT3(model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._41,
 						model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._42,
 						model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._43),
 					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
 					model_vector->m_xmf3Look});
+				player->grenade_amount -= 1;
 			}
 
 			// 구르기가 아닐때는 그냥 일반 이동을 더하고 구르기 일때는 구르기 전용을 더함
@@ -385,7 +419,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 #endif
 			
 			//velocity->m_velocity = Vector3::Add(velocity->m_velocity, XMFLOAT3(0, -65.4f* deltaTime, 0));
-			cout << position->Position.x << " " << position->Position.z << endl;
+			//cout << position->Position.x << " " << position->Position.z << endl;
+			//cout << rotation->mfYaw << endl;
 		}
 
 	}

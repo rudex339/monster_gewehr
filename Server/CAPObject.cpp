@@ -138,17 +138,17 @@ void Player::SetWeapon(char weapon)
 	case S_RIFLE:
 		m_atk = 10;
 		m_ammo = 30;
-		m_range = 500.0f;
+		m_range = 250.0f;
 		break;
 	case S_SHOT_GUN:
 		m_atk = 25;
 		m_ammo = 7;
-		m_range = 200.0f;
+		m_range = 100.0f;
 		break;	
 	case S_SNIPER:
 		m_atk = 100;
 		m_ammo = 5;
-		m_range = 1000.0f;
+		m_range = 500.0f;
 		break;
 	}
 }
