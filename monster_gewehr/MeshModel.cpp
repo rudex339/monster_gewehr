@@ -620,16 +620,21 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel* pRoo
 	if (m_pAnimationTracks)
 	{
 		for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++) m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
-
+		float blendingSpeed = 0.f;
 		for (int k = 0; k < m_nAnimationTracks; k++) {
 			if (m_pAnimationTracks[k].m_bEnable) {
-				m_pAnimationTracks[k].m_fWeight += m_pAnimationTracks[k].m_blendingSpeed * fTimeElapsed;
+				blendingSpeed = m_pAnimationTracks[k].m_blendingSpeed;
+			}
+		}
+		for (int k = 0; k < m_nAnimationTracks; k++) {
+			if (m_pAnimationTracks[k].m_bEnable) {
+				m_pAnimationTracks[k].m_fWeight += blendingSpeed * fTimeElapsed;
 				if (m_pAnimationTracks[k].m_fWeight > 1.f) {
 					m_pAnimationTracks[k].m_fWeight = 1.f;
 				}
 			}
 			else {
-				m_pAnimationTracks[k].m_fWeight -= m_pAnimationTracks[k].m_blendingSpeed * fTimeElapsed;
+				m_pAnimationTracks[k].m_fWeight -= blendingSpeed * fTimeElapsed;
 				if (m_pAnimationTracks[k].m_fWeight < 0.f) {
 					m_pAnimationTracks[k].m_fWeight = 0.f;
 				}

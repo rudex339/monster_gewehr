@@ -63,9 +63,9 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                         if (boundingBox.Intersects(object->get<BoundingBox_Component>()->m_bounding_box)) {
 
                             cout << "Boom" << endl;
-                            Granade->get<Scale_Component>()->mx = 5.f;
-                            Granade->get<Scale_Component>()->my = 5.f;
-                            Granade->get<Scale_Component>()->mz = 100.f;
+                            //Granade->get<Scale_Component>()->mx = 5.f;
+                            //Granade->get<Scale_Component>()->my = 5.f;
+                            //Granade->get<Scale_Component>()->mz = 100.f;
                             granade->Boom = true;
                             Granade->get<Velocity_Component>()->gravity = false;
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
@@ -90,6 +90,8 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                             granade->Boom = true;
                             Granade->get<Velocity_Component>()->gravity = false;
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
+                            world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
+                                ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
                             break;
                         }
 

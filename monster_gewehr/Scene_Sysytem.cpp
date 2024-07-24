@@ -1058,7 +1058,7 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		DirectX::XMVECTOR direction = DirectX::XMVector3TransformNormal(forward, rotationMatrix);
 
 		// Scale the direction by speed
-		DirectX::XMVECTOR velocity = DirectX::XMVectorScale(direction, 30.f);
+		DirectX::XMVECTOR velocity = DirectX::XMVectorScale(direction, 18.f);
 		DirectX::XMStoreFloat3(&vel->m_velocity, velocity);
 		string pstrGameObjectName = "Cube";
 		ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject,
@@ -1082,7 +1082,7 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
-		ent->assign<Emitter_Componet>(6.4f, 0.1f,8,8);
+		ent->assign<Emitter_Componet>(6.4f, 0.05f,8,8);
 
 		//world->emit<AddObjectlayer_Event>({ "Granade", ent });
 	}
