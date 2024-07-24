@@ -1618,7 +1618,7 @@ MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 
-	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 3);
+	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 13);
 	
 
 	CMaterial* pBoxMaterial = new CMaterial(1);

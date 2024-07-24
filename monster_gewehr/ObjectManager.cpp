@@ -171,7 +171,7 @@ ID3D12RootSignature *ObjectManager::CreateGraphicsRootSignature(ID3D12Device *pd
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[9];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -232,12 +232,6 @@ ID3D12RootSignature *ObjectManager::CreateGraphicsRootSignature(ID3D12Device *pd
 	pd3dDescriptorRanges[9].BaseShaderRegister = 2; //t2: gtxtTerrainDetailTexture
 	pd3dDescriptorRanges[9].RegisterSpace = 0;
 	pd3dDescriptorRanges[9].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	pd3dDescriptorRanges[10].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-	pd3dDescriptorRanges[10].NumDescriptors = 1;
-	pd3dDescriptorRanges[10].BaseShaderRegister = 3; //GameObject
-	pd3dDescriptorRanges[10].RegisterSpace = 0;
-	pd3dDescriptorRanges[10].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[16];
 
@@ -317,14 +311,11 @@ ID3D12RootSignature *ObjectManager::CreateGraphicsRootSignature(ID3D12Device *pd
 	pd3dRootParameters[14].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[9]);
 	pd3dRootParameters[14].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	//pd3dRootParameters[15].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	//pd3dRootParameters[15].Descriptor.ShaderRegister = 3; //Camera
-	//pd3dRootParameters[15].Descriptor.RegisterSpace = 0;
-	//pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	pd3dRootParameters[15].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[15].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[15].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[10];
-	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	pd3dRootParameters[15].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[15].Descriptor.ShaderRegister = 9; //Camera
+	pd3dRootParameters[15].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
 	
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];

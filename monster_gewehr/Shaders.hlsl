@@ -20,7 +20,7 @@ cbuffer cbGameObjectInfo : register(b2)
 	uint					gnTexturesMask : packoffset(c8);
 };
 
-cbuffer cbTextureInfo : register(b3)
+cbuffer cbTextureInfo : register(b9)
 {
     matrix gmtxTexture : packoffset(c0);
     int2 gi2TextureTiling : packoffset(c4);
