@@ -197,6 +197,9 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		}
 
 		player->is_suppling = false;
+		if (!player->near_supply) {
+			supply_on = false;
+		}
 		if (supply_on) {
 			player->is_suppling = true;
 			if (player->supply_timer <= 0) {
@@ -254,21 +257,21 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 힐키 (1 : 붕대, 2 : 구상, 3 : 주사기)
-			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on) {
+			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on && !supply_on) {
 				heal_on = true;
 				player->heal_timer = healtime[0];
 				player->heal_all_time = healtime[0];
 				heal_type = 0;
 			}
 
-			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on) {
+			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on && !supply_on) {
 				heal_on = true;
 				player->heal_timer = healtime[1];
 				player->heal_all_time = healtime[1];
 				heal_type = 1;
 			}
 
-			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on) {
+			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on && !supply_on) {
 				heal_on = true;
 				player->heal_timer = healtime[2];
 				player->heal_all_time = healtime[2];
@@ -277,16 +280,11 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 			// 상호작용 f키(보급 받는 키 or 회복 취소 키)
 			if (pKeysBuffer[0x46] & 0xF0) {
+
 				// 회복취소
 				if (heal_on) {
 					heal_on = false;
 					player->heal_timer = 0;
-				}
-
-				// 보급 가까이 있는지
-				// 보급중에 F다시 누르면 취소
-				if (supply_on) {
-					supply_on = false;
 				}
 
 				if (player->near_supply) {
@@ -296,14 +294,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 						player->supply_timer = player->supply_time;
 					}
 				}
-				else {
-					// 멀어지면 취소
-					supply_on = false;
-				}
-				
-				
-			}
 
+			}
 
 			// 움직이는키 wsad
 			if (pKeysBuffer[0x57] & 0xF0) {
