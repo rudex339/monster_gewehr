@@ -218,7 +218,19 @@ void BossThread()
 					for (int ply_id : gamerooms[i].GetPlyId()) {
 						if (ply_id == -1) continue;
 						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-						SendEndGame(players[ply_id].GetID());
+						SendEndGame(players[ply_id].GetID(), true);
+						//database.Update(&players[ply_id]);
+						players[ply_id].PlayerInit();
+					}
+					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+					gamerooms[i].InitGameRoom();
+					SendDeleteRoom(i);
+				}
+				else if (gamerooms[i].m_all_life <= 0) {
+					for (int ply_id : gamerooms[i].GetPlyId()) {
+						if (ply_id == -1) continue;
+						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+						SendEndGame(players[ply_id].GetID(), false);
 						//database.Update(&players[ply_id]);
 						players[ply_id].PlayerInit();
 					}
@@ -636,6 +648,9 @@ void SendHitPlayer(int id)
 	packet.hp = players[id].GetHp();
 
 	int room_id = players[id].GetRoomID();
+	if (packet.hp <= 0) {
+		gamerooms[room_id].m_all_life -= 1;
+	}
 
 	for (int ply_id : gamerooms[room_id].GetPlyId()) {
 		if (ply_id < 0) continue;
@@ -644,12 +659,15 @@ void SendHitPlayer(int id)
 	}
 }
 
-void SendEndGame(int id)
+void SendEndGame(int id, bool clear)
 {
 	SC_END_GAME_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_END_GAME;
-	packet.score = 1000 - players[id].death_count * 100;
+	if (clear)
+		packet.score = 1000 - players[id].death_count * 200;
+	else
+		packet.score = 0;
 
 	players[id].SetMoney(players[id].GetMoney() + packet.score);
 

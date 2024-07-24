@@ -368,7 +368,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 						ComponentHandle<ControllAngle_Component> controllangle =
 							ent->get<ControllAngle_Component>();
 
-						Position->Position = XMFLOAT3(1014.f, 1024.f, 1429.f);
+						Position->Position = XMFLOAT3(2465.f, 2.f, 826.f);
 						Rotation->mfYaw = 0.f;
 						eulerangle->m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 						eulerangle->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);

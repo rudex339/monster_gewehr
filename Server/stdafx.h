@@ -33,6 +33,8 @@
 
 using namespace DirectX;
 
+constexpr int MAX_LIFE = 3;
+
 namespace Vector3
 {
 	inline XMFLOAT3 Add(const XMFLOAT3& f1, const XMFLOAT3& f2)

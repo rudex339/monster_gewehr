@@ -2,6 +2,7 @@
 
 GameRoom::GameRoom()
 {
+	m_all_life = MAX_LIFE;
 	for (auto& id : m_player_ids) {
 		id = -1;
 	}
@@ -10,6 +11,7 @@ GameRoom::GameRoom()
 
 void GameRoom::InitGameRoom()
 {
+	m_all_life = MAX_LIFE;
 	for (auto& id : m_player_ids) {
 		id = -1;
 	}

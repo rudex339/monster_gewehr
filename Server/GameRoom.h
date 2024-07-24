@@ -32,6 +32,8 @@ public:
 
 	GameRoomState GetState() { return m_state; }
 
+	int m_all_life;
+
 private:
 	std::array<INT, MAX_CLIENT_ROOM> m_player_ids;
 	GameRoomState m_state;

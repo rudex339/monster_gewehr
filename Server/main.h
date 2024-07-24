@@ -18,7 +18,7 @@ void SendPlayerMove(int id);
 void SendAnimaition(int id);
 void Disconnect(int id);
 void SendHitPlayer(int id);
-void SendEndGame(int id);
+void SendEndGame(int id, bool clear);
 void SendRoomList(int id);
 void SendRoomCreate(int ply_id, int room_num);
 void SendRoomSelect(int id, short room_num);
