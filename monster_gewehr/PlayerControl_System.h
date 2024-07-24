@@ -49,6 +49,12 @@ private:
 
 	int heal_type; // 0, 1, 2
 
+	// 보급 받는 시간
+	float supply_timer = 0;
+
+	// 보급 받는 중인지 체크
+	bool supply_on = false;
+
 public:
 	PlayerControl_System() = default;
 

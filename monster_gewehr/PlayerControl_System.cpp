@@ -196,6 +196,27 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 		}
 
+		player->is_suppling = false;
+		if (supply_on) {
+			player->is_suppling = true;
+			if (player->supply_timer <= 0) {
+				cout << "보급 완료" << endl;
+				supply_on = false;
+				player->can_supply = 180.0f; // 쿨타임 적용
+
+				player->ammo = weapon_ammo[player->m_weapon];
+				player->mag = weapon_mag[player->m_weapon];
+				
+				// 힐템 추가?
+			}
+			else {
+				player->supply_timer -= deltaTime;
+			}
+		}
+		
+		player->can_supply -= deltaTime;
+
+
 		UCHAR pKeysBuffer[256];
 		if (GetKeyboardState(pKeysBuffer)) {
 
@@ -256,10 +277,31 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 			// 상호작용 f키(보급 받는 키 or 회복 취소 키)
 			if (pKeysBuffer[0x46] & 0xF0) {
+				// 회복취소
 				if (heal_on) {
 					heal_on = false;
 					player->heal_timer = 0;
 				}
+
+				// 보급 가까이 있는지
+				// 보급중에 F다시 누르면 취소
+				if (supply_on) {
+					supply_on = false;
+				}
+
+				if (player->near_supply) {
+					// 보급이 가능한지 여부 체크(힐중이거나 보급 시간이 안되면 실행x)
+					if (player->can_supply < 0.f && !heal_on) {
+						supply_on = true;
+						player->supply_timer = player->supply_time;
+					}
+				}
+				else {
+					// 멀어지면 취소
+					supply_on = false;
+				}
+				
+				
 			}
 
 
@@ -385,7 +427,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 #endif
 			
 			//velocity->m_velocity = Vector3::Add(velocity->m_velocity, XMFLOAT3(0, -65.4f* deltaTime, 0));
-			cout << position->Position.x << " " << position->Position.z << endl;
+			//cout << position->Position.x << " " << position->Position.z << endl;
 		}
 
 	}
