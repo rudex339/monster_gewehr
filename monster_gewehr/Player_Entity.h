@@ -59,6 +59,17 @@ struct player_Component {
 	FLOAT heal_timer;
 	FLOAT heal_all_time;
 
+	// 보급받는 시간에 관여하는 변수
+	FLOAT supply_timer;
+	FLOAT supply_time = 3.5f;
+
+	// 보급 위치 근처에 있는를 체크
+	bool near_supply = false;
+	bool is_suppling = false;
+
+	// 보급 가능 시간을 체크(0이하면 보급 가능)
+	FLOAT can_supply = 0.0f;
+
 	INT grenade_type;
 	INT grenade_amount = 1;
 

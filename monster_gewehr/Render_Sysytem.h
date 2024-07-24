@@ -44,6 +44,16 @@ struct InputId_Event {
 
 };
 
+// 보급상자 정보 저장
+struct Supply
+{
+	float cooltime = 180.0f;
+	float time = 0.0f;
+	bool state = true;
+	XMFLOAT3 position;
+};
+
+
 class Render_System : public EntitySystem,
 	public EventSubscriber<SetCamera_Event>,
 	public EventSubscriber<DrawUI_Event>,
@@ -113,9 +123,24 @@ private:
 	//boundingbox
 	Box* m_pBox;
 
-	// user info
+	// user info (for minimap)
 	// key : userID, value : coordinate
 	map <int, POINT> UserPositionXZ;
+
+	//// 보급 위치 1(유저-보스 스폰 사이) 2290, 1825
+	// 보급 위치 2(도망1~도망2 사이) 1485, 3065
+	// 보급 위치 3(도망2~도망3 사이) 385, 2230
+	// 보급 위치 4(도망3 구역 구석) 115, 730
+	// 보급 위치 5(두갈래길 사이) 865, 2230
+	
+	// supplys
+	XMFLOAT3 supplys[5] = {
+		{2290, 0, 1825},
+		{1485, 0, 3065},
+		{385, 0, 2230},
+		{115, 0, 730},
+		{865, 0, 2230}
+	};
 
 public:
 	Render_System() = default;
@@ -136,6 +161,8 @@ public:
 	void SetUserInfo(int uid, POINT coordinate);
 	map <int, POINT> GetUserInfo() { return UserPositionXZ; }
 	void ClearUserInfo() { UserPositionXZ.clear(); }
+
+	float Distance(XMFLOAT3 posA, XMFLOAT3 posB);
 
 	void SetRootSignANDDescriptorANDCammandlist(ObjectManager* manager, ID3D12GraphicsCommandList* pd3dCommandList);
 };
