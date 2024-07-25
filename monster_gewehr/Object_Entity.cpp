@@ -36,6 +36,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		controller->m_AnimationController->SetTrackEnable(i, false);
 		//controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);
 	}
+	controller->m_AnimationController->SetTrackWeight(8, 0.f);
 	controller->m_AnimationController->SetTrackEnable(0, true);
 	controller->m_AnimationController->SetTrackWeight(0, 1.f);
 	controller->m_AnimationController->SetBlendingSpeed(2, 8.0f);
