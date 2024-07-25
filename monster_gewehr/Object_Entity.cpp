@@ -282,12 +282,13 @@ Sound_Componet::Sound_Componet()
 	m_result = m_system->createSound("Sound/Effect/button_on.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_On]);
 	m_result = m_system->createSound("Sound/Effect/button_push.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_Push]);
 	m_result = m_system->createSound("Sound/Effect/purchase.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Purchase]);
+	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Rifle]);
+	m_result = m_system->createSound("Sound/Effect/shotgun.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::ShotGun]);
+	m_result = m_system->createSound("Sound/Effect/sniper.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Sniper]);
 
-	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_3D, 0, &m_sound[Sound::Rifle]);
-
-	m_result = m_sound[Sound::Rifle]->set3DMinMaxDistance(0.5f, 200.f);
-	m_result = m_sound[Sound::Rifle]->setMode(FMOD_LOOP_OFF);
-	m_musicChannel->setVolume(5.0f);
+	m_result = m_system->createSound("Sound/Effect/reload.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Reload]);
+	m_result = m_system->createSound("Sound/Effect/dash.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Dash]);
+	m_musicChannel->setVolume(3.0f);
 }
 
 Sound_Componet::~Sound_Componet()
@@ -322,6 +323,19 @@ void Sound_Componet::PlaySound(Sound tag)
 	}
 }
 
+void Sound_Componet::PlaySound(int type)
+{
+	bool playing;
+	for (auto& channel : m_soundChannel) {
+		m_result = channel->isPlaying(&playing);
+		if (!playing) {
+			m_result = m_system->playSound(m_sound[type], 0, false, &channel);
+			break;
+		}
+	}
+}
+
+// 이밑부터는 다른사람 소리 들을때 3d 효과 넣는 함수들
 void Sound_Componet::Play3DSound(XMFLOAT3 sound, Sound tag)
 {
 	FMOD_VECTOR soundPos = { sound.x, sound.y, sound.z };
@@ -330,11 +344,22 @@ void Sound_Componet::Play3DSound(XMFLOAT3 sound, Sound tag)
 	bool playing;
 	for (auto& channel : m_soundChannel) {
 		m_result = channel->isPlaying(&playing);
-		if (!playing) {			
-			m_result = m_system->playSound(m_sound[tag], 0, true, &channel);
+		if (!playing) {	
+			m_result = m_system->playSound(m_3dsound[tag], 0, true, &channel);
 			m_result = channel->set3DAttributes(&soundPos, &velocity);
 			m_result = channel->setPaused(false);
 			break;
 		}
 	}
+}
+
+void Sound_Componet::ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front)
+{
+	FMOD_VECTOR listenerPos = { pos.x, pos.y, pos.z };
+	FMOD_VECTOR velocity = { vel.x, vel.y , vel.z };
+	FMOD_VECTOR forward = { front.x, front.y, front.z };
+	FMOD_VECTOR up = { 0.0f, 1.0f, 0.0f };
+
+	Sound_Componet::GetInstance().m_system->set3DListenerAttributes(0, &listenerPos, &velocity, &forward, &up);
+	Sound_Componet::GetInstance().m_system->update();
 }

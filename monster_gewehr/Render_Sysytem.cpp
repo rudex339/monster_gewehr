@@ -370,10 +370,17 @@ void Render_System::tick(World* world, float deltaTime)
 					ComponentHandle<Rotation_Component> rotation = ent->get<Rotation_Component>();
 					ComponentHandle<Scale_Component> Scale = ent->get<Scale_Component>();
 					if (ent->has<AnimationController_Component>()) {
+						// 애니메이션 실행 시키는 부분
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
 						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel);
 						Model->m_MeshModel->Animate(deltaTime);
-
+						// 여기서 부턴 애니메이션에 따른 효과음 출력
+						ComponentHandle<player_Component> data = ent->get<player_Component>();
+						if (data->id > -1) {	// 유저 일 경우
+							if (AnimationController->next_State == SHOOT) {
+								// 소리
+							}
+						}
 					}
 
 					XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();

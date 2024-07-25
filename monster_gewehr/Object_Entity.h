@@ -333,7 +333,18 @@ struct Sound_Componet {
 		Rifle,
 		ShotGun,
 		Sniper,
+		Walk,
+		Run,
+		Reload,
+		Dash,
 		SoundCount
+	};
+	enum TDSound
+	{
+		TDRifle,
+		TDShotGun,
+		TDSniper,
+		TDSoundCount
 	};
 
 	Sound_Componet(const Sound_Componet& rhs) = delete;
@@ -353,7 +364,8 @@ struct Sound_Componet {
 	FMOD::Channel* m_musicChannel;
 
 	array<FMOD::Sound*, Sound::SoundCount>	m_sound;
-	array<FMOD::Channel*, MAX_PLAY_SOUND>	m_soundChannel;
+	array<FMOD::Sound*, TDSound::TDSoundCount>	m_3dsound;	// 3d 효과음을 위한 사운드 어레이
+	array<FMOD::Channel*, MAX_PLAY_SOUND>	m_soundChannel; // 효과음 출력을 위한 채널
 
 	FMOD_RESULT m_result;
 
@@ -364,6 +376,11 @@ struct Sound_Componet {
 	void StopMusic();
 
 	void PlaySound(Sound tag);
+	void PlaySound(int type);
 
+	// 이밑부터는 다른사람 소리 들을때 3d 효과 넣는 함수들
 	void Play3DSound(XMFLOAT3 sound, Sound tag);
+
+	void ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front);
+
 };
