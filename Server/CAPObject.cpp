@@ -96,6 +96,8 @@ Player::Player(int id, SOCKET socket)
 	m_is_ready = false;
 
 	// 나중에 데이터베이스 연동하면 삭제해라
+	m_money = 1000;
+
 	m_item_info[0] = 0;
 	m_item_info[1] = 0;
 	m_item_info[2] = 0;

@@ -390,6 +390,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				if (shot_cooltime <= 0) {
 					shot_cooltime = shot_cooltime_list[player->m_weapon];
 					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
+					Sound_Componet::GetInstance().Play3DSound(position->Position, Sound_Componet::Sound::Rifle);
 					player->ammo--;
 					if (player->ammo <= 0 && player->mag > 0) {
 						AnimationController->next_State = (UINT)RELOAD;

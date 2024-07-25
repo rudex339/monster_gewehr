@@ -343,10 +343,6 @@ void ProcessPacket(int id, char* p)
 		DirectX::XMVECTOR distanceVec = souleaterPos - positionVec;
 		float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
 
-		std::cout << "Player Position: " << packet->pos.x << ", " << packet->pos.y << ", " << packet->pos.z << std::endl;
-		std::cout << "Player Direction: " << packet->dir.x << ", " << packet->dir.y << ", " << packet->dir.z << std::endl;
-		std::cout << "Shot Range: " << shot_range << std::endl;
-
 		if (distance <= shot_range) {
 			if (souleaters[room_id].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
 				souleaters[room_id].m_lock.lock();

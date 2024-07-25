@@ -702,6 +702,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 	case GAME:
 	{
+		Sound_Componet::GetInstance().StopMusic();
 		world->reset();
 		//
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,

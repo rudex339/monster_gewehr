@@ -232,12 +232,15 @@ void Button_Component::CursorOn(POINT cursor, ComPtr<IDWriteTextFormat> big_font
 		return;
 	}
 	if (cursor.x > m_Rectsaved.left && cursor.x < m_Rectsaved.right && cursor.y > m_Rectsaved.top && cursor.y < m_Rectsaved.bottom) {
+		if (!cursor_on) {
+			Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::B_On);
+		}
 		m_Rect.bottom = m_Rectsaved.bottom + (m_Rectsaved.bottom - m_Rectsaved.top) * 0.05;
 		m_Rect.right = m_Rectsaved.right + (m_Rectsaved.right - m_Rectsaved.left) * 0.05;
 		m_Rect.left = m_Rectsaved.left - (m_Rectsaved.right - m_Rectsaved.left) * 0.05;
 		m_Rect.top = m_Rectsaved.top - (m_Rectsaved.bottom - m_Rectsaved.top) * 0.05;
 		cursor_on = true;
-		m_textFormat = big_font;
+		m_textFormat = big_font;		
 	}
 	else {
 		m_Rect = m_Rectsaved;
@@ -267,4 +270,71 @@ void Model_Component::addChildComponent(Model_Component* child)
 void Model_Component::SetSocket(GameObjectModel* rootModel, char* name)
 {
 	socket = rootModel->FindFrame(name);
+}
+
+Sound_Componet::Sound_Componet()
+{
+	m_result = FMOD::System_Create(&m_system);
+	m_result = m_system->init(32, FMOD_INIT_NORMAL, nullptr);
+
+	m_result = m_system->createSound("Sound/Music/title.mp3", FMOD_LOOP_NORMAL, 0, &m_music);
+	
+	m_result = m_system->createSound("Sound/Effect/button_on.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_On]);
+	m_result = m_system->createSound("Sound/Effect/button_push.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_Push]);
+	m_result = m_system->createSound("Sound/Effect/purchase.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Purchase]);
+
+	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_3D, 0, &m_sound[Sound::Rifle]);
+
+	m_result = m_sound[Sound::Rifle]->set3DMinMaxDistance(0.5f, 200.f);
+	m_result = m_sound[Sound::Rifle]->setMode(FMOD_LOOP_OFF);
+	m_musicChannel->setVolume(5.0f);
+}
+
+Sound_Componet::~Sound_Componet()
+{
+	m_system->release();
+}
+
+void Sound_Componet::PlayMusic(Music tag)
+{
+	bool playing;
+	m_result = m_musicChannel->isPlaying(&playing);
+	if (playing) m_musicChannel->stop();
+	m_result = m_system->playSound(m_music, 0, false, &m_musicChannel);
+}
+
+void Sound_Componet::StopMusic()
+{
+	bool playing;
+	m_result = m_musicChannel->isPlaying(&playing);
+	if (playing) m_musicChannel->stop();
+}
+
+void Sound_Componet::PlaySound(Sound tag)
+{
+	bool playing;
+	for (auto& channel : m_soundChannel) {
+		m_result = channel->isPlaying(&playing);
+		if (!playing) {
+			m_result = m_system->playSound(m_sound[tag], 0, false, &channel);
+			break;
+		}
+	}
+}
+
+void Sound_Componet::Play3DSound(XMFLOAT3 sound, Sound tag)
+{
+	FMOD_VECTOR soundPos = { sound.x, sound.y, sound.z };
+	FMOD_VECTOR velocity = { 1.0f, 1.0f, 1.0f };
+	
+	bool playing;
+	for (auto& channel : m_soundChannel) {
+		m_result = channel->isPlaying(&playing);
+		if (!playing) {			
+			m_result = m_system->playSound(m_sound[tag], 0, true, &channel);
+			m_result = channel->set3DAttributes(&soundPos, &velocity);
+			m_result = channel->setPaused(false);
+			break;
+		}
+	}
 }

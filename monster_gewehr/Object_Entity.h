@@ -316,3 +316,54 @@ struct Emitter_Componet {
 	{
 	}
 };
+
+constexpr int MAX_PLAY_SOUND = 32;
+
+struct Sound_Componet {
+	enum Music
+	{
+		Title,
+		MusicCount
+	};
+	enum Sound
+	{
+		B_On,
+		B_Push,
+		Purchase,
+		Rifle,
+		ShotGun,
+		Sniper,
+		SoundCount
+	};
+
+	Sound_Componet(const Sound_Componet& rhs) = delete;
+	Sound_Componet(Sound_Componet&& rhs) = delete;
+	void operator=(const Sound_Componet& rhs) = delete;
+	void operator=(Sound_Componet&&) = delete;
+
+	static Sound_Componet& GetInstance()
+	{
+		static Sound_Componet instance;
+		return instance;
+	}
+
+	FMOD::System* m_system;
+
+	FMOD::Sound* m_music;
+	FMOD::Channel* m_musicChannel;
+
+	array<FMOD::Sound*, Sound::SoundCount>	m_sound;
+	array<FMOD::Channel*, MAX_PLAY_SOUND>	m_soundChannel;
+
+	FMOD_RESULT m_result;
+
+	Sound_Componet();
+	~Sound_Componet();
+
+	void PlayMusic(Music tag);
+	void StopMusic();
+
+	void PlaySound(Sound tag);
+
+	void Play3DSound(XMFLOAT3 sound, Sound tag);
+};

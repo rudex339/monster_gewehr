@@ -212,6 +212,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		//m_login = true;
 		world->emit<LoginCheck_Event>({ (int)m_id });
 		world->emit< ChangeScene_Event>({ LOBBY });
+		Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::Title);
 		break;
 	}
 	case SC_PACKET_LOGIN_FAIL: {
@@ -277,9 +278,10 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	case SC_PACKET_CHANGE_ANIMATION: {
 		SC_CHANGE_ANIMATION_PACKET* pk = reinterpret_cast<SC_CHANGE_ANIMATION_PACKET*>(packet);
 
-		world->each<player_Component, AnimationController_Component>(
+		world->each<player_Component, Position_Component, AnimationController_Component>(
 			[&](Entity* ent,
 				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
 				ComponentHandle<AnimationController_Component> AnimationController)->
 			void {
 				if (Player->id == pk->id) {

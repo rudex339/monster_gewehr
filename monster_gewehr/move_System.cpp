@@ -103,6 +103,14 @@ void Move_System::tick(World* world, float deltaTime)
                                     rotation->mfYaw, state, 0 });
                             }
 #endif
+                            // sound µè´Â À§Ä¡ ¼³Á¤
+                            FMOD_VECTOR listenerPos = { position->Position.x, position->Position.y, position->Position.z };
+                            cout << "µè´Â À§Ä¡ : " << position->Position.x << ", " << position->Position.z << endl;
+                            FMOD_VECTOR vel = {velocity->m_velocity.x, velocity->m_velocity.y , velocity->m_velocity.z };
+                            FMOD_VECTOR forward = { eulerangle->m_xmf3Look.x, eulerangle->m_xmf3Look.y, eulerangle->m_xmf3Look.z };
+                            FMOD_VECTOR up = { 0.0f, 1.0f, 0.0f };
+                            Sound_Componet::GetInstance().m_system->set3DListenerAttributes(0, &listenerPos, &vel, &forward, &up);
+                            Sound_Componet::GetInstance().m_system->update();
                         }
                         velocity->m_velocity = XMFLOAT3(0, 0, 0);
                         velocity->m_velRotate = XMFLOAT3(0, 0, 0);

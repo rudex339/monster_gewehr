@@ -373,6 +373,7 @@ void Render_System::tick(World* world, float deltaTime)
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
 						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel);
 						Model->m_MeshModel->Animate(deltaTime);
+
 					}
 
 					XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
@@ -673,6 +674,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 
 			if (button->cursor_on && clicked && button->activate) {
+				Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::B_Push);
 				switch (button->button_id)
 				{
 				case ExitBtn:
@@ -718,6 +720,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					cout << "구매/강화" << endl;
 					world->emit<Purchase_Event>({});
 					world->emit<Refresh_Scene>({ SHOP });
+					Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Purchase);
 					break;
 				case GameReadyBtn:
 					world->emit<Ready_Room>({});
@@ -743,6 +746,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case EndGameBtn:
 					world->emit<Clearlayer_Event>({});
 					world->emit<ChangeScene_Event>({ LOBBY });
+					Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::Title);
 					break;
 				default:
 					cout << "디폴트" << endl;
