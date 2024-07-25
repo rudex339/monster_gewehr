@@ -50,7 +50,8 @@ using namespace std;
 #include "ECS.h"
 using namespace ECS;
 
-//#include <Mmsystem.h>
+#include <Mmsystem.h>
+#pragma comment(lib, "winmm")
 
 // tcp/ip용 헤더들
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
