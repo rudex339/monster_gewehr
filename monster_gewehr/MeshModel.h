@@ -242,7 +242,7 @@ public:
 	~CAnimationTrack();
 
 public:
-    BOOL 							m_bEnable = true;
+    BOOL 							m_bEnable = false;
     float 							m_fSpeed = 1.0f;
     float 							m_fPosition = -ANIMATION_CALLBACK_EPSILON;
 	float 							m_fWeight = 0.0f;
