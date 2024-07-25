@@ -151,7 +151,7 @@ protected:
 };
 
 
-enum MonsterState { idle_state, fight_state, runaway_state, die_state };
+enum MonsterState { idle_state, alert_state, fight_state, runaway_state, gohome_state, die_state, blind_state };
 enum MonsterAnimation {
 	idle_ani,
 	growl_ani, walk_ani,
@@ -193,10 +193,13 @@ public:
 	void SetUserArround(int index, bool b) { isUserArround[index] = b; }
 	bool GetUserArround(int index) { return isUserArround[index]; }
 
-
 	void SetAnimation(CHAR animation) { m_animation = animation; }
 
-	void SetState(CHAR state) { m_state = state; }
+	void SetState(CHAR state) {
+		prev_state = m_state;
+		m_state = state; 
+		curr_state = m_state;
+	}
 	CHAR GetState() { return m_state; }
 
 	void SetChoice(CHAR choice) { m_choose = choice; }
@@ -220,9 +223,16 @@ public:
 	void BuildBT(BehaviorTree node) { root = node; }
 	void RunBT() { root.run(); }
 
-	// demo only
-	void dash(float time);
+	CHAR prev_state = idle_state, curr_state = idle_state;
+	XMFLOAT3 HomePos = XMFLOAT3(2200.0f, 0.f, 3100.0f);
 
+	// [home][index], index0,2 : xmin, xmax | index 1,3 : zmin, zmax 
+	float sector_line[3][4] = {
+		{1762, 2385, 2492, 3411},
+		{125, 2835, 1095, 3275},
+		{123, 745, 715, 2082}
+	};
+	int home = 0;
 	std::mutex m_lock;
 protected:
 	bool isUserArround[MAX_CLIENT_ROOM];

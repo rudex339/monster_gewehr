@@ -1,5 +1,7 @@
 #include "CAPObject.h"
 #include <random>
+#include <chrono>
+using namespace std::chrono_literals;
 
 #define LAND_Y 0.f
 #define RUNAWAY_POINT 3
@@ -341,7 +343,7 @@ void Monster::InitMonster()
 	m_bounding_box.Orientation = q;
 }
 
-
+// functions
 
 void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
@@ -361,14 +363,62 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 	}
 }
 
+float CalculateAngleBetweenVectors(XMVECTOR vecA, XMVECTOR vecB) {
+	// Normalize the vectors
+	XMVECTOR vecANormalized = XMVector3Normalize(vecA);
+	XMVECTOR vecBNormalized = XMVector3Normalize(vecB);
 
-//// Behaviors
+	// Calculate the dot product
+	float dotProduct = XMVectorGetX(XMVector3Dot(vecANormalized, vecBNormalized));
+
+	// Ensure the dot product is within the valid range for arccos
+	dotProduct = max(-1.0f, min(1.0f, dotProduct));
+
+	// Calculate the angle in radians
+	float angleRadians = acosf(dotProduct);
+
+	// Convert the angle from radians to degrees
+	float angleDegrees = XMConvertToDegrees(angleRadians);
+
+	return angleDegrees;
+}
+
+bool is_toofar(Monster* monster) {
+	if (monster->GetPosition().x <= monster->sector_line[monster->home][0] || (monster->GetPosition().x >= monster->sector_line[monster->home][2]) ||
+		monster->GetPosition().z <= monster->sector_line[monster->home][1] || (monster->GetPosition().z >= monster->sector_line[monster->home][3])) {
+		return true;
+	}
+	return false;
+}
+
+//-----------------------------------------------------------------------------------------
+//// Behaviors Nodes
 
 // idle
-Sequence idle_sequence;
+Selector idle_selector;
+	Leaf check_near_user_node;
+	Leaf idle_to_home_node; ConditionChecker idle_to_home_dec;	 // conditional dec 
+	Sequence action_seq;
+		RandomNode random_action;
+			Sequence patrol_seq;
+				Leaf set_patrol_pos_node;
+				Leaf go_to_pos_node;
+			Leaf growling_node;
+			Leaf sleep_node;
+		Leaf set_idle_ani_node;
+		Leaf wait_next_idle_node; TimeLimiter wait_next_idle_dec; // delay dec
+
 	
 // alert_state
-Sequence alert_sequence;
+Selector alert_selector;
+	Sequence check_near_user_seq;
+		Leaf checking_user_node;
+		Leaf to_fight_time_check_node;
+		Leaf alert_to_fight_node;
+	Sequence alert_to_idle_seq;
+		Leaf to_idle_time_check_node;
+		Leaf alert_to_idle_node;
+
 
 // fight
 Sequence fight_sequence;
@@ -392,9 +442,222 @@ XMFLOAT3 runaway_point03 = XMFLOAT3(340.f, LAND_Y, 1450.f);
 
 XMFLOAT3 runaway_point[RUNAWAY_POINT] = { runaway_point01, runaway_point02, runaway_point03 };
 
+//-----------------------------------------------------------------------------------------
+//// Behaviors Function
+
+///////////// idle
+int check_near_user_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	bool isTargetExist = false;
+	for (int i : room->GetPlyId()) {
+		if (i == -1) continue;
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			monster->SetUserArround(i, false);
+			if (playerIter->second.GetID() != -1) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= IDLE_FIND_USER_DISTANCE) {
+					isTargetExist = true;
+					monster->SetUserArround(i, true);
+				}
+			}
+		}
+	}
+	if (isTargetExist) {
+		monster->SetAnimation(idle_ani);
+		monster->SetState(alert_state);
+		build_bt(monster, players, room);
+
+		return BehaviorTree::SUCCESS;
+	}
+
+	return BehaviorTree::FAIL;
+}
+
+int idle_to_gohome(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetState(gohome_state);
+	build_bt(monster, players, room);
+
+	return BehaviorTree::SUCCESS;
+}
+
+int set_random_pos(Monster* monster) {
+	XMFLOAT3 randompos;
+	float dir = minus(gen);
+	dir = (dir / abs(dir));
+	randompos.x = monster->GetPosition().x + urd(gen) * dir;
+	randompos.y = monster->GetPosition().y;
+	randompos.z = monster->GetPosition().z + urd(gen) * dir;
+
+	monster->SetTargetPos(randompos);
+
+	return BehaviorTree::SUCCESS;
+}
+
+int move_to_random_pos(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(walk_ani);
+
+
+	if (is_toofar(monster)) {
+		monster->SetState(gohome_state);
+		build_bt(monster, players, room);
+		return BehaviorTree::SUCCESS;
+	}
+
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) return BehaviorTree::SUCCESS;
+
+	XMFLOAT3 target = monster->GetTargetPos();
+	XMFLOAT3 pos = monster->GetPosition();
+
+	XMVECTOR targetPosVec = XMLoadFloat3(&target);
+	XMVECTOR currentPosVec = XMLoadFloat3(&pos);
+
+	XMVECTOR frontVec = XMVector3Normalize(XMVectorSubtract(targetPosVec, currentPosVec)); // 봐야하는 방향
+
+	// 회전각 계산후 적용
+	XMFLOAT3 Front = monster->GetFront();
+	XMVECTOR currentFrontVec = XMLoadFloat3(&Front);
+	float angle = CalculateAngleBetweenVectors(currentFrontVec, frontVec);
+	monster->SetYaw(monster->GetYaw() + angle);
+
+	// 방향을 적용
+	XMFLOAT3 setfront;
+	XMStoreFloat3(&setfront, frontVec);
+	monster->SetFront(setfront);	
+
+	monster->Foward(monster->GetElapsedTime());
+	return BehaviorTree::RUNNING;
+}
+
+
+
+
+int growling(Monster* monster) {
+	monster->SetAnimation(growl_ani);
+
+	static float growlTime = 0.f;
+	if (growlTime <= GROWL_ANI_TIME) {
+		growlTime += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		growlTime = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int sleeping(Monster* monster) {
+	monster->SetAnimation(flying_ani);
+
+	static float sleepTime = 0.f;
+	if (sleepTime <= SLEEP_ANI_TIME) {
+		sleepTime += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		sleepTime = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int setAnimIdle(Monster* monster) {
+	monster->SetAnimation(idle_ani);
+	return BehaviorTree::SUCCESS;
+}
+
+int wait_next_idle(Monster* monster) {
+	return BehaviorTree::SUCCESS;
+}
+
+///////////// alert
+int check_near_user_alert(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	bool isTargetExist = false;
+	for (int i : room->GetPlyId()) {
+		if (i == -1) continue;
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			monster->SetUserArround(i, false);
+			if (playerIter->second.GetID() != -1) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= ALERT_FIND_USER_DISTANCE) {
+					isTargetExist = true;
+					monster->SetUserArround(i, true);
+				}
+			}
+		}
+	}
+	if (isTargetExist) {
+		return BehaviorTree::SUCCESS;
+	}
+
+	return BehaviorTree::FAIL;
+}
+
+int time_check_to_fight(Monster* monster) {
+	static float a2f_time = 0.0f;
+
+	if (a2f_time >= ALERT_TO_FIGHT_TIME) {
+		a2f_time = 0;
+		return BehaviorTree::SUCCESS;
+	}
+	a2f_time += monster->GetElapsedTime();
+	return BehaviorTree::FAIL;
+}
+
+int alert_to_fight(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetState(fight_state);
+	build_bt(monster, players, room);
+	return BehaviorTree::SUCCESS;
+}
+
+int time_check_to_idle(Monster* monster) {
+	static float a2i_time = 0.0f;
+
+	if (a2i_time >= ALERT_TO_IDLE_TIME) {
+		a2i_time = 0;
+		return BehaviorTree::SUCCESS;
+	}
+	a2i_time += monster->GetElapsedTime();
+	return BehaviorTree::FAIL;
+}
+
+int alert_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetState(idle_state);
+	build_bt(monster, players, room);
+	return BehaviorTree::SUCCESS;
+}
+
+// go Home
+int move_to_home(Monster* monster) {
+	
+	monster->SetAnimation(walk_ani);
+
+	monster->SetTargetPos(runaway_point[monster->home]);
+
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) return BehaviorTree::SUCCESS;
+
+	XMFLOAT3 target = monster->GetTargetPos();
+	XMFLOAT3 pos = monster->GetPosition();
+
+	XMVECTOR targetPosVec = XMLoadFloat3(&target);
+	XMVECTOR currentPosVec = XMLoadFloat3(&pos);
+
+	XMVECTOR frontVec = XMVector3Normalize(XMVectorSubtract(targetPosVec, currentPosVec)); // 봐야하는 방향
+
+	// 회전각 계산후 적용
+	XMFLOAT3 Front = monster->GetFront();
+	XMVECTOR currentFrontVec = XMLoadFloat3(&Front);
+	float angle = CalculateAngleBetweenVectors(currentFrontVec, frontVec);
+	monster->SetYaw(monster->GetYaw() + angle);
+
+	// 방향을 적용
+	XMFLOAT3 setfront;
+	XMStoreFloat3(&setfront, frontVec);
+	monster->SetFront(setfront);
+
+	monster->Foward(monster->GetElapsedTime());
+	return BehaviorTree::RUNNING;
+
+}
 
 // die
-
 int die(Monster* monster)
 {
 	monster->SetAnimation(die_ani);
@@ -405,31 +668,95 @@ int die(Monster* monster)
 
 void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
+	// idle
+	{
+		wait_next_idle_node = Leaf("TimeOut", std::bind(wait_next_idle, monster));
+		wait_next_idle_dec = TimeLimiter(&wait_next_idle_node, 2s);
+
+		set_patrol_pos_node = Leaf("Set Patrol Pos", std::bind(set_random_pos, monster));
+		go_to_pos_node = Leaf("Go To Random Pos", std::bind(move_to_random_pos, monster, players, room));
+
+		patrol_seq = Sequence("Patrol Seq", { &set_patrol_pos_node, &go_to_pos_node });
+
+		growling_node = Leaf("Growling", std::bind(growling, monster));
+		sleep_node = Leaf("Sleeping... Zzz", std::bind(sleeping, monster));
+
+		random_action = RandomNode("Random Idle Action", { &patrol_seq, &growling_node, &sleep_node });
+
+		set_idle_ani_node = Leaf("Change Animation to idle", std::bind(setAnimIdle, monster));
+		action_seq = Sequence("Action Sequence", { &random_action, &set_idle_ani_node, &wait_next_idle_dec });
+
+		idle_to_home_node = Leaf("GotoHome", std::bind(idle_to_gohome, monster, players, room));
+		idle_to_home_dec = ConditionChecker(&idle_to_home_node, [monster]() {
+			if (is_toofar(monster))
+				return true;
+			else
+				return false;
+			});
+
+		check_near_user_node = Leaf("Check Near User(idle)", std::bind(check_near_user_idle, monster, players, room));
+
+		idle_selector = Selector("IDLE", { &check_near_user_node, &idle_to_home_dec, &action_seq });
+	}
+
+	// alert
+	{
+		alert_to_idle_node = Leaf("Alert to Idle", std::bind(alert_to_idle, monster, players, room));
+		to_idle_time_check_node = Leaf("To idle Time Check", std::bind(time_check_to_idle, monster));
+
+		alert_to_idle_seq = Sequence("Alert To Idle Sequence", { &to_idle_time_check_node, &alert_to_idle_node });
+
+		alert_to_fight_node = Leaf("Alert to Fight", std::bind(alert_to_fight, monster, players, room));
+		to_fight_time_check_node = Leaf("To idle Time Check", std::bind(time_check_to_fight, monster));
+		checking_user_node = Leaf("Check Near User(alert)", std::bind(check_near_user_alert, monster, players, room));
+
+		check_near_user_seq = Sequence("Check Near User Sequence", { &checking_user_node, &to_fight_time_check_node, &alert_to_fight_node });
+
+		alert_selector = Selector("Alert Selector", { &check_near_user_seq, &alert_to_idle_seq });
+	}
+
+
 
 	// die
 	die_node = Leaf("DIE", std::bind(die, monster));
 
 	// root
-	if (monster->GetState() == idle_state)
-		monster->BuildBT(&idle_sequence);
+	{
+		if (monster->GetState() == idle_state) 
+		{
+			monster->BuildBT(&idle_selector);
+		}
 
-	else if (monster->GetState() == alert_state)
-		monster->BuildBT(&alert_sequence);
+		else if (monster->GetState() == alert_state)
+		{
+			monster->BuildBT(&alert_selector);
+		}
 
-	else if (monster->GetState() == fight_state)
-		monster->BuildBT(&fight_sequence);
+		else if (monster->GetState() == fight_state)
+		{
+			monster->BuildBT(&fight_sequence);
+		}
 
-	else if (monster->GetState() == runaway_state)
-		monster->BuildBT(&runaway_sequence);
+		else if (monster->GetState() == runaway_state)
+		{
+			monster->BuildBT(&runaway_sequence);
+		}
 
-	else if (monster->GetState() == gohome_state)
-		monster->BuildBT(&goHome_sequence);
+		else if (monster->GetState() == gohome_state)
+		{
+			monster->BuildBT(&goHome_sequence);
+		}
 
-	else if (monster->GetState() == die_state)
-		monster->BuildBT(&die_node);
+		else if (monster->GetState() == die_state)
+		{
+			monster->BuildBT(&die_node);
+		}
 
-	else if (monster->GetState() == blind_state)
-		monster->BuildBT(&blind_sequence);
+		else if (monster->GetState() == blind_state)
+		{
+			monster->BuildBT(&blind_sequence);
+		}
+	}
 }
 
 void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)

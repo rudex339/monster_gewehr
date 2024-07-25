@@ -1,4 +1,6 @@
-#define		FIND_USER_DISTANCE 300.0f
+#define		IDLE_FIND_USER_DISTANCE 300.0f
+#define		ALERT_FIND_USER_DISTANCE 400.0f
+
 #define		ATTENT_TIME 5000.0f
 #define		WAIT_PATROL 3000.0f
 
@@ -16,4 +18,10 @@
 
 #define		CALMDOWN_TIME 5000.0f
 
+// state change time
+#define		ALERT_TO_FIGHT_TIME 3000.0f
+#define		ALERT_TO_IDLE_TIME	3000.0f
 
+// Animation time defines
+#define		GROWL_ANI_TIME 100.0f
+#define		SLEEP_ANI_TIME 100.0f

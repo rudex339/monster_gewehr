@@ -162,6 +162,7 @@ private:
 public:
     RandomNode(const std::string& name, std::initializer_list<Node*> nodes)
         : children(nodes), name(name), current_running_index(-1) {}
+    RandomNode() {}
 
     void reset() override {
         current_running_index = -1;
@@ -206,7 +207,7 @@ protected:
     Node* child;
 public:
     Decorator(Node* child) : child(child) {}
-
+    Decorator() {}
     void reset() override {
         if (child) child->reset();
     }
@@ -228,6 +229,7 @@ private:
 
 public:
     Repeater(Node* child, int limit) : Decorator(child), limit(limit), count(0) {}
+    Repeater() {}
 
     void reset() override {
         count = 0;
@@ -273,6 +275,7 @@ private:
 public:
     TimeLimiter(Node* child, std::chrono::seconds delay)
         : Decorator(child), delay(delay), waiting(true) {}
+    TimeLimiter() {}
 
     void reset() override {
         // 초기화 시 현재 시간을 저장하여 지연 시간을 시작
@@ -314,6 +317,7 @@ private:
 public:
     ConditionChecker(Node* child, std::function<bool()> condition)
         : Decorator(child), condition(condition) {}
+    ConditionChecker() {}
 
     void reset() override {
         Decorator::reset();

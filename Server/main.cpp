@@ -161,7 +161,6 @@ void BossThread()
 
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
 			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
-				
 				run_bt(&souleaters[i], &players, &gamerooms[i]);
 
 				if (souleaters[i].GetAnimation() == dash_ani) {
@@ -482,7 +481,7 @@ void ProcessPacket(int id, char* p)
 	}
 	case CS_DEMO_MONSTER_BEHAVIOR: {
 		int room_id = players[id].GetRoomID();
-		souleaters[room_id].dash(7500.f);
+		//souleaters[room_id].dash(7500.f);
 		break;
 	}
 	}
