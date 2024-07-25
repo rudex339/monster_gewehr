@@ -25,3 +25,5 @@
 // Animation time defines
 #define		GROWL_ANI_TIME 100.0f
 #define		SLEEP_ANI_TIME 100.0f
+#define		TAKE_OFF_ANI_TIME 1000.0f
+#define		LANDING_ANI_TIME 1000.0f

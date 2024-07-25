@@ -158,7 +158,7 @@ enum MonsterAnimation {
 	flyup_ani, flying_ani, landing_ani,
 	bite_ani, dash_ani,
 	hit_ani, die_ani,
-	sleep_ani
+	sleep_ani, flyidle_ani
 };
 
 class Monster : public CAPObject

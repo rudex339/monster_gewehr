@@ -196,7 +196,7 @@ Monster::Monster()
 
 	turnning_speed = 0.3f;
 	move_speed = 0.07f;
-	fly_up_speed = 0.05f;
+	fly_up_speed = 0.1f;
 
 	m_yaw = 0.0f;
 
@@ -333,6 +333,9 @@ void Monster::InitMonster()
 
 	m_animation = idle_ani;
 	m_state = idle_state;
+	prev_state = curr_state = idle_state;
+
+	home = 0;
 
 	m_bounding_box.Center = m_position;
 	m_bounding_box.Center.y += 15.0f;
@@ -364,9 +367,13 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 }
 
 float CalculateAngleBetweenVectors(XMVECTOR vecA, XMVECTOR vecB) {
+	// Extract the x and z components and ignore the y component
+	XMVECTOR vecAXZ = XMVectorSet(XMVectorGetX(vecA), 0.0f, XMVectorGetZ(vecA), 0.0f);
+	XMVECTOR vecBXZ = XMVectorSet(XMVectorGetX(vecB), 0.0f, XMVectorGetZ(vecB), 0.0f);
+
 	// Normalize the vectors
-	XMVECTOR vecANormalized = XMVector3Normalize(vecA);
-	XMVECTOR vecBNormalized = XMVector3Normalize(vecB);
+	XMVECTOR vecANormalized = XMVector3Normalize(vecAXZ);
+	XMVECTOR vecBNormalized = XMVector3Normalize(vecBXZ);
 
 	// Calculate the dot product
 	float dotProduct = XMVectorGetX(XMVector3Dot(vecANormalized, vecBNormalized));
@@ -425,6 +432,13 @@ Sequence fight_sequence;
 
 // runaway
 Sequence runaway_sequence;
+	Leaf set_runaway_point_node;
+	Leaf take_off_node;
+	Leaf fly_up_node;
+	Leaf fly_to_point_node;
+	Leaf fly_down_node;
+	Leaf landing_node;
+	Leaf runaway_to_idle_node; TimeLimiter wait_change_to_idle_dec;
 
 // go home
 Sequence goHome_sequence;
@@ -568,6 +582,9 @@ int wait_next_idle(Monster* monster) {
 }
 
 ///////////// alert
+static float a2f_time = 0.0f;
+static float a2i_time = 0.0f;
+
 int check_near_user_alert(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
 	bool isTargetExist = false;
 	for (int i : room->GetPlyId()) {
@@ -591,10 +608,9 @@ int check_near_user_alert(Monster* monster, std::unordered_map<INT, Player>* pla
 }
 
 int time_check_to_fight(Monster* monster) {
-	static float a2f_time = 0.0f;
-
 	if (a2f_time >= ALERT_TO_FIGHT_TIME) {
 		a2f_time = 0;
+		a2i_time = 0;
 		return BehaviorTree::SUCCESS;
 	}
 	a2f_time += monster->GetElapsedTime();
@@ -608,10 +624,9 @@ int alert_to_fight(Monster* monster, std::unordered_map<INT, Player>* players, G
 }
 
 int time_check_to_idle(Monster* monster) {
-	static float a2i_time = 0.0f;
-
 	if (a2i_time >= ALERT_TO_IDLE_TIME) {
 		a2i_time = 0;
+		a2f_time = 0;
 		return BehaviorTree::SUCCESS;
 	}
 	a2i_time += monster->GetElapsedTime();
@@ -624,7 +639,7 @@ int alert_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, Ga
 	return BehaviorTree::SUCCESS;
 }
 
-// go Home
+/////////// go Home
 int move_to_home(Monster* monster) {
 	
 	monster->SetAnimation(walk_ani);
@@ -657,7 +672,111 @@ int move_to_home(Monster* monster) {
 
 }
 
-// die
+/////////// fight
+
+
+/////////// runaway
+int set_runaway_point(Monster* monster) {
+	int point = 0;
+	while (1) {
+		point = rand_runaway_point(gen);
+		if (point != monster->home) {
+			monster->SetTargetPos(runaway_point[point]);
+			monster->home = point;
+			break;
+		}
+	}
+	return BehaviorTree::SUCCESS;
+}
+
+int take_off(Monster* monster) {
+	monster->SetAnimation(flyup_ani);
+
+	static float takeoff_time = 0.f;
+	if (takeoff_time <= TAKE_OFF_ANI_TIME) {
+		takeoff_time += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		takeoff_time = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int fly_up(Monster* monster) {
+	monster->SetAnimation(flyidle_ani);
+
+	if (monster->GetPosition().y <= 500.f) {
+
+		monster->Up(monster->GetElapsedTime());
+		return BehaviorTree::RUNNING;
+	}
+
+	return BehaviorTree::SUCCESS;
+}
+
+int fly_to_point(Monster* monster) {
+	monster->SetAnimation(flying_ani);
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) 
+		return BehaviorTree::SUCCESS;
+
+	XMFLOAT3 target = monster->GetTargetPos();
+	XMFLOAT3 pos = { monster->GetPosition().x, LAND_Y, monster->GetPosition().z };
+
+	XMVECTOR targetPosVec = XMLoadFloat3(&target);
+	XMVECTOR currentPosVec = XMLoadFloat3(&pos);
+
+	XMVECTOR frontVec = XMVector3Normalize(XMVectorSubtract(targetPosVec, currentPosVec)); // 봐야하는 방향
+
+	// 회전각 계산후 적용
+	XMFLOAT3 Front = monster->GetFront();
+	XMVECTOR currentFrontVec = XMLoadFloat3(&Front);
+	float angle = CalculateAngleBetweenVectors(currentFrontVec, frontVec);
+	monster->SetYaw(monster->GetYaw() + angle);
+
+	// 방향을 적용
+	XMFLOAT3 setfront;
+	XMStoreFloat3(&setfront, frontVec);
+	monster->SetFront(setfront);
+
+	monster->Foward(monster->GetElapsedTime()*3.0f);
+	return BehaviorTree::RUNNING;
+}
+
+int fly_down(Monster* monster) {
+	monster->SetAnimation(flyidle_ani);
+
+	if (monster->GetPosition().y >= LAND_Y + 20.0f) {
+
+		monster->Down(monster->GetElapsedTime());
+		return BehaviorTree::RUNNING;
+	}
+	return BehaviorTree::SUCCESS;
+}
+
+int landing(Monster* monster) {
+	monster->SetAnimation(landing_ani);
+
+	static float landing_time = 0.f;
+	if (landing_time <= LANDING_ANI_TIME) {
+		landing_time += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		landing_time = 0.0f;
+		monster->SetAnimation(idle_ani);
+		monster->SetPostion(monster->GetPosition().x, LAND_Y, monster->GetPosition().z);
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int runaway_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetState(idle_state);
+	build_bt(monster, players, room);
+	return BehaviorTree::SUCCESS;
+}
+
+/////////// die
 int die(Monster* monster)
 {
 	monster->SetAnimation(die_ani);
@@ -715,7 +834,40 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		alert_selector = Selector("Alert Selector", { &check_near_user_seq, &alert_to_idle_seq });
 	}
 
+	// runaway
+	{
+		/*Sequence runaway_sequence;
+		Leaf set_runaway_point_node;
+		Leaf take_off_node;
+		Leaf fly_up_node;
+		Leaf fly_to_point_node;
+		Leaf fly_down_node;
+		Leaf landing_node;
+		Leaf runaway_to_idle_node; TimeLimiter wait_change_to_idle_dec;*/
 
+		runaway_to_idle_node = Leaf("runaway to idle", std::bind(runaway_to_idle, monster, players, room));
+		wait_change_to_idle_dec = TimeLimiter(&runaway_to_idle_node, 2s);
+		landing_node = Leaf("landing", std::bind(landing, monster));
+		fly_down_node = Leaf("fly down", std::bind(fly_down, monster));
+		fly_to_point_node = Leaf("go to potin", std::bind(fly_to_point, monster));
+		fly_up_node = Leaf("fly up", std::bind(fly_up, monster));
+		take_off_node = Leaf("take off", std::bind(take_off, monster));
+
+		set_runaway_point_node = Leaf("Set RunAway Point", std::bind(set_runaway_point, monster));
+
+		runaway_sequence = Sequence("RUN AWAY Sequence", { &set_runaway_point_node, &take_off_node, &fly_up_node, &fly_to_point_node,
+			&fly_down_node, &landing_node, &wait_change_to_idle_dec });
+	}
+
+	// go home
+	{
+
+	}
+
+	// blind
+	{
+
+	}
 
 	// die
 	die_node = Leaf("DIE", std::bind(die, monster));
