@@ -6,6 +6,7 @@
 #include "Sever_Sysyem.h"
 #include "Scene_Sysytem.h"
 #include <math.h>
+#include "BlurFilter.h"
 
 struct LIGHTS
 {
@@ -291,6 +292,8 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 	m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
+	m_pBlurFilter = new BlurFilter(pd3dDevice, pd3dCommandList);
+
 }
 
 void Render_System::configure(World* world)
@@ -300,7 +303,9 @@ void Render_System::configure(World* world)
 	world->subscribe<KeyDown_Event>(this);
 	world->subscribe<Tab_Event>(this);
 	world->subscribe<Mouse_Event>(this);
-	world->subscribe<InputId_Event>(this);
+	world->subscribe<InputId_Event>(this); 
+	world->subscribe<DrawComputeShader_Event>(this);
+	world->subscribe<SetBlur_Event>(this);
 }
 
 void Render_System::unconfigure(World* world)
@@ -310,6 +315,10 @@ void Render_System::unconfigure(World* world)
 
 void Render_System::tick(World* world, float deltaTime)
 {
+	if (m_pBlurFilter->m_Strength > 0) {
+		m_pBlurFilter->m_Strength -= deltaTime*2;
+	}
+
 	if (m_pCamera) {
 		if (m_pd3dGraphicsRootSignature) m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 		if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
@@ -1122,6 +1131,13 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 }
 
+void Render_System::receive(class World* world, const  DrawComputeShader_Event& event) {
+	if (m_pBlurFilter) {
+		m_pBlurFilter->Execute(event.cmdList, event.input);
+	}
+}
+
+
 float Render_System::Distance(XMFLOAT3 posA, XMFLOAT3 posB)
 {
 	return sqrt(pow(posB.x - posA.x, 2) + pow(posB.y - posA.y, 2) + pow(posB.z - posA.z, 2));
@@ -1192,6 +1208,15 @@ void Render_System::receive(World* world, const InputId_Event& event)
 	password.assign(text[1].begin(), text[1].end());
 
 	world->emit<Login_Event>({ id, password });
+}
+
+void Render_System::receive(World* world, const SetBlur_Event& event) {
+	
+	switch (event.blur) {
+	case 0:
+		m_pBlurFilter->m_Strength = 5.0f;
+		break;
+	}
 }
 
 void Render_System::SetUserInfo(int uid, POINT coordinate)

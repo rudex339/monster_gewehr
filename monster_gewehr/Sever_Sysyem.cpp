@@ -3,6 +3,7 @@
 #include "Player_Entity.h"
 #include "Object_Entity.h"
 #include "Scene_Sysytem.h"
+#include "Render_Sysytem.h"
 
 
 void Sever_System::configure(World* world)
@@ -362,6 +363,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			void {
 				if (Player->id == pk->id) {
 					Player->hp = pk->hp;
+					world->emit<SetBlur_Event>({ 0 });
 					if (ent->has<Camera_Component>() && Player->hp <= 0) {
 						ComponentHandle<EulerAngle_Component> eulerangle =
 							ent->get<EulerAngle_Component>();
@@ -377,7 +379,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 						controllangle->m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 						controllangle->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 						controllangle->m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-						Player->hp = 100;
+						Player->hp = 100;						
 					}
 				}
 				else

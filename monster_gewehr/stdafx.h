@@ -42,6 +42,8 @@ using namespace std;
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
+#include <d3d12sdklayers.h>
+
 #include <d3d11on12.h>
 //	#include <d2d1.h>
 #include <d2d1_3.h>

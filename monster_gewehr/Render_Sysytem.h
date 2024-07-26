@@ -8,6 +8,7 @@
 class ObjectManager;
 class CCamera;
 class Box;
+class BlurFilter;
 
 enum FontType {
 	DEFAULT_FONT,
@@ -54,6 +55,14 @@ struct Supply
 	XMFLOAT3 position;
 };
 
+struct DrawComputeShader_Event{
+	ID3D12GraphicsCommandList* cmdList;
+	ID3D12Resource* input;
+};
+
+struct SetBlur_Event {
+	UINT blur;
+};
 
 class Render_System : public EntitySystem,
 	public EventSubscriber<SetCamera_Event>,
@@ -61,9 +70,12 @@ class Render_System : public EntitySystem,
 	public EventSubscriber<KeyDown_Event>,
 	public EventSubscriber<Tab_Event>,
 	public EventSubscriber<Mouse_Event>,
-	public EventSubscriber<InputId_Event>
+	public EventSubscriber<InputId_Event>,
+	public EventSubscriber<DrawComputeShader_Event>,
+	public EventSubscriber<SetBlur_Event>
 {
 private:
+
 	CCamera* m_pCamera = NULL;
 	ID3D12Device* m_pd3dDevice;
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
@@ -143,6 +155,8 @@ private:
 		{865, 0, 2230}
 	};
 
+	////////////////////////////////////////
+	BlurFilter* m_pBlurFilter = NULL;
 public:
 	Render_System() = default;
 	Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, IDWriteFactory5* dwriteFactory, Scene_Sysytem* scene);
@@ -157,6 +171,8 @@ public:
 	virtual void receive(class World* world, const Tab_Event& event);
 	virtual void receive(class World* world, const Mouse_Event& event);
 	virtual void receive(class World* world, const InputId_Event& event);
+	virtual void receive(class World* world, const DrawComputeShader_Event& event);
+	virtual void receive(class World* world, const SetBlur_Event& event);
 
 	void Clicked() { clicked = false; }
 	void SetUserInfo(int uid, POINT coordinate);
