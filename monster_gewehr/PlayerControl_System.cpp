@@ -255,6 +255,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				xmf3Shift_roll = XMFLOAT3(0, 0, 0);
 				roll_timer = 0.2f;
 				roll_on = 1;
+				player->stamina -= 25;
+				Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Dash);
 			}
 			// 달리기 키는 shift
 			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on  && !heal_on && !player->reload) {
@@ -315,9 +317,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if (pKeysBuffer[0x57] & 0xF0) {
 				xmf3Shift = Vector3::Add(xmf3Shift, controller_vector->m_xmf3Look, speed);
 				if (roll_on == 1) { // 구르기 키를 처음 눌렀으면 어디로 굴러야 하는지 방향을 정해줌
-					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, speed * 3);
-					player->stamina -= 25;
-					roll_on = 2; // 그리고 다른 키가 구르기 방향을 망치지 않도록 하기 위해 2로 바꿔줌
+					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, speed * 3);					
 				}
 				if (!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
@@ -326,7 +326,6 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				xmf3Shift = Vector3::Add(xmf3Shift, controller_vector->m_xmf3Look, -speed);
 				if (roll_on == 1) {
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, -speed * 3);
-					roll_on = 2;
 				}
 				if (!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
@@ -335,7 +334,6 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				xmf3Shift = Vector3::Add(xmf3Shift, model_vector->m_xmf3Right, -speed);
 				if (roll_on == 1) {
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, -speed * 3);
-					roll_on = 2;
 				}
 				if (!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
@@ -343,11 +341,14 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if (pKeysBuffer[0x44] & 0xF0) {
 				xmf3Shift = Vector3::Add(xmf3Shift, model_vector->m_xmf3Right, speed);
 				if (roll_on == 1) {
-					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, speed * 3);
-					roll_on = 2;
+					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, speed * 3);					
 				}
 				if(!player->reload && !run_on && !heal_on && !player->reload)
 					AnimationController->next_State = (UINT)RUN;
+			}
+
+			if (roll_on == 1) {
+				roll_on = 2; // 그리고 다른 키가 구르기 방향을 망치지 않도록 하기 위해 2로 바꿔줌
 			}
 
 			// 투척 g키
@@ -371,7 +372,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			float fLength = sqrtf(velocity->m_velocity.x * velocity->m_velocity.x + velocity->m_velocity.z * velocity->m_velocity.z);
-			if (::IsZero(fLength) && !player->reload)
+			if (::IsZero(fLength) && !player->reload && !heal_on)
 			{
 				AnimationController->next_State = (UINT)IDLE;
 			}
@@ -390,10 +391,12 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				if (shot_cooltime <= 0) {
 					shot_cooltime = shot_cooltime_list[player->m_weapon];
 					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
+					Sound_Componet::GetInstance().PlaySound(player->m_weapon+3);
 					player->ammo--;
 					if (player->ammo <= 0 && player->mag > 0) {
 						AnimationController->next_State = (UINT)RELOAD;
 						player->reload = true;
+						Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Reload);
 					}
 				}
 				else {
@@ -412,6 +415,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			// r키로 재장전
 			if (pKeysBuffer[0x52] & 0xF0 && !player->reload && player->mag > 0 && !roll_on && !heal_on ) {
 				AnimationController->next_State = (UINT)RELOAD;
+				Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Reload);
 				if (!player->reload) {
 					player->reload = true;
 				}

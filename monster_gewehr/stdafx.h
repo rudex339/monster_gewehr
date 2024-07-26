@@ -50,8 +50,9 @@ using namespace std;
 #include "ECS.h"
 using namespace ECS;
 
-#include <Mmsystem.h>
-#pragma comment(lib, "winmm")
+#include "fmod.hpp"
+//#pragma comment(lib, "fmod64_vc")
+//#pragma comment(lib, "fmodL64_vc")
 
 // tcp/ip용 헤더들
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
@@ -89,8 +90,8 @@ extern HINSTANCE						ghAppInstance;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
-#define FRAME_BUFFER_WIDTH				1920
-#define FRAME_BUFFER_HEIGHT				1080
+#define FRAME_BUFFER_WIDTH				1280
+#define FRAME_BUFFER_HEIGHT				720
 #define LOGIN_FONT_SIZE					FRAME_BUFFER_WIDTH * FRAME_BUFFER_HEIGHT / 35446
 
 #define USE_NETWORK

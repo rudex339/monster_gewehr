@@ -213,6 +213,7 @@ void BossThread()
 					players[ply_id].DoSend(&monster_packet, monster_packet.size);
 				}
 
+				// 몬스터가 죽으면 클리어
 				if (souleaters[i].GetHp() <= 0 && monster_packet.animation == die_ani) {
 					for (int ply_id : gamerooms[i].GetPlyId()) {
 						if (ply_id == -1) continue;
@@ -225,6 +226,7 @@ void BossThread()
 					gamerooms[i].InitGameRoom();
 					SendDeleteRoom(i);
 				}
+				// 방에서 3번 죽어서 게임오버
 				else if (gamerooms[i].m_all_life <= 0) {
 					for (int ply_id : gamerooms[i].GetPlyId()) {
 						if (ply_id == -1) continue;
@@ -276,7 +278,7 @@ void ProcessPacket(int id, char* p)
 		players[id].SetWeapon(0);
 		players[id].SetRoomID(-1);
 
-		std::cout << "입장 : " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
+		std::cout << "입장 : " << id << ", " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
 		SendLoginInfo(id);
 		SendRoomList(id);
 		SendItemInfo(id);
@@ -342,10 +344,6 @@ void ProcessPacket(int id, char* p)
 		DirectX::XMVECTOR distanceVec = souleaterPos - positionVec;
 		float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
 
-		std::cout << "Player Position: " << packet->pos.x << ", " << packet->pos.y << ", " << packet->pos.z << std::endl;
-		std::cout << "Player Direction: " << packet->dir.x << ", " << packet->dir.y << ", " << packet->dir.z << std::endl;
-		std::cout << "Shot Range: " << shot_range << std::endl;
-
 		if (distance <= shot_range) {
 			if (souleaters[room_id].GetState() == runaway_state || souleaters[room_id].GetState() == gohome_state) {
 
@@ -364,6 +362,8 @@ void ProcessPacket(int id, char* p)
 				build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 			}
 		}
+
+		SendShot(id);
 		break;
 	}
 	case CS_PACKET_CREATE_ROOM: {
@@ -600,6 +600,29 @@ void SendAnimaition(int id)
 	packet.type = SC_PACKET_CHANGE_ANIMATION;
 	packet.id = players[id].GetID();
 	packet.animation = players[id].GetAnimaition();
+
+	int room_id = players[id].GetRoomID();
+
+	// 같은 게임룸 안의 사람들 한테만 보내기
+	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+		if (ply_id < 0) continue;
+		if (ply_id == id) continue;
+		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+		retval = players[ply_id].DoSend(&packet, packet.size);
+		if (retval == SOCKET_ERROR) {
+			players[ply_id].SetState(S_STATE::LOG_OUT);
+		}
+	}
+}
+
+void SendShot(int id)
+{
+	int retval;
+	SC_SHOT_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_SHOT;
+	packet.pos = players[id].GetPosition();
+	packet.weapon = players[id].GetWeapon(); // 0, 1, 2
 
 	int room_id = players[id].GetRoomID();
 

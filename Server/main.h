@@ -16,6 +16,7 @@ void SendLoginFail(int id);
 void SendStartGame(int id);
 void SendPlayerMove(int id);
 void SendAnimaition(int id);
+void SendShot(int id);
 void Disconnect(int id);
 void SendHitPlayer(int id);
 void SendEndGame(int id, bool clear);
