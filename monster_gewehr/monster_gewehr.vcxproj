@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Animate_System.h" />
+    <ClInclude Include="BlurFilter.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision_Sysytem.h" />
     <ClInclude Include="d3dx12.h" />
@@ -160,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animate_System.cpp" />
+    <ClCompile Include="BlurFilter.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision_Sysytem.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />

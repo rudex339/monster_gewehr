@@ -46,6 +46,8 @@ public:
 	void InitServer();
 
 private:
+	ComPtr<ID3D12Debug> debugController;
+
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
 
