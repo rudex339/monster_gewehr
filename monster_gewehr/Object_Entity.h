@@ -316,3 +316,21 @@ struct Emitter_Componet {
 	{
 	}
 };
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+class SoldierAnimationController : public CAnimationController {
+private:
+	vector<UINT> underState;
+	vector<UINT> upperState;
+
+public:
+
+	SoldierAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	~SoldierAnimationController();
+
+	virtual void SetTrackEnable(int nAnimationTrack, bool bEnable);
+	virtual void AdvanceTime(float fElapsedTime, GameObjectModel* pRootGameObject);
+};

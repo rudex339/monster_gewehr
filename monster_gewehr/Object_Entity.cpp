@@ -269,3 +269,22 @@ void Model_Component::SetSocket(GameObjectModel* rootModel, char* name)
 {
 	socket = rootModel->FindFrame(name);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SoldierAnimationController::SoldierAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel):
+	CAnimationController(pd3dDevice,  pd3dCommandList, nAnimationTracks, pModel)
+{
+}
+
+SoldierAnimationController::~SoldierAnimationController()
+{
+}
+
+void SoldierAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
+{
+}
+
+void SoldierAnimationController::AdvanceTime(float fElapsedTime, GameObjectModel* pRootGameObject)
+{
+}

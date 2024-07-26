@@ -316,7 +316,7 @@ void Render_System::unconfigure(World* world)
 void Render_System::tick(World* world, float deltaTime)
 {
 	if (m_pBlurFilter->m_Strength > 0) {
-		m_pBlurFilter->m_Strength -= deltaTime*2;
+		m_pBlurFilter->m_Strength -= deltaTime*3;
 	}
 
 	if (m_pCamera) {
