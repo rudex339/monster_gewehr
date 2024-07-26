@@ -147,7 +147,7 @@ void ProcessClient(SOCKET sock)
 
 void BossThread()
 {
-	constexpr int MAX_FRAME = 30;
+	constexpr int MAX_FRAME = 60;
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
 	using ms = std::chrono::duration<float, std::milli>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
@@ -313,9 +313,7 @@ void ProcessPacket(int id, char* p)
 		CS_PLAYER_MOVE_PACKET* packet = reinterpret_cast<CS_PLAYER_MOVE_PACKET*>(p);
 		players[id].SetPostion(packet->pos);
 		players[id].SetYaw(packet->yaw);
-		//std::cout << id << "에서 만큼 받아옴 " << packet->pos.x << std::endl;
 		players[id].SetBoundingBox();
-		//std::cout << players[id].GetBoundingBox().Center.x << std::endl;
 		players[id].RotateBoundingBox();
 
 		SendPlayerMove(id);
@@ -439,7 +437,7 @@ void ProcessPacket(int id, char* p)
 		players[id].SetArmor(packet->armor);
 		players[id].SetThrowWp(packet->grenade);
 
-		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].GetThrowWp() << std::endl;		
+		std::cout << "장비 변경 : " << (int)players[id].GetWeapon() << ", " << (int)players[id].GetArmor() << ", " << (int)players[id].GetThrowWp() << std::endl;
 		break;
 	}
 	case CS_PACKET_BUY: {
@@ -515,6 +513,9 @@ void SendLoginFail(int id)
 	packet.type = SC_PACKET_LOGIN_FAIL;
 	packet.id = -1;
 	retval = players[id].DoSend(&packet, packet.size);
+	if (retval == SOCKET_ERROR) {
+		players[id].SetState(S_STATE::LOG_OUT);
+	}
 
 }
 
@@ -555,6 +556,9 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 			if (recv_id == -1) continue;
 			if (recv_id == send_id) continue;
 			retval = players[recv_id].DoSend(&add_p, add_p.size);
+			if (retval == SOCKET_ERROR) {
+				players[recv_id].SetState(S_STATE::LOG_OUT);
+			}
 
 		}
 		SC_ADD_MONSTER_PACKET monster_p;
@@ -562,7 +566,10 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 		monster_p.type = SC_PACKET_ADD_MONSTER;
 		monster_p.monster = souleaters[gameroom_id].GetData();
 
-		players[send_id].DoSend(&monster_p, monster_p.size);
+		retval = players[send_id].DoSend(&monster_p, monster_p.size);
+		if (retval == SOCKET_ERROR) {
+			players[send_id].SetState(S_STATE::LOG_OUT);
+		}
 
 		players[send_id].SetState(S_STATE::IN_GAME);
 	}
@@ -640,6 +647,7 @@ void SendShot(int id)
 
 void Disconnect(int id)
 {
+	int retval;
 	players[id].PlayerInit();
 	players[id].SetState(S_STATE::LOG_OUT);
 
@@ -653,7 +661,10 @@ void Disconnect(int id)
 		for (int i : gamerooms[room_num].GetPlyId()) {
 			if (i < 0) continue;
 			if (players[i].GetID() == id) continue;
-			players[i].DoSend(&packet, packet.size);
+			retval = players[i].DoSend(&packet, packet.size);
+			if (retval == SOCKET_ERROR) {
+				players[i].SetState(S_STATE::LOG_OUT);
+			}
 		}
 
 		gamerooms[room_num].DeletePlayerId(id);
@@ -668,6 +679,7 @@ void Disconnect(int id)
 
 void SendHitPlayer(int id)
 {
+	int retval;
 	SC_HIT_PLAYER_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_HIT_PLAYER;
@@ -682,12 +694,16 @@ void SendHitPlayer(int id)
 	for (int ply_id : gamerooms[room_id].GetPlyId()) {
 		if (ply_id < 0) continue;
 		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-		players[ply_id].DoSend(&packet, packet.size);
+		retval = players[ply_id].DoSend(&packet, packet.size);
+		if (retval == SOCKET_ERROR) {
+			players[ply_id].SetState(S_STATE::LOG_OUT);
+		}
 	}
 }
 
 void SendEndGame(int id, bool clear)
 {
+	int retval;
 	SC_END_GAME_PACKET packet;
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_END_GAME;
@@ -698,11 +714,15 @@ void SendEndGame(int id, bool clear)
 
 	players[id].SetMoney(players[id].GetMoney() + packet.score);
 
-	players[id].DoSend(&packet, packet.size);
+	retval = players[id].DoSend(&packet, packet.size);
+	if (retval == SOCKET_ERROR) {
+		players[id].SetState(S_STATE::LOG_OUT);
+	}
 }
 
 void SendRoomList(int id)
 {
+	int retval;
 	for (int i = 0; i < MAX_GAME_ROOM; i++) {
 		gamerooms[i].SetStateLock();
 		if (gamerooms[i].GetState() != G_FREE) {
@@ -715,7 +735,10 @@ void SendRoomList(int id)
 			if (gamerooms[i].GetState() == G_INGAME)
 				sub_packet.start = true;
 
-			players[id].DoSend(&sub_packet, sub_packet.size);
+			retval = players[id].DoSend(&sub_packet, sub_packet.size);
+			if (retval == SOCKET_ERROR) {
+				players[id].SetState(S_STATE::LOG_OUT);
+			}
 		}
 		gamerooms[i].SetStateUnLock();
 	}
