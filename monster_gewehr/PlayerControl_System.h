@@ -57,6 +57,10 @@ private:
 
 	bool stamina_empty = false;	
 
+	float gun_rebound = 0.0f;
+
+	bool shot_on = false;
+
 public:
 	PlayerControl_System() = default;
 

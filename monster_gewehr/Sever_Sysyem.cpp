@@ -500,7 +500,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		break;
 	}
 
-	}
+	} // switch문 마지막
 
 
 }

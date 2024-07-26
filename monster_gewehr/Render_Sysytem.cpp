@@ -1104,6 +1104,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 
 			{
+				// 조준 크로스헤어
 				if (player->aim_mode) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Blue));
 					m_d2dDeviceContext->FillEllipse(&ellipse, m_textBrush.Get());
