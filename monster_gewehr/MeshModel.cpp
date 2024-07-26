@@ -587,6 +587,9 @@ void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 				}
 			}
 		}
+		else {
+			m_pAnimationTracks[nAnimationTrack].m_fPosition = 0;
+		}
 		m_pAnimationTracks[nAnimationTrack].SetEnable(bEnable); }
 }
 

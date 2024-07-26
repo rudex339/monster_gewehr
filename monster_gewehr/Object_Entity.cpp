@@ -57,13 +57,48 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	CLoadedModelInfo* model = OM->Get_ModelInfo("Souleater");
 	ent->assign<Model_Component>(model->m_pModelRootObject, model->m_pModelRootObject->m_pstrFrameName);
 	auto controller = ent->assign<AnimationController_Component>(
-		new CAnimationController(pd3dDevice, pd3dCommandList, 10, model), 0);
-	for (int i = 0; i < 10; i++) {
+		new CAnimationController(pd3dDevice, pd3dCommandList, 15, model), 0);
+	for (int i = 0; i < 15; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		controller->m_AnimationController->SetTrackEnable(i, false);
+
 		//controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);
 	}
+
+	// 한번만 재생하도록 수정
+	controller->m_AnimationController->SetTrackType(1, ANIMATION_TYPE_ONCE);
+	controller->m_AnimationController->SetTrackType(6, ANIMATION_TYPE_ONCE);
 	controller->m_AnimationController->SetTrackType(9, ANIMATION_TYPE_ONCE);
+	controller->m_AnimationController->SetTrackType(10, ANIMATION_TYPE_ONCE);
+	controller->m_AnimationController->SetTrackType(14, ANIMATION_TYPE_ONCE);
+
+	controller->m_AnimationController->SetBlendingSpeed(0, 100.0f);
+	/*
+	0 IDLE,
+	1 GROW,
+	2 WALK,
+	3 FLYUP,
+	4 FLYING,
+	5 LANDING,
+	6 BITE,
+	7 RUN,
+	8 HIT,
+	9 DIE,
+	10 TailAttack,
+	11 Blind(차징),
+	12 FLYIDLE,
+	13 SLEEP,
+	14 FIREBALL 
+	*/
+
+	// 몬스터 애니메이션 속도 조절
+	controller->m_AnimationController->SetTrackSpeed(1, 0.5f);
+	controller->m_AnimationController->SetTrackSpeed(3, 0.7f);
+	controller->m_AnimationController->SetTrackSpeed(5, 0.7f);
+	controller->m_AnimationController->SetTrackSpeed(7, 2.0f);
+	controller->m_AnimationController->SetTrackSpeed(10, 1.0f);
+	controller->m_AnimationController->SetTrackSpeed(11, 0.05f);
+	controller->m_AnimationController->SetTrackSpeed(14, 0.5f);
 
 	ent->assign<Position_Component>(x, y, z);
 	ent->assign<Rotation_Component>(rx, ry, rz);
@@ -233,12 +268,15 @@ void Button_Component::CursorOn(POINT cursor, ComPtr<IDWriteTextFormat> big_font
 		return;
 	}
 	if (cursor.x > m_Rectsaved.left && cursor.x < m_Rectsaved.right && cursor.y > m_Rectsaved.top && cursor.y < m_Rectsaved.bottom) {
+		if (!cursor_on) {
+			Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::B_On);
+		}
 		m_Rect.bottom = m_Rectsaved.bottom + (m_Rectsaved.bottom - m_Rectsaved.top) * 0.05;
 		m_Rect.right = m_Rectsaved.right + (m_Rectsaved.right - m_Rectsaved.left) * 0.05;
 		m_Rect.left = m_Rectsaved.left - (m_Rectsaved.right - m_Rectsaved.left) * 0.05;
 		m_Rect.top = m_Rectsaved.top - (m_Rectsaved.bottom - m_Rectsaved.top) * 0.05;
 		cursor_on = true;
-		m_textFormat = big_font;
+		m_textFormat = big_font;		
 	}
 	else {
 		m_Rect = m_Rectsaved;
@@ -268,4 +306,131 @@ void Model_Component::addChildComponent(Model_Component* child)
 void Model_Component::SetSocket(GameObjectModel* rootModel, char* name)
 {
 	socket = rootModel->FindFrame(name);
+}
+
+Sound_Componet::Sound_Componet()
+{
+	m_result = FMOD::System_Create(&m_system);
+	m_result = m_system->init(32, FMOD_INIT_NORMAL, nullptr);
+	m_result = m_system->set3DSettings(1.0f, 1.0f, 1.0f);
+
+	m_result = m_system->createSound("Sound/Music/title.mp3", FMOD_LOOP_NORMAL, 0, &m_music[Music::Title]);
+	m_result = m_system->createSound("Sound/Music/ingame2.mp3", FMOD_LOOP_NORMAL, 0, &m_music[Music::Ingame]);
+	m_result = m_system->createSound("Sound/Music/gameclear.mp3", FMOD_LOOP_OFF, 0, &m_music[Music::GameClear]);
+	m_result = m_system->createSound("Sound/Music/gamefail.mp3", FMOD_LOOP_OFF, 0, &m_music[Music::GameFail]);
+	
+	m_result = m_system->createSound("Sound/Effect/button_on.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_On]);
+	m_result = m_system->createSound("Sound/Effect/button_push.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_Push]);
+	m_result = m_system->createSound("Sound/Effect/purchase.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Purchase]);
+	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Rifle]);
+	m_result = m_system->createSound("Sound/Effect/shotgun.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::ShotGun]);	
+	m_result = m_system->createSound("Sound/Effect/sniper.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Sniper]);
+	m_result = m_system->createSound("Sound/Effect/walk.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Walk]);
+	m_result = m_system->createSound("Sound/Effect/run.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Run]);
+	m_result = m_system->createSound("Sound/Effect/reload.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Reload]);
+	m_result = m_system->createSound("Sound/Effect/dash.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Dash]);
+	m_result = m_system->createSound("Sound/Effect/hurt.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Hurt]);
+
+	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDRifle]);
+	m_result = m_3dsound[TDSound::TDRifle]->set3DMinMaxDistance(100.f, 5000.f);
+	m_result = m_3dsound[TDSound::TDRifle]->setMode(FMOD_LOOP_OFF);
+
+	m_result = m_system->createSound("Sound/Effect/shotgun.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDShotGun]);
+	m_result = m_3dsound[TDSound::TDShotGun]->set3DMinMaxDistance(100.f, 5000.f);
+	m_result = m_3dsound[TDSound::TDShotGun]->setMode(FMOD_LOOP_OFF);
+
+	m_result = m_system->createSound("Sound/Effect/sniper.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDSniper]);
+	m_result = m_3dsound[TDSound::TDSniper]->set3DMinMaxDistance(100.f, 5000.f);
+	m_result = m_3dsound[TDSound::TDSniper]->setMode(FMOD_LOOP_OFF);
+	
+	m_musicChannel->setVolume(3.0f);
+}
+
+Sound_Componet::~Sound_Componet()
+{
+	m_system->release();
+}
+
+void Sound_Componet::PlayMusic(Music tag)
+{
+	bool playing;
+	m_result = m_musicChannel->isPlaying(&playing);
+	if (playing) m_musicChannel->stop();
+	m_result = m_system->playSound(m_music[tag], 0, false, &m_musicChannel);
+}
+
+void Sound_Componet::StopMusic()
+{
+	bool playing;
+	m_result = m_musicChannel->isPlaying(&playing);
+	if (playing) m_musicChannel->stop();
+}
+
+void Sound_Componet::PlaySound(Sound tag)
+{
+	bool playing;
+	for (auto& channel : m_soundChannel) {
+		m_result = channel->isPlaying(&playing);
+		if (!playing) {
+			m_result = m_system->playSound(m_sound[tag], 0, false, &channel);
+			break;
+		}
+	}
+}
+
+void Sound_Componet::PlaySound(int type)
+{
+	bool playing;
+	for (auto& channel : m_soundChannel) {
+		m_result = channel->isPlaying(&playing);
+		if (!playing) {
+			m_result = m_system->playSound(m_sound[type], 0, false, &channel);
+			break;
+		}
+	}
+}
+
+void Sound_Componet::PlayMoveSound(Sound tag)
+{
+	bool playing;
+	m_result = m_movesoundChannel[tag - Sound::Walk]->isPlaying(&playing);
+	if (!playing) {
+		m_result = m_system->playSound(m_sound[tag], 0, false, &m_movesoundChannel[tag - Sound::Walk]);
+	}
+}
+
+// 이밑부터는 다른사람 소리 들을때 3d 효과 넣는 함수들
+void Sound_Componet::Play3DSound(XMFLOAT3 sound, TDSound tag)
+{
+	FMOD_VECTOR soundPos = { sound.x, sound.y, sound.z };
+	FMOD_VECTOR velocity = { 0.0f, 0.0f, 0.0f };
+	
+	bool playing;
+	for (auto& channel : m_soundChannel) {
+		m_result = channel->isPlaying(&playing);
+		if (!playing) {	
+			m_result = m_system->playSound(m_3dsound[tag], 0, true, &channel);
+			m_result = channel->set3DAttributes(&soundPos, &velocity);
+			m_result = channel->setPaused(false);
+			break;
+		}
+	}
+}
+
+void Sound_Componet::ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front, XMFLOAT3 up)
+{	
+	FMOD_VECTOR listenerPos = { pos.x, pos.y, pos.z };
+	FMOD_VECTOR velocity = { vel.x, vel.y, vel.z };
+	FMOD_VECTOR forward = { front.x, front.y, front.z };
+	FMOD_VECTOR sound_up = { up.x, up.y, up.z };
+
+	m_result = m_system->set3DListenerAttributes(0, &listenerPos, &velocity, &forward, &sound_up);
+	if (m_result != FMOD_OK) {
+		std::cerr << "Failed to set listener attributes: " << "\n";
+	}
+
+	m_result = m_system->update();
+	if (m_result != FMOD_OK) {
+		std::cerr << "Failed to update system: " << "\n";
+	}
 }

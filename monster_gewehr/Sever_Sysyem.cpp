@@ -47,7 +47,7 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	CS_CHANGE_ANIMATION_PACKET sub_packet;
 	sub_packet.size = sizeof(sub_packet);
 	sub_packet.type = CS_PACKET_CHANGE_ANIMATION;
-	sub_packet.animation = event.State;
+	sub_packet.animation = (CHAR)event.State;
 
 	send(g_socket, (char*)&sub_packet, sub_packet.size, 0);
 
@@ -208,11 +208,13 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	switch (packet[1])
 	{
 	case SC_PACKET_LOGIN_INFO: {
-		SC_LOGIN_INFO_PACKET* pk = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);;
+		SC_LOGIN_INFO_PACKET* pk = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
 		m_id = (int)pk->id;
 		//m_login = true;
 		world->emit<LoginCheck_Event>({ (int)m_id });
 		world->emit< ChangeScene_Event>({ LOBBY });
+		cout << "고유 아이디 : " << m_id << endl;
+		Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::Title);
 		break;
 	}
 	case SC_PACKET_LOGIN_FAIL: {
@@ -247,7 +249,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 						}
 						else weapon[i]->draw = false;
 					}
-
+					cout << Player->id << "번 추가, 무기 : " << Player->m_weapon << endl;
 					pk->player_data.id = -1;
 				}
 				else
@@ -278,9 +280,10 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 	case SC_PACKET_CHANGE_ANIMATION: {
 		SC_CHANGE_ANIMATION_PACKET* pk = reinterpret_cast<SC_CHANGE_ANIMATION_PACKET*>(packet);
 
-		world->each<player_Component, AnimationController_Component>(
+		world->each<player_Component, Position_Component, AnimationController_Component>(
 			[&](Entity* ent,
 				ComponentHandle<player_Component> Player,
+				ComponentHandle<Position_Component> Position,
 				ComponentHandle<AnimationController_Component> AnimationController)->
 			void {
 				if (Player->id == pk->id) {
@@ -363,6 +366,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			void {
 				if (Player->id == pk->id) {
 					Player->hp = pk->hp;
+					Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Hurt);
 					world->emit<SetBlur_Event>({ 0 });
 					if (ent->has<Camera_Component>() && Player->hp <= 0) {
 						ComponentHandle<EulerAngle_Component> eulerangle =
@@ -462,8 +466,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		std::wstring wstr(len, L'\0');
 		MultiByteToWideChar(CP_ACP, 0, pk->name, -1, &wstr[0], len);
 
-		if(!pk->ready)
-			cout << "name : " << pk->name << " weapon : " << (int)pk->weapon << endl;
+		cout << "name : " << pk->name << " weapon : " << (int)pk->weapon << endl;
 
 		RoomPlayer_Info info;
 		info.id = pk->id;
@@ -482,8 +485,24 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		world->emit<GetUserData_Event>({ pk->money, pk->item_info });
 		break;
 	}
+	case SC_PACKET_SHOT: {	// 쏘는 소리 출력하라는 패킷
+		SC_SHOT_PACKET* pk = reinterpret_cast<SC_SHOT_PACKET*>(packet);
 
+		switch (pk->weapon) {
+		case 0:
+			Sound_Componet::GetInstance().Play3DSound(pk->pos, Sound_Componet::TDSound::TDRifle);
+			break;
+		case 1:
+			Sound_Componet::GetInstance().Play3DSound(pk->pos, Sound_Componet::TDSound::TDShotGun);
+			break;
+		case 2:
+			Sound_Componet::GetInstance().Play3DSound(pk->pos, Sound_Componet::TDSound::TDSniper);
+			break;
+		}
+		break;
 	}
+
+	} // switch문 마지막
 
 
 }

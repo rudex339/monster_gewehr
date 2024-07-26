@@ -702,6 +702,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 	case GAME:
 	{
+		Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::Ingame);
 		world->reset();
 		//
 		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
@@ -801,11 +802,12 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	case END:
 		::ReleaseCapture();
 		Entity* ent = world->create();
-
+		money += event.score;
 		D2D1_RECT_F imageRect, screenRect, sRect;
 		imageRect = { 0, 0, 1, 1 };
 		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 		if (event.score > 0) {
+			Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::GameClear);
 			sRect = { FRAME_BUFFER_WIDTH / 10, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH * 9 / 10, FRAME_BUFFER_HEIGHT * 9 / 10 };
 			ent = world->create();
 			ent->assign<ImageUI_Component>(L"image/white.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,
@@ -824,6 +826,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		}
 
 		else {
+			Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::GameFail);
 			sRect = { FRAME_BUFFER_WIDTH / 10, FRAME_BUFFER_HEIGHT / 10, FRAME_BUFFER_WIDTH * 9 / 10, FRAME_BUFFER_HEIGHT * 9 / 10 };
 			ent = world->create();
 			ent->assign<ImageUI_Component>(L"image/black.png", m_d2dDeviceContext, m_d2dFactory, m_bitmap,

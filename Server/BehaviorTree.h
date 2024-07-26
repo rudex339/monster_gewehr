@@ -3,8 +3,11 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <random>
+#include <string>
+#include <chrono>
 
-#define PrintNodes
+#define PrintNode
 
 class Node {
 public:
@@ -86,7 +89,7 @@ public:
     Sequence(const std::string& name, std::initializer_list<Node*> nodes)
         : children(nodes), name(name), prev_running_pos(0) {}
     Sequence() {}
-    
+
     void reset() override {
         prev_running_pos = 0;
         for (Node* node : children) {
@@ -136,14 +139,6 @@ public:
 
     void reset() override {}
 
-    void add_child(Node* child)  {
-        std::cout << "에러: 리프 노드에는 자식 노드를 추가할 수 없습니다." << std::endl;
-    }
-
-    void add_children(std::initializer_list<Node*> children)  {
-        std::cout << "에러: 리프 노드에는 자식 노드를 추가할 수 없습니다." << std::endl;
-    }
-
     int run() override {
         print();
         return func();
@@ -154,7 +149,201 @@ public:
         std::cout << "리프 노드: " << name << std::endl;
 #endif
     }
+};
 
+// Random Node
+class RandomNode : public Node {
+private:
+    std::vector<Node*> children;
+    std::string name;
+    std::mt19937 rng{ std::random_device{}() };
+    int current_running_index;
+
+public:
+    RandomNode(const std::string& name, std::initializer_list<Node*> nodes)
+        : children(nodes), name(name), current_running_index(-1) {}
+    RandomNode() {}
+
+    void reset() override {
+        current_running_index = -1;
+        for (Node* node : children) {
+            node->reset();
+        }
+    }
+
+    int run() override {
+        if (current_running_index == -1) {
+            if (children.empty()) {
+                return BehaviorTree::FAIL;
+            }
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<int> dist(0, children.size() - 1);
+            current_running_index = dist(gen);
+        }
+
+        int result = children[current_running_index]->run();
+
+        if (result != BehaviorTree::RUNNING) {
+            current_running_index = -1;  // Reset running index if the node is not running
+        }
+
+        return result;
+    }
+
+    void print() override {
+#ifdef PrintNode
+        std::cout << "랜덤 노드: " << name << std::endl;
+        for (Node* child : children) {
+            child->print();
+        }
+#endif
+    }
+};
+
+// Decorator base class
+class Decorator : public Node {
+protected:
+    Node* child;
+public:
+    Decorator(Node* child) : child(child) {}
+    Decorator() {}
+    void reset() override {
+        if (child) child->reset();
+    }
+
+    int run() override {
+        if (child) return child->run();
+        return BehaviorTree::FAIL;
+    }
+
+    void print() override {
+        if (child) child->print();
+    }
+};
+
+class Repeater : public Decorator {
+private:
+    int limit;
+    int count;
+
+public:
+    Repeater(Node* child, int limit) : Decorator(child), limit(limit), count(0) {}
+    Repeater() {}
+
+    void reset() override {
+        count = 0;
+        Decorator::reset();
+    }
+
+    int run() override {
+        while (count < limit) {
+            int result = child->run();
+            if (result == BehaviorTree::RUNNING) {
+                return BehaviorTree::RUNNING;
+            }
+            else if (result == BehaviorTree::FAIL) {
+                count = 0;  // 실패 시 반복 횟수 초기화
+                return BehaviorTree::FAIL;
+            }
+            // 결과가 SUCCESS일 경우, 카운트 증가
+            count++;
+            if (count >= limit) {
+                count = 0;
+                return BehaviorTree::SUCCESS;
+            }
+            // 반복 횟수를 초과하지 않았을 경우, 다음 반복을 위해 자식 노드 리셋
+            child->reset();
+        }
+        return BehaviorTree::SUCCESS;
+    }
+
+    void print() override {
+#ifdef PrintNode
+        std::cout << "반복자 노드: " << std::endl;
+        Decorator::print();
+#endif
+    }
+};
+
+class TimeLimiter : public Decorator {
+private:
+    std::chrono::seconds delay;  // 지연 시간 (초 단위)
+    std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+    bool waiting;  // 현재 대기 상태인지 여부를 나타내는 플래그
+
+public:
+    TimeLimiter(Node* child, std::chrono::seconds delay)
+        : Decorator(child), delay(delay), waiting(true) {}
+
+    TimeLimiter(Node* child, std::chrono::duration<double> delay)
+        : Decorator(child), delay(std::chrono::duration_cast<std::chrono::seconds>(delay)), waiting(true) {}
+
+    TimeLimiter() : waiting(true) {}
+
+    void reset() override {
+        waiting = true;  // 대기 상태로 설정
+        Decorator::reset();
+    }
+
+    int run() override {
+        auto now = std::chrono::steady_clock::now();
+
+        if (waiting) {
+            // 처음 run이 호출될 때 start_time을 설정
+            start_time = now;
+            waiting = false;
+        }
+
+        // 지연 시간이 경과했는지 확인
+        if (now - start_time >= delay) {
+            // 대기 상태 종료 후 자식 노드를 실행
+            int result = child->run();
+            // 자식 노드가 실행을 완료하면 타이머를 리셋
+            if (result != BehaviorTree::RUNNING) {
+                waiting = true;  // 다시 대기 상태로 설정
+            }
+            return result;
+        }
+        else {
+            return BehaviorTree::RUNNING;  // 대기 중
+        }
+    }
+
+    void print() override {
+#ifdef PrintNode
+        std::cout << "시간 제한 노드 (초 단위): " << delay.count() << "초 지연" << std::endl;
+        Decorator::print();
+#endif
+    }
 };
 
 
+// Condition Checker Decorator
+class ConditionChecker : public Decorator {
+private:
+    std::function<bool()> condition;
+
+public:
+    ConditionChecker(Node* child, std::function<bool()> condition)
+        : Decorator(child), condition(condition) {}
+    ConditionChecker() {}
+
+    void reset() override {
+        Decorator::reset();
+    }
+
+    int run() override {
+        if (condition()) {
+            return child->run();
+        }
+        return BehaviorTree::FAIL;
+    }
+
+    void print() override {
+#ifdef PrintNode
+        std::cout << "조건 검사 노드: " << std::endl;
+        Decorator::print();
+#endif
+    }
+};

@@ -151,14 +151,23 @@ protected:
 };
 
 
-enum MonsterState { idle_state, fight_state, runaway_state, die_state };
+enum MonsterState { idle_state, alert_state, fight_state, runaway_state, gohome_state, die_state, blind_state };
 enum MonsterAnimation {
 	idle_ani,
-	growl_ani, walk_ani,
-	flyup_ani, flying_ani, landing_ani,
-	bite_ani, dash_ani,
-	hit_ani, die_ani,
-	sleep_ani
+	growl_ani, 
+	walk_ani,
+	flyup_ani, 
+	flying_ani, 
+	landing_ani,
+	bite_ani, 
+	dash_ani,
+	blind_ani, 
+	die_ani,
+	tail_ani,
+	charging_ani,
+	flyidle_ani,
+	sleep_ani,
+	fireball_ani
 };
 
 class Monster : public CAPObject
@@ -193,10 +202,13 @@ public:
 	void SetUserArround(int index, bool b) { isUserArround[index] = b; }
 	bool GetUserArround(int index) { return isUserArround[index]; }
 
-
 	void SetAnimation(CHAR animation) { m_animation = animation; }
 
-	void SetState(CHAR state) { m_state = state; }
+	void SetState(CHAR state) {
+		prev_state = m_state;
+		m_state = state; 
+		curr_state = m_state;
+	}
 	CHAR GetState() { return m_state; }
 
 	void SetChoice(CHAR choice) { m_choose = choice; }
@@ -204,6 +216,9 @@ public:
 
 	void SetTarget(Player* player) { m_target = player; }
 	Player* GetTarget() { return m_target; }
+
+	void SetLatestAttackPlayer(Player* player) { latest_damage_player = player; }
+	Player* GetLatestAttackPlayer() { return latest_damage_player; }
 
 	void SetTargetPos(DirectX::XMFLOAT3 target_pos) { m_target_position = target_pos; }
 	XMFLOAT3 GetTargetPos() { return m_target_position; }
@@ -220,9 +235,15 @@ public:
 	void BuildBT(BehaviorTree node) { root = node; }
 	void RunBT() { root.run(); }
 
-	// demo only
-	void dash(float time);
+	CHAR prev_state = idle_state, curr_state = idle_state;
 
+	// [home][index], index0,2 : xmin, xmax | index 1,3 : zmin, zmax 
+	float sector_line[3][4] = {
+		{1762, 2385, 2492, 3411},
+		{125, 2835, 1095, 3275},
+		{123, 745, 715, 2082}
+	};
+	int home = 0;
 	std::mutex m_lock;
 protected:
 	bool isUserArround[MAX_CLIENT_ROOM];
@@ -231,6 +252,7 @@ protected:
 	DirectX::XMFLOAT3 m_front;
 
 	Player* m_target;
+	Player* latest_damage_player;
 
 	FLOAT currentTime = 0.f;
 	FLOAT elapsedTime = 0.f;
@@ -259,3 +281,5 @@ protected:
 
 void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room);
 void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room);
+
+void SetFaceDirection(Monster* monster);

@@ -68,6 +68,7 @@ constexpr char SC_PACKET_JOIN_ROOM = 19;
 constexpr char SC_PACKET_QUIT_ROOM = 20;
 constexpr char SC_PACKET_ADD_ROOM_PLAYER = 21;
 constexpr char SC_PACKET_ITEM_INFO = 22;
+constexpr char SC_PACKET_SHOT = 23;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -374,6 +375,14 @@ struct SC_ITEM_INFO_PACKET
 	UCHAR type;
 	INT money;
 	INT item_info[10];
+};
+
+struct SC_SHOT_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	DirectX::XMFLOAT3 pos;
+	CHAR weapon;
 };
 #pragma pack (pop)
 

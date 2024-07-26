@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "CAPObject.h"
 
-enum GameRoomState { G_FREE, G_CREATE, G_INGAME, G_END };
+enum GameRoomState { G_FREE, G_CREATE, G_INGAME };
 
 class GameRoom
 {
@@ -19,7 +19,6 @@ public:
 
 	BOOL SetStartGame();
 	void SetCreateRoom();
-	void SetEndGame();
 	void SetFreeRoom();
 
 	void SetStateLock() { m_state_lock.lock(); }

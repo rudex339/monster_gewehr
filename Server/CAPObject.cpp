@@ -1,5 +1,7 @@
 #include "CAPObject.h"
 #include <random>
+#include <chrono>
+using namespace std::chrono_literals;
 
 #define LAND_Y 0.f
 #define RUNAWAY_POINT 3
@@ -96,6 +98,8 @@ Player::Player(int id, SOCKET socket)
 	m_is_ready = false;
 
 	// 나중에 데이터베이스 연동하면 삭제해라
+	m_money = 1000;
+
 	m_item_info[0] = 0;
 	m_item_info[1] = 0;
 	m_item_info[2] = 0;
@@ -128,6 +132,8 @@ void Player::PlayerInit()
 
 	m_is_host = false;
 	m_is_ready = false;
+
+	death_count = 0;
 }
 
 void Player::SetWeapon(char weapon)
@@ -194,7 +200,7 @@ Monster::Monster()
 
 	turnning_speed = 0.3f;
 	move_speed = 0.07f;
-	fly_up_speed = 0.05f;
+	fly_up_speed = 0.1f;
 
 	m_yaw = 0.0f;
 
@@ -331,6 +337,9 @@ void Monster::InitMonster()
 
 	m_animation = idle_ani;
 	m_state = idle_state;
+	prev_state = curr_state = idle_state;
+
+	home = 0;
 
 	m_bounding_box.Center = m_position;
 	m_bounding_box.Center.y += 15.0f;
@@ -340,8 +349,8 @@ void Monster::InitMonster()
 	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
 	m_bounding_box.Orientation = q;
 }
-
-
+bool tail_attack_on = false;
+// functions
 
 void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
@@ -352,6 +361,8 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		build_bt(monster, players, room);
 	}
 
+	else if (monster->GetState() == runaway_state) return;
+
 	else if (hp <= monster->GetRAHp()) {
 		monster->SetState(runaway_state);
 		if (hp >= 300.0f) {
@@ -361,63 +372,166 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 	}
 }
 
+float CalculateAngleBetweenVectors(XMVECTOR vecA, XMVECTOR vecB) {
+	// Extract the x and z components and ignore the y component
+	XMVECTOR vecAXZ = XMVectorSet(XMVectorGetX(vecA), 0.0f, XMVectorGetZ(vecA), 0.0f);
+	XMVECTOR vecBXZ = XMVectorSet(XMVectorGetX(vecB), 0.0f, XMVectorGetZ(vecB), 0.0f);
 
-//// Behaviors
+	// Normalize the vectors
+	XMVECTOR vecANormalized = XMVector3Normalize(vecAXZ);
+	XMVECTOR vecBNormalized = XMVector3Normalize(vecBXZ);
+
+	// Calculate the dot product
+	float dotProduct = XMVectorGetX(XMVector3Dot(vecANormalized, vecBNormalized));
+
+	// Ensure the dot product is within the valid range for arccos
+	dotProduct = max(-1.0f, min(1.0f, dotProduct));
+
+	// Calculate the angle in radians
+	float angleRadians = acosf(dotProduct);
+
+	// Calculate the cross product
+	XMVECTOR crossProduct = XMVector3Cross(vecANormalized, vecBNormalized);
+
+	// Extract the y component of the cross product
+	float crossY = XMVectorGetY(crossProduct);
+
+	// Determine the sign of the angle based on the cross product's y component
+	if (crossY < 0) {
+		angleRadians = -angleRadians;
+	}
+
+	// Convert the angle from radians to degrees
+	float angleDegrees = XMConvertToDegrees(angleRadians);
+
+	return angleDegrees;
+}
+
+bool is_toofar(Monster* monster) {
+	if (monster->GetPosition().x <= monster->sector_line[monster->home][0] || (monster->GetPosition().x >= monster->sector_line[monster->home][2]) ||
+		monster->GetPosition().z <= monster->sector_line[monster->home][1] || (monster->GetPosition().z >= monster->sector_line[monster->home][3])) {
+		return true;
+	}
+	return false;
+}
+
+bool tail_attack_check(Monster* monster) {
+	if (Distance(monster->GetPosition(), monster->GetTarget()->GetPosition()) <= 200.0f) {
+		return true;
+	}
+	if (tail_attack_on) {
+		return true;
+	}
+
+	return false;
+}
+
+// 가야하는 방향(타겟)을 향해 쳐다보도록 회전하는 함수
+void SetFaceDirection(Monster* monster)
+{
+	XMFLOAT3 target = monster->GetTargetPos();
+	XMFLOAT3 pos = { monster->GetPosition().x, LAND_Y, monster->GetPosition().z };
+
+	XMVECTOR targetPosVec = XMLoadFloat3(&target);
+	XMVECTOR currentPosVec = XMLoadFloat3(&pos);
+
+	XMVECTOR frontVec = XMVector3Normalize(XMVectorSubtract(targetPosVec, currentPosVec)); // 봐야하는 방향
+
+	// 회전각 계산후 적용
+	XMFLOAT3 Front = monster->GetFront();
+	XMVECTOR currentFrontVec = XMLoadFloat3(&Front);
+	float angle = CalculateAngleBetweenVectors(currentFrontVec, frontVec);
+	monster->SetYaw(monster->GetYaw() + angle);
+
+	// 방향을 적용
+	XMFLOAT3 setfront;
+	XMStoreFloat3(&setfront, frontVec);
+	monster->SetFront(setfront);
+}
+
+//-----------------------------------------------------------------------------------------
+//// Behaviors Nodes
 
 // idle
-Selector	idle_selector;
-	Sequence	idle_sequence;
-		Sequence	attentive_sequence;
-			Leaf		find_near_user_node;
-			Leaf		idle_to_fight_node;
-	Leaf		choose_random_action_node;
-	Selector	choose_action_selector;
-		Selector	go_to_home_selector;
-			Leaf		check_far_node;
-			Leaf		go_to_home_node;
-			//Leaf		wait
-		Leaf		growling_node;
-		Leaf		do_nothing_node;
-		Sequence	patrol_sequence;
-			Leaf		find_random_pos_node;
-			Leaf		move_to_node;
-			Leaf		patrol_cool_time_node;
+Selector idle_selector;
+	Leaf check_near_user_node;
+	Leaf idle_to_home_node; ConditionChecker idle_to_home_dec;	 // conditional dec 
+	Sequence action_seq;
+		RandomNode random_action;
+			Sequence patrol_seq;
+				Leaf set_patrol_pos_node;
+				Leaf go_to_pos_node;
+			Leaf growling_node;
+			Leaf sleep_node;
+		Leaf set_idle_ani_node;
+		Leaf wait_next_idle_node; TimeLimiter wait_next_idle_dec; // delay dec
+
 	
+// alert_state
+Selector alert_selector;
+	Sequence check_near_user_seq;
+		Leaf checking_user_node;
+		Leaf to_fight_time_check_node;
+		Leaf alert_to_fight_node;
+	Sequence alert_to_idle_seq;
+		Leaf to_idle_time_check_node;
+		Leaf alert_to_idle_node;
+
 
 // fight
 Sequence fight_sequence;
-	Selector	search_user_selector;
-		Leaf		search_user_node;
-		Leaf		search_time_out_node;
-		Leaf		fight_to_idle_node;
-	Selector	choose_user_selector;
-		Leaf		choose_user_time_out_node;
-		Leaf		choose_user_node;
-	Selector	attack_selector;
-		Sequence	dash_or_move_sequence;
-			Leaf	dash_time_out_node;
-			Sequence	dash_sequence;
-				Leaf        set_target_node;
-				Leaf        charging_dash_node;
-				Leaf        dash_attack_node;
-				Leaf        dash_cool_time_node;
-		Sequence	move_to_bite_sequence;
-			Leaf		move_to_user_node;
-			Sequence	bite_attack_sequence;
-				Leaf		bite_attack_node;
-				Leaf		bite_cooltime_node;
-
+	Sequence find_user_seq;
+		Selector check_near_user_sel;
+			Leaf find_user_node;
+			Leaf fight_to_alert_node;
+		RandomNode	choice_target_user_randnode;
+			Leaf choice_latest_user_node;
+			Leaf choice_near_user_node;
+			Leaf choice_far_user_node;
+			Leaf choice_random_user_node;
+	Selector go2home_or_attack_sel;
+		Leaf fight_to_go2home_node; ConditionChecker fight_to_home_dec;
+		RandomNode attack_randomnode;
+			Leaf fireball_node;
+			Sequence dash_seq;
+				Leaf change_ani_node;
+				Leaf charging_dash_node;	TimeLimiter dash_attack_dec;
+				Leaf dash_attack_node;	
+			Sequence bite_seq;
+				Selector bite_attack_check_sel;
+					Sequence bite_timeout_dash_seq;
+						Leaf move_to_bite_time_check_node; 
+						// 돌진 시퀀스 재사용
+					Sequence move_to_bite_seq;
+						Leaf move_to_bite_node;
+						Leaf bite_node;
+			Sequence irontail_seq;	ConditionChecker user_distance_dec;
+				// change_ani_node 노드 재활용
+				Leaf charging_irontail_node;	TimeLimiter irontail_dec;
+				Leaf irontail_node;
+	Leaf change_ani_to_idle_node;
+	Leaf wait_next_attack_node;	TimeLimiter wait_next_attack_dec;
 
 // runaway
-Sequence	runaway_sequence;
-	Leaf		set_runaway_location_node;
-	Leaf		flyup_node;
-	Leaf		runaway_node;
-	Leaf		landing_node;
-	Leaf		runaway_to_idle_node;
+Sequence runaway_sequence;
+	Leaf set_runaway_point_node;
+	Leaf take_off_node;
+	Leaf fly_up_node;
+	Leaf fly_to_point_node;
+	Leaf fly_down_node;
+	Leaf landing_node;
+	Leaf runaway_to_idle_node; TimeLimiter wait_change_to_idle_dec;
+
+// go home
+Sequence goHome_sequence;
+	Leaf move_to_home_node;
+	Leaf go2home_to_idle_node; TimeLimiter wait_gohome_to_idle_dec;
 
 // die
 Leaf	die_node;
+
+// blind
+Sequence blind_sequence;
 
 // runaway points
 XMFLOAT3 runaway_point01 = XMFLOAT3(2200.0f, LAND_Y, 3100.0f);
@@ -426,52 +540,143 @@ XMFLOAT3 runaway_point03 = XMFLOAT3(340.f, LAND_Y, 1450.f);
 
 XMFLOAT3 runaway_point[RUNAWAY_POINT] = { runaway_point01, runaway_point02, runaway_point03 };
 
-static float bite_attack_time = 0.0f;
-static float dash_attack_time = 0.0f;
-static float charging_dash_time = 0.0f;
-static float do_nothing_time = 0.0f;
-
-static float time_out_search = 0.0f;
-static float time_out_dash = 0.0f;
-static float time_out_choose = 100000.0f;
-
-void Monster::dash(float time)
-{
-	time_out_dash = time;
+//-----------------------------------------------------------------------------------------
+//// Behaviors Function
+int success() {
+	return BehaviorTree::SUCCESS;
 }
 
-//fight
-int search_target(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
-{
+int fail() {
+	return BehaviorTree::FAIL;
+}
+
+///////////// idle
+int check_near_user_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
 	bool isTargetExist = false;
-
-	/*for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
-		auto playerIter = players->find(i);
-		if (playerIter != players->end()) {
-			monster->SetUserArround(i, false);
-			if (playerIter->second.GetID() != -1 ) {
-				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
-					isTargetExist = true;
-					monster->SetUserArround(i, true);
-				}
-			}
-		}
-	}*/
-
 	for (int i : room->GetPlyId()) {
 		if (i == -1) continue;
 		auto playerIter = players->find(i);
 		if (playerIter != players->end()) {
 			monster->SetUserArround(i, false);
 			if (playerIter->second.GetID() != -1) {
-				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= IDLE_FIND_USER_DISTANCE) {
 					isTargetExist = true;
 					monster->SetUserArround(i, true);
 				}
 			}
 		}
 	}
+	if (isTargetExist) {
+		monster->SetAnimation(idle_ani);
+		monster->SetState(alert_state);
+		build_bt(monster, players, room);
 
+		return BehaviorTree::SUCCESS;
+	}
+
+	return BehaviorTree::FAIL;
+}
+
+int idle_to_gohome(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
+	monster->SetState(gohome_state);
+	build_bt(monster, players, room);
+
+	return BehaviorTree::SUCCESS;
+}
+
+int set_random_pos(Monster* monster) {
+	XMFLOAT3 randompos;
+	float dir = minus(gen);
+	dir = (dir / abs(dir));
+	randompos.x = monster->GetPosition().x + urd(gen) * dir;
+	randompos.y = monster->GetPosition().y;
+	randompos.z = monster->GetPosition().z + urd(gen) * dir;
+
+	monster->SetTargetPos(randompos);
+
+	return BehaviorTree::SUCCESS;
+}
+
+int move_to_random_pos(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(walk_ani);
+
+
+	if (is_toofar(monster)) {
+		monster->SetState(gohome_state);
+		build_bt(monster, players, room);
+		return BehaviorTree::SUCCESS;
+	}
+
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) {
+		monster->SetAnimation(idle_ani);
+		return BehaviorTree::SUCCESS;
+	}
+	SetFaceDirection(monster);
+
+	monster->Foward(monster->GetElapsedTime());
+	return BehaviorTree::RUNNING;
+}
+
+
+
+
+int growling(Monster* monster) {
+	monster->SetAnimation(growl_ani);
+
+	static float growlTime = 0.f;
+	if (growlTime <= GROWL_ANI_TIME) {
+		growlTime += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		growlTime = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int sleeping(Monster* monster) {
+	monster->SetAnimation(sleep_ani);
+
+	static float sleepTime = 0.f;
+	if (sleepTime <= SLEEP_ANI_TIME) {
+		sleepTime += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		sleepTime = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int setAnimIdle(Monster* monster) {
+	monster->SetAnimation(idle_ani);
+	return BehaviorTree::SUCCESS;
+}
+
+int wait_next_idle(Monster* monster) {
+	return BehaviorTree::SUCCESS;
+}
+
+///////////// alert
+static float a2f_time = 0.0f;
+static float a2i_time = 0.0f;
+
+int check_near_user_alert(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	bool isTargetExist = false;
+	for (int i : room->GetPlyId()) {
+		if (i == -1) continue;
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			monster->SetUserArround(i, false);
+			if (playerIter->second.GetID() != -1) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= ALERT_FIND_USER_DISTANCE) {
+					isTargetExist = true;
+					monster->SetUserArround(i, true);
+				}
+			}
+		}
+	}
 	if (isTargetExist) {
 		return BehaviorTree::SUCCESS;
 	}
@@ -479,41 +684,161 @@ int search_target(Monster* monster, std::unordered_map<INT, Player>* players, Ga
 	return BehaviorTree::FAIL;
 }
 
-int time_out(Monster* monster, float& timeout, float cooltime)
-{
-	timeout += monster->GetElapsedTime();
-	if (timeout < cooltime)
-		return BehaviorTree::SUCCESS;
-
-	else {
-		timeout = 0.0f;
-		return BehaviorTree::FAIL;
-	}
-}
-
-int dash_time_out(Monster* monster, float cooltime)
-{
-	time_out_dash += monster->GetElapsedTime();
-
-	if (time_out_dash < cooltime)
-		return BehaviorTree::FAIL;
-
-	else {
-		time_out_dash = 0.0f;
+int time_check_to_fight(Monster* monster) {
+	if (a2f_time >= ALERT_TO_FIGHT_TIME) {
+		a2f_time = 0;
+		a2i_time = 0;
 		return BehaviorTree::SUCCESS;
 	}
+	a2f_time += monster->GetElapsedTime();
+	return BehaviorTree::FAIL;
 }
 
-int to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
-{
-	monster->SetState(idle_state);
+int alert_to_fight(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetState(fight_state);
 	build_bt(monster, players, room);
-
 	return BehaviorTree::SUCCESS;
 }
 
-int choose_target(Monster* monster, std::unordered_map<INT, Player>* players)
-{
+int time_check_to_idle(Monster* monster) {
+	if (a2i_time >= ALERT_TO_IDLE_TIME) {
+		a2i_time = 0;
+		a2f_time = 0;
+		return BehaviorTree::SUCCESS;
+	}
+	a2i_time += monster->GetElapsedTime();
+	return BehaviorTree::FAIL;
+}
+
+int alert_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetState(idle_state);
+	build_bt(monster, players, room);
+	return BehaviorTree::SUCCESS;
+}
+
+
+/////////// fight
+static float check_time = 0.0f;
+
+int check_near_user_fight(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	bool isTargetExist = false;
+	for (int i : room->GetPlyId()) {
+		if (i == -1) continue;
+		auto playerIter = players->find(i);
+		if (playerIter != players->end()) {
+			monster->SetUserArround(i, false);
+			if (playerIter->second.GetID() != -1) {
+				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= IDLE_FIND_USER_DISTANCE) {
+					isTargetExist = true;
+					monster->SetUserArround(i, true);
+				}
+			}
+		}
+	}
+	if (isTargetExist) {
+		return BehaviorTree::SUCCESS;
+	}
+
+	return BehaviorTree::FAIL;
+}
+
+int fight_to_alert(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
+	monster->SetState(alert_state);
+	build_bt(monster, players, room);
+	return BehaviorTree::SUCCESS;
+}
+
+int choice_latest_user(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	// 공격받은 적이 없다면 실패
+	if (monster->GetLatestAttackPlayer() == nullptr) {
+		return BehaviorTree::FAIL;
+	}
+
+	//거리가 너무 멀면 실패
+	if (Distance(monster->GetLatestAttackPlayer()->GetPosition(), monster->GetPosition()) >= FIGHT_FIND_USER_DISTANCE) {
+		return BehaviorTree::FAIL;
+	}
+
+	if (monster->GetLatestAttackPlayer() != nullptr) {
+		monster->SetTarget(monster->GetLatestAttackPlayer());
+		monster->SetLatestAttackPlayer(nullptr); //한번 타겟을 설정하고 마지막 공격자 초기화하기
+		monster->SetTargetPos(monster->GetTarget()->GetPosition());
+		return BehaviorTree::SUCCESS;
+	}
+	// 최근 공격 유저가 사라지면 실패
+	return BehaviorTree::FAIL;
+}
+
+int choice_near_user(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	bool targetcheck[MAX_CLIENT_ROOM];
+	bool isTargetExist = false;
+
+	float min_distance = 10000000.0f;
+
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		targetcheck[i] = false;
+		if (monster->GetUserArround(i)) {
+			isTargetExist = true;
+			targetcheck[i] = true;
+		}
+	}
+
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		if (targetcheck[i]) {
+			auto playerIter = players->find(i);
+			if (playerIter != players->end()) {
+				float distance = Distance(playerIter->second.GetPosition(), monster->GetPosition());
+				if (distance < min_distance) {
+					min_distance = distance;
+					monster->SetTarget(&playerIter->second);
+				}
+			}
+		}
+	}
+
+	if (min_distance >= 100000.0f)
+		return BehaviorTree::FAIL;
+
+	monster->SetTargetPos(monster->GetTarget()->GetPosition());
+	return BehaviorTree::SUCCESS;
+}
+
+int choice_far_user(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	bool targetcheck[MAX_CLIENT_ROOM];
+	bool isTargetExist = false;
+
+	float max_distance = -100000000.0f;
+
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		targetcheck[i] = false;
+		if (monster->GetUserArround(i)) {
+			isTargetExist = true;
+			targetcheck[i] = true;
+		}
+	}
+
+	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
+		if (targetcheck[i]) {
+			auto playerIter = players->find(i);
+			if (playerIter != players->end()) {
+				float distance = Distance(playerIter->second.GetPosition(), monster->GetPosition());
+				if (distance > max_distance) {
+					max_distance = distance;
+					monster->SetTarget(&playerIter->second);
+				}
+			}
+		}
+	}
+
+	if (max_distance <= -100000.0f)
+		return BehaviorTree::FAIL;
+
+	monster->SetTargetPos(monster->GetTarget()->GetPosition());
+	return BehaviorTree::SUCCESS;
+}
+
+int choice_random_user(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
 	bool targetcheck[MAX_CLIENT_ROOM];
 	bool isTargetExist = false;
 
@@ -530,6 +855,7 @@ int choose_target(Monster* monster, std::unordered_map<INT, Player>* players)
 			int target = random_0_to_100(gen) % 4;
 			if (targetcheck[target]) {
 				monster->SetTarget(&players->find(target)->second);
+				monster->SetTargetPos(monster->GetTarget()->GetPosition());
 				return BehaviorTree::SUCCESS;
 			}
 		}
@@ -538,320 +864,155 @@ int choose_target(Monster* monster, std::unordered_map<INT, Player>* players)
 	return BehaviorTree::FAIL;
 }
 
-int charging_dash(Monster* monster)
-{
-	//monster->SetAnimation(dash_ani);
-	// 대쉬 준비하는 애니메이션
-
-	charging_dash_time += monster->GetElapsedTime();
-	
-	std::cout << charging_dash_time << std::endl;
-
-	if (charging_dash_time < DASH_CHARGING_TIME) {
-		return BehaviorTree::RUNNING;
-	}
-	charging_dash_time = 0.0f;
+int fight_to_home(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
+	monster->SetState(gohome_state);
+	build_bt(monster, players, room);
 	return BehaviorTree::SUCCESS;
 }
 
-int dash_attack(Monster* monster)
-{
+int fire_ball(Monster* monster) {
+	SetFaceDirection(monster);
+	monster->SetAnimation(fireball_ani);
+	static float firetime = 0.0f;
+	if (firetime >= FIREBALL_ANI_TIME) {
+		firetime = 0;
+		monster->SetAnimation(idle_ani);
+		return BehaviorTree::SUCCESS;
+	}
+	firetime += monster->GetElapsedTime();
+	return BehaviorTree::RUNNING;
+}
+
+int change_ani_to_charge(Monster* monster) {
+	SetFaceDirection(monster);
+	monster->SetAnimation(charging_ani);
+	return BehaviorTree::SUCCESS;
+}
+
+int charging_dash(Monster* monster) {
+	return BehaviorTree::SUCCESS;
+}
+
+int dash(Monster* monster) {
 	monster->SetAnimation(dash_ani);
 
-	dash_attack_time += monster->GetElapsedTime();
-	if (dash_attack_time < DASH_TIME) {
-		monster->Foward(monster->GetElapsedTime() * DASH_SPEED);
-		return BehaviorTree::RUNNING;
-	}
-	dash_attack_time = 0.0f;
-	return BehaviorTree::SUCCESS;
-}
-
-int bite_attack(Monster* monster)
-{
-	monster->SetAnimation(bite_ani);
-	bite_attack_time += monster->GetElapsedTime();
-	if (bite_attack_time < BITE_ANIMATION) {
-		time_out_dash = 0.0f;
-		return BehaviorTree::RUNNING;
-	}
-	bite_attack_time = 0.0f;
-	charging_dash_time = 0.0f;
-	return BehaviorTree::SUCCESS;
-}
-
-//// idle
-int attent(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room, float cooltime)
-{
-	bool isTargetExist = false;
-
-	/*for (int i = 0; i < MAX_CLIENT; i++) {
-		auto playerIter = players->find(i);
-		if (playerIter != players->end()) {
-			monster->SetUserArround(i, false);
-			if (playerIter->second.GetID() != -1) {
-				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
-					isTargetExist = true;
-					monster->SetUserArround(i, true);
-				}
-			}
-		}
-	}*/
-
-	for (int i : room->GetPlyId()) {
-		if (i == -1) continue;
-		auto playerIter = players->find(i);
-		if (playerIter != players->end()) {
-			monster->SetUserArround(i, false);
-			if (playerIter->second.GetID() != -1) {
-				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
-					isTargetExist = true;
-					monster->SetUserArround(i, true);
-				}
-			}
-		}
-	}
-
-	if (isTargetExist) {
-		monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
-		if (monster->GetWaitTime() < cooltime) {
-			return BehaviorTree::RUNNING;
-		}
-		else {
-			monster->SetWaitTime(0.0f);
-			return BehaviorTree::SUCCESS;
-		}
-	}
-
-	return BehaviorTree::FAIL;
-
-}
-
-int find_near_user(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room, float cooltime)
-{
-	bool isTargetExist = false;
-
-	for (int i = 0; i < MAX_CLIENT_ROOM; i++) {
-		auto playerIter = players->find(i);
-		if (playerIter != players->end()) {
-			if (playerIter->second.GetID() != -1) {
-				if (Distance(monster->GetPosition(), playerIter->second.GetPosition()) <= FIND_USER_DISTANCE) {
-					isTargetExist = true;
-				}
-			}
-		}
-	}
-
-	if (isTargetExist) {
-		monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
-
-		if (monster->GetWaitTime() < cooltime)
-			return BehaviorTree::RUNNING;
-
-		else {
-			monster->SetWaitTime(0.0f);
-			return BehaviorTree::SUCCESS;
-		}
-	}
-
-	return BehaviorTree::FAIL;
-}
-
-int to_fight(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
-{
-	monster->SetState(fight_state);
-	build_bt(monster, players, room);
-
-
-	return BehaviorTree::SUCCESS;
-}
-
-int choose_action(Monster* monster)
-{
-	monster->SetChoice(random_0_to_100(gen));
-
-	return BehaviorTree::SUCCESS;
-}
-
-int wait_cool_time(Monster* monster, FLOAT cooltime)
-{
-	monster->SetAnimation(idle_ani);
-	monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
-
-	if (monster->GetWaitTime() < cooltime)
-		return BehaviorTree::RUNNING;
-
-	else {
-		monster->SetWaitTime(0.0f);
-		return BehaviorTree::SUCCESS;
-	}
-}
-
-int growling(Monster* monster)
-{
-	if (monster->GetChoice() <= 10) {
-		monster->SetAnimation(growl_ani);
-		monster->SetWaitTime(monster->GetWaitTime() + monster->GetElapsedTime());
-		if (monster->GetWaitTime() < 5200.0f) {
-			// 위 시간을 포효하는 애니메이션 시간으로 조정
-			return BehaviorTree::RUNNING;
-		}
-		monster->SetWaitTime(0.0f);
-		return BehaviorTree::SUCCESS;
-	}
-	return BehaviorTree::FAIL;
-}
-
-int do_nothing(Monster* monster, float time)
-{
-	if (monster->GetChoice() <= 40) {
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 12.0f) {
 		monster->SetAnimation(idle_ani);
-		do_nothing_time += monster->GetElapsedTime();
-
-		if (do_nothing_time < time)
-			return BehaviorTree::RUNNING;
-
-		else {
-			do_nothing_time = 0.0f;
-			return BehaviorTree::SUCCESS;
-		}
+		return BehaviorTree::SUCCESS;
 	}
-	return BehaviorTree::FAIL;
+	SetFaceDirection(monster);
+
+	monster->Foward(monster->GetElapsedTime() * 3.0f);
+	return BehaviorTree::RUNNING;
 }
 
-// patrol
-
-int find_random_pos(Monster* monster)
-{
-	XMFLOAT3 randompos;
-	float dir = minus(gen);
-	dir = (dir / abs(dir));
-	randompos.x = monster->GetPosition().x + urd(gen) * dir;
-	randompos.y = monster->GetPosition().y;
-	randompos.z = monster->GetPosition().z + urd(gen) * dir;
-
-	monster->SetTargetPos(randompos);
-
-	return BehaviorTree::SUCCESS;
-}
-
-int move_to(Monster* monster)
-{
+int move_to_bite(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
 	monster->SetAnimation(walk_ani);
 
-	if (monster->GetPosition().y >= LAND_Y + 100.f) {
-		monster->SetAnimation(flying_ani);
+	monster->SetTargetPos(monster->GetTarget()->GetPosition());
+
+	if (is_toofar(monster)) {
+		monster->SetAnimation(idle_ani);
+		monster->SetState(gohome_state);
+		build_bt(monster, players, room);
+		return BehaviorTree::SUCCESS;
 	}
 
-	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) return BehaviorTree::SUCCESS;
-
-	XMFLOAT3 target = monster->GetTargetPos();
-	XMFLOAT3 pos = monster->GetPosition();
-
-	XMVECTOR targetPosVec = XMLoadFloat3(&target);
-	XMVECTOR currentPosVec = XMLoadFloat3(&pos);
-
-	XMVECTOR frontVec = XMVector3Normalize(XMVectorSubtract(targetPosVec, currentPosVec)); // 봐야하는 방향
-
-	XMVECTOR upVec = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	XMFLOAT3 front = monster->GetFront();
-	XMVECTOR FrontVec = XMLoadFloat3(&front); // 몬스터가 현재 보는 방향
-
-	bool isleft = XMVectorGetX(XMVector3Dot(upVec, XMVector3Cross(FrontVec, frontVec))) > 0;
-
-	float angle;
-	XMVECTOR angleVec = XMVector3AngleBetweenNormals(FrontVec, frontVec);
-	XMStoreFloat(&angle, angleVec);
-
-	angle = angle * XMVectorGetX(XMVector3Dot(upVec, XMVector3Cross(FrontVec, frontVec)));
-
-	if (angle < -0.02f) {
-		monster->Left(monster->GetElapsedTime());
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 35.0f) {
+		return BehaviorTree::SUCCESS;
 	}
-	else if (angle > 0.02f) {
-		monster->Right(monster->GetElapsedTime());
-	}
-	else {
-		XMFLOAT3 setfront;
-		XMStoreFloat3(&setfront, frontVec);
-		monster->SetFront(setfront);
-	}
+	SetFaceDirection(monster);
+
 	monster->Foward(monster->GetElapsedTime());
 	return BehaviorTree::RUNNING;
 }
 
-int move_to_user(Monster* monster, std::unordered_map<INT, Player>* players)
-{
-	monster->SetAnimation(walk_ani);
-
-	auto playerIter = players->find(monster->GetTarget()->GetID());
-	monster->SetTargetPos(playerIter->second.GetPosition());
-
-	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 35.0f)
+int bite(Monster* monster) {
+	check_time = 0;
+	SetFaceDirection(monster);
+	monster->SetAnimation(bite_ani);
+	static float bitetime = 0.0f;
+	//std::cout << "깨물기 재생중 " << TAIL_ANI_TIME - bitetime << "남음" << std::endl;
+	if (bitetime >= BITE_ANI_TIME) {
+		bitetime = 0.0f;
 		return BehaviorTree::SUCCESS;
-
-	XMFLOAT3 target = monster->GetTargetPos();
-	XMFLOAT3 pos = monster->GetPosition();
-
-	XMVECTOR targetPosVec = XMLoadFloat3(&target);
-	XMVECTOR currentPosVec = XMLoadFloat3(&pos);
-
-	XMVECTOR frontVec = XMVector3Normalize(XMVectorSubtract(targetPosVec, currentPosVec)); // 봐야하는 방향
-
-	XMVECTOR upVec = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	XMFLOAT3 front = monster->GetFront();
-	XMVECTOR FrontVec = XMLoadFloat3(&front); // 몬스터가 현재 보는 방향
-
-	bool isleft = XMVectorGetX(XMVector3Dot(upVec, XMVector3Cross(FrontVec, frontVec))) > 0;
-
-	float angle;
-	XMVECTOR angleVec = XMVector3AngleBetweenNormals(FrontVec, frontVec);
-	XMStoreFloat(&angle, angleVec);
-
-
-	angle = angle * XMVectorGetX(XMVector3Dot(upVec, XMVector3Cross(FrontVec, frontVec)));
-
-	if (angle < -0.01f) {
-		monster->Left(monster->GetElapsedTime());
 	}
-	else if (angle > 0.01f) {
-		monster->Right(monster->GetElapsedTime());
-	}
-	else {
-		XMFLOAT3 setfront;
-		XMStoreFloat3(&setfront, frontVec);
-		monster->SetFront(setfront);
-	}
-	monster->Foward(monster->GetElapsedTime());
+	bitetime += monster->GetElapsedTime();
+	return BehaviorTree::RUNNING;
+}
 
+int time_check_to_dash(Monster* monster) {
+	if (check_time >= BITE_TO_DASH_TIMEOUT) {
+		check_time = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+	check_time += monster->GetElapsedTime();
 	return BehaviorTree::FAIL;
 }
 
-
-
-
-// run away
-int set_runaway_location(Monster* monster)
-{
-	int point = 0;
-	while (1) {
-		point = rand_runaway_point(gen);
-		if (Distance(monster->GetPosition(), runaway_point[point]) > 300.f) {
-			monster->SetTargetPos(runaway_point[point]);
-			break;
-		}
-	}
-
+int charging_irontail(Monster* monster) {
+	SetFaceDirection(monster);
 	return BehaviorTree::SUCCESS;
 }
 
-int fly_up(Monster* monster)
-{
+int irontail(Monster* monster) {
+	monster->SetAnimation(tail_ani);
+	static float tailtime = 0.0f;
+	tail_attack_on = true;
+	//std::cout << "꼬리치기 재생중 " << TAIL_ANI_TIME - tailtime << "남음" << std::endl;
+	if (tailtime >= TAIL_ANI_TIME) {
+		tailtime = 0.0f;
+		tail_attack_on = false;
+		return BehaviorTree::SUCCESS;
+	}
+	tailtime += monster->GetElapsedTime();
+	return BehaviorTree::RUNNING;
+}
+
+int change_ani_to_idle(Monster* monster) {
+	monster->SetAnimation(idle_ani);
+	return BehaviorTree::SUCCESS;
+}
+
+int wait_next_attack(Monster* monster) {
+	check_time = 0.0f; // 깨물려고 가다가 대쉬하는 시간 체크를 초기화
+	return BehaviorTree::SUCCESS;
+}
+
+
+/////////// runaway
+int set_runaway_point(Monster* monster) {
+	int point = 0;
+	while (1) {
+		point = rand_runaway_point(gen);
+		if (point != monster->home) {
+			monster->SetTargetPos(runaway_point[point]);
+			monster->home = point;
+			break;
+		}
+	}
+	return BehaviorTree::SUCCESS;
+}
+
+int take_off(Monster* monster) {
 	monster->SetAnimation(flyup_ani);
 
-	if (monster->GetPosition().y <= 1200.f) {
+	static float takeoff_time = 0.f;
+	if (takeoff_time <= TAKE_OFF_ANI_TIME) {
+		takeoff_time += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		takeoff_time = 0.0f;
+		monster->SetPostion(monster->GetPosition().x, monster->GetPosition().y + 30.0f, monster->GetPosition().z);
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int fly_up(Monster* monster) {
+	monster->SetAnimation(flyidle_ani);
+	if (monster->GetPosition().y <= 500.f) {
 
 		monster->Up(monster->GetElapsedTime());
 		return BehaviorTree::RUNNING;
@@ -860,24 +1021,78 @@ int fly_up(Monster* monster)
 	return BehaviorTree::SUCCESS;
 }
 
-int landing(Monster* monster)
-{
-	monster->SetAnimation(landing_ani);
+int fly_to_point(Monster* monster) {
+	monster->SetAnimation(flying_ani);
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) 
+		return BehaviorTree::SUCCESS;
+
+	SetFaceDirection(monster);
+
+	monster->Foward(monster->GetElapsedTime()*3.0f);
+	return BehaviorTree::RUNNING;
+}
+
+int fly_down(Monster* monster) {
+	monster->SetAnimation(flyidle_ani);
 
 	if (monster->GetPosition().y >= LAND_Y) {
+
 		monster->Down(monster->GetElapsedTime());
 		return BehaviorTree::RUNNING;
 	}
-
-	XMFLOAT3 pos = monster->GetPosition();
-	pos.y = LAND_Y;
-	monster->SetPostion(pos);
-
 	return BehaviorTree::SUCCESS;
 }
 
-// die
+int landing(Monster* monster) {
+	monster->SetAnimation(landing_ani);
 
+	static float landing_time = 0.f;
+	if (landing_time <= LANDING_ANI_TIME) {
+		landing_time += monster->GetElapsedTime();
+		return BehaviorTree::RUNNING;
+	}
+	else {
+		landing_time = 0.0f;
+		monster->SetAnimation(idle_ani);
+		monster->SetPostion(monster->GetPosition().x, LAND_Y, monster->GetPosition().z);
+		return BehaviorTree::SUCCESS;
+	}
+}
+
+int runaway_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
+	monster->SetState(idle_state);
+	build_bt(monster, players, room);
+	return BehaviorTree::SUCCESS;
+}
+
+
+
+/////////// go Home
+int move_to_home(Monster* monster) {
+
+	monster->SetAnimation(walk_ani);
+
+	monster->SetTargetPos(runaway_point[monster->home]);
+
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) {
+		monster->SetAnimation(idle_ani);
+		return BehaviorTree::SUCCESS;
+	}
+	SetFaceDirection(monster);
+
+	monster->Foward(monster->GetElapsedTime());
+	return BehaviorTree::RUNNING;
+}
+
+int go2home_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
+	monster->SetState(idle_state);
+	build_bt(monster, players, room);
+	return BehaviorTree::SUCCESS;
+}
+
+/////////// die
 int die(Monster* monster)
 {
 	monster->SetAnimation(die_ani);
@@ -885,91 +1100,198 @@ int die(Monster* monster)
 	return BehaviorTree::RUNNING;
 }
 
+
 void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
-	//fight
-	bite_cooltime_node = Leaf("CoolTime(bite)", std::bind(wait_cool_time, monster, BITE_COOLTIME));
-	bite_attack_node = Leaf("BITE!!", std::bind(bite_attack, monster));
-	bite_attack_sequence = Sequence("bite sequence", { &bite_attack_node, &bite_cooltime_node });
+	// idle
+	{
+		wait_next_idle_node = Leaf("TimeOut", std::bind(wait_next_idle, monster));
+		wait_next_idle_dec = TimeLimiter(&wait_next_idle_node, 2.0s);
 
-	move_to_user_node = Leaf("Move to Target User", std::bind(move_to_user, monster, players));
-	move_to_bite_sequence = Sequence("go_to_bite", { &move_to_user_node, &bite_attack_sequence });
+		set_patrol_pos_node = Leaf("Set Patrol Pos", std::bind(set_random_pos, monster));
+		go_to_pos_node = Leaf("Go To Random Pos", std::bind(move_to_random_pos, monster, players, room));
 
-	dash_cool_time_node = Leaf("CoolTime(Dash)", std::bind(wait_cool_time, monster, DASH_COOLTIME));
-	dash_attack_node = Leaf("DASH!!", std::bind(dash_attack, monster));
-	charging_dash_node = Leaf("Charging Dash...", std::bind(charging_dash, monster));
-	set_target_node = Leaf("Set Target", std::bind(choose_target, monster, players));
-	dash_sequence = Sequence("dash sequence", { &set_target_node, &charging_dash_node, &dash_attack_node, &dash_cool_time_node });
+		patrol_seq = Sequence("Patrol Seq", { &set_patrol_pos_node, &go_to_pos_node });
 
-	dash_time_out_node = Leaf("Timeout check(dash)", std::bind(dash_time_out, monster, CHASE_USER_TIME));
-	dash_or_move_sequence = Sequence("dash or move seq", { &dash_time_out_node, &dash_sequence });
-	attack_selector = Selector("attack selector", { &dash_or_move_sequence, &move_to_bite_sequence });
+		growling_node = Leaf("Growling", std::bind(growling, monster));
+		sleep_node = Leaf("Sleeping... Zzz", std::bind(sleeping, monster));
 
-	choose_user_node = Leaf("choose user", std::bind(choose_target, monster, players));
-	choose_user_time_out_node = Leaf("Timeout check(choose user)", std::bind(time_out, monster, time_out_choose, CHANGE_TARGET_USER_TIME));
-	choose_user_selector = Selector("choose user selector", { &choose_user_time_out_node, &choose_user_node });
+		random_action = RandomNode("Random Idle Action", { &patrol_seq, &growling_node, &sleep_node });
 
-	fight_to_idle_node = Leaf("State Change(fight->idle)", std::bind(to_idle, monster, players, room));
-	search_time_out_node = Leaf("Timeout check(Search)", std::bind(time_out, monster, time_out_search, CALMDOWN_TIME));
-	search_user_node = Leaf("Search Users", std::bind(search_target, monster, players, room));
+		set_idle_ani_node = Leaf("Change Animation to idle", std::bind(setAnimIdle, monster));
+		action_seq = Sequence("Action Sequence", { &random_action, &set_idle_ani_node, &wait_next_idle_dec });
 
-	search_user_selector = Selector("search user selector", { &search_user_node, &search_time_out_node, &fight_to_idle_node });
+		idle_to_home_node = Leaf("GotoHome", std::bind(idle_to_gohome, monster, players, room));
+		idle_to_home_dec = ConditionChecker(&idle_to_home_node, [monster]() {
+			if (is_toofar(monster))
+				return true;
+			else
+				return false;
+			});
 
-	fight_sequence = Sequence("fight sequence(root)", { &search_user_selector, &choose_user_selector, &attack_selector });
+		check_near_user_node = Leaf("Check Near User(idle)", std::bind(check_near_user_idle, monster, players, room));
 
-	//idle
+		idle_selector = Selector("IDLE", { &check_near_user_node, &idle_to_home_dec, &action_seq });
+	}
+
+	// alert
+	{
+		alert_to_idle_node = Leaf("Alert to Idle", std::bind(alert_to_idle, monster, players, room));
+		to_idle_time_check_node = Leaf("To idle Time Check", std::bind(time_check_to_idle, monster));
+
+		alert_to_idle_seq = Sequence("Alert To Idle Sequence", { &to_idle_time_check_node, &alert_to_idle_node });
+
+		alert_to_fight_node = Leaf("Alert to Fight", std::bind(alert_to_fight, monster, players, room));
+		to_fight_time_check_node = Leaf("To idle Time Check", std::bind(time_check_to_fight, monster));
+		checking_user_node = Leaf("Check Near User(alert)", std::bind(check_near_user_alert, monster, players, room));
+
+		check_near_user_seq = Sequence("Check Near User Sequence", { &checking_user_node, &to_fight_time_check_node, &alert_to_fight_node });
+
+		alert_selector = Selector("Alert Selector", { &check_near_user_seq, &alert_to_idle_seq });
+	}
+
+	// fight
+	{
+		wait_next_attack_node = Leaf("Next Attack", std::bind(wait_next_attack, monster));
+		wait_next_attack_dec = TimeLimiter(&wait_next_attack_node, NEXT_ATTACK_TIME);
+
+		change_ani_to_idle_node = Leaf("Change animation -> idle", std::bind(change_ani_to_idle, monster));
+			
+		irontail_node = Leaf("IRON TAIL", std::bind(irontail, monster));
+		charging_irontail_node = Leaf("charging irontail", std::bind(charging_irontail, monster));
+		irontail_dec = TimeLimiter(&charging_irontail_node, CHARGING_IRONTAIL_TIME);
+		
+		change_ani_node = Leaf("change ani", std::bind(change_ani_to_charge, monster));
+
+		irontail_seq = Sequence("IronTail Sequence", { &change_ani_node, &irontail_dec, &irontail_node });
+		user_distance_dec = ConditionChecker(&irontail_seq, [monster]() {
+			if (tail_attack_check(monster))
+				return true;
+			else
+				return false;
+			});
+
+		dash_attack_node = Leaf("DASH", std::bind(dash, monster));
+		charging_dash_node = Leaf("charging irontail", std::bind(charging_dash, monster));
+		dash_attack_dec = TimeLimiter(&charging_dash_node, CHARGING_DASH_TIME);
+
+		dash_seq = Sequence("Dash Sequence", { &change_ani_node, &dash_attack_dec, &dash_attack_node });
+
+		fireball_node = Leaf("FIREBALL", std::bind(fire_ball, monster));
+
+		bite_node = Leaf("BITE", std::bind(bite, monster));
+		move_to_bite_node = Leaf("move to bite", std::bind(move_to_bite, monster, players, room));
+
+		move_to_bite_seq = Sequence("move_to_bite_Sequence", { &move_to_bite_node, &bite_node });
+
+		move_to_bite_time_check_node = Leaf("move timeout dash now", std::bind(time_check_to_dash, monster));
+
+		bite_timeout_dash_seq = Sequence("bite_timeout_dash Sequence", { &move_to_bite_time_check_node, &dash_seq });
+
+		bite_attack_check_sel = Selector("bite check", { &bite_timeout_dash_seq, &move_to_bite_seq });
+
+		attack_randomnode = RandomNode("Random Attack", { &fireball_node, &dash_seq, &bite_attack_check_sel, &user_distance_dec });
+
+		fight_to_go2home_node = Leaf("go to home", std::bind(fight_to_home, monster, players, room));
+		fight_to_home_dec = ConditionChecker(&fight_to_go2home_node, [monster]() {
+			if (is_toofar(monster))
+				return true;
+			else
+				return false;
+			});
+
+		go2home_or_attack_sel = Selector("go home or attack", { &fight_to_home_dec, &attack_randomnode });
+
+		choice_random_user_node = Leaf("choice random user", std::bind(choice_random_user, monster, players, room));
+		choice_far_user_node = Leaf("choice random user", std::bind(choice_far_user, monster, players, room));
+		choice_near_user_node = Leaf("choice random user", std::bind(choice_near_user, monster, players, room));
+		choice_latest_user_node = Leaf("choice random user", std::bind(choice_latest_user, monster, players, room));
+
+		choice_target_user_randnode = RandomNode("Choice Random User", { &choice_latest_user_node, &choice_near_user_node, &choice_far_user_node, &choice_random_user_node });
+
+		
+		fight_to_alert_node = Leaf("fight to alert", std::bind(fight_to_alert, monster, players, room));
+		find_user_node = Leaf("search near user", std::bind(check_near_user_fight, monster, players, room));
+
+		check_near_user_sel = Selector("check near user", { &find_user_node, &fight_to_alert_node });
+
+		find_user_seq = Sequence("find user sequence", { &check_near_user_sel, &choice_target_user_randnode });
 
 
-	find_near_user_node = Leaf("Search Near User", std::bind(attent, monster, players, room, 3000.0f));
-	idle_to_fight_node = Leaf("Change State(idle->fight)", std::bind(to_fight, monster, players, room));
-
-
-	attentive_sequence = Sequence("Attent Sequence", { &find_near_user_node, &idle_to_fight_node });
-
-
-	choose_random_action_node = Leaf("Choose action", std::bind(choose_action, monster));
-
-	growling_node = Leaf("Growling", std::bind(growling, monster));
-	do_nothing_node = Leaf("Do Nothing", std::bind(do_nothing, monster, 2000.0f));
-
-	choose_action_selector = Selector("Do Action Selector", { &growling_node, &do_nothing_node, &patrol_sequence });
-
-
-
-	find_random_pos_node = Leaf("Find Random Position", std::bind(find_random_pos, monster));
-	move_to_node = Leaf("Move", std::bind(move_to, monster));
-	patrol_cool_time_node = Leaf("Wait Next Patrol", std::bind(wait_cool_time, monster, WAIT_PATROL));
-
-	patrol_sequence = Sequence("Patrol", { &find_random_pos_node, &move_to_node, &patrol_cool_time_node });
-
-	idle_sequence = Sequence("Idle", { &choose_random_action_node, &choose_action_selector });
-
-	idle_selector = Selector("", { &attentive_sequence, &idle_sequence });
+		fight_sequence = Sequence("fight root sequence", { &find_user_seq, &go2home_or_attack_sel, &change_ani_to_idle_node , &wait_next_attack_dec });
+	}
 
 	// runaway
-	set_runaway_location_node = Leaf("Set RunAway Point", std::bind(set_runaway_location, monster));
-	flyup_node = Leaf("Fly UP", std::bind(fly_up, monster));
-	runaway_node = Leaf("Fly to Point", std::bind(move_to, monster));
-	landing_node = Leaf("Landing", std::bind(landing, monster));
-	runaway_to_idle_node = Leaf("Change State(runaway->idle)", std::bind(to_idle, monster, players, room));
+	{
+		runaway_to_idle_node = Leaf("runaway to idle", std::bind(runaway_to_idle, monster, players, room));
+		wait_change_to_idle_dec = TimeLimiter(&runaway_to_idle_node, 2s);
+		landing_node = Leaf("landing", std::bind(landing, monster));
+		fly_down_node = Leaf("fly down", std::bind(fly_down, monster));
+		fly_to_point_node = Leaf("go to potin", std::bind(fly_to_point, monster));
+		fly_up_node = Leaf("fly up", std::bind(fly_up, monster));
+		take_off_node = Leaf("take off", std::bind(take_off, monster));
 
-	runaway_sequence = Sequence("RunAway", { &set_runaway_location_node, &flyup_node, &runaway_node, &landing_node, &runaway_to_idle_node });
+		set_runaway_point_node = Leaf("Set RunAway Point", std::bind(set_runaway_point, monster));
+
+		runaway_sequence = Sequence("RUN AWAY Sequence", { &set_runaway_point_node, &take_off_node, &fly_up_node, &fly_to_point_node,
+			&fly_down_node, &landing_node, &wait_change_to_idle_dec });
+	}
+
+	// go home
+	{
+		go2home_to_idle_node = Leaf("go home -> idle", std::bind(go2home_to_idle, monster, players, room));
+		wait_gohome_to_idle_dec = TimeLimiter(&go2home_to_idle_node, 0.2s);
+
+		move_to_home_node = Leaf("move to home", std::bind(move_to_home, monster));
+
+		goHome_sequence = Sequence("go home Sequence", { &move_to_home_node, &wait_gohome_to_idle_dec });
+	}
+
+	// blind
+	{
+
+	}
 
 	// die
 	die_node = Leaf("DIE", std::bind(die, monster));
 
 	// root
-	if (monster->GetState() == idle_state)
-		monster->BuildBT(&idle_selector);
+	{
+		if (monster->GetState() == idle_state) 
+		{
+			monster->BuildBT(&idle_selector);
+		}
 
-	else if (monster->GetState() == fight_state)
-		monster->BuildBT(&fight_sequence);
+		else if (monster->GetState() == alert_state)
+		{
+			monster->BuildBT(&alert_selector);
+		}
 
-	else if (monster->GetState() == runaway_state)
-		monster->BuildBT(&runaway_sequence);
+		else if (monster->GetState() == fight_state)
+		{
+			monster->BuildBT(&fight_sequence);
+		}
 
-	else if (monster->GetState() == die_state)
-		monster->BuildBT(&die_node);
+		else if (monster->GetState() == runaway_state)
+		{
+			monster->BuildBT(&runaway_sequence);
+		}
+
+		else if (monster->GetState() == gohome_state)
+		{
+			monster->BuildBT(&goHome_sequence);
+		}
+
+		else if (monster->GetState() == die_state)
+		{
+			monster->BuildBT(&die_node);
+		}
+
+		else if (monster->GetState() == blind_state)
+		{
+			monster->BuildBT(&blind_sequence);
+		}
+	}
 }
 
 void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
@@ -977,4 +1299,5 @@ void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom
 	monster->ElapsedTime();
 	check_hp(monster, players, room);
 	monster->RunBT();
+	std::cout << (int)monster->GetAnimation() << std::endl;
 }

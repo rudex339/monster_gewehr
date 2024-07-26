@@ -103,6 +103,8 @@ void Move_System::tick(World* world, float deltaTime)
                                     rotation->mfYaw, state, 0 });
                             }
 #endif
+                            // sound 듣는 위치 설정
+                            Sound_Componet::GetInstance().ListenerUpdate(position->Position, velocity->m_velocity, eulerangle->m_xmf3Look, eulerangle->m_xmf3Up);
                         }
                         velocity->m_velocity = XMFLOAT3(0, 0, 0);
                         velocity->m_velRotate = XMFLOAT3(0, 0, 0);
