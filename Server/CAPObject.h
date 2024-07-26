@@ -208,6 +208,9 @@ public:
 	void SetTarget(Player* player) { m_target = player; }
 	Player* GetTarget() { return m_target; }
 
+	void SetLatestAttackPlayer(Player* player) { latest_damage_player = player; }
+	Player* GetLatestAttackPlayer() { return latest_damage_player; }
+
 	void SetTargetPos(DirectX::XMFLOAT3 target_pos) { m_target_position = target_pos; }
 	XMFLOAT3 GetTargetPos() { return m_target_position; }
 
@@ -224,7 +227,6 @@ public:
 	void RunBT() { root.run(); }
 
 	CHAR prev_state = idle_state, curr_state = idle_state;
-	XMFLOAT3 HomePos = XMFLOAT3(2200.0f, 0.f, 3100.0f);
 
 	// [home][index], index0,2 : xmin, xmax | index 1,3 : zmin, zmax 
 	float sector_line[3][4] = {
@@ -241,6 +243,7 @@ protected:
 	DirectX::XMFLOAT3 m_front;
 
 	Player* m_target;
+	Player* latest_damage_player;
 
 	FLOAT currentTime = 0.f;
 	FLOAT elapsedTime = 0.f;
@@ -269,3 +272,5 @@ protected:
 
 void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room);
 void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room);
+
+void SetFaceDirection(Monster* monster);

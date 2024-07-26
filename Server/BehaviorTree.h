@@ -7,7 +7,7 @@
 #include <string>
 #include <chrono>
 
-#define PrintNode
+//#define PrintNode
 
 class Node {
 public:
@@ -275,6 +275,8 @@ private:
 public:
     TimeLimiter(Node* child, std::chrono::seconds delay)
         : Decorator(child), delay(delay), waiting(true) {}
+    TimeLimiter(Node* child, std::chrono::duration<double> delay)
+        : Decorator(child), delay(std::chrono::duration_cast<std::chrono::seconds>(delay)), waiting(true) {}
     TimeLimiter() {}
 
     void reset() override {
