@@ -223,6 +223,7 @@ void CMaterial::ReleaseUploadBuffers()
 
 CShader* CMaterial::m_pSkinnedAnimationShader = NULL;
 CShader* CMaterial::m_pStandardShader = NULL;
+CShader* CMaterial::m_pEmitterShader = NULL;
 
 void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
@@ -233,6 +234,10 @@ void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pSkinnedAnimationShader = new CSkinnedAnimationStandardShader();
 	m_pSkinnedAnimationShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pSkinnedAnimationShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_pEmitterShader = new EmitterShader();
+	m_pEmitterShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pEmitterShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1632,7 +1637,7 @@ MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	CMaterial* pBoxMaterial = new CMaterial(1);
 	//m_ppMaterials = new CMaterial * [m_nMaterials];
 	pBoxMaterial->SetTexture(Texture);
-	pBoxMaterial->SetShader(pShader);
+	pBoxMaterial->SetShader(CMaterial::m_pEmitterShader);
 	pBoxMaterial->SetMaterialType(MATERIAL_ALBEDO_MAP);
 
 	SetMaterial(0, pBoxMaterial);

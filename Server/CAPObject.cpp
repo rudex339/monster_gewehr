@@ -349,7 +349,7 @@ void Monster::InitMonster()
 	XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
 	m_bounding_box.Orientation = q;
 }
-
+bool tail_attack_on = false;
 // functions
 
 void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
@@ -419,6 +419,10 @@ bool tail_attack_check(Monster* monster) {
 	if (Distance(monster->GetPosition(), monster->GetTarget()->GetPosition()) <= 200.0f) {
 		return true;
 	}
+	if (tail_attack_on) {
+		return true;
+	}
+
 	return false;
 }
 
@@ -505,6 +509,7 @@ Sequence fight_sequence;
 				// change_ani_node 노드 재활용
 				Leaf charging_irontail_node;	TimeLimiter irontail_dec;
 				Leaf irontail_node;
+	Leaf change_ani_to_idle_node;
 	Leaf wait_next_attack_node;	TimeLimiter wait_next_attack_dec;
 
 // runaway
@@ -872,6 +877,7 @@ int fire_ball(Monster* monster) {
 	static float firetime = 0.0f;
 	if (firetime >= FIREBALL_ANI_TIME) {
 		firetime = 0;
+		monster->SetAnimation(idle_ani);
 		return BehaviorTree::SUCCESS;
 	}
 	firetime += monster->GetElapsedTime();
@@ -914,7 +920,6 @@ int move_to_bite(Monster* monster, std::unordered_map<INT, Player>* players, Gam
 	}
 
 	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 35.0f) {
-		monster->SetAnimation(idle_ani);
 		return BehaviorTree::SUCCESS;
 	}
 	SetFaceDirection(monster);
@@ -928,6 +933,7 @@ int bite(Monster* monster) {
 	SetFaceDirection(monster);
 	monster->SetAnimation(bite_ani);
 	static float bitetime = 0.0f;
+	//std::cout << "깨물기 재생중 " << TAIL_ANI_TIME - bitetime << "남음" << std::endl;
 	if (bitetime >= BITE_ANI_TIME) {
 		bitetime = 0.0f;
 		return BehaviorTree::SUCCESS;
@@ -953,17 +959,23 @@ int charging_irontail(Monster* monster) {
 int irontail(Monster* monster) {
 	monster->SetAnimation(tail_ani);
 	static float tailtime = 0.0f;
-	std::cout << "꼬리치기 재생중 " << TAIL_ANI_TIME - tailtime << "남음" << std::endl;
+	tail_attack_on = true;
+	//std::cout << "꼬리치기 재생중 " << TAIL_ANI_TIME - tailtime << "남음" << std::endl;
 	if (tailtime >= TAIL_ANI_TIME) {
 		tailtime = 0.0f;
+		tail_attack_on = false;
 		return BehaviorTree::SUCCESS;
 	}
 	tailtime += monster->GetElapsedTime();
 	return BehaviorTree::RUNNING;
 }
 
-int wait_next_attack(Monster* monster) {
+int change_ani_to_idle(Monster* monster) {
 	monster->SetAnimation(idle_ani);
+	return BehaviorTree::SUCCESS;
+}
+
+int wait_next_attack(Monster* monster) {
 	check_time = 0.0f; // 깨물려고 가다가 대쉬하는 시간 체크를 초기화
 	return BehaviorTree::SUCCESS;
 }
@@ -974,7 +986,6 @@ int set_runaway_point(Monster* monster) {
 	int point = 0;
 	while (1) {
 		point = rand_runaway_point(gen);
-		std::cout << "point : " << point << ", " << "home : " << monster->home << std::endl;
 		if (point != monster->home) {
 			monster->SetTargetPos(runaway_point[point]);
 			monster->home = point;
@@ -1144,10 +1155,12 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		wait_next_attack_node = Leaf("Next Attack", std::bind(wait_next_attack, monster));
 		wait_next_attack_dec = TimeLimiter(&wait_next_attack_node, NEXT_ATTACK_TIME);
 
+		change_ani_to_idle_node = Leaf("Change animation -> idle", std::bind(change_ani_to_idle, monster));
 			
 		irontail_node = Leaf("IRON TAIL", std::bind(irontail, monster));
-		irontail_dec = TimeLimiter(&charging_irontail_node, CHARGING_IRONTAIL_TIME);
 		charging_irontail_node = Leaf("charging irontail", std::bind(charging_irontail, monster));
+		irontail_dec = TimeLimiter(&charging_irontail_node, CHARGING_IRONTAIL_TIME);
+		
 		change_ani_node = Leaf("change ani", std::bind(change_ani_to_charge, monster));
 
 		irontail_seq = Sequence("IronTail Sequence", { &change_ani_node, &irontail_dec, &irontail_node });
@@ -1205,7 +1218,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		find_user_seq = Sequence("find user sequence", { &check_near_user_sel, &choice_target_user_randnode });
 
 
-		fight_sequence = Sequence("fight root sequence", { &find_user_seq, &go2home_or_attack_sel, &set_idle_ani_node, &wait_next_attack_dec });
+		fight_sequence = Sequence("fight root sequence", { &find_user_seq, &go2home_or_attack_sel, &change_ani_to_idle_node , &wait_next_attack_dec });
 	}
 
 	// runaway
@@ -1286,5 +1299,5 @@ void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom
 	monster->ElapsedTime();
 	check_hp(monster, players, room);
 	monster->RunBT();
-
+	std::cout << (int)monster->GetAnimation() << std::endl;
 }

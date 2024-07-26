@@ -3,6 +3,7 @@
 #include "Player_Entity.h"
 #include "Object_Entity.h"
 #include "Scene_Sysytem.h"
+#include "Render_Sysytem.h"
 
 
 void Sever_System::configure(World* world)
@@ -366,6 +367,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 				if (Player->id == pk->id) {
 					Player->hp = pk->hp;
 					Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Hurt);
+					world->emit<SetBlur_Event>({ 0 });
 					if (ent->has<Camera_Component>() && Player->hp <= 0) {
 						ComponentHandle<EulerAngle_Component> eulerangle =
 							ent->get<EulerAngle_Component>();

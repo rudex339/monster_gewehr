@@ -31,8 +31,8 @@
 #define		ALERT_TO_IDLE_TIME	3000.0f
 
 // charging attack time
-#define		CHARGING_IRONTAIL_TIME 1.5s
-#define		CHARGING_DASH_TIME 2.0s
+#define		CHARGING_IRONTAIL_TIME 1.0s
+#define		CHARGING_DASH_TIME 1.0s
 
 // Animation time defines
 #define		TAIL_ANI_TIME 1330.0f

@@ -61,6 +61,7 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	for (int i = 0; i < 15; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		controller->m_AnimationController->SetTrackEnable(i, false);
+
 		//controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);
 	}
 
@@ -71,6 +72,7 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	controller->m_AnimationController->SetTrackType(10, ANIMATION_TYPE_ONCE);
 	controller->m_AnimationController->SetTrackType(14, ANIMATION_TYPE_ONCE);
 
+	controller->m_AnimationController->SetBlendingSpeed(0, 100.0f);
 	/*
 	0 IDLE,
 	1 GROW,
@@ -94,7 +96,7 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	controller->m_AnimationController->SetTrackSpeed(3, 0.7f);
 	controller->m_AnimationController->SetTrackSpeed(5, 0.7f);
 	controller->m_AnimationController->SetTrackSpeed(7, 2.0f);
-	controller->m_AnimationController->SetTrackSpeed(10, 1.2f);
+	controller->m_AnimationController->SetTrackSpeed(10, 1.0f);
 	controller->m_AnimationController->SetTrackSpeed(11, 0.05f);
 	controller->m_AnimationController->SetTrackSpeed(14, 0.5f);
 
