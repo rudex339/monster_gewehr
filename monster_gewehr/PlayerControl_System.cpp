@@ -372,7 +372,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			float fLength = sqrtf(velocity->m_velocity.x * velocity->m_velocity.x + velocity->m_velocity.z * velocity->m_velocity.z);
-			if (::IsZero(fLength) && !player->reload)
+			if (::IsZero(fLength) && !player->reload && !heal_on)
 			{
 				AnimationController->next_State = (UINT)IDLE;
 			}

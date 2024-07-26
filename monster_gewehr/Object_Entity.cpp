@@ -276,6 +276,8 @@ Sound_Componet::Sound_Componet()
 {
 	m_result = FMOD::System_Create(&m_system);
 	m_result = m_system->init(32, FMOD_INIT_NORMAL, nullptr);
+	m_result = m_system->set3DSettings(1.0f, 1.0f, 1.0f);
+
 
 	m_result = m_system->createSound("Sound/Music/title.mp3", FMOD_LOOP_NORMAL, 0, &m_music);
 	
@@ -285,9 +287,21 @@ Sound_Componet::Sound_Componet()
 	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Rifle]);
 	m_result = m_system->createSound("Sound/Effect/shotgun.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::ShotGun]);
 	m_result = m_system->createSound("Sound/Effect/sniper.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Sniper]);
-
 	m_result = m_system->createSound("Sound/Effect/reload.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Reload]);
 	m_result = m_system->createSound("Sound/Effect/dash.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Dash]);
+
+	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDRifle]);
+	m_result = m_3dsound[TDSound::TDRifle]->set3DMinMaxDistance(100.f, 5000.f);
+	m_result = m_3dsound[TDSound::TDRifle]->setMode(FMOD_LOOP_OFF);
+
+	m_result = m_system->createSound("Sound/Effect/shotgun.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDShotGun]);
+	m_result = m_3dsound[TDSound::TDShotGun]->set3DMinMaxDistance(100.f, 5000.f);
+	m_result = m_3dsound[TDSound::TDShotGun]->setMode(FMOD_LOOP_OFF);
+
+	m_result = m_system->createSound("Sound/Effect/sniper.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDSniper]);
+	m_result = m_3dsound[TDSound::TDSniper]->set3DMinMaxDistance(100.f, 5000.f);
+	m_result = m_3dsound[TDSound::TDSniper]->setMode(FMOD_LOOP_OFF);
+	
 	m_musicChannel->setVolume(3.0f);
 }
 
@@ -336,10 +350,10 @@ void Sound_Componet::PlaySound(int type)
 }
 
 // 이밑부터는 다른사람 소리 들을때 3d 효과 넣는 함수들
-void Sound_Componet::Play3DSound(XMFLOAT3 sound, Sound tag)
+void Sound_Componet::Play3DSound(XMFLOAT3 sound, TDSound tag)
 {
 	FMOD_VECTOR soundPos = { sound.x, sound.y, sound.z };
-	FMOD_VECTOR velocity = { 1.0f, 1.0f, 1.0f };
+	FMOD_VECTOR velocity = { 0.0f, 0.0f, 0.0f };
 	
 	bool playing;
 	for (auto& channel : m_soundChannel) {
@@ -353,13 +367,20 @@ void Sound_Componet::Play3DSound(XMFLOAT3 sound, Sound tag)
 	}
 }
 
-void Sound_Componet::ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front)
-{
+void Sound_Componet::ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front, XMFLOAT3 up)
+{	
 	FMOD_VECTOR listenerPos = { pos.x, pos.y, pos.z };
-	FMOD_VECTOR velocity = { vel.x, vel.y , vel.z };
+	FMOD_VECTOR velocity = { vel.x, vel.y, vel.z };
 	FMOD_VECTOR forward = { front.x, front.y, front.z };
-	FMOD_VECTOR up = { 0.0f, 1.0f, 0.0f };
+	FMOD_VECTOR sound_up = { up.x, up.y, up.z };
 
-	Sound_Componet::GetInstance().m_system->set3DListenerAttributes(0, &listenerPos, &velocity, &forward, &up);
-	Sound_Componet::GetInstance().m_system->update();
+	m_result = m_system->set3DListenerAttributes(0, &listenerPos, &velocity, &forward, &sound_up);
+	if (m_result != FMOD_OK) {
+		std::cerr << "Failed to set listener attributes: " << "\n";
+	}
+
+	m_result = m_system->update();
+	if (m_result != FMOD_OK) {
+		std::cerr << "Failed to update system: " << "\n";
+	}
 }

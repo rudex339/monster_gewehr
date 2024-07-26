@@ -130,6 +130,8 @@ void Player::PlayerInit()
 
 	m_is_host = false;
 	m_is_ready = false;
+
+	death_count = 0;
 }
 
 void Player::SetWeapon(char weapon)

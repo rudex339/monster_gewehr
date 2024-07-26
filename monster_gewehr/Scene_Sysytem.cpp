@@ -802,7 +802,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 	case END:
 		::ReleaseCapture();
 		Entity* ent = world->create();
-
+		money += event.score;
 		D2D1_RECT_F imageRect, screenRect, sRect;
 		imageRect = { 0, 0, 1, 1 };
 		screenRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };

@@ -379,8 +379,8 @@ struct Sound_Componet {
 	void PlaySound(int type);
 
 	// 이밑부터는 다른사람 소리 들을때 3d 효과 넣는 함수들
-	void Play3DSound(XMFLOAT3 sound, Sound tag);
+	void Play3DSound(XMFLOAT3 sound, TDSound tag);
 
-	void ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front);
+	void ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front, XMFLOAT3 up);
 
 };
