@@ -347,10 +347,15 @@ void ProcessPacket(int id, char* p)
 		std::cout << "Shot Range: " << shot_range << std::endl;
 
 		if (distance <= shot_range) {
-			if (souleaters[room_id].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
+			if (souleaters[room_id].GetState() == runaway_state || souleaters[room_id].GetState() == gohome_state) {
+
+			}
+
+			else if (souleaters[room_id].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
 				souleaters[room_id].m_lock.lock();
 				souleaters[room_id].SetHp(souleaters[room_id].GetHp() - players[id].GetAtk());
-				if (souleaters[room_id].GetState() == idle_state) {
+				souleaters[room_id].SetLatestAttackPlayer(&players[id]);
+				if (souleaters[room_id].GetState() == idle_state || souleaters[room_id].GetState() == alert_state) {
 					souleaters[room_id].SetState(fight_state);
 					souleaters[room_id].SetTarget(&players[id]);
 				}
