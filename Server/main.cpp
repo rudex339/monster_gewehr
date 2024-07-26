@@ -558,7 +558,7 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 
 		}
 		SC_ADD_MONSTER_PACKET monster_p;
-		monster_p.size = sizeof(SC_ADD_MONSTER_PACKET);
+		monster_p.size = sizeof(monster_p);
 		monster_p.type = SC_PACKET_ADD_MONSTER;
 		monster_p.monster = souleaters[gameroom_id].GetData();
 

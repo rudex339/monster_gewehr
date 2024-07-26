@@ -496,6 +496,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			Sound_Componet::GetInstance().Play3DSound(pk->pos, Sound_Componet::TDSound::TDSniper);
 			break;
 		}
+		break;
 	}
 
 	}
