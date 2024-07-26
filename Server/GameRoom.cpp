@@ -20,13 +20,6 @@ void GameRoom::InitGameRoom()
 
 BOOL GameRoom::SetPlayerId(int c_id)
 {
-	m_state_lock.lock();
-	if (m_state == G_END) {
-		m_state_lock.unlock();
-		return false;
-	}
-	m_state_lock.unlock();
-
 	for (auto& id : m_player_ids) {
 		if (id == -1) {
 			id = c_id;
@@ -96,16 +89,6 @@ void GameRoom::SetCreateRoom()
 	}
 }
 
-void GameRoom::SetEndGame()
-{
-	m_state_lock.lock();
-	m_state = G_END;
-	m_state_lock.unlock();
-
-	for (auto& id : m_player_ids) {
-		id = -1;
-	}
-}
 
 void GameRoom::SetFreeRoom()
 {
