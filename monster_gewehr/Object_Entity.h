@@ -323,6 +323,9 @@ struct Sound_Componet {
 	enum Music
 	{
 		Title,
+		Ingame,
+		GameClear,
+		GameFail,
 		MusicCount
 	};
 	enum Sound
@@ -337,6 +340,7 @@ struct Sound_Componet {
 		Run,
 		Reload,
 		Dash,
+		Hurt,
 		SoundCount
 	};
 	enum TDSound
@@ -360,12 +364,14 @@ struct Sound_Componet {
 
 	FMOD::System* m_system;
 
-	FMOD::Sound* m_music;
+	array<FMOD::Sound*, Music::MusicCount> m_music;
 	FMOD::Channel* m_musicChannel;
 
 	array<FMOD::Sound*, Sound::SoundCount>	m_sound;
 	array<FMOD::Sound*, TDSound::TDSoundCount>	m_3dsound;	// 3d 효과음을 위한 사운드 어레이
 	array<FMOD::Channel*, MAX_PLAY_SOUND>	m_soundChannel; // 효과음 출력을 위한 채널
+
+	array<FMOD::Channel*, 2> m_movesoundChannel;
 
 	FMOD_RESULT m_result;
 
@@ -377,6 +383,7 @@ struct Sound_Componet {
 
 	void PlaySound(Sound tag);
 	void PlaySound(int type);
+	void PlayMoveSound(Sound tag);
 
 	// 이밑부터는 다른사람 소리 들을때 3d 효과 넣는 함수들
 	void Play3DSound(XMFLOAT3 sound, TDSound tag);

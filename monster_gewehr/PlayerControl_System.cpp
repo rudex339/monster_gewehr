@@ -376,6 +376,12 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			{
 				AnimationController->next_State = (UINT)IDLE;
 			}
+			else if (!(::IsZero(fLength)) && !roll_on) {
+				if (!run_on)
+					Sound_Componet::GetInstance().PlayMoveSound(Sound_Componet::Sound::Walk);
+				else
+					Sound_Componet::GetInstance().PlayMoveSound(Sound_Componet::Sound::Run);
+			}
 
 
 			if (R_btn) {

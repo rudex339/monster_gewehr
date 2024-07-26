@@ -46,7 +46,7 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	CS_CHANGE_ANIMATION_PACKET sub_packet;
 	sub_packet.size = sizeof(sub_packet);
 	sub_packet.type = CS_PACKET_CHANGE_ANIMATION;
-	sub_packet.animation = event.State;
+	sub_packet.animation = (CHAR)event.State;
 
 	send(g_socket, (char*)&sub_packet, sub_packet.size, 0);
 
@@ -365,6 +365,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 			void {
 				if (Player->id == pk->id) {
 					Player->hp = pk->hp;
+					Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Hurt);
 					if (ent->has<Camera_Component>() && Player->hp <= 0) {
 						ComponentHandle<EulerAngle_Component> eulerangle =
 							ent->get<EulerAngle_Component>();
@@ -380,7 +381,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 						controllangle->m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 						controllangle->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 						controllangle->m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-						Player->hp = 100;
+						Player->hp = 100;						
 					}
 				}
 				else

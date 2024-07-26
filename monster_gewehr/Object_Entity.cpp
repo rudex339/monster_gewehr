@@ -279,17 +279,22 @@ Sound_Componet::Sound_Componet()
 	m_result = m_system->init(32, FMOD_INIT_NORMAL, nullptr);
 	m_result = m_system->set3DSettings(1.0f, 1.0f, 1.0f);
 
-
-	m_result = m_system->createSound("Sound/Music/title.mp3", FMOD_LOOP_NORMAL, 0, &m_music);
+	m_result = m_system->createSound("Sound/Music/title.mp3", FMOD_LOOP_NORMAL, 0, &m_music[Music::Title]);
+	m_result = m_system->createSound("Sound/Music/ingame2.mp3", FMOD_LOOP_NORMAL, 0, &m_music[Music::Ingame]);
+	m_result = m_system->createSound("Sound/Music/gameclear.mp3", FMOD_LOOP_OFF, 0, &m_music[Music::GameClear]);
+	m_result = m_system->createSound("Sound/Music/gamefail.mp3", FMOD_LOOP_OFF, 0, &m_music[Music::GameFail]);
 	
 	m_result = m_system->createSound("Sound/Effect/button_on.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_On]);
 	m_result = m_system->createSound("Sound/Effect/button_push.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::B_Push]);
 	m_result = m_system->createSound("Sound/Effect/purchase.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Purchase]);
 	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Rifle]);
-	m_result = m_system->createSound("Sound/Effect/shotgun.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::ShotGun]);
+	m_result = m_system->createSound("Sound/Effect/shotgun.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::ShotGun]);	
 	m_result = m_system->createSound("Sound/Effect/sniper.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Sniper]);
+	m_result = m_system->createSound("Sound/Effect/walk.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Walk]);
+	m_result = m_system->createSound("Sound/Effect/run.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Run]);
 	m_result = m_system->createSound("Sound/Effect/reload.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Reload]);
 	m_result = m_system->createSound("Sound/Effect/dash.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Dash]);
+	m_result = m_system->createSound("Sound/Effect/hurt.mp3", FMOD_LOOP_OFF, 0, &m_sound[Sound::Hurt]);
 
 	m_result = m_system->createSound("Sound/Effect/rifle.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDRifle]);
 	m_result = m_3dsound[TDSound::TDRifle]->set3DMinMaxDistance(100.f, 5000.f);
@@ -316,7 +321,7 @@ void Sound_Componet::PlayMusic(Music tag)
 	bool playing;
 	m_result = m_musicChannel->isPlaying(&playing);
 	if (playing) m_musicChannel->stop();
-	m_result = m_system->playSound(m_music, 0, false, &m_musicChannel);
+	m_result = m_system->playSound(m_music[tag], 0, false, &m_musicChannel);
 }
 
 void Sound_Componet::StopMusic()
@@ -347,6 +352,15 @@ void Sound_Componet::PlaySound(int type)
 			m_result = m_system->playSound(m_sound[type], 0, false, &channel);
 			break;
 		}
+	}
+}
+
+void Sound_Componet::PlayMoveSound(Sound tag)
+{
+	bool playing;
+	m_result = m_movesoundChannel[tag - Sound::Walk]->isPlaying(&playing);
+	if (!playing) {
+		m_result = m_system->playSound(m_sound[tag], 0, false, &m_movesoundChannel[tag - Sound::Walk]);
 	}
 }
 
