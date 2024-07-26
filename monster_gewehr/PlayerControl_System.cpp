@@ -154,6 +154,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 					model_vector->m_xmf3Look = Vector3::TransformNormal(model_vector->m_xmf3Look, xmmtxRotate);
 					model_vector->m_xmf3Right = Vector3::TransformNormal(model_vector->m_xmf3Right, xmmtxRotate);
+					model_vector->m_xmf3Look = Vector3::Add(model_vector->m_xmf3Look, {0.0f, gun_rebound, 0.0f});
 
 					model_vector->m_xmf3Look = Vector3::Normalize(model_vector->m_xmf3Look);
 					model_vector->m_xmf3Up = Vector3::CrossProduct(model_vector->m_xmf3Look, model_vector->m_xmf3Right, true);
@@ -411,10 +412,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				}
 			}
 			// 우클릭 조준
-			else if ((pKeysBuffer[VK_RBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && !heal_on) {
-				if (shot_cooltime > 0) {
-					AnimationController->next_State = (UINT)AIM;
-				}
+			else if ((pKeysBuffer[VK_RBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && !heal_on) {	
+				AnimationController->next_State = (UINT)AIM;
 				player->aim_mode = true;
 				shot_cooltime -= deltaTime;
 			}
@@ -422,6 +421,43 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				shot_cooltime -= deltaTime;
 				player->aim_mode = false;
 			}
+			
+			switch (player->m_weapon)
+			{
+			case 0:
+				if (shot_cooltime > shot_cooltime_list[player->m_weapon] / 2) {
+					gun_rebound = 0.02f;
+				}
+				else {
+					gun_rebound = 0.0f;
+				}
+				break;
+			case 1:
+				if (shot_cooltime > shot_cooltime_list[player->m_weapon]* 0.8f) {
+					gun_rebound = 0.04f;
+				}
+				else if (shot_cooltime > shot_cooltime_list[player->m_weapon] * 0.7f) {
+					gun_rebound = -0.04f;
+				}
+				else {
+					gun_rebound = 0.0f;
+				}
+				break;
+			case 2:
+				if (shot_cooltime > shot_cooltime_list[player->m_weapon] * 0.9f) {
+					gun_rebound = 0.03f;
+				}
+				else if(shot_cooltime > shot_cooltime_list[player->m_weapon] * 0.8f ) {
+					gun_rebound = -0.03f;
+				}
+				else {
+					gun_rebound = 0.0f;
+				}
+				break;
+			default:
+				break;
+			}
+			
 
 			// r키로 재장전
 			if (pKeysBuffer[0x52] & 0xF0 && !player->reload && player->mag > 0 && !roll_on && !heal_on ) {
