@@ -7,7 +7,7 @@
 #include <string>
 #include <chrono>
 
-//#define PrintNode
+#define PrintNode
 
 class Node {
 public:
@@ -275,32 +275,39 @@ private:
 public:
     TimeLimiter(Node* child, std::chrono::seconds delay)
         : Decorator(child), delay(delay), waiting(true) {}
+
     TimeLimiter(Node* child, std::chrono::duration<double> delay)
         : Decorator(child), delay(std::chrono::duration_cast<std::chrono::seconds>(delay)), waiting(true) {}
-    TimeLimiter() {}
+
+    TimeLimiter() : waiting(true) {}
 
     void reset() override {
-        // 초기화 시 현재 시간을 저장하여 지연 시간을 시작
-        start_time = std::chrono::steady_clock::now();
         waiting = true;  // 대기 상태로 설정
         Decorator::reset();
     }
 
     int run() override {
         auto now = std::chrono::steady_clock::now();
+
         if (waiting) {
-            // 지연 시간이 경과했는지 확인
-            if (now - start_time >= delay) {
-                waiting = false;  // 대기 상태 종료
-            }
-            else {
-                return BehaviorTree::RUNNING;  // 대기 중
-            }
+            // 처음 run이 호출될 때 start_time을 설정
+            start_time = now;
+            waiting = false;
         }
-        waiting = true;
-        start_time = std::chrono::steady_clock::now();
-        // 지연 시간이 지나면 자식 노드를 실행
-        return child->run();
+
+        // 지연 시간이 경과했는지 확인
+        if (now - start_time >= delay) {
+            // 대기 상태 종료 후 자식 노드를 실행
+            int result = child->run();
+            // 자식 노드가 실행을 완료하면 타이머를 리셋
+            if (result != BehaviorTree::RUNNING) {
+                waiting = true;  // 다시 대기 상태로 설정
+            }
+            return result;
+        }
+        else {
+            return BehaviorTree::RUNNING;  // 대기 중
+        }
     }
 
     void print() override {
@@ -310,6 +317,7 @@ public:
 #endif
     }
 };
+
 
 // Condition Checker Decorator
 class ConditionChecker : public Decorator {

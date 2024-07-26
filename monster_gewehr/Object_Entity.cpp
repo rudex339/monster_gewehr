@@ -57,13 +57,46 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	CLoadedModelInfo* model = OM->Get_ModelInfo("Souleater");
 	ent->assign<Model_Component>(model->m_pModelRootObject, model->m_pModelRootObject->m_pstrFrameName);
 	auto controller = ent->assign<AnimationController_Component>(
-		new CAnimationController(pd3dDevice, pd3dCommandList, 10, model), 0);
-	for (int i = 0; i < 10; i++) {
+		new CAnimationController(pd3dDevice, pd3dCommandList, 15, model), 0);
+	for (int i = 0; i < 15; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		controller->m_AnimationController->SetTrackEnable(i, false);
 		//controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);
 	}
+
+	// 한번만 재생하도록 수정
+	controller->m_AnimationController->SetTrackType(1, ANIMATION_TYPE_ONCE);
+	controller->m_AnimationController->SetTrackType(6, ANIMATION_TYPE_ONCE);
 	controller->m_AnimationController->SetTrackType(9, ANIMATION_TYPE_ONCE);
+	controller->m_AnimationController->SetTrackType(10, ANIMATION_TYPE_ONCE);
+	controller->m_AnimationController->SetTrackType(14, ANIMATION_TYPE_ONCE);
+
+	/*
+	0 IDLE,
+	1 GROW,
+	2 WALK,
+	3 FLYUP,
+	4 FLYING,
+	5 LANDING,
+	6 BITE,
+	7 RUN,
+	8 HIT,
+	9 DIE,
+	10 TailAttack,
+	11 Blind(차징),
+	12 FLYIDLE,
+	13 SLEEP,
+	14 FIREBALL 
+	*/
+
+	// 몬스터 애니메이션 속도 조절
+	controller->m_AnimationController->SetTrackSpeed(1, 0.5f);
+	controller->m_AnimationController->SetTrackSpeed(3, 0.7f);
+	controller->m_AnimationController->SetTrackSpeed(5, 0.7f);
+	controller->m_AnimationController->SetTrackSpeed(7, 2.0f);
+	controller->m_AnimationController->SetTrackSpeed(10, 1.2f);
+	controller->m_AnimationController->SetTrackSpeed(11, 0.05f);
+	controller->m_AnimationController->SetTrackSpeed(14, 0.5f);
 
 	ent->assign<Position_Component>(x, y, z);
 	ent->assign<Rotation_Component>(rx, ry, rz);
