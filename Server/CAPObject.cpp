@@ -354,9 +354,6 @@ void Monster::InitMonster()
 
 void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
-
-
-
 	float hp = monster->GetHp();
 
 	if (hp <= 0) {
@@ -373,8 +370,6 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		}
 		build_bt(monster, players, room);
 	}
-
-
 }
 
 float CalculateAngleBetweenVectors(XMVECTOR vecA, XMVECTOR vecB) {
@@ -420,8 +415,8 @@ bool is_toofar(Monster* monster) {
 	return false;
 }
 
-bool is_user_near(Monster* monster) {
-	if (Distance(monster->GetPosition(), monster->GetTarget()->GetPosition()) <= 50.0f) {
+bool tail_attack_check(Monster* monster) {
+	if (Distance(monster->GetPosition(), monster->GetTarget()->GetPosition()) <= 200.0f) {
 		return true;
 	}
 	return false;
@@ -578,6 +573,7 @@ int check_near_user_idle(Monster* monster, std::unordered_map<INT, Player>* play
 }
 
 int idle_to_gohome(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
 	monster->SetState(gohome_state);
 	build_bt(monster, players, room);
 
@@ -635,7 +631,7 @@ int growling(Monster* monster) {
 }
 
 int sleeping(Monster* monster) {
-	monster->SetAnimation(flying_ani);
+	monster->SetAnimation(sleep_ani);
 
 	static float sleepTime = 0.f;
 	if (sleepTime <= SLEEP_ANI_TIME) {
@@ -717,6 +713,8 @@ int alert_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, Ga
 
 
 /////////// fight
+static float check_time = 0.0f;
+
 int check_near_user_fight(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
 	bool isTargetExist = false;
 	for (int i : room->GetPlyId()) {
@@ -870,14 +868,20 @@ int fight_to_home(Monster* monster, std::unordered_map<INT, Player>* players, Ga
 
 int fire_ball(Monster* monster) {
 	SetFaceDirection(monster);
-	//monster->SetAnimation(fire_ani);
-	return BehaviorTree::SUCCESS;
+	monster->SetAnimation(fireball_ani);
+	static float firetime = 0.0f;
+	if (firetime >= FIREBALL_ANI_TIME) {
+		firetime = 0;
+		return BehaviorTree::SUCCESS;
+	}
+	firetime += monster->GetElapsedTime();
+	return BehaviorTree::RUNNING;
 }
 
 int change_ani_to_charge(Monster* monster) {
-	//monster->SetAnimation(charging_ani);
+	SetFaceDirection(monster);
+	monster->SetAnimation(charging_ani);
 	return BehaviorTree::SUCCESS;
-
 }
 
 int charging_dash(Monster* monster) {
@@ -887,13 +891,13 @@ int charging_dash(Monster* monster) {
 int dash(Monster* monster) {
 	monster->SetAnimation(dash_ani);
 
-	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 20.0f) {
+	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 12.0f) {
 		monster->SetAnimation(idle_ani);
 		return BehaviorTree::SUCCESS;
 	}
 	SetFaceDirection(monster);
 
-	monster->Foward(monster->GetElapsedTime() * 4.0f);
+	monster->Foward(monster->GetElapsedTime() * 3.0f);
 	return BehaviorTree::RUNNING;
 }
 
@@ -903,6 +907,7 @@ int move_to_bite(Monster* monster, std::unordered_map<INT, Player>* players, Gam
 	monster->SetTargetPos(monster->GetTarget()->GetPosition());
 
 	if (is_toofar(monster)) {
+		monster->SetAnimation(idle_ani);
 		monster->SetState(gohome_state);
 		build_bt(monster, players, room);
 		return BehaviorTree::SUCCESS;
@@ -919,30 +924,47 @@ int move_to_bite(Monster* monster, std::unordered_map<INT, Player>* players, Gam
 }
 
 int bite(Monster* monster) {
+	check_time = 0;
+	SetFaceDirection(monster);
 	monster->SetAnimation(bite_ani);
-	return BehaviorTree::SUCCESS;
+	static float bitetime = 0.0f;
+	if (bitetime >= BITE_ANI_TIME) {
+		bitetime = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+	bitetime += monster->GetElapsedTime();
+	return BehaviorTree::RUNNING;
 }
 
 int time_check_to_dash(Monster* monster) {
-	static float time = 0.0f;
-	if (time >= BITE_TO_DASH_TIMEOUT) {
-		time = 0;
+	if (check_time >= BITE_TO_DASH_TIMEOUT) {
+		check_time = 0.0f;
 		return BehaviorTree::SUCCESS;
 	}
-	time += monster->GetElapsedTime();
+	check_time += monster->GetElapsedTime();
 	return BehaviorTree::FAIL;
 }
 
 int charging_irontail(Monster* monster) {
+	SetFaceDirection(monster);
 	return BehaviorTree::SUCCESS;
 }
 
 int irontail(Monster* monster) {
-	//monster->SetAnimation(irontail_ani);
-	return BehaviorTree::SUCCESS;
+	monster->SetAnimation(tail_ani);
+	static float tailtime = 0.0f;
+	std::cout << "꼬리치기 재생중 " << TAIL_ANI_TIME - tailtime << "남음" << std::endl;
+	if (tailtime >= TAIL_ANI_TIME) {
+		tailtime = 0.0f;
+		return BehaviorTree::SUCCESS;
+	}
+	tailtime += monster->GetElapsedTime();
+	return BehaviorTree::RUNNING;
 }
 
 int wait_next_attack(Monster* monster) {
+	monster->SetAnimation(idle_ani);
+	check_time = 0.0f; // 깨물려고 가다가 대쉬하는 시간 체크를 초기화
 	return BehaviorTree::SUCCESS;
 }
 
@@ -972,13 +994,13 @@ int take_off(Monster* monster) {
 	}
 	else {
 		takeoff_time = 0.0f;
+		monster->SetPostion(monster->GetPosition().x, monster->GetPosition().y + 30.0f, monster->GetPosition().z);
 		return BehaviorTree::SUCCESS;
 	}
 }
 
 int fly_up(Monster* monster) {
-	monster->SetAnimation(flying_ani);
-
+	monster->SetAnimation(flyidle_ani);
 	if (monster->GetPosition().y <= 500.f) {
 
 		monster->Up(monster->GetElapsedTime());
@@ -1002,7 +1024,7 @@ int fly_to_point(Monster* monster) {
 int fly_down(Monster* monster) {
 	monster->SetAnimation(flyidle_ani);
 
-	if (monster->GetPosition().y >= LAND_Y + 20.0f) {
+	if (monster->GetPosition().y >= LAND_Y) {
 
 		monster->Down(monster->GetElapsedTime());
 		return BehaviorTree::RUNNING;
@@ -1027,6 +1049,7 @@ int landing(Monster* monster) {
 }
 
 int runaway_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
 	monster->SetState(idle_state);
 	build_bt(monster, players, room);
 	return BehaviorTree::SUCCESS;
@@ -1052,6 +1075,7 @@ int move_to_home(Monster* monster) {
 }
 
 int go2home_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
 	monster->SetState(idle_state);
 	build_bt(monster, players, room);
 	return BehaviorTree::SUCCESS;
@@ -1071,7 +1095,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 	// idle
 	{
 		wait_next_idle_node = Leaf("TimeOut", std::bind(wait_next_idle, monster));
-		wait_next_idle_dec = TimeLimiter(&wait_next_idle_node, 2s);
+		wait_next_idle_dec = TimeLimiter(&wait_next_idle_node, 2.0s);
 
 		set_patrol_pos_node = Leaf("Set Patrol Pos", std::bind(set_random_pos, monster));
 		go_to_pos_node = Leaf("Go To Random Pos", std::bind(move_to_random_pos, monster, players, room));
@@ -1117,16 +1141,18 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 
 	// fight
 	{
-		wait_next_attack_node = Leaf("Next Attack", success);
+		wait_next_attack_node = Leaf("Next Attack", std::bind(wait_next_attack, monster));
 		wait_next_attack_dec = TimeLimiter(&wait_next_attack_node, NEXT_ATTACK_TIME);
+
 			
 		irontail_node = Leaf("IRON TAIL", std::bind(irontail, monster));
 		irontail_dec = TimeLimiter(&charging_irontail_node, CHARGING_IRONTAIL_TIME);
 		charging_irontail_node = Leaf("charging irontail", std::bind(charging_irontail, monster));
+		change_ani_node = Leaf("change ani", std::bind(change_ani_to_charge, monster));
 
 		irontail_seq = Sequence("IronTail Sequence", { &change_ani_node, &irontail_dec, &irontail_node });
 		user_distance_dec = ConditionChecker(&irontail_seq, [monster]() {
-			if (is_user_near(monster))
+			if (tail_attack_check(monster))
 				return true;
 			else
 				return false;
@@ -1135,7 +1161,6 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		dash_attack_node = Leaf("DASH", std::bind(dash, monster));
 		charging_dash_node = Leaf("charging irontail", std::bind(charging_dash, monster));
 		dash_attack_dec = TimeLimiter(&charging_dash_node, CHARGING_DASH_TIME);
-		change_ani_node = Leaf("change ani", std::bind(change_ani_to_charge, monster));
 
 		dash_seq = Sequence("Dash Sequence", { &change_ani_node, &dash_attack_dec, &dash_attack_node });
 
@@ -1180,7 +1205,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		find_user_seq = Sequence("find user sequence", { &check_near_user_sel, &choice_target_user_randnode });
 
 
-		fight_sequence = Sequence("fight root sequence", { &find_user_seq, &go2home_or_attack_sel, &wait_next_attack_dec });
+		fight_sequence = Sequence("fight root sequence", { &find_user_seq, &go2home_or_attack_sel, &set_idle_ani_node, &wait_next_attack_dec });
 	}
 
 	// runaway
@@ -1201,12 +1226,6 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 
 	// go home
 	{
-		/*
-		// go home
-		Sequence goHome_sequence;
-			Leaf move_to_home_node;
-			Leaf go2home_to_idle_node; TimeLimiter wait_gohome_to_idle_dec;
-		*/
 		go2home_to_idle_node = Leaf("go home -> idle", std::bind(go2home_to_idle, monster, players, room));
 		wait_gohome_to_idle_dec = TimeLimiter(&go2home_to_idle_node, 0.2s);
 
@@ -1267,4 +1286,5 @@ void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom
 	monster->ElapsedTime();
 	check_hp(monster, players, room);
 	monster->RunBT();
+
 }

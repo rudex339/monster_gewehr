@@ -354,10 +354,10 @@ void ProcessPacket(int id, char* p)
 				if (souleaters[room_id].GetState() == idle_state || souleaters[room_id].GetState() == alert_state) {
 					souleaters[room_id].SetState(fight_state);
 					souleaters[room_id].SetTarget(&players[id]);
+					build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 				}
 				souleaters[room_id].m_lock.unlock();
 				std::cout << souleaters[room_id].GetHp() << std::endl;
-				build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 			}
 		}
 

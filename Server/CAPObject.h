@@ -154,11 +154,20 @@ protected:
 enum MonsterState { idle_state, alert_state, fight_state, runaway_state, gohome_state, die_state, blind_state };
 enum MonsterAnimation {
 	idle_ani,
-	growl_ani, walk_ani,
-	flyup_ani, flying_ani, landing_ani,
-	bite_ani, dash_ani,
-	hit_ani, die_ani,
-	sleep_ani, flyidle_ani
+	growl_ani, 
+	walk_ani,
+	flyup_ani, 
+	flying_ani, 
+	landing_ani,
+	bite_ani, 
+	dash_ani,
+	blind_ani, 
+	die_ani,
+	tail_ani,
+	charging_ani,
+	flyidle_ani,
+	sleep_ani,
+	fireball_ani
 };
 
 class Monster : public CAPObject
