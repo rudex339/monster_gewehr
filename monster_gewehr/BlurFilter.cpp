@@ -58,7 +58,7 @@ BlurFilter::BlurFilter(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 void BlurFilter::Execute(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* input)
 {
-	auto weights = CalcGaussWeights(2.5f);
+	auto weights = CalcGaussWeights(1.2f);
 	int blurRadius = (int)weights.size() / 2;
 
 	cmdList->SetComputeRootSignature(rootSig.Get());

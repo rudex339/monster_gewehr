@@ -71,7 +71,7 @@ void HorzBlurCS(int3 groupThreadID : SV_GroupThreadID,
 	// Now blur each pixel.
 	//
 
-	float4 blurColor = float4(0, 0, 0, 0);
+	float4 blurColor = float4(0.05f, 0.f, 0.f, 0);
 	
 	for(int i = -gBlurRadius; i <= gBlurRadius; ++i)
 	{
