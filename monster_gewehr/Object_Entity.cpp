@@ -40,6 +40,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	controller->m_AnimationController->SetTrackEnable(0, true);
 	controller->m_AnimationController->SetTrackWeight(0, 1.f);
 	controller->m_AnimationController->SetBlendingSpeed(2, 8.0f);
+	controller->m_AnimationController->SetBlendingSpeed(6, 8.0f);
 	
 	ent->assign<Position_Component>(x, y, z);
 	ent->assign<Rotation_Component>(rx, ry, rz);
