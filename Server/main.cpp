@@ -93,7 +93,6 @@ void ProcessClient(SOCKET sock)
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
 
 	players.try_emplace(id, id, client_sock);
-	
 
 	frame fps{}, frame_count{};
 	//std::cout << id << std::endl;
@@ -107,7 +106,7 @@ void ProcessClient(SOCKET sock)
 		retval = players[id].RecvData();
 		
 		if (retval > 0) {
-			PacketReassembly(id, retval);			
+			PacketReassembly(id, retval);
 		}
 		else if (retval == -1) {
 			std::cout << "나감" << std::endl;
@@ -121,7 +120,7 @@ void ProcessClient(SOCKET sock)
 					players[id].hit_on = 0;
 				}
 				else {
-					hit_timer--;
+					hit_timer -= 1;
 				}
 			}
 
@@ -129,7 +128,6 @@ void ProcessClient(SOCKET sock)
 				players[id].death_count += 1;
 				players[id].SetHp(100);
 			}
-
 		}
 		fps_timer = std::chrono::steady_clock::now();
 	}
@@ -172,7 +170,6 @@ void BossThread()
 
 						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
 							players[ply_id].hit_on = 1;
-							//players[ply_id].SetHp(players[ply_id].GetHp() - 50);
 							players[ply_id].HitPlayer(50);
 							SendHitPlayer(players[ply_id].GetID());
 						}						
@@ -183,21 +180,20 @@ void BossThread()
 					if (!bite_cooltime) {
 						bite_cooltime = 13;
 						for (int ply_id : gamerooms[i].GetPlyId()) {
+							std::cout << "방 아이디 : " << ply_id << std::endl;
 							if (ply_id == -1) continue;
 							if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 							if (players[ply_id].hit_on) continue;
 
 							if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
 								players[ply_id].hit_on = 1;
-								//players[ply_id].SetHp(players[ply_id].GetHp() - 25);
 								players[ply_id].HitPlayer(25);
 								SendHitPlayer(players[ply_id].GetID());
-								std::cout << "실행" << std::endl;
 							}							
 						}
 					}
 					else {
-						bite_cooltime--;
+						bite_cooltime -= 1;
 					}
 				}
 				else {
@@ -230,7 +226,7 @@ void BossThread()
 						}
 					}
 					else {
-						tail_cooltime--;
+						tail_cooltime -= 1;
 					}
 				}
 				else {
@@ -312,6 +308,7 @@ void ProcessPacket(int id, char* p)
 		players[id].SetName(packet->name);
 		players[id].SetPassword(packet->password);
 		players[id].SetWeapon(0);
+		players[id].SetArmor(3);
 		players[id].SetRoomID(-1);
 
 		std::cout << "입장 : " << id << ", " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
@@ -745,15 +742,19 @@ void SendHitPlayer(int id)
 	if (packet.hp <= 0) {
 		gamerooms[room_id].m_all_life -= 1;
 	}
+	retval = players[id].DoSend(&packet, packet.size);
+	if (retval == SOCKET_ERROR) {
+		players[id].SetState(S_STATE::LOG_OUT);
+	}
 
-	for (int ply_id : gamerooms[room_id].GetPlyId()) {
+	/*for (int ply_id : gamerooms[room_id].GetPlyId()) {
 		if (ply_id < 0) continue;
 		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 		retval = players[ply_id].DoSend(&packet, packet.size);
 		if (retval == SOCKET_ERROR) {
 			players[ply_id].SetState(S_STATE::LOG_OUT);
 		}
-	}
+	}*/
 }
 
 void SendEndGame(int id, bool clear)

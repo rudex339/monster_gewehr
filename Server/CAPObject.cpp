@@ -68,7 +68,7 @@ Player::Player()
 	m_mag = 0;
 
 	m_weapon = 0;
-	m_armor = 0;
+	m_armor = 3;
 }
 
 Player::Player(int id, SOCKET socket)
@@ -83,9 +83,9 @@ Player::Player(int id, SOCKET socket)
 	m_ammo = 0;
 	m_mag = 0;
 
-	m_weapon = 0;
-	m_armor = 0;
-	m_throw_wp = 0;
+	m_weapon = S_RIFLE;
+	m_armor = S_L_ARMOR;
+	m_throw_wp = S_GRENADE;
 
 	m_remain_size = 0;
 	m_state = S_STATE::LOG_IN;
@@ -121,9 +121,6 @@ void Player::PlayerInit()
 	m_yaw = 0.f;
 	m_hp = 100;
 	m_max_hp = 100;
-
-	m_ammo = 0;
-	m_mag = 0;
 
 	m_state = S_STATE::LOBBY;
 
