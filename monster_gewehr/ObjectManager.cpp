@@ -35,7 +35,7 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,48+5); //사용되는 텍스쳐 갯수 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,49+5); //사용되는 텍스쳐 갯수 
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -133,6 +133,9 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_EmitterList.insert({ "explosion",
 		 (std::shared_ptr<GameObjectModel>)
 		(new MultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature))});
+	m_EmitterList.insert({ "blood00",
+		 (std::shared_ptr<GameObjectModel>)
+		(new MultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature)) });
 
 	m_nHierarchicalGameObjects = 0;
 
@@ -171,7 +174,7 @@ ID3D12RootSignature *ObjectManager::CreateGraphicsRootSignature(ID3D12Device *pd
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[9];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[10];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -312,8 +315,9 @@ ID3D12RootSignature *ObjectManager::CreateGraphicsRootSignature(ID3D12Device *pd
 	pd3dRootParameters[14].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameters[15].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[15].Descriptor.ShaderRegister = 9; //Camera
-	pd3dRootParameters[15].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[15].Constants.Num32BitValues = 16;
+	pd3dRootParameters[15].Constants.ShaderRegister = 9; //GameObject
+	pd3dRootParameters[15].Constants.RegisterSpace = 0;
 	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	

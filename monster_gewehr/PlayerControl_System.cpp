@@ -359,6 +359,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			// 투척 g키
 			if (pKeysBuffer[0x47] & 0xF0 && player->grenade_amount) {
 				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
+				AnimationController->next_State = (UINT)GRANADE;
 				world->emit<CreateObject_Event>({ granade, 
 					XMFLOAT3(model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._41,
 						model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._42,

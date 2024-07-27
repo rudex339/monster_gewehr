@@ -314,7 +314,7 @@ void Render_System::unconfigure(World* world)
 }
 
 void Render_System::tick(World* world, float deltaTime)
-{
+{	if(m_pBlurFilter)
 	if (m_pBlurFilter->m_Strength > 0) {
 		m_pBlurFilter->m_Strength -= deltaTime*5;
 
@@ -1229,7 +1229,8 @@ void Render_System::receive(World* world, const SetBlur_Event& event) {
 	
 	switch (event.blur) {
 	case 0:
-		m_pBlurFilter->m_Strength = 5.0f;
+		if(m_pBlurFilter)
+			m_pBlurFilter->m_Strength = 5.0f;
 		break;
 	}
 }
