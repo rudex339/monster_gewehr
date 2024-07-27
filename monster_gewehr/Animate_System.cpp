@@ -26,6 +26,8 @@ void Animate_System::tick(World* world, float deltaTime)
 					AnimationController->m_AnimationController->SetTrackEnable(AnimationController->next_State, true);
 					AnimationController->cur_State = AnimationController->next_State;
 					AnimationController->next_State = MAXDWORD;
+
+					AnimationController->m_AnimationController->animate(deltaTime);
 				}
 			}
 			else if (ent->has<Emitter_Componet>()) {

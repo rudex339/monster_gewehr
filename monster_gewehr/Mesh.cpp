@@ -1017,21 +1017,21 @@ bool TextureRectMesh::changeRowCol(int row, int col, int rows, int cols)
 	m_xmf4x4Texture._31 = x ;
 	m_xmf4x4Texture._32 = y ;
 
-	XMStoreFloat4x4(&m_pcbMappedtexture->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	//XMStoreFloat4x4(&m_pcbMappedtexture->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
 	return false;
 }
 
 void TextureRectMesh::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbtexture = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	//m_pcbMappedtexture = new cbTextureInfo;
-	m_pd3dcbtexture->Map(0, NULL, (void**)&m_pcbMappedtexture);
+	//m_pd3dcbtexture = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pcbMappedtexture = new cbTextureInfo;
+	//m_pd3dcbtexture->Map(0, NULL, (void**)&m_pcbMappedtexture);
 	
 	//UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
 	//D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = ObjectManager::GetCbvSrvDescriptorHeap()->m_d3dCbvGPUDescriptorNextHandle;
 	
-	d3dCbvGPUDescriptorNextHandle.ptr = ObjectManager::CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbtexture, ncbElementBytes).ptr;
+	//d3dCbvGPUDescriptorNextHandle.ptr = ObjectManager::CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbtexture, ncbElementBytes).ptr;
 }
 
 void TextureRectMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1043,7 +1043,10 @@ void TextureRectMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	memcpy(pBufferDataBegin, &m_pcbMappedtexture, ncbElementBytes);
 	m_pd3dcbtexture->Unmap(0, NULL);*/
 
-	pd3dCommandList->SetGraphicsRootConstantBufferView(15, m_pd3dcbtexture->GetGPUVirtualAddress());
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(15, m_pd3dcbtexture->GetGPUVirtualAddress());
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(15, 16 ,&xmf4x4World, 0);
 }
 
 void TextureRectMesh::ReleaseShaderVariables()

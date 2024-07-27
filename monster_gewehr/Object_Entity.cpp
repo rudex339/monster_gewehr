@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Object_Entity.h"
 #include "ObjectManager.h"
+#include "Player_Entity.h"
+#include <algorithm>
 
 
 Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -30,7 +32,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	temp_mComponet->draw = false;
 
 	auto controller = ent->assign<AnimationController_Component>(
-		new CAnimationController(pd3dDevice, pd3dCommandList, 9, model), 0);
+		new SoldierAnimationController(pd3dDevice, pd3dCommandList, 9, model, ent), 0);
 	for (int i = 0; i < 9; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		//controller->m_AnimationController->SetTrackEnable(i, false);
@@ -433,5 +435,131 @@ void Sound_Componet::ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front, 
 	m_result = m_system->update();
 	if (m_result != FMOD_OK) {
 		std::cerr << "Failed to update system: " << "\n";
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SoldierAnimationController::SoldierAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel, Entity* owner):
+	CAnimationController(pd3dDevice,  pd3dCommandList, nAnimationTracks, pModel), m_owner(owner)
+{
+	weight_Under[0] = 1.f;
+}
+
+SoldierAnimationController::~SoldierAnimationController()
+{
+}
+
+void SoldierAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel* pRootGameObject)
+{
+	m_fTime += fTimeElapsed;
+	XMFLOAT3 velocity = m_owner->get<player_Component>()->m_velocity;
+	velocityXZ = Vector3::Length(velocity);
+	//float player_speed[2] = { 50.25f, 40.25f };
+	//ent의 xz 속도를 구한뒤 그 속도가 0이면 idle 0이상이면 run run 속도 이상이면 fastrun
+	
+	//만약 속도가 40.25*deltatime 이상인가? run과 fastrun
+	for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++) m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
+
+	if (velocityXZ >45.f * fTimeElapsed) {
+		weight_Under[0] = 0.f;
+
+		weight_Under[8] += m_pAnimationTracks[8].m_blendingSpeed * fTimeElapsed;
+		weight_Under[1] = 1.0 - weight_Under[8];
+	}
+	//else만약 속도가 0 이상인가? idle과 run
+	else if (velocityXZ > 0)
+	{
+		weight_Under[8] = 0.f;
+
+		weight_Under[1] += m_pAnimationTracks[1].m_blendingSpeed * fTimeElapsed;
+		weight_Under[0] = 1.0 - weight_Under[1];
+	}
+	else {
+		weight_Under[8] = 0.f;
+		
+		weight_Under[0] += m_pAnimationTracks[0].m_blendingSpeed * fTimeElapsed;
+		weight_Under[1] = 1.0 - weight_Under[0];
+
+		// weight_Under 값들을 0과 1 사이로 제한
+		
+	}
+	for (int i = 0; i < 10; ++i) {
+		if (weight_Under[i] < 0.0f) {
+			weight_Under[i] = 0.0f;
+		}
+		else if (weight_Under[i] > 1.0f) {
+			weight_Under[i] = 1.0f;
+		}
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	if (m_pAnimationTracks)
+	{
+		for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++) m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
+		float blendingSpeed = 0.f;
+		for (int k = 0; k < m_nAnimationTracks; k++) {
+			if (m_pAnimationTracks[k].m_bEnable) {
+				blendingSpeed = m_pAnimationTracks[k].m_blendingSpeed;
+			}
+		}
+		for (int k = 0; k < m_nAnimationTracks; k++) {
+			if (m_pAnimationTracks[k].m_bEnable) {
+				m_pAnimationTracks[k].m_fWeight += blendingSpeed * fTimeElapsed;
+				if (m_pAnimationTracks[k].m_fWeight > 1.f) {
+					m_pAnimationTracks[k].m_fWeight = 1.f;
+				}
+			}
+			else {
+				m_pAnimationTracks[k].m_fWeight -= blendingSpeed * fTimeElapsed;
+				if (m_pAnimationTracks[k].m_fWeight < 0.f) {
+					m_pAnimationTracks[k].m_fWeight = 0.f;
+				}
+			}
+		}
+
+		for (int k = 0; k < m_nAnimationTracks; k++)
+		{
+
+			if (m_pAnimationTracks[k].m_fWeight > 0.f|| weight_Under[k]>0.f)
+			{
+				bool up=false;
+				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+				float fPosition = m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+				for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++)//에니메이션 셋의 각 뼈대의 변환 행렬을 가져옴
+				{
+					XMFLOAT4X4 xmf4x4Transform = m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent;
+					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j, fPosition);//여기서 현재 프레임의 변환 값을 가져움
+					if (up) {						
+						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
+					}
+					else {
+						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, weight_Under[k]));
+						if (!strcmp(m_pAnimationSets->m_ppBoneFrameCaches[j]->m_pstrFrameName, "Bip001_Spine")) {
+							up = true;
+						}
+					}
+					m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = xmf4x4Transform;
+				}
+				m_pAnimationTracks[k].HandleCallback();
+			}
+		}
+
+		pRootGameObject->UpdateTransform(NULL);
+
+		OnRootMotion(pRootGameObject);
+		OnAnimationIK(pRootGameObject);
+	}
+}
+
+void SoldierAnimationController::Animate(float fElapsedTime)
+{
+	if (m_owner->has<Velocity_Component>()) {
+		XMFLOAT3 velocity = m_owner->get<Velocity_Component>()->m_velocity;
+		velocityXZ = Vector3::Length(velocity);
+	}
+	else {
+		XMFLOAT3 velocity = m_owner->get<player_Component>()->m_velocity;
+		velocityXZ = Vector3::Length(velocity); 
 	}
 }
