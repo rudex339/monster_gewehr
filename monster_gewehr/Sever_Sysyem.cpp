@@ -21,6 +21,7 @@ void Sever_System::configure(World* world)
 	world->subscribe<Set_Equipment>(this);
 	world->subscribe<Heal_Event>(this);
 	world->subscribe<Buy_Item>(this);
+	world->subscribe<ThrowWeapon_Event>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -41,6 +42,7 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_PLAYER_MOVE;
 	packet.pos = event.pos;
+	packet.vel = event.vel;
 	packet.yaw = event.yaw;
 	send(g_socket, (char*)&packet, packet.size, 0);
 
@@ -163,6 +165,17 @@ void Sever_System::receive(World* world, const Buy_Item& event)
 	p.type = CS_PACKET_BUY;
 	p.money = event.money;
 	p.item_type = event.item_type;
+
+	send(g_socket, (char*)&p, p.size, 0);
+}
+
+void Sever_System::receive(World* world, const ThrowWeapon_Event& event)
+{
+	CS_THROW_WEAPON_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_PACKET_THROW_WEAPON;
+	p.throw_type = event.type;
+	p.pos = event.pos;
 
 	send(g_socket, (char*)&p, p.size, 0);
 }

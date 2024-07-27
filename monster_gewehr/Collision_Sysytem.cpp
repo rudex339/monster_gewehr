@@ -74,6 +74,8 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
 
                             world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
                                 ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+
+                            world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
                             break;
                         }
 
@@ -94,6 +96,8 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
                             world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
                                 ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+
+                            world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
                             break;
                         }
 
