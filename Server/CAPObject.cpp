@@ -544,6 +544,8 @@ Leaf	die_node;
 
 // blind
 Sequence blind_sequence;
+	Leaf set_blind_ani_node;
+	Leaf blind_to_fight_node; TimeLimiter blind_to_fight_dec;
 
 // runaway points
 XMFLOAT3 runaway_point01 = XMFLOAT3(2200.0f, LAND_Y, 3100.0f);
@@ -1104,6 +1106,20 @@ int go2home_to_idle(Monster* monster, std::unordered_map<INT, Player>* players, 
 	return BehaviorTree::SUCCESS;
 }
 
+/////////// blind
+int blind_to_fight(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room) {
+	monster->SetAnimation(idle_ani);
+	monster->SetState(fight_state);
+	build_bt(monster, players, room);
+
+	return BehaviorTree::SUCCESS;
+}
+
+int play_blind_ani(Monster* monster) {
+	monster->SetAnimation(blind_ani);
+	return BehaviorTree::SUCCESS;
+}
+
 /////////// die
 int die(Monster* monster)
 {
@@ -1261,7 +1277,12 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 
 	// blind
 	{
+		blind_to_fight_node = Leaf("Blind -> fight", std::bind(blind_to_fight, monster, players, room));
+		blind_to_fight_dec = TimeLimiter(&blind_to_fight_node, 3s); // 3s ´ë½Å ¿øÇÏ´Â ¼¶±¤Åº ½Ã°£À» ³Ö¾îµµµÊ.
 
+		set_blind_ani_node = Leaf("play blind ani", std::bind(play_blind_ani, monster));
+
+		blind_sequence = Sequence("Blind sequence", { &set_blind_ani_node, &blind_to_fight_dec });
 	}
 
 	// die
