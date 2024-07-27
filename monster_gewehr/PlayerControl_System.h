@@ -61,6 +61,8 @@ private:
 
 	bool shot_on = false;
 
+	float player_speed[2] = { 50.25f, 40.25f };
+
 public:
 	PlayerControl_System() = default;
 

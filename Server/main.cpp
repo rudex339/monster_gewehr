@@ -153,6 +153,7 @@ void BossThread()
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 
 	int bite_cooltime = 13;
+	int tail_cooltime = 6;
 
 	frame fps{}, frame_count{};
 	while (1) {
@@ -162,7 +163,7 @@ void BossThread()
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
 			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
 				run_bt(&souleaters[i], &players, &gamerooms[i]);
-				//souleaters[i].SetAnimation(walk_ani);
+
 				if (souleaters[i].GetAnimation() == dash_ani) {
 					for (int ply_id : gamerooms[i].GetPlyId()) {
 						if (ply_id == -1) continue;
@@ -171,7 +172,8 @@ void BossThread()
 
 						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
 							players[ply_id].hit_on = 1;
-							players[ply_id].SetHp(players[ply_id].GetHp() - 50);
+							//players[ply_id].SetHp(players[ply_id].GetHp() - 50);
+							players[ply_id].HitPlayer(50);
 							SendHitPlayer(players[ply_id].GetID());
 						}						
 					}
@@ -187,7 +189,8 @@ void BossThread()
 
 							if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
 								players[ply_id].hit_on = 1;
-								players[ply_id].SetHp(players[ply_id].GetHp() - 25);
+								//players[ply_id].SetHp(players[ply_id].GetHp() - 25);
+								players[ply_id].HitPlayer(25);
 								SendHitPlayer(players[ply_id].GetID());
 								std::cout << "실행" << std::endl;
 							}							
@@ -199,6 +202,39 @@ void BossThread()
 				}
 				else {
 					bite_cooltime = 13;
+				}
+
+				if (souleaters[i].GetAnimation() == tail_ani) {
+					if (!tail_cooltime) {
+						tail_cooltime = 6;
+						for (int ply_id : gamerooms[i].GetPlyId()) {
+							if (ply_id == -1) continue;
+							if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+							if (players[ply_id].hit_on) continue;
+							XMFLOAT3 ply_pos = players[ply_id].GetPosition();
+							XMFLOAT3 soul_pos = souleaters[i].GetPosition();
+
+							DirectX::XMVECTOR ply_vec = XMLoadFloat3(&ply_pos);
+							DirectX::XMVECTOR soul_vec = XMLoadFloat3(&soul_pos);
+
+							DirectX::XMVECTOR distanceVec = ply_vec - soul_vec;
+							float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
+							std::cout << "거리 : " << distance << std::endl;
+							if (distance < 70.f) {
+								players[ply_id].hit_on = 1;
+								//players[ply_id].SetHp(players[ply_id].GetHp() - 25);
+								players[ply_id].HitPlayer(25);
+								SendHitPlayer(players[ply_id].GetID());
+								std::cout << "실행" << std::endl;
+							}
+						}
+					}
+					else {
+						tail_cooltime--;
+					}
+				}
+				else {
+					tail_cooltime = 6;
 				}
 
 				SC_UPDATE_MONSTER_PACKET monster_packet;
@@ -470,7 +506,7 @@ void ProcessPacket(int id, char* p)
 	case CS_DEMO_MONSTER_SETHP: {
 		int room_id = players[id].GetRoomID();
 		souleaters[room_id].m_lock.lock();
-		souleaters[room_id].SetHp(50);
+		souleaters[room_id].SetHp(10);
 		souleaters[room_id].SetRAHp(0);
 		souleaters[room_id].m_lock.unlock();
 		break;
