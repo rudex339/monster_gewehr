@@ -293,6 +293,7 @@ struct Grande_Component {
 	float coolTime = 0.f;
 	Grande_Component() = default;
 
+	int Owner;
 	Grande_Component(const UINT& property,float range, float damage)
 		: property(property), range(range), damage(damage)
 	{
@@ -390,4 +391,23 @@ struct Sound_Componet {
 
 	void ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front, XMFLOAT3 up);
 
+};
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+class SoldierAnimationController : public CAnimationController {
+private:
+	vector<UINT> underState;
+	vector<UINT> upperState;
+
+public:
+
+	SoldierAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	~SoldierAnimationController();
+
+	virtual void SetTrackEnable(int nAnimationTrack, bool bEnable);
+	virtual void AdvanceTime(float fElapsedTime, GameObjectModel* pRootGameObject);
 };

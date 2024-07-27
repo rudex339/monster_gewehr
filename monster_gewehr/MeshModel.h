@@ -321,7 +321,7 @@ public:
 
 	void SetTrackType(int nAnimationTrack, int type) { if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].m_nType = type; };
 
-	void SetTrackEnable(int nAnimationTrack, bool bEnable);
+	virtual void SetTrackEnable(int nAnimationTrack, bool bEnable);
 	void SetTrackPosition(int nAnimationTrack, float fPosition);
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
 	void SetTrackWeight(int nAnimationTrack, float fWeight);
@@ -331,7 +331,7 @@ public:
 	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler *pCallbackHandler);
 	void SetBlendingSpeed(int nAnimationTrack, float speed);
 
-	void AdvanceTime(float fElapsedTime, GameObjectModel *pRootGameObject);
+	virtual void AdvanceTime(float fElapsedTime, GameObjectModel *pRootGameObject);
 
 public:
 	bool							m_bRootMotion = false;
