@@ -1287,7 +1287,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
 			
-
+			
 
 			if (xmf4x4World._42 < 1054.f) {
 				//cout << xmf4x4World._42 << "\n";
@@ -1295,91 +1295,212 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
 					m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
 				// XMFLOAT4X4를 XMMATRIX로 변환
+
+				// BoundingOrientedBox 변환
+				XMMATRIX worldMatrix = XMLoadFloat4x4(&xmf4x4World);
+				box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
+
 				if (!strcmp(pstrGameObjectName, "Cube")) {
 					xmf4x4World._42 += 2.f;
 				}
 
 				// 시작 지점에서 밖으로 나가지 못하게 제일 큰 건물 바운딩 박스를 조절
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_001_LOD1")) {
-					if (xmf4x4World._41 >= 2300.0f && xmf4x4World._43 <= 2000.0f) {
-						box->m_bounding_box.Extents.y += 3.8f;
-						if (xmf4x4World._41 <= 2600.0f) {
-							box->m_bounding_box.Center.y += 2.1f;
+					if (box->m_bounding_box.Center.x >= 2000.0f) {
+						box->m_bounding_box.Extents.y += 30.0f;
+						if (box->m_bounding_box.Center.x <= 2500.0f) {
+							box->m_bounding_box.Center.x += 30.0f;
 						}
+						if (box->m_bounding_box.Center.z <= 1090) {
+							box->m_bounding_box.Extents.x += 10.0f;
+							box->m_bounding_box.Center.z += 10.0f;
+
+						}
+					}
+					
+					if (box->m_bounding_box.Center.z > 2174 && box->m_bounding_box.Center.z < 2175) {
+						box->m_bounding_box.Extents.x += 20.0f;
+						box->m_bounding_box.Extents.y += 20.0f;
+
+						box->m_bounding_box.Center.x -= 20.0f;
+						box->m_bounding_box.Center.z += 20.0f;
+					}
+
+					if (box->m_bounding_box.Center.z > 2396 && box->m_bounding_box.Center.z < 2397) {
+						box->m_bounding_box.Extents.x += 10.0f;
+						box->m_bounding_box.Extents.y += 10.0f;
+
+						box->m_bounding_box.Center.x += 10.0f;
+						box->m_bounding_box.Center.z -= 10.0f;
+					}
+
+					if (box->m_bounding_box.Center.x > 697 && box->m_bounding_box.Center.x < 698) {
+						box->m_bounding_box.Extents.x += 10.0f;
+
+						box->m_bounding_box.Center.z -= 10.0f;
+					}
+
+					if (box->m_bounding_box.Center.z > 2941 && box->m_bounding_box.Center.z < 2942) {
+						box->m_bounding_box.Extents.x += 10.0f;
+
+						box->m_bounding_box.Center.x += 10.0f;
 					}
 				}
 
 				// 주황 테라스 건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_009_LOD1")) {
-					box->m_bounding_box.Extents.x -= 0.5f;
-					box->m_bounding_box.Center.x += 0.5f;
-					if (xmf4x4World._43 <= 800.0f) {
-						box->m_bounding_box.Extents.y += 1.5f;
+					box->m_bounding_box.Extents.x -= 5.0f;
+					box->m_bounding_box.Center.z -= 5.0f;
+					box->m_bounding_box.Extents.y += 10.0f;
+					if (box->m_bounding_box.Center.x < 52) {
+						box->m_bounding_box.Extents.x -= 5.0f;
+						box->m_bounding_box.Extents.y += 5.0f;
+					}
+					if (box->m_bounding_box.Center.x < 12) {
+						box->m_bounding_box.Extents.y += 15.0f;
+					}
+					if (box->m_bounding_box.Center.z >= 3350) {
+						box->m_bounding_box.Center.z += 10.0f;
+					}
+					if (box->m_bounding_box.Center.x > 1510 && box->m_bounding_box.Center.x < 1511) {
+						box->m_bounding_box.Center.z += 5.0f;
+					}
+					if (box->m_bounding_box.Center.x > 1288 && box->m_bounding_box.Center.x < 1289) {
+						box->m_bounding_box.Extents.x -= 5.0f;
+						box->m_bounding_box.Center.x -= 8.0f;
+						box->m_bounding_box.Center.z -= 5.0f;
 					}
 
-					if (xmf4x4World._41 >= 900.0f &&  xmf4x4World._41 <= 1700 && xmf4x4World._43 >= 2230 && xmf4x4World._43 <= 2850) {
-						box->m_bounding_box.Extents.y += 1.5f;
+					if (box->m_bounding_box.Center.x > 1026 && box->m_bounding_box.Center.x < 1027) {
+						box->m_bounding_box.Extents.y += 15.0f;
 					}
+
+					if (box->m_bounding_box.Center.z > 2287 && box->m_bounding_box.Center.z < 2288) {
+						box->m_bounding_box.Extents.y += 10.0f;
+						box->m_bounding_box.Center.x -= 15.0f;
+						box->m_bounding_box.Center.z += 10.0f;
+					}
+					if (box->m_bounding_box.Center.z > 1144 && box->m_bounding_box.Center.z < 1145) {
+						box->m_bounding_box.Center.z += 10.0f;
+					}
+
+					if (box->m_bounding_box.Center.z > 1455 && box->m_bounding_box.Center.z < 1456) {
+						box->m_bounding_box.Extents.y += 10.0f;
+						box->m_bounding_box.Center.x -= 5.0f;
+					}
+					
 				}
 
 				// 입구 볼록한 건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_013_LOD1")) {
-					if (xmf4x4World._41 >= 800.0f) {
-						box->m_bounding_box.Extents.x += 0.1f;
-						box->m_bounding_box.Extents.y += 2.0f;
-					}
-					else {
-						box->m_bounding_box.Extents.y += 1.0f;
-						box->m_bounding_box.Center.y -= 1.0f;
+					box->m_bounding_box.Extents.y += 5.0f;
+					box->m_bounding_box.Extents.x -= 4.0f;
+					if (box->m_bounding_box.Center.x < 300 && box->m_bounding_box.Center.z <= 800) {
+						box->m_bounding_box.Extents.y += 10.0f;
 					}
 
+					if (box->m_bounding_box.Center.x <= 52) {
+						box->m_bounding_box.Extents.x -= 5.0f;
+					}
+
+					if (box->m_bounding_box.Center.x <= 40 && box->m_bounding_box.Center.z >= 3230) {
+						box->m_bounding_box.Extents.y += 30.0f;
+						box->m_bounding_box.Center.z += 30.0f;
+					}
+
+					if (box->m_bounding_box.Center.z > 2499 && box->m_bounding_box.Center.z < 2500) {
+						box->m_bounding_box.Extents.y += 20.0f;
+					}
+
+					if (box->m_bounding_box.Center.z > 1860 && box->m_bounding_box.Center.z < 1860.5f) {
+						box->m_bounding_box.Extents.y += 20.0f;
+						box->m_bounding_box.Center.z -= 20.0f;
+					}
+				}
+
+				// 입구 볼록한 낮은 건물
+				if (!strcmp(pstrGameObjectName, "SM_ac_building_017_LOD1")) {
+					box->m_bounding_box.Extents.y += 5.0f;
 				}
 
 				// 1층 천막있는 창문건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_018_LOD1")) {
-					box->m_bounding_box.Extents.y -= 1.5f;
-					box->m_bounding_box.Extents.x += 60.0f;
+					box->m_bounding_box.Extents.y -= 18.0f;
+					box->m_bounding_box.Extents.x += 150.0f;
+					box->m_bounding_box.Center.x += 150.0f;
 				}
 
 				// 보라건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_039_LOD1")) {
-					box->m_bounding_box.Extents.x -= 0.85f;
+					box->m_bounding_box.Extents.y += 8.0f;
+					box->m_bounding_box.Extents.x -= 10.0f;
+
+					if (box->m_bounding_box.Center.x < 25 && box->m_bounding_box.Center.z > 2800.0f && box->m_bounding_box.Center.z < 3000.0f) {
+						box->m_bounding_box.Extents.y -= 8.0f;
+						box->m_bounding_box.Extents.x += 30.0f;
+					}
+
+					if (box->m_bounding_box.Center.x > 2036 && box->m_bounding_box.Center.z > 1625 && box->m_bounding_box.Center.z < 1626) {
+						box->m_bounding_box.Center.z -= 10.0f;
+						box->m_bounding_box.Extents.x += 10.0f;
+					}
 				}
+
 				// 초록 테라스 건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_010_LOD1")) {
-					box->m_bounding_box.Extents.x -= 0.65f;
+					box->m_bounding_box.Extents.x -= 10.0f;
+					box->m_bounding_box.Extents.y += 10.0f;
+					if (box->m_bounding_box.Center.x < 2149 && box->m_bounding_box.Center.z > 1750 && box->m_bounding_box.Center.z < 1751) {
+						box->m_bounding_box.Center.x += 10.0f;
+						box->m_bounding_box.Extents.x += 30.0f;
+						box->m_bounding_box.Center.z -= 30.0f;
+					}
+				}
+				
+				// 창고 건물
+				if (!strcmp(pstrGameObjectName, "SM_ac_building_003_LOD1")) {
+					if (box->m_bounding_box.Center.x < 50 && box->m_bounding_box.Center.z > 3070) {
+						box->m_bounding_box.Extents.y += 8.0f;
+						box->m_bounding_box.Extents.x += 10.0f;
+						box->m_bounding_box.Center.z -= 10.0f;
+					}
 				}
 
 				// 가로로 긴 구멍있는 건물
-				if (!strcmp(pstrGameObjectName, "SM_ac_building_024_LOD1")) {
-					box->m_bounding_box.Extents.x += 1.2f;
-					box->m_bounding_box.Center.x -= 1.2f;
+				if (!strcmp(pstrGameObjectName, "SM_ac_building_024_LOD1")) {	
+					box->m_bounding_box.Extents.x += 20.0f;
+					if (box->m_bounding_box.Center.x > 45 && box->m_bounding_box.Center.x < 46) {
+						box->m_bounding_box.Center.z += 20.f;
+					}
 				}
 
 				// 교회
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_006_LOD1")) {
-					box->m_bounding_box.Extents.x -= 4.5f;
+					box->m_bounding_box.Extents.x -= 110.0f;
+
 				}
 
 				// 네모난 천막 건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_041_LOD1")) {
-					box->m_bounding_box.Extents.y -= 1.0f;
+
 				}
 
 				// 코너 건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_033_LOD1")) {
-					box->m_bounding_box.Extents.y -= 1.5f;
+					box->m_bounding_box.Extents.y -= 17.0f;
+					if (box->m_bounding_box.Center.x > 840 && box->m_bounding_box.Center.x < 841) {
+						box->m_bounding_box.Extents.y += 5.0f;
+						box->m_bounding_box.Center.x += 5.0f;
+					}
+
+					if (box->m_bounding_box.Center.x > 1577 && box->m_bounding_box.Center.x < 1588) {
+						box->m_bounding_box.Extents.y += 5.0f;
+						box->m_bounding_box.Center.x -= 5.0f;
+					}
 				}
 
-				if (!strcmp(pstrGameObjectName, "SM_ac_building_003_LOD1")) {
-					box->m_bounding_box.Extents.y += 1.5f;
-				}
+
 				
-
-
-				// BoundingOrientedBox 변환
-				XMMATRIX worldMatrix = XMLoadFloat4x4(&xmf4x4World);
-				box->m_bounding_box.Transform(box->m_bounding_box, worldMatrix);
 				world->emit<AddObjectlayer_Event>({ "Object",ent });
 
 				box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
