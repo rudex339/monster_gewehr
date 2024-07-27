@@ -1085,11 +1085,27 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
-		ent->assign<Emitter_Componet>(2.0f, 1.0f,8,8);
+		ent->assign<Emitter_Componet>(3.2f, 0.5f,8,8);
 
 		//world->emit<AddObjectlayer_Event>({ "Granade", ent });
 	}
 		break;
+	case blood:
+	{
+		Entity* ent = world->create();
+		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
+		ent->assign<Rotation_Component>(0.f, 0.f, 0.f);
+		ent->assign<Scale_Component>(5.f, 5.f, 5.f);
+
+		string pstrGameObjectName = "explosion";
+		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
+			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
+
+		ent->assign<Emitter_Componet>(1.0f, 0.5f, 8, 8);
+
+		//world->emit<AddObjectlayer_Event>({ "Granade", ent });
+	}
+	break;
 
 	}
 }
