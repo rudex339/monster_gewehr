@@ -509,6 +509,8 @@ void ProcessPacket(int id, char* p)
 		if (distance < 100) {
 			if (packet->throw_type == 0) {	// ½´·ùÅº
 				std::cout << "½´·ùÅº ¸ÂÀ½" << std::endl;
+				souleaters[room_id].SetState(blind_state);
+				build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 			}
 			else if (packet->throw_type == 1) {	// ¼¶±¤
 

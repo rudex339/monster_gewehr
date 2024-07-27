@@ -245,6 +245,7 @@ public:
 		{123, 745, 715, 2082}
 	};
 	int home = 0;
+	int prev_home = 0;
 	std::mutex m_lock;
 protected:
 	bool isUserArround[MAX_CLIENT_ROOM];

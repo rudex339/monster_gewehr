@@ -1001,6 +1001,7 @@ int set_runaway_point(Monster* monster) {
 		point = rand_runaway_point(gen);
 		if (point != monster->home) {
 			monster->SetTargetPos(runaway_point[point]);
+			monster->prev_home = monster->home;
 			monster->home = point;
 			break;
 		}
@@ -1115,6 +1116,7 @@ int blind_to_fight(Monster* monster, std::unordered_map<INT, Player>* players, G
 }
 
 int play_blind_ani(Monster* monster) {
+	monster->home = monster->prev_home;
 	monster->SetAnimation(blind_ani);
 	return BehaviorTree::SUCCESS;
 }
@@ -1260,7 +1262,7 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 
 		set_runaway_point_node = Leaf("Set RunAway Point", std::bind(set_runaway_point, monster));
 
-		runaway_sequence = Sequence("RUN AWAY Sequence", { &set_runaway_point_node, &take_off_node, &fly_up_node, &fly_to_point_node,
+		runaway_sequence = Sequence("RUN AWAY Sequence", { &set_runaway_point_node, &growling_node, &wait_next_idle_dec ,&take_off_node, &fly_up_node, &fly_to_point_node,
 			&fly_down_node, &landing_node, &wait_change_to_idle_dec });
 	}
 

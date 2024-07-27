@@ -420,7 +420,7 @@ void Render_System::tick(World* world, float deltaTime)
 							if (box->m_pMesh) {
 								m_pBox->m_pMesh = box->m_pMesh;
 								m_pBox->SetPosition(box->m_bounding_box.Center);
-								m_pBox->SetRotation(rotation->mfPitch, rotation->mfYaw, rotation->mfRoll);
+								//m_pBox->SetRotation(rotation->mfPitch, rotation->mfYaw, rotation->mfRoll);
 								//cout << box->m_bounding_box.Center.x << " " << box->m_bounding_box.Center.z << endl;
 								//cout << pos->Position.x << " " << pos->Position.y << " " << pos->Position.z << endl;
 								m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
