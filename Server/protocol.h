@@ -23,9 +23,22 @@ constexpr int S_FAK = 8;
 constexpr int S_INJECTOR = 9;
 
 // 무기 데미지
-constexpr short RIFLE_ATK = 10;
-constexpr short SHOTGUN_ATK = 5;	// 펠릿당 데미지
-constexpr short SNIPER_ATK = 100;
+constexpr float RIFLE_ATK = 5.f;
+constexpr float SHOTGUN_ATK = 3.f;	// 펠릿당 데미지
+constexpr float SNIPER_ATK = 25.f;
+
+// 무기 강화율
+constexpr float RIFLE_UP = 0.5f;
+constexpr float SHOTGUN_UP = 0.1f;	// 펠릿당 데미지
+constexpr float SNIPER_UP = 2.f;
+
+// 방어구 방어율
+constexpr float L_ARMOR_DEF = 0.0f;
+constexpr float H_ARMOR_DEF = 5.f;
+
+// 방어구 강화율
+constexpr float L_ARMOR_UP = 0.5f;
+constexpr float H_ARMOR_UP = 1.0f;
 
 // 몬스터 데이터
 constexpr float MONSTER_MAX_HP = 1000;

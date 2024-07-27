@@ -316,7 +316,7 @@ Sound_Componet::Sound_Componet()
 	m_result = m_system->set3DSettings(1.0f, 1.0f, 1.0f);
 
 	m_result = m_system->createSound("Sound/Music/title.mp3", FMOD_LOOP_NORMAL, 0, &m_music[Music::Title]);
-	m_result = m_system->createSound("Sound/Music/ingame2.mp3", FMOD_LOOP_NORMAL, 0, &m_music[Music::Ingame]);
+	m_result = m_system->createSound("Sound/Music/ingame3.mp3", FMOD_LOOP_NORMAL, 0, &m_music[Music::Ingame]);
 	m_result = m_system->createSound("Sound/Music/gameclear.mp3", FMOD_LOOP_OFF, 0, &m_music[Music::GameClear]);
 	m_result = m_system->createSound("Sound/Music/gamefail.mp3", FMOD_LOOP_OFF, 0, &m_music[Music::GameFail]);
 	

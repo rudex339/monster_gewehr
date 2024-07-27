@@ -134,68 +134,69 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
 
                     boundingBox->m_bounding_box.Center = Vector3::Add(cur_center,velocity->m_velocity);
 
-                    if (boundingBox->m_bounding_box.Intersects(Another_boundingBox->m_bounding_box)) {
-                        cout << Player->get<Model_Component>()->model_name;
-                        cout << " hit " << object->get<Model_Component>()->model_name << endl;
+                    if (boundingBox->m_bounding_box.Intersects(Another_boundingBox->m_bounding_box) || Another_boundingBox->m_bounding_box.Intersects(boundingBox->m_bounding_box)) {
+                        BoundingOrientedBox boxA = boundingBox->m_bounding_box;
+                        BoundingOrientedBox boxB = Another_boundingBox->m_bounding_box;
                         
-                        
-                        XMVECTOR vExtents = XMLoadFloat3(&boundingBox->m_bounding_box.Extents);
+                        XMFLOAT3 corners[8];
+                        boxA.GetCorners(corners);
 
-                        
-                        
-                       // DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationQuaternion();
-                        XMVECTOR vOrientation = DirectX::XMLoadFloat4(&Another_boundingBox->m_bounding_box.Orientation);
-                        assert(DirectX::Internal::XMQuaternionIsUnit(vOrientation));
+                        XMFLOAT3 min1 = corners[0];
+                        XMFLOAT3 max1 = corners[0];
 
-                        XMVECTOR axisX = XMVector3Rotate(XMVectorSet(1.0f, 0.f, 0.f, 0.f), vOrientation);
-                        XMVECTOR axisY = XMVector3Rotate(XMVectorSet(0.0f, 1.f, 0.f, 0.f), vOrientation);
-                        XMVECTOR axisZ = XMVector3Rotate(XMVectorSet(0.0f, 0.f, 1.f, 0.f), vOrientation);
-                        XMVECTOR axismX = XMVector3Rotate(XMVectorSet(-1.0f, 0.f, 0.f, 0.f), vOrientation);
-                        XMVECTOR axismY = XMVector3Rotate(XMVectorSet(0.0f, -1.f, 0.f, 0.f), vOrientation);
-                        XMVECTOR axismZ = XMVector3Rotate(XMVectorSet(0.0f, 0.f, -1.f, 0.f), vOrientation);
-                        
-                        XMVECTOR normals[6];
-                        normals[0] = XMVector3Rotate(XMVectorMultiply(vExtents, XMVectorSet(0.0f, 1.f, 0.f, 0.f)), vOrientation);     // ����
-                        normals[1] = XMVector3Rotate(XMVectorMultiply(vExtents, XMVectorSet(0.0f, -1.f, 0.f, 0.f)), vOrientation);  // �Ʒ���
-                        normals[2] = XMVector3Rotate(XMVectorMultiply(vExtents, XMVectorSet(0.0f, 0.f, 1.f, 0.f)), vOrientation); // ����
-                        normals[3] = XMVector3Rotate(XMVectorMultiply(vExtents, XMVectorSet(0.0f, 0.f, -1.f, 0.f)), vOrientation);   // ����
-                        normals[4] = XMVector3Rotate(XMVectorMultiply(vExtents, XMVectorSet(-1.0f, 0.f, 0.f, 0.f)), vOrientation);   // ����
-                        normals[5] = XMVector3Rotate(XMVectorMultiply(vExtents, XMVectorSet(1.0f, 0.f, 0.f, 0.f)), vOrientation);   // ������
-
-                        float minDepth = FLT_MAX;
-                        XMVECTOR minNormal;
-
-                        for (int i = 0; i < 6; ++i) {
-                            float depth = (DistancePointToPlane(normals[i], normals[i],XMLoadFloat3(&Vector3::Subtract(boundingBox->m_bounding_box.Center, Another_boundingBox->m_bounding_box.Center))));
-                            if (depth < minDepth&&depth>0) {
-                                minDepth = depth;
-                                minNormal = normals[i];
-                            }
+                        // 각 꼭짓점을 순회하면서 최소값 및 최대값 업데이트
+                        for (int i = 1; i < 8; ++i) {
+                            min1.x = std::min<float>(min1.x, corners[i].x);
+                            min1.y = std::min<float>(min1.y, corners[i].y);
+                            min1.z = std::min<float>(min1.z, corners[i].z);
+                                               
+                            max1.x = std::max<float>(max1.x, corners[i].x);
+                            max1.y = std::max<float>(max1.y, corners[i].y);
+                            max1.z = std::max<float>(max1.z, corners[i].z);
                         }
 
-                        XMFLOAT3 Corners[8];
-                        boundingBox->m_bounding_box.GetCorners(Corners);
-                        for (int i = 0; i < 8; i++) {
-                            Corners[i] = Vector3::Subtract(Corners[i], Another_boundingBox->m_bounding_box.Center);
+                        boxB.GetCorners(corners);
+
+                        XMFLOAT3 min2 = corners[0];
+                        XMFLOAT3 max2 = corners[0];
+
+                        // 각 꼭짓점을 순회하면서 최소값 및 최대값 업데이트
+                        for (int i = 1; i < 8; ++i) {
+                            min2.x = std::min<float>(min2.x, corners[i].x);
+                            min2.y = std::min<float>(min2.y, corners[i].y);
+                            min2.z = std::min<float>(min2.z, corners[i].z);
+                                                       
+                            max2.x = std::max<float>(max2.x, corners[i].x);
+                            max2.y = std::max<float>(max2.y, corners[i].y);
+                            max2.z = std::max<float>(max2.z, corners[i].z);
                         }
 
-                        minDepth = FLT_MAX;
-                        XMVECTOR vNormal;
-                        for (int i = 0; i < 8; i++) {
-                            float depth = DistancePointToPlane(minNormal, minNormal, XMLoadFloat3(&Corners[i]));
-                            if (depth < minDepth && depth < 0) {
-                                minDepth = depth;
-                                vNormal = OrthogonalVectorToPlane(minNormal, minNormal, XMLoadFloat3(&Corners[i]));
-
-                            }
+                        float distance = 0.0f;
+                        // 충돌면은 미니맵에서 보이는 방향 기준
+                        // 물체의 왼쪽면과 충돌
+                        if (max1.z >= min2.z && min1.z < min2.z) {
+                            distance = max1.z - min2.z;
+                            position->Position.z -= distance;
                         }
 
-                        vNormal = XMVectorScale(XMVector3Normalize(minNormal), 50.25f * deltaTime);
-
-                        if (true) {                            
-                            velocity->m_velocity = Vector3::Add(velocity->m_velocity, Vector3::XMVectorToFloat3(vNormal));
+                        // 물체의 오른쪽 면과 충돌
+                        else if (min1.z <= max2.z && max1.z > max2.z) {
+                            distance = max2.z - min1.z;
+                            position->Position.z += distance;
                         }
-                        //object_it = layers["Object"].begin();
+
+                        // 물체의 위쪽과 충돌
+                        else if (max1.x >= min2.x && min1.x < min2.x) {
+                            distance = max1.x - min2.x;
+                            position->Position.x -= distance;
+                        }
+
+                        // 물체의 아래쪽과 충돌
+                        else if (min1.x <= max2.x && max1.x > max2.x) {
+                            distance = max2.x - min1.x;
+                            position->Position.x -= distance;
+                        }
+
                     }
                     else {
                         
