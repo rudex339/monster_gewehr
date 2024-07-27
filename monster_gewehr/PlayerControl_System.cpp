@@ -397,8 +397,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && player->ammo > 0 && !heal_on) {				
 				if (shot_cooltime <= 0) {
 					AnimationController->next_State = (UINT)SHOOT;
-					shot_cooltime = shot_cooltime_list[player->m_weapon];
-					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()}); // 서버 보내는거
+					shot_cooltime = shot_cooltime_list[player->m_weapon];					
 					world->emit<ShootGun_Event>({ (int)player->m_weapon, camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector() }); //  이건 콜리전 시스템
 
 					Sound_Componet::GetInstance().PlaySound(player->m_weapon+3);

@@ -11,8 +11,7 @@ struct PacketSend_Event {
 };
 
 struct Shoot_Event {
-	DirectX::XMFLOAT3 c_pos;
-	DirectX::XMFLOAT3 c_dir;
+	short hit_count;
 };
 
 struct Login_Event {

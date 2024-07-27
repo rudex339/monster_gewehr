@@ -142,19 +142,19 @@ void Player::SetWeapon(char weapon)
 	switch (weapon)
 	{
 	case S_RIFLE:
-		m_atk = 10;
+		m_atk = RIFLE_ATK;
 		m_ammo = 30;
 		m_range = 250.0f;
 		break;
 	case S_SHOT_GUN:
-		m_atk = 25;
+		m_atk = SHOTGUN_ATK;
 		m_ammo = 7;
-		m_range = 100.0f;
+		m_range = 150.0f;
 		break;	
 	case S_SNIPER:
-		m_atk = 100;
+		m_atk = SNIPER_ATK;
 		m_ammo = 5;
-		m_range = 500.0f;
+		m_range = 400.0f;
 		break;
 	}
 }
@@ -1299,5 +1299,5 @@ void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom
 	monster->ElapsedTime();
 	check_hp(monster, players, room);
 	monster->RunBT();
-	std::cout << (int)monster->GetAnimation() << std::endl;
+	//std::cout << (int)monster->GetAnimation() << std::endl;
 }

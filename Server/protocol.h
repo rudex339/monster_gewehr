@@ -10,6 +10,7 @@ constexpr int MAX_ID_LENGTH = 20;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
+// 데이터베이스 아이템정보 배열 순서 무기, 방어구, 슈류탄은 강화, 회복템은 개수
 constexpr int S_RIFLE = 0;
 constexpr int S_SHOT_GUN = 1;
 constexpr int S_SNIPER = 2;
@@ -20,6 +21,11 @@ constexpr int S_FLASH_BANG = 6;
 constexpr int S_BANDAGE = 7;
 constexpr int S_FAK = 8;
 constexpr int S_INJECTOR = 9;
+
+// 무기 데미지
+constexpr short RIFLE_ATK = 10;
+constexpr short SHOTGUN_ATK = 5;	// 펠릿당 데미지
+constexpr short SNIPER_ATK = 100;
 
 // 몬스터 데이터
 constexpr float MONSTER_MAX_HP = 1000;
@@ -139,8 +145,7 @@ struct CS_PLAYER_ATTACK_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 dir;
+	SHORT hit_count;
 };
 
 struct CS_CREATE_ROOM_PACKET

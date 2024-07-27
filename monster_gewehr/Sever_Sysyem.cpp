@@ -59,8 +59,7 @@ void Sever_System::receive(class World* world, const Shoot_Event& event)
 	CS_PLAYER_ATTACK_PACKET atk_packet;
 	atk_packet.size = sizeof(atk_packet);
 	atk_packet.type = CS_PACKET_PLAYER_ATTACK;
-	atk_packet.dir = event.c_dir;
-	atk_packet.pos = event.c_pos;
+	atk_packet.hit_count = event.hit_count;
 
 	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
 }

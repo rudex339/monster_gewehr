@@ -161,8 +161,8 @@ void BossThread()
 
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
 			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
-				//run_bt(&souleaters[i], &players, &gamerooms[i]);
-				souleaters[i].SetAnimation(walk_ani);
+				run_bt(&souleaters[i], &players, &gamerooms[i]);
+				//souleaters[i].SetAnimation(walk_ani);
 				if (souleaters[i].GetAnimation() == dash_ani) {
 					for (int ply_id : gamerooms[i].GetPlyId()) {
 						if (ply_id == -1) continue;
@@ -328,34 +328,24 @@ void ProcessPacket(int id, char* p)
 	}
 	case CS_PACKET_PLAYER_ATTACK: {
 		int room_id = players[id].GetRoomID();
-
 		CS_PLAYER_ATTACK_PACKET* packet = reinterpret_cast<CS_PLAYER_ATTACK_PACKET*>(p);
-		players[id].SetAtkDir(packet->dir);
-		players[id].SetAtkPos(packet->pos);
-		
-		DirectX::XMVECTOR positionVec = XMLoadFloat3(&packet->pos);
-		DirectX::XMVECTOR directionVec = XMLoadFloat3(&packet->dir);
-		float shot_range = players[id].GetRange();
 
-		XMFLOAT3 souleaterPosition = souleaters[room_id].GetPosition();
-		DirectX::XMVECTOR souleaterPos = XMLoadFloat3(&souleaterPosition);
-		DirectX::XMVECTOR distanceVec = souleaterPos - positionVec;
-		float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
-
-		if (distance <= shot_range) {
-			if (souleaters[room_id].GetState() == runaway_state || souleaters[room_id].GetState() == gohome_state) {
+		if (packet->hit_count) {
+			if (souleaters[room_id].GetState() == runaway_state || souleaters[room_id].GetState() == gohome_state) {	// 도망갈때는 데미지 안입음
 
 			}
-
-			else if (souleaters[room_id].GetBoundingBox().Intersects(positionVec, directionVec, shot_range)) {
+			else {
 				souleaters[room_id].m_lock.lock();
-				souleaters[room_id].SetHp(souleaters[room_id].GetHp() - players[id].GetAtk());
+				souleaters[room_id].SetHp(souleaters[room_id].GetHp() - players[id].GetAtk() * packet->hit_count);
+
+				// 행동트리 설정 ---------------
 				souleaters[room_id].SetLatestAttackPlayer(&players[id]);
 				if (souleaters[room_id].GetState() == idle_state || souleaters[room_id].GetState() == alert_state) {
 					souleaters[room_id].SetState(fight_state);
 					souleaters[room_id].SetTarget(&players[id]);
 					build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 				}
+				// 행동트리 설정 ---------------
 				souleaters[room_id].m_lock.unlock();
 				std::cout << souleaters[room_id].GetHp() << std::endl;
 			}
@@ -366,6 +356,7 @@ void ProcessPacket(int id, char* p)
 	}
 	case CS_PACKET_CREATE_ROOM: {
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
+			gamerooms[i].SetStateLock();
 			if (gamerooms[i].GetState() == G_FREE) {
 				gamerooms[i].SetCreateRoom();
 				gamerooms[i].SetPlayerId(id);
@@ -373,8 +364,10 @@ void ProcessPacket(int id, char* p)
 				players[id].SetRoomID(i);
 				players[id].SetHost(true);
 				SendRoomCreate(id, i);
+				gamerooms[i].SetStateUnLock();
 				break;
 			}
+			gamerooms[i].SetStateUnLock();
 		}
 		break;
 	}
@@ -724,7 +717,7 @@ void SendRoomList(int id)
 {
 	int retval;
 	for (int i = 0; i < MAX_GAME_ROOM; i++) {
-		//gamerooms[i].SetStateLock();
+		gamerooms[i].SetStateLock();
 		if (gamerooms[i].GetState() != G_FREE) {
 			SC_ADD_ROOM_PACKET sub_packet;
 			sub_packet.size = sizeof(sub_packet);
@@ -735,12 +728,13 @@ void SendRoomList(int id)
 			if (gamerooms[i].GetState() == G_INGAME)
 				sub_packet.start = true;
 
+			gamerooms[i].SetStateUnLock();
 			retval = players[id].DoSend(&sub_packet, sub_packet.size);
 			if (retval == SOCKET_ERROR) {
 				players[id].SetState(S_STATE::LOG_OUT);
 			}
 		}
-		//gamerooms[i].SetStateUnLock();
+		gamerooms[i].SetStateUnLock();		
 	}
 }
 

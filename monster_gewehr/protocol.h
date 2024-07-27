@@ -139,8 +139,7 @@ struct CS_PLAYER_ATTACK_PACKET
 {
 	UCHAR size;
 	UCHAR type;
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 dir;
+	SHORT hit_count;
 };
 
 struct CS_CREATE_ROOM_PACKET

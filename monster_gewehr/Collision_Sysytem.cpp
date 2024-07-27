@@ -2,6 +2,7 @@
 #include "Collision_Sysytem.h"
 #include "Object_Entity.h"
 #include "Scene_Sysytem.h"
+#include "Sever_Sysyem.h"
 
 
 float DistancePointToPlane(const XMVECTOR& planeNormal, const XMVECTOR& planePoint, const XMVECTOR& point) {
@@ -236,8 +237,9 @@ void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
     XMVECTOR finaldir;                                  // 샷건같은 경우 탄퍼짐을 위한 벡터
     float shot_range = m_shot_range[event.weapon_type]; // 무기 사거리 몬스터와의 거리가 이거 이상이면 충돌체크 아예 안함
     float ray_dis;                                      // 내 위치에서 몬스터가 총 맞은 위치까지의 거리
+    short hit_count = 0;
     
-    if (layers.find("Monster") != layers.end()) {
+    if (layers.find("Monster") != layers.end()) {   // 충돌체크 시작
         for (auto object_it = layers["Monster"].begin(); object_it != layers["Monster"].end(); ++object_it) {
             Entity* object = *object_it;
             XMFLOAT3 souleaterPosition = object->get<Position_Component>()->Position;
@@ -262,6 +264,7 @@ void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
 
                             world->emit<CreateObject_Event>({ explotion,intersection
                                         ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+                            hit_count += 1;
                         }
                     }
                 }
@@ -273,9 +276,13 @@ void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
 
                         world->emit<CreateObject_Event>({ explotion,intersection
                                     ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+                        hit_count += 1;
                     }
                 }
             }
         }
-    }
+    }   // 충돌체크 끝
+
+    // 서버 shot_event를 이용해서 전달 어차피 소리도 전달해줘야해서 그냥 이거 쓰기로 함
+    world->emit<Shoot_Event>({ hit_count }); // 서버 보내는거
 }
