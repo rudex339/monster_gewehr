@@ -348,6 +348,7 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_PLAYER_MOVE: {
 		CS_PLAYER_MOVE_PACKET* packet = reinterpret_cast<CS_PLAYER_MOVE_PACKET*>(p);
 		players[id].SetPostion(packet->pos);
+		players[id].SetVelocity(packet->vel);
 		players[id].SetYaw(packet->yaw);
 		players[id].SetBoundingBox();
 		players[id].RotateBoundingBox();

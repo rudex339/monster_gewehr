@@ -2,7 +2,6 @@
 #include "Scene_Sysytem.h"
 
 struct PacketSend_Event {
-	CHAR id;
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
@@ -57,6 +56,10 @@ struct Heal_Event {
 struct Buy_Item {
 	INT money;
 	INT item_type;
+};
+
+struct Grenade_Event {
+	DirectX::XMFLOAT3 pos;
 };
 
 struct Demo_Event {

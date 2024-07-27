@@ -59,6 +59,8 @@ constexpr char CS_PACKET_SET_EQUIPMENT = 11;
 // 아니면 클라에서는 아이템을 구매버튼만 누르면 이를 서버에서 구매기능을 구현해서 구매됬다고 클라에 다시 알릴건지 고민중
 constexpr char CS_PACKET_BUY = 12;
 constexpr char CS_PACKET_HEAL = 13;
+constexpr char CS_PACKET_GRENADE = 14;
+constexpr char CS_PACKET_FLASHBANG = 15;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -88,6 +90,8 @@ constexpr char SC_PACKET_QUIT_ROOM = 20;
 constexpr char SC_PACKET_ADD_ROOM_PLAYER = 21;
 constexpr char SC_PACKET_ITEM_INFO = 22;
 constexpr char SC_PACKET_SHOT = 23;
+constexpr char SC_PACKET_GRENADE = 24;
+constexpr char SC_PACKET_FLASHBANG = 25;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -144,6 +148,7 @@ struct CS_PLAYER_MOVE_PACKET
 	UCHAR size;
 	UCHAR type;
 	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
 };
 

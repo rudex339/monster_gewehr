@@ -41,6 +41,7 @@ void Sever_System::receive(World* world, const PacketSend_Event& event)
 	packet.size = sizeof(packet);
 	packet.type = CS_PACKET_PLAYER_MOVE;
 	packet.pos = event.pos;
+	packet.vel = event.vel;
 	packet.yaw = event.yaw;
 	send(g_socket, (char*)&packet, packet.size, 0);
 
