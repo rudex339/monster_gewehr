@@ -293,6 +293,7 @@ struct Grande_Component {
 	float coolTime = 0.f;
 	Grande_Component() = default;
 
+	int Owner;
 	Grande_Component(const UINT& property,float range, float damage)
 		: property(property), range(range), damage(damage)
 	{

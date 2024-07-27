@@ -283,6 +283,7 @@ SoldierAnimationController::~SoldierAnimationController()
 
 void SoldierAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 {
+	CAnimationController::SetTrackEnable(nAnimationTrack, bEnable);
 }
 
 void SoldierAnimationController::AdvanceTime(float fElapsedTime, GameObjectModel* pRootGameObject)
