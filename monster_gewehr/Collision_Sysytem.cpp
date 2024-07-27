@@ -135,9 +135,12 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                     boundingBox->m_bounding_box.Center = Vector3::Add(cur_center,velocity->m_velocity);
 
                     if (boundingBox->m_bounding_box.Intersects(Another_boundingBox->m_bounding_box) || Another_boundingBox->m_bounding_box.Intersects(boundingBox->m_bounding_box)) {
+                        cout << Player->get<Model_Component>()->model_name;
+                        cout << " hit " << object->get<Model_Component>()->model_name << endl;
                         BoundingOrientedBox boxA = boundingBox->m_bounding_box;
                         BoundingOrientedBox boxB = Another_boundingBox->m_bounding_box;
-                        
+                        cout << "충돌건물중심 : " << boxB.Center.x << ", " << boxB.Center.y << ", " << boxB.Center.z << endl;
+
                         XMFLOAT3 corners[8];
                         boxA.GetCorners(corners);
 
@@ -194,7 +197,7 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                         // 물체의 아래쪽과 충돌
                         else if (min1.x <= max2.x && max1.x > max2.x) {
                             distance = max2.x - min1.x;
-                            position->Position.x -= distance;
+                            position->Position.x += distance;
                         }
 
                     }
