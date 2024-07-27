@@ -142,24 +142,36 @@ void Player::SetWeapon(char weapon)
 	switch (weapon)
 	{
 	case S_RIFLE:
-		m_atk = RIFLE_ATK;
+		m_atk = RIFLE_ATK + RIFLE_UP * m_item_info[S_RIFLE];
 		m_ammo = 30;
 		m_range = 250.0f;
 		break;
 	case S_SHOT_GUN:
-		m_atk = SHOTGUN_ATK;
+		m_atk = SHOTGUN_ATK + SHOTGUN_UP * m_item_info[S_SHOT_GUN];
 		m_ammo = 7;
 		m_range = 150.0f;
 		break;	
 	case S_SNIPER:
-		m_atk = SNIPER_ATK;
+		m_atk = SNIPER_ATK + SNIPER_UP * m_item_info[S_SNIPER];
 		m_ammo = 5;
 		m_range = 400.0f;
 		break;
 	}
 }
 
-
+void Player::SetArmor(char armor)
+{
+	m_armor = armor;
+	switch (m_armor)
+	{
+	case S_L_ARMOR:
+		m_def = L_ARMOR_DEF + L_ARMOR_UP * m_item_info[S_L_ARMOR];
+		break;
+	case S_H_ARMOR:
+		m_def = H_ARMOR_DEF + H_ARMOR_UP * m_item_info[S_H_ARMOR];
+		break;
+	}
+}
 
 int Player::RecvData()
 {

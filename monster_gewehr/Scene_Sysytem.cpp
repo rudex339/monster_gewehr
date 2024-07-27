@@ -1162,6 +1162,7 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 						else weapon[i]->draw = false;
 					}
 					Player->m_weapon = equipments[0];
+					Player->m_armor = equipments[1];
 					Player->ammo = weapon_ammo[Player->m_weapon];
 					Player->mag = weapon_mag[Player->m_weapon];
 

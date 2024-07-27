@@ -26,6 +26,11 @@ enum Weapon_State {
 	SNIPERRIFLE
 };
 
+enum Armor_State {
+	LIGHT_ARMOR,
+	HEAVY_ARMOR
+};
+
 Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
 	float x, float y, float z,
@@ -57,6 +62,7 @@ struct player_Component {
 	FLOAT reload_coolTime = 3.5f;
 
 	UINT m_weapon = RIFLE;
+	UINT m_armor = LIGHT_ARMOR;
 
 	INT heal_item[3];
 

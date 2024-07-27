@@ -33,7 +33,6 @@ public:
 	CHAR GetID() { return m_id; }
 	SHORT GetRoomID() { return m_room_id; }
 	DirectX::BoundingOrientedBox GetBoundingBox() { return m_bounding_box; }
-	
 
 protected:
 	
@@ -65,7 +64,7 @@ public:
 	void SetAmmo(float ammo) { m_ammo = ammo; }
 	void SetMag(float mag) { m_mag = mag; }
 	void SetWeapon(char wepon);
-	void SetArmor(char armor) { m_armor = armor; }
+	void SetArmor(char armor);
 	void SetThrowWp(char throw_wp) { m_throw_wp = throw_wp; }
 	void SetRemainSize(int remain_size) { m_remain_size = remain_size; }
 	void SetState(S_STATE state) { m_state = state; }
@@ -101,6 +100,8 @@ public:
 
 	int RecvData();
 	int DoSend(void* p, size_t size);
+
+	void HitPlayer(int damage) { m_hp -= (damage - m_def); }
 
 	void closesock() { closesocket(m_socket); }
 
@@ -141,7 +142,7 @@ protected:
 	// 데이터 베이스 연동 해줘야함
 	INT m_money;
 
-	INT m_item_info[10];
+	INT m_item_info[10];	// 아이템 정보들, 0라이플 시작, 강화율이나 소지율
 	//------------------------
 	INT m_remain_size;
 

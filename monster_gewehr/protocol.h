@@ -10,6 +10,7 @@ constexpr int MAX_ID_LENGTH = 20;
 constexpr int MAX_GAME_ROOM = 5;
 constexpr int MAX_CLIENT_ROOM = 4;
 
+// 데이터베이스 아이템정보 배열 순서 무기, 방어구, 슈류탄은 강화, 회복템은 개수
 constexpr int S_RIFLE = 0;
 constexpr int S_SHOT_GUN = 1;
 constexpr int S_SNIPER = 2;
@@ -20,6 +21,24 @@ constexpr int S_FLASH_BANG = 6;
 constexpr int S_BANDAGE = 7;
 constexpr int S_FAK = 8;
 constexpr int S_INJECTOR = 9;
+
+// 무기 데미지
+constexpr float RIFLE_ATK = 5.f;
+constexpr float SHOTGUN_ATK = 3.f;	// 펠릿당 데미지
+constexpr float SNIPER_ATK = 25.f;
+
+// 무기 강화율
+constexpr float RIFLE_UP = 0.5f;
+constexpr float SHOTGUN_UP = 0.1f;	// 펠릿당 데미지
+constexpr float SNIPER_UP = 2.f;
+
+// 방어구 방어율
+constexpr float L_ARMOR_DEF = 0.0f;
+constexpr float H_ARMOR_DEF = 5.f;
+
+// 방어구 강화율
+constexpr float L_ARMOR_UP = 0.5f;
+constexpr float H_ARMOR_UP = 1.0f;
 
 // 몬스터 데이터
 constexpr float MONSTER_MAX_HP = 1000;
@@ -40,6 +59,7 @@ constexpr char CS_PACKET_SET_EQUIPMENT = 11;
 // 아니면 클라에서는 아이템을 구매버튼만 누르면 이를 서버에서 구매기능을 구현해서 구매됬다고 클라에 다시 알릴건지 고민중
 constexpr char CS_PACKET_BUY = 12;
 constexpr char CS_PACKET_HEAL = 13;
+constexpr char CS_PACKET_THROW_WEAPON = 14;
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -69,6 +89,7 @@ constexpr char SC_PACKET_QUIT_ROOM = 20;
 constexpr char SC_PACKET_ADD_ROOM_PLAYER = 21;
 constexpr char SC_PACKET_ITEM_INFO = 22;
 constexpr char SC_PACKET_SHOT = 23;
+constexpr char SC_PACKET_THROW_WEAPON = 24;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -125,6 +146,7 @@ struct CS_PLAYER_MOVE_PACKET
 	UCHAR size;
 	UCHAR type;
 	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 vel;
 	FLOAT yaw;
 };
 
@@ -200,6 +222,14 @@ struct CS_HEAL_PACKET
 	UCHAR type;
 	FLOAT hp;
 	INT item_type;	// 0, 1, 2
+};
+
+struct CS_THROW_WEAPON_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR throw_type;
+	DirectX::XMFLOAT3 pos;
 };
 
 struct CS_DEMO_PACKET
@@ -382,6 +412,14 @@ struct SC_SHOT_PACKET
 	UCHAR type;
 	DirectX::XMFLOAT3 pos;
 	CHAR weapon;
+};
+
+struct SC_THROW_WEAPON_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	CHAR throw_type;
+	DirectX::XMFLOAT3 pos;
 };
 #pragma pack (pop)
 
