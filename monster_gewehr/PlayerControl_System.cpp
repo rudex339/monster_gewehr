@@ -231,8 +231,8 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		UCHAR pKeysBuffer[256];
 		if (GetKeyboardState(pKeysBuffer)) {
 
-			float speed = 50.25f * deltaTime;
-			//float speed = 1050.25f * deltaTime;
+			//float speed = 50.25f * deltaTime;
+			float speed = 1050.25f * deltaTime;
 
 			bool run_on = false; // 달리기 상태인지 아닌지 확인해 주는거
 			bool shift_key_press = false;
@@ -398,7 +398,9 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				if (shot_cooltime <= 0) {
 					AnimationController->next_State = (UINT)SHOOT;
 					shot_cooltime = shot_cooltime_list[player->m_weapon];
-					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()});
+					world->emit<Shoot_Event>({camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector()}); // 서버 보내는거
+					world->emit<ShootGun_Event>({ (int)player->m_weapon, camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector() }); //  이건 콜리전 시스템
+
 					Sound_Componet::GetInstance().PlaySound(player->m_weapon+3);
 					player->ammo--;
 					if (player->ammo <= 0 && player->mag > 0) {

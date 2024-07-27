@@ -161,8 +161,8 @@ void BossThread()
 
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
 			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
-				run_bt(&souleaters[i], &players, &gamerooms[i]);
-
+				//run_bt(&souleaters[i], &players, &gamerooms[i]);
+				souleaters[i].SetAnimation(walk_ani);
 				if (souleaters[i].GetAnimation() == dash_ani) {
 					for (int ply_id : gamerooms[i].GetPlyId()) {
 						if (ply_id == -1) continue;
@@ -255,7 +255,7 @@ void PacketReassembly(int id, size_t recv_size)
 	char* p = players[id].m_recv_buf;
 	while (remain_size > 0) {
 		int packet_size = p[0];
-		if (packet_size <= remain_size) {			
+		if (packet_size <= remain_size) {
 			ProcessPacket(id, p);
 			p = p + packet_size;
 			remain_size -= packet_size;
@@ -724,7 +724,7 @@ void SendRoomList(int id)
 {
 	int retval;
 	for (int i = 0; i < MAX_GAME_ROOM; i++) {
-		gamerooms[i].SetStateLock();
+		//gamerooms[i].SetStateLock();
 		if (gamerooms[i].GetState() != G_FREE) {
 			SC_ADD_ROOM_PACKET sub_packet;
 			sub_packet.size = sizeof(sub_packet);
@@ -740,7 +740,7 @@ void SendRoomList(int id)
 				players[id].SetState(S_STATE::LOG_OUT);
 			}
 		}
-		gamerooms[i].SetStateUnLock();
+		//gamerooms[i].SetStateUnLock();
 	}
 }
 

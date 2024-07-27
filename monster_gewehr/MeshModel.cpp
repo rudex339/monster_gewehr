@@ -1071,6 +1071,30 @@ void GameObjectModel::Rotate(XMFLOAT4* pxmf4Quaternion)
 	UpdateTransform(NULL);
 }
 
+void GameObjectModel::SetRotation(float fPitch, float fYaw, float fRoll)
+{
+	// 새로운 회전 변환 행렬을 생성
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
+
+	// 현재 변환 행렬에서 회전 부분만 새로 설정
+	XMFLOAT4X4 transformMatrix;
+	XMStoreFloat4x4(&transformMatrix, mtxRotate);
+
+	m_xmf4x4ToParent._11 = transformMatrix._11;
+	m_xmf4x4ToParent._12 = transformMatrix._12;
+	m_xmf4x4ToParent._13 = transformMatrix._13;
+	m_xmf4x4ToParent._21 = transformMatrix._21;
+	m_xmf4x4ToParent._22 = transformMatrix._22;
+	m_xmf4x4ToParent._23 = transformMatrix._23;
+	m_xmf4x4ToParent._31 = transformMatrix._31;
+	m_xmf4x4ToParent._32 = transformMatrix._32;
+	m_xmf4x4ToParent._33 = transformMatrix._33;
+
+	// 변환 행렬 업데이트
+	UpdateTransform(NULL);
+}
+
+
 //#define _WITH_DEBUG_FRAME_HIERARCHY
 
 CTexture* GameObjectModel::FindReplicatedTexture(_TCHAR* pstrTextureName)
@@ -1601,7 +1625,6 @@ Box::~Box()
 
 void Box::Render(ID3D12GraphicsCommandList* pd3dCommandList, DirectX::BoundingOrientedBox* box)
 {
-
 	GameObjectModel::Render(pd3dCommandList);
 }
 

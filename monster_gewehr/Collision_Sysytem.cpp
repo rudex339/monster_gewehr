@@ -23,6 +23,7 @@ void Collision_Sysytem::configure(World* world)
     world->subscribe<AddObjectlayer_Event>(this);
     world->subscribe<Clearlayer_Event>(this);
     world->subscribe<delObjectlayer_Event>(this);
+    world->subscribe<ShootGun_Event>(this);
 }
 
 void Collision_Sysytem::tick(World* world, float deltaTime)
@@ -123,8 +124,8 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
             ComponentHandle<Position_Component> position= Player->get<Position_Component>();
             ComponentHandle<BoundingBox_Component> boundingBox = Player->get<BoundingBox_Component>();
             ComponentHandle<Velocity_Component> velocity = Player->get<Velocity_Component>();
-            
             XMFLOAT3 cur_center = boundingBox->m_bounding_box.Center;
+
             if (layers.find("Object") != layers.end()) {
                 for (auto object_it = layers["Object"].begin(); object_it != layers["Object"].end(); object_it++){
                     Entity* object = *object_it;
@@ -190,8 +191,7 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
 
                         vNormal = XMVectorScale(XMVector3Normalize(minNormal), 50.25f * deltaTime);
 
-                        if (true) {
-                            
+                        if (true) {                            
                             velocity->m_velocity = Vector3::Add(velocity->m_velocity, Vector3::XMVectorToFloat3(vNormal));
                         }
                         //object_it = layers["Object"].begin();
@@ -227,4 +227,55 @@ void Collision_Sysytem::receive(World* world, const Clearlayer_Event& event)
 void Collision_Sysytem::receive(World* world, const delObjectlayer_Event& event)
 {
     std::remove(layers[event.layer].begin(), layers[event.layer].end(), event.ent);
+}
+
+void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
+{
+    XMVECTOR positionVec = XMLoadFloat3(&event.pos);    // 총 발사한 위치
+    XMVECTOR directionVec = XMLoadFloat3(&event.dir);   // 발사할 방향 or 바라보고있는 방향
+    XMVECTOR finaldir;                                  // 샷건같은 경우 탄퍼짐을 위한 벡터
+    float shot_range = m_shot_range[event.weapon_type]; // 무기 사거리 몬스터와의 거리가 이거 이상이면 충돌체크 아예 안함
+    float ray_dis;                                      // 내 위치에서 몬스터가 총 맞은 위치까지의 거리
+    
+    if (layers.find("Monster") != layers.end()) {
+        for (auto object_it = layers["Monster"].begin(); object_it != layers["Monster"].end(); ++object_it) {
+            Entity* object = *object_it;
+            XMFLOAT3 souleaterPosition = object->get<Position_Component>()->Position;
+            XMVECTOR souleaterPos = XMLoadFloat3(&souleaterPosition);
+            XMVECTOR distanceVec = souleaterPos - positionVec;
+            float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
+
+            if (distance <= shot_range) {
+                if (event.weapon_type == 1) {   // 샷건일때는 5발
+                    for (int i = 0; i < 5; ++i) {
+                        // 랜덤한 탄퍼짐
+                        XMVECTOR spray = XMVectorSet(
+                            urd(dre), urd(dre), urd(dre), 0.0f
+                        );
+                        finaldir = XMVector3Normalize(directionVec + spray);
+
+
+                        if (object->get<BoundingBox_Component>()->m_bounding_box.Intersects(positionVec, finaldir, ray_dis)) {
+                            XMVECTOR intersectionPoint = positionVec + ray_dis * finaldir;
+                            XMFLOAT3 intersection;
+                            XMStoreFloat3(&intersection, intersectionPoint);
+
+                            world->emit<CreateObject_Event>({ explotion,intersection
+                                        ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+                        }
+                    }
+                }
+                else {
+                    if (object->get<BoundingBox_Component>()->m_bounding_box.Intersects(positionVec, directionVec, ray_dis)) {
+                        XMVECTOR intersectionPoint = positionVec + ray_dis * directionVec;
+                        XMFLOAT3 intersection;
+                        XMStoreFloat3(&intersection, intersectionPoint);
+
+                        world->emit<CreateObject_Event>({ explotion,intersection
+                                    ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+                    }
+                }
+            }
+        }
+    }
 }

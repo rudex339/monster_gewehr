@@ -316,7 +316,7 @@ void Render_System::unconfigure(World* world)
 void Render_System::tick(World* world, float deltaTime)
 {
 	if (m_pBlurFilter->m_Strength > 0) {
-		m_pBlurFilter->m_Strength -= deltaTime*2;
+		m_pBlurFilter->m_Strength -= deltaTime*5;
 	}
 
 	if (m_pCamera) {
@@ -383,13 +383,6 @@ void Render_System::tick(World* world, float deltaTime)
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
 						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel);
 						Model->m_MeshModel->Animate(deltaTime);
-						// 여기서 부턴 애니메이션에 따른 효과음 출력
-						ComponentHandle<player_Component> data = ent->get<player_Component>();
-						if (data->id > -1) {	// 유저 일 경우
-							if (AnimationController->next_State == SHOOT) {
-								// 소리
-							}
-						}
 					}
 
 					XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
@@ -411,19 +404,27 @@ void Render_System::tick(World* world, float deltaTime)
 
 							box->m_bounding_box.Center = pos->Position;
 							box->m_bounding_box.Center.y += box->m_bounding_box.Extents.y / 2 + 5.f;
-							/*box->m_bounding_box.Orientation.x = rotation->mfPitch;
-							box->m_bounding_box.Orientation.y = rotation->mfYaw;
-							box->m_bounding_box.Orientation.z = rotation->mfRoll;*/
+
+							float radian = XMConvertToRadians(rotation->mfYaw);
+							XMFLOAT4 q{};
+							XMStoreFloat4(&q, XMQuaternionRotationRollPitchYaw(0.f, radian, 0.f));
+
+							box->m_bounding_box.Orientation = q;
+
+							//box->m_bounding_box.Orientation.x = rotation->mfPitch;
+							//box->m_bounding_box.Orientation.y = rotation->mfYaw;
+							//box->m_bounding_box.Orientation.z = rotation->mfRoll;
 
 
-							//m_pBox->UpdateTransform(&Matrix4x4::Identity());
+							m_pBox->UpdateTransform(&Matrix4x4::Identity());
 							if (box->m_pMesh) {
-								//m_pBox->m_pMesh = box->m_pMesh;
-								//m_pBox->SetPosition(box->m_bounding_box.Center);
-								////cout << box->m_bounding_box.Center.x << " " << box->m_bounding_box.Center.z << endl;
-								////cout << pos->Position.x << " " << pos->Position.y << " " << pos->Position.z << endl;
-								//m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
-								//m_pBox->SetPosition(0.f, 0.f, 0.f);
+								m_pBox->m_pMesh = box->m_pMesh;
+								m_pBox->SetPosition(box->m_bounding_box.Center);
+								m_pBox->SetRotation(rotation->mfPitch, rotation->mfYaw, rotation->mfRoll);
+								//cout << box->m_bounding_box.Center.x << " " << box->m_bounding_box.Center.z << endl;
+								//cout << pos->Position.x << " " << pos->Position.y << " " << pos->Position.z << endl;
+								m_pBox->Render(m_pd3dCommandList, &box->m_bounding_box);
+								m_pBox->SetPosition(0.f, 0.f, 0.f);
 							}
 						}
 					}
@@ -437,7 +438,8 @@ void Render_System::tick(World* world, float deltaTime)
 					}
 					if (ent->has<Emitter_Componet>()) {
 						ComponentHandle<Emitter_Componet> emiiter = ent->get<Emitter_Componet>();
-						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(emiiter->m_nRow, emiiter->m_nCol, emiiter->m_nRows, emiiter->m_nCols);				
+						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(emiiter->m_nRow, emiiter->m_nCol, emiiter->m_nRows, emiiter->m_nCols);
+
 						
 					}
 					
