@@ -377,10 +377,10 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 				ComponentHandle<Rotation_Component> Rotation) ->
 			void {
 				if (Player->id == pk->id) {
-					Player->hp = pk->hp;
-					Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Hurt);
-					world->emit<SetBlur_Event>({ 0 });
+					Player->hp = pk->hp;					
 					if (ent->has<Camera_Component>() && Player->hp <= 0) {
+						Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Hurt);
+						world->emit<SetBlur_Event>({ 0 });
 						ComponentHandle<EulerAngle_Component> eulerangle =
 							ent->get<EulerAngle_Component>();
 						ComponentHandle<ControllAngle_Component> controllangle =
