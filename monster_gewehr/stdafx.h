@@ -30,6 +30,8 @@
 #include <locale.h>
 #include <format>
 
+#include <random>
+
 
 using namespace std;
 
@@ -89,6 +91,7 @@ using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
 
 extern HINSTANCE						ghAppInstance;
+extern default_random_engine			dre;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 

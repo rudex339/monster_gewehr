@@ -63,26 +63,22 @@ void GameRoom::DeletePlayerId(int c_id)
 
 BOOL GameRoom::SetStartGame()
 {
-	m_state_lock.lock();
+	//m_state_lock.lock();
 	if (m_state == G_CREATE) {
 		m_state = G_INGAME;
-		m_state_lock.unlock();
+		//m_state_lock.unlock();
 		return true;
 	}
-	/*else if (m_state == G_INGAME) {
-		m_state_lock.unlock();
-		return true;
-	}*/
-	m_state_lock.unlock();
+	//m_state_lock.unlock();
 
 	return false;
 }
 
 void GameRoom::SetCreateRoom()
 {
-	m_state_lock.lock();
+	//m_state_lock.lock();
 	m_state = G_CREATE;
-	m_state_lock.unlock();
+	//m_state_lock.unlock();
 
 	for (auto& id : m_player_ids) {
 		id = -1;
@@ -92,8 +88,8 @@ void GameRoom::SetCreateRoom()
 
 void GameRoom::SetFreeRoom()
 {
-	m_state_lock.lock();
+	//m_state_lock.lock();
 	m_state = G_FREE;
-	m_state_lock.unlock();
+	//m_state_lock.unlock();
 
 }

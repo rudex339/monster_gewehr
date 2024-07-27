@@ -16,6 +16,8 @@ SOCKET g_socket{}; // 통신을 위한 소켓
 string SERVER_IP{ "127.0.0.1" };
 SOCKADDR_IN server_addr;
 
+default_random_engine dre; // 랜덤엔진
+
 // 소켓 함수 오류 출력 후 종료
 void err_quit(const char* msg)
 {
