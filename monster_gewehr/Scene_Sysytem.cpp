@@ -1342,8 +1342,17 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 
 					if (box->m_bounding_box.Center.z > 2941 && box->m_bounding_box.Center.z < 2942) {
 						box->m_bounding_box.Extents.x += 10.0f;
-
 						box->m_bounding_box.Center.x += 10.0f;
+					}
+
+					if (box->m_bounding_box.Center.z > 2291 && box->m_bounding_box.Center.z < 2292) {
+						box->m_bounding_box.Extents.x += 10.0f;
+						box->m_bounding_box.Center.z -= 10.0f;
+					}
+
+					if (box->m_bounding_box.Center.z > 2819 && box->m_bounding_box.Center.z < 2820) {
+						box->m_bounding_box.Extents.y += 10.0f;
+						box->m_bounding_box.Center.z += 10.0f;
 					}
 				}
 
@@ -1416,11 +1425,15 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 						box->m_bounding_box.Extents.y += 20.0f;
 						box->m_bounding_box.Center.z -= 20.0f;
 					}
+
+					if (box->m_bounding_box.Center.z > 2736 && box->m_bounding_box.Center.z < 2737) {
+						box->m_bounding_box.Extents.y += 20.0f;
+					}
 				}
 
 				// 입구 볼록한 낮은 건물
 				if (!strcmp(pstrGameObjectName, "SM_ac_building_017_LOD1")) {
-					box->m_bounding_box.Extents.y += 5.0f;
+					box->m_bounding_box.Extents.y += 10.0f;
 				}
 
 				// 1층 천막있는 창문건물
@@ -1443,6 +1456,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 					if (box->m_bounding_box.Center.x > 2036 && box->m_bounding_box.Center.z > 1625 && box->m_bounding_box.Center.z < 1626) {
 						box->m_bounding_box.Center.z -= 10.0f;
 						box->m_bounding_box.Extents.x += 10.0f;
+						box->m_bounding_box.Center.x += 10.0f;
 					}
 				}
 
@@ -1462,7 +1476,9 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 					if (box->m_bounding_box.Center.x < 50 && box->m_bounding_box.Center.z > 3070) {
 						box->m_bounding_box.Extents.y += 8.0f;
 						box->m_bounding_box.Extents.x += 10.0f;
-						box->m_bounding_box.Center.z -= 10.0f;
+						box->m_bounding_box.Center.x -= 8.0f;
+						box->m_bounding_box.Center.z += 10.0f;
+
 					}
 				}
 
