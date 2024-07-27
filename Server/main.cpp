@@ -390,7 +390,7 @@ void ProcessPacket(int id, char* p)
 	}
 	case CS_PACKET_CREATE_ROOM: {
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
-			gamerooms[i].SetStateLock();
+			//gamerooms[i].SetStateLock();
 			if (gamerooms[i].GetState() == G_FREE) {
 				gamerooms[i].SetCreateRoom();
 				gamerooms[i].SetPlayerId(id);
@@ -401,7 +401,7 @@ void ProcessPacket(int id, char* p)
 				gamerooms[i].SetStateUnLock();
 				break;
 			}
-			gamerooms[i].SetStateUnLock();
+			//gamerooms[i].SetStateUnLock();
 		}
 		break;
 	}
@@ -780,7 +780,7 @@ void SendRoomList(int id)
 {
 	int retval;
 	for (int i = 0; i < MAX_GAME_ROOM; i++) {
-		gamerooms[i].SetStateLock();
+		//gamerooms[i].SetStateLock();
 		if (gamerooms[i].GetState() != G_FREE) {
 			SC_ADD_ROOM_PACKET sub_packet;
 			sub_packet.size = sizeof(sub_packet);
@@ -791,13 +791,13 @@ void SendRoomList(int id)
 			if (gamerooms[i].GetState() == G_INGAME)
 				sub_packet.start = true;
 
-			gamerooms[i].SetStateUnLock();
+			//gamerooms[i].SetStateUnLock();
 			retval = players[id].DoSend(&sub_packet, sub_packet.size);
 			if (retval == SOCKET_ERROR) {
 				players[id].SetState(S_STATE::LOG_OUT);
 			}
 		}
-		gamerooms[i].SetStateUnLock();		
+		//gamerooms[i].SetStateUnLock();		
 	}
 }
 
