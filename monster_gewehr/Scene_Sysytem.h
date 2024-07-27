@@ -52,7 +52,8 @@ enum Items {
 enum createObject {
 	flashBand,
 	granade,
-	explotion
+	explotion,
+	blood
 };
 
 struct ChangeScene_Event {
