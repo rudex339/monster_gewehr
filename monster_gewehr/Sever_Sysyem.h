@@ -58,7 +58,8 @@ struct Buy_Item {
 	INT item_type;
 };
 
-struct Grenade_Event {
+struct ThrowWeapon_Event {
+	CHAR type;
 	DirectX::XMFLOAT3 pos;
 };
 
@@ -79,6 +80,7 @@ class Sever_System : public EntitySystem,
 	public EventSubscriber<Set_Equipment>,
 	public EventSubscriber<Heal_Event>,
 	public EventSubscriber<Buy_Item>,
+	public EventSubscriber<ThrowWeapon_Event>,
 	public EventSubscriber<Demo_Event>
 {
 private:
@@ -107,6 +109,7 @@ public:
 	virtual void receive(class World* world, const Set_Equipment& event);
 	virtual void receive(class World* world, const Heal_Event& event);
 	virtual void receive(class World* world, const Buy_Item& event);
+	virtual void receive(class World* world, const ThrowWeapon_Event& event);
 	virtual void receive(class World* world, const Demo_Event& event);
 	void PacketReassembly(World* world, char* recv_buf, size_t recv_size);
 	void ProcessPacket(World* world, char* packet);

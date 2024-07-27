@@ -494,6 +494,29 @@ void ProcessPacket(int id, char* p)
 		// SendHitPlayer ÀçÈ°¿ë ÇÏ¸é µÉµí?
 		break;
 	}
+	case CS_PACKET_THROW_WEAPON: {
+		CS_THROW_WEAPON_PACKET* packet = reinterpret_cast<CS_THROW_WEAPON_PACKET*>(p);
+		int room_id = players[id].GetRoomID();
+
+		XMFLOAT3 soul_pos = souleaters[room_id].GetPosition();
+
+		DirectX::XMVECTOR gre_vec = XMLoadFloat3(&packet->pos);
+		DirectX::XMVECTOR soul_vec = XMLoadFloat3(&soul_pos);
+
+		DirectX::XMVECTOR distanceVec = gre_vec - soul_vec;
+		float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
+		
+		if (distance < 100) {
+			if (packet->throw_type == 0) {	// ½´·ùÅº
+				std::cout << "½´·ùÅº ¸ÂÀ½" << std::endl;
+			}
+			else if (packet->throw_type == 1) {	// ¼¶±¤
+
+			}
+		}
+
+		break;
+	}
 	case CS_DEMO_MONSTER_SETPOS: {
 		int room_id = players[id].GetRoomID();
 		souleaters[room_id].m_lock.lock();
