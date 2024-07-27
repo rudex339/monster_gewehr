@@ -496,6 +496,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 #endif
 			
 			//velocity->m_velocity = Vector3::Add(velocity->m_velocity, XMFLOAT3(0, -65.4f* deltaTime, 0));
+			m_Pawn->get<player_Component>()->m_velocity = velocity->m_velocity;
 			//cout << position->Position.x << " " << position->Position.z << endl;
 			//cout << rotation->mfYaw << endl;
 		}

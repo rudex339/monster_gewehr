@@ -399,14 +399,15 @@ struct Sound_Componet {
 
 class SoldierAnimationController : public CAnimationController {
 private:
-	vector<UINT> underState;
-	vector<UINT> upperState;
-
+	Entity* m_owner;
+	float  velocityXZ = 10.f;
+	float weight_Under[10] = { 0, };
 public:
 
-	SoldierAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	SoldierAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel, Entity* owner);
 	~SoldierAnimationController();
 
-	virtual void SetTrackEnable(int nAnimationTrack, bool bEnable);
+	//virtual void SetTrackEnable(int nAnimationTrack, bool bEnable);
 	virtual void AdvanceTime(float fElapsedTime, GameObjectModel* pRootGameObject);
+	virtual void Animate(float fElapsedTime);
 };

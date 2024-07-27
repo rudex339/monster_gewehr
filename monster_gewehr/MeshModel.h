@@ -344,6 +344,7 @@ public:
 
 	virtual void OnRootMotion(GameObjectModel* pRootGameObject) { }
 	virtual void OnAnimationIK(GameObjectModel* pRootGameObject) { }
+	virtual void animate(float fElapsedTime) {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
