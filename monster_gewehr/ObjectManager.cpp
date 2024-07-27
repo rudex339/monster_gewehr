@@ -311,7 +311,7 @@ ID3D12RootSignature *ObjectManager::CreateGraphicsRootSignature(ID3D12Device *pd
 	pd3dRootParameters[14].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[9]);
 	pd3dRootParameters[14].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	pd3dRootParameters[15].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[15].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[15].Descriptor.ShaderRegister = 9; //Camera
 	pd3dRootParameters[15].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;

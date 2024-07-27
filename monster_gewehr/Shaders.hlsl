@@ -23,7 +23,7 @@ cbuffer cbGameObjectInfo : register(b2)
 cbuffer cbTextureInfo : register(b9)
 {
     matrix gmtxTexture : packoffset(c0);
-    int2 gi2TextureTiling : packoffset(c4);
+    //int2 gi2TextureTiling : packoffset(c4);
 };
 
 #include "Light.hlsl"

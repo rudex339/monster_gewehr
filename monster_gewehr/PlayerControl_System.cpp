@@ -359,7 +359,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 						model->m_MeshModel->FindFrame("Bip001_R_Hand")->m_xmf4x4World._43),
 					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
 					model_vector->m_xmf3Look});
-				player->grenade_amount -= 1;
+				//player->grenade_amount -= 1;
 			}
 
 			// 구르기가 아닐때는 그냥 일반 이동을 더하고 구르기 일때는 구르기 전용을 더함
