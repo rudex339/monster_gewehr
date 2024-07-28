@@ -141,7 +141,7 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	m_EmitterList.insert({ "flash",
 		 (std::shared_ptr<GameObjectModel>)
-		(new MultiSpriteObject3(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature)) });
+		(new MultiSpriteObject2(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature)) });
 
 	m_EmitterList.insert({ "blood",
 		 (std::shared_ptr<GameObjectModel>)

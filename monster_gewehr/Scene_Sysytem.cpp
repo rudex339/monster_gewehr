@@ -1189,13 +1189,13 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		Entity* ent = world->create();
 		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
 		ent->assign<Rotation_Component>(0.f, 0.f, 0.f);
-		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
+		ent->assign<Scale_Component>(10.f, 10.f, 10.f);
 		string pstrGameObjectName = "flash";
 		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
 		//ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
-		ent->assign<Emitter_Componet>(3.2f, 0.05f, 8, 8);
+		ent->assign<Emitter_Componet>(3.2f, 0.05f, 2, 2);
 
 		auto light = ent->assign<Light_Component>();
 		light->m_pLight = new LIGHT;
