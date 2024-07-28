@@ -40,7 +40,7 @@ bool is_camera_far(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR&
 }
 
 bool should_render(const DirectX::XMVECTOR& camera_pos, const DirectX::XMVECTOR& camera_look, const DirectX::XMVECTOR& object_pos) {
-	return is_camera_behind(camera_pos, camera_look, object_pos) || is_camera_far(camera_pos, object_pos);
+	return /*is_camera_behind(camera_pos, camera_look, object_pos) || */is_camera_far(camera_pos, object_pos);
 }
 
 HRESULT LoadBitmapFromFile(const wchar_t* imagePath, ID2D1DeviceContext2* d2dDeviceContext, ID2D1Factory3* d2dFactory, ID2D1Bitmap** ppBitmap)
@@ -337,7 +337,7 @@ void Render_System::tick(World* world, float deltaTime)
 					cur_point++;
 				}
 			});
-
+		cout << cur_point << endl;
 		::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 		::memcpy(&m_pcbMappedLights->m_nLights, &cur_point, sizeof(int));
 
@@ -470,7 +470,7 @@ void Render_System::tick(World* world, float deltaTime)
 				else{
 					Model->m_MeshModel->UpdateTransform(&pos->m_xmf4x4World);
 					if (!should_render(XMLoadFloat3(&m_pCamera->GetPosition()), XMLoadFloat3(&m_pCamera->GetLookVector()), XMLoadFloat3(&pos->Position))) {		
-					//if (true) {
+					if (true) {
 						if (Model->draw){
 							Model->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 						}

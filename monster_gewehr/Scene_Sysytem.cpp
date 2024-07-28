@@ -1081,6 +1081,42 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 {
 	switch (event.object) {
 	case granade:
+	{
+		Entity* ent = world->create();
+		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
+		ent->assign<Rotation_Component>(event.Rotate.x, 90.f, event.Rotate.z);
+		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
+		ComponentHandle<Velocity_Component> vel = ent->assign<Velocity_Component>();
+		DirectX::XMVECTOR rotationVec = DirectX::XMLoadFloat3(&event.Rotate);
+
+		// Convert rotation (in degrees) to radians
+		DirectX::XMVECTOR rotationRad = DirectX::XMVectorScale(rotationVec, DirectX::XM_PI / 180.0f);
+
+		// Calculate the forward direction based on rotation
+		DirectX::XMVECTOR forward = DirectX::XMVectorSet(0.f, 0.f, 1.f, 0.f); // Assuming forward is along the z-axis
+		DirectX::XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(
+			XMConvertToRadians(event.Rotate.x - 20.f),
+			XMConvertToRadians(event.Rotate.y),
+			XMConvertToRadians(event.Rotate.z));
+
+		DirectX::XMVECTOR direction = DirectX::XMVector3TransformNormal(forward, rotationMatrix);
+
+		// Scale the direction by speed
+		DirectX::XMVECTOR velocity = DirectX::XMVectorScale(direction, 18.f);
+		DirectX::XMStoreFloat3(&vel->m_velocity, velocity);
+		string pstrGameObjectName = "Cube";
+		ent->assign<Model_Component>(m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject,
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pstrFrameName);
+		ComponentHandle<BoundingBox_Component> box = ent->assign<BoundingBox_Component>(
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
+			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
+		if (event.id == m_id)
+			ent->assign<Grande_Component>(event.object, 20.f, true,0)->coolTime = 10.f;
+		else
+			ent->assign<Grande_Component>(event.object, 20.f, false,0)->coolTime = 10.f;
+		world->emit<AddObjectlayer_Event>({ "Granade", ent });
+	}
+	break;
 	case flashBand:
 	{
 		Entity* ent = world->create();
@@ -1112,9 +1148,9 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
 		if(event.id == m_id)
-		ent->assign<Grande_Component>(event.object, 20.f, true)->coolTime = 10.f;
+		ent->assign<Grande_Component>(event.object, 20.f, true,1)->coolTime = 10.f;
 		else
-			ent->assign<Grande_Component>(event.object, 20.f, false)->coolTime = 10.f;
+			ent->assign<Grande_Component>(event.object, 20.f, false,1)->coolTime = 10.f;
 		world->emit<AddObjectlayer_Event>({ "Granade", ent });
 	}
 		break;
@@ -1134,7 +1170,7 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		//world->emit<AddObjectlayer_Event>({ "Granade", ent });
 	}
 	break;
-	case blood:
+	case blood: {
 		Entity* ent = world->create();
 		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
 		ent->assign<Rotation_Component>(0.f, 0.f, 0.f);
@@ -1146,9 +1182,40 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 
 		//ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
 		ent->assign<Emitter_Componet>(3.2f, 0.05f, 8, 8);
-
+	}
 		break;
+	case flash:
+	{
+		Entity* ent = world->create();
+		ent->assign<Position_Component>(event.Position.x, event.Position.y, event.Position.z);
+		ent->assign<Rotation_Component>(0.f, 0.f, 0.f);
+		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
+		string pstrGameObjectName = "explosion";
+		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
+			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
+		//ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
+		ent->assign<Emitter_Componet>(3.2f, 0.05f, 8, 8);
+
+		auto light = ent->assign<Light_Component>();
+		light->m_pLight = new LIGHT;
+		::ZeroMemory(light->m_pLight, sizeof(LIGHT));
+		light->m_pLight->m_bEnable = true;
+		light->m_pLight->m_nType = POINT_LIGHT;
+		light->m_pLight->m_fRange = 500.0f;
+		light->m_pLight->m_xmf4Ambient = XMFLOAT4(1.f, 1.f, 1.f, 1.0f);
+		light->m_pLight->m_xmf4Diffuse = XMFLOAT4(10.f, 10.f, 10.f, 1.0f);
+		light->m_pLight->m_xmf4Specular = XMFLOAT4(10.f, 10.f, 10.f, 1.0f);
+		light->m_pLight->m_xmf3Position = XMFLOAT3(event.Position.x, event.Position.y, event.Position.z);
+		light->m_pLight->m_xmf3Attenuation = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		//string pstrGameObjectName = "explosion";
+		//ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
+		//	m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
+
+		//ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
+		//ent->assign<Emitter_Componet>(3.2f, 0.05f, 8, 8);
+	}
+	break;
 	}
 }
 
@@ -1237,7 +1304,7 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 					Player->heal_item[2] = equipHealItems[2];
 
 					Player->grenade_amount = 1;
-					Player->grenade_type = equipments[3];
+					Player->grenade_type = equipments[2]-5;
 				}
 			});
 	}
