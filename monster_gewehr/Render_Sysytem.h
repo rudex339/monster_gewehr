@@ -43,7 +43,7 @@ struct DrawUI_Event {
 
 // 로그인 이벤트
 struct InputId_Event {
-
+	CHAR type;
 };
 
 // 보급상자 정보 저장

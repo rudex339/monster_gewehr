@@ -66,12 +66,12 @@ DataBase::~DataBase()
 	SQLFreeHandle(SQL_HANDLE_ENV, m_henv);
 }
 
-bool DataBase::Createaccount(Player* player)
+bool DataBase::Createaccount(const char* id, const char* password)
 {
 	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
 
-	std::wstring c_id{ player->GetName().c_str(), player->GetName().c_str() + player->GetName().length()};
-	std::wstring c_password{ player->GetPassword().c_str(), player->GetPassword().c_str() + player->GetPassword().length()};
+	std::wstring c_id{ id, id + strlen(id) };
+	std::wstring c_password{ password, password + strlen(password) };
 
 	std::wcout << c_id << " " << c_password << std::endl;
 

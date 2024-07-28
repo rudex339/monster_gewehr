@@ -33,6 +33,7 @@
 
 using namespace DirectX;
 
+//#define DATABASE	// 데이터 베이스 미사용시 주석
 constexpr int MAX_LIFE = 3;
 
 namespace Vector3

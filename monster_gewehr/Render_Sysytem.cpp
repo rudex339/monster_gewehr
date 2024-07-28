@@ -702,11 +702,12 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				case LoginBtn:
 					// 여기서 아이디 비교하고, 성공하면 로비로 이동
 					m_scene->SetName(text[0]);
-					world->emit<InputId_Event>({});
+					world->emit<InputId_Event>({0});
 					break;
 
 				case RegisterBtn:
 					// 여기서 아이디랑 비밀번호를 DB에 저장 및 로비로 이동
+					world->emit<InputId_Event>({ 1 });
 					break;
 
 				case ChangeSceneBtn:
@@ -1221,7 +1222,7 @@ void Render_System::receive(World* world, const InputId_Event& event)
 	id.assign(text[0].begin(), text[0].end());
 	password.assign(text[1].begin(), text[1].end());
 
-	world->emit<Login_Event>({ id, password });
+	world->emit<Account_Event>({ event.type, id, password });
 }
 
 void Render_System::receive(World* world, const SetBlur_Event& event) {

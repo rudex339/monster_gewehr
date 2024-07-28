@@ -10,7 +10,7 @@ void Sever_System::configure(World* world)
 {
 	world->subscribe<PacketSend_Event>(this);
 	world->subscribe<Shoot_Event>(this);
-	world->subscribe<Login_Event>(this);
+	world->subscribe<Account_Event>(this);
 	world->subscribe<Game_Start>(this);
 	world->subscribe<Demo_Event>(this);
 	world->subscribe<Create_Room>(this);
@@ -66,11 +66,16 @@ void Sever_System::receive(class World* world, const Shoot_Event& event)
 	send(g_socket, (char*)&atk_packet, atk_packet.size, 0);
 }
 
-void Sever_System::receive(World* world, const Login_Event& event)
+void Sever_System::receive(World* world, const Account_Event& event)
 {
-	CS_LOGIN_PACKET packet;
+	CS_ACCOUNT_PACKET packet;
 	packet.size = sizeof(packet);
-	packet.type = CS_PACKET_LOGIN;
+	if (event.type == 0) {
+		packet.type = CS_PACKET_LOGIN;
+	}
+	if (event.type == 1) {
+		packet.type = CS_PACKET_REGISTER;
+	}
 
 	strcpy_s(packet.name, event.id.c_str());
 	strcpy_s(packet.password, event.password.c_str());
@@ -230,6 +235,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		break;
 	}
 	case SC_PACKET_LOGIN_FAIL: {
+		// 로그인 실패 했다는 메시지
 		cout << "로그인 실패" << endl;
 		break;
 	}
@@ -513,7 +519,16 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		}
 		break;
 	}
-
+	case SC_PACKET_REGISTER_SUCC: {
+		// 여기에 회원가입 성공했다는 메시지
+		cout << "회원가입 성공" << endl;
+		break;
+	}
+	case SC_PACKET_REGISTER_FAIL: {
+		// 여기에 회원가입 실패했다는 메시지
+		cout << "회원가입 실패" << endl;
+		break;
+	}
 	} // switch문 마지막
 
 

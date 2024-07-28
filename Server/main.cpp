@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 		addrlen = sizeof(clientaddr);
 
 		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
-		if (client_sock == INVALID_SOCKET) {			
+		if (client_sock == INVALID_SOCKET) {
 			break;
 		}
 
@@ -132,7 +132,9 @@ void ProcessClient(SOCKET sock)
 		fps_timer = std::chrono::steady_clock::now();
 	}
 
-	//database.Update(&players[id]);
+#ifdef DATABASE
+	database.Update(&players[id]);
+#endif
 	Disconnect(id);
 
 	// 소켓 닫기
@@ -251,7 +253,9 @@ void BossThread()
 						if (ply_id == -1) continue;
 						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 						SendEndGame(players[ply_id].GetID(), true);
-						//database.Update(&players[ply_id]);
+#ifdef DATABASE
+						database.Update(&players[ply_id]);
+#endif
 						players[ply_id].PlayerInit();
 					}
 					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
@@ -264,7 +268,9 @@ void BossThread()
 						if (ply_id == -1) continue;
 						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 						SendEndGame(players[ply_id].GetID(), false);
-						//database.Update(&players[ply_id]);
+#ifdef DATABASE
+						database.Update(&players[ply_id]);
+#endif
 						players[ply_id].PlayerInit();
 					}
 					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
@@ -304,7 +310,7 @@ void ProcessPacket(int id, char* p)
 {
 	switch (p[1]) {
 	case CS_PACKET_LOGIN: {
-		CS_LOGIN_PACKET* packet = reinterpret_cast<CS_LOGIN_PACKET*>(p);
+		CS_ACCOUNT_PACKET* packet = reinterpret_cast<CS_ACCOUNT_PACKET*>(p);
 		players[id].SetName(packet->name);
 		players[id].SetPassword(packet->password);
 		players[id].SetWeapon(0);
@@ -312,20 +318,23 @@ void ProcessPacket(int id, char* p)
 		players[id].SetRoomID(-1);
 
 		std::cout << "입장 : " << id << ", " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
-		SendLoginInfo(id);
-		SendRoomList(id);
-		SendItemInfo(id);
 
+
+#ifdef DATABASE
 		// 데이터 베이스 연동시 사용
-		/*if (database.Login(&players[id])) {
+		if (database.Login(&players[id])) {
 			SendLoginInfo(id);
 			SendRoomList(id);
 			SendItemInfo(id);
 		}
 		else {
 			SendLoginFail(id);
-		}*/
-
+		}
+#else  
+		SendLoginInfo(id);
+		SendRoomList(id);
+		SendItemInfo(id);
+#endif
 		break;
 	}
 	case CS_PACKET_START_GAME: {
@@ -474,8 +483,9 @@ void ProcessPacket(int id, char* p)
 		players[id].SetItem(packet->item_type, players[id].GetItem(packet->item_type) + 1);
 		std::cout << "돈 : " << players[id].GetMoney() << std::endl;
 		std::cout << "구매한 아이템 : " << players[id].GetItem(packet->item_type) << std::endl;
-
-		//database.Update(&players[id]);
+#ifdef DATABASE
+		database.Update(&players[id]);
+#endif
 		break;
 	}
 	case CS_PACKET_HEAL: {
@@ -514,6 +524,18 @@ void ProcessPacket(int id, char* p)
 			}
 		}
 
+		break;
+	}
+	case CS_PACKET_REGISTER: {
+		CS_ACCOUNT_PACKET* packet = reinterpret_cast<CS_ACCOUNT_PACKET*>(p);
+#ifdef DATABASE
+		if (database.Createaccount(packet->name, packet->password)) {
+			SendRegisterSucc(id);
+		}
+		else {
+			SendRegisterFail(id);
+		}
+#endif
 		break;
 	}
 	case CS_DEMO_MONSTER_SETPOS: {
@@ -955,6 +977,23 @@ void SendItemInfo(int id)
 	for (int i = 0; i < 10; i++) {
 		packet.item_info[i] = players[id].GetItem(i);
 	}
+
+	players[id].DoSend(&packet, packet.size);
+}
+
+void SendRegisterSucc(int id)
+{
+	SC_REGISTER_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_REGISTER_SUCC;
+
+	players[id].DoSend(&packet, packet.size);
+}
+void SendRegisterFail(int id)
+{
+	SC_REGISTER_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_PACKET_REGISTER_FAIL;
 
 	players[id].DoSend(&packet, packet.size);
 }

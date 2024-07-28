@@ -13,7 +13,8 @@ struct Shoot_Event {
 	short hit_count;
 };
 
-struct Login_Event {
+struct Account_Event {
+	CHAR type;
 	string id;
 	string password;
 };
@@ -70,7 +71,7 @@ struct Demo_Event {
 class Sever_System : public EntitySystem,
 	public EventSubscriber<PacketSend_Event>,
 	public EventSubscriber<Shoot_Event>,
-	public EventSubscriber<Login_Event>,
+	public EventSubscriber<Account_Event>,
 	public EventSubscriber<Game_Start>,
 	public EventSubscriber<Create_Room>,
 	public EventSubscriber<Join_Room>,
@@ -99,7 +100,7 @@ public:
 	virtual void tick(class World* world, float deltaTime);
 	virtual void receive(class World* world, const PacketSend_Event& event);
 	virtual void receive(class World* world, const Shoot_Event& event);
-	virtual void receive(class World* world, const Login_Event& event);
+	virtual void receive(class World* world, const Account_Event& event);
 	virtual void receive(class World* world, const Game_Start& event);
 	virtual void receive(class World* world, const Create_Room& event);
 	virtual void receive(class World* world, const Join_Room& event);

@@ -28,7 +28,7 @@ public:
 	DataBase();
 	~DataBase();
 
-	bool Createaccount(Player* player);
+	bool Createaccount(const char* id, const char* password);
 	bool Login(Player* player);
 	void Update(Player* player);
 
