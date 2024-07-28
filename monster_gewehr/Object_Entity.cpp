@@ -12,6 +12,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {
 	CLoadedModelInfo* model = OM->Get_ModelInfo("Soldier");
 	auto Mcomponent = ent->assign<Model_Component>(model->m_pModelRootObject, model->m_pModelRootObject->m_pstrFrameName);
+	Mcomponent->SetSocket("Granade", "Bip001_R_Hand");
 
 	Model_Component* temp_mComponet = new Model_Component(OM->Get_ModelInfo("M4A1")->m_pModelRootObject,
 		OM->Get_ModelInfo("M4A1")->m_pModelRootObject->m_pstrFrameName);
@@ -308,6 +309,11 @@ void Model_Component::addChildComponent(Model_Component* child)
 void Model_Component::SetSocket(GameObjectModel* rootModel, char* name)
 {
 	socket = rootModel->FindFrame(name);
+}
+
+void Model_Component::SetSocket(string socketName, string frameName)
+{
+	blankSocketList[socketName] = make_pair(frameName, Matrix4x4::Identity());
 }
 
 Sound_Componet::Sound_Componet()

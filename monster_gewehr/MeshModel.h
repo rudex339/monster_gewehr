@@ -437,7 +437,7 @@ public:
 
 	GameObjectModel *GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent=NULL);
-	GameObjectModel *FindFrame(char *pstrFrameName);
+	GameObjectModel *FindFrame(const char *pstrFrameName);
 
 	CTexture *FindReplicatedTexture(_TCHAR *pstrTextureName);
 

@@ -33,6 +33,7 @@ struct Model_Component {
 	Model_Component* m_pParentObject = NULL;
 	vector<Model_Component*> m_pchildObjects;
 
+	unordered_map<string, pair<string, XMFLOAT4X4>> blankSocketList;
 	bool draw = true;
 	Model_Component() = default;
 	Model_Component(GameObjectModel* MeshModel, string name)
@@ -41,6 +42,7 @@ struct Model_Component {
 	void addChildComponent(Model_Component* child);
 
 	void SetSocket(GameObjectModel* rootModel, char* name);
+	void SetSocket(string socketName, string frameName);
 };
 
 struct AnimationController_Component {
