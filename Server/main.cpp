@@ -536,11 +536,14 @@ void ProcessPacket(int id, char* p)
 		if (distance < 100) {
 			if (packet->throw_type == 0) {	// ½´·ùÅº
 				std::cout << "½´·ùÅº ¸ÂÀ½" << std::endl;
-				souleaters[room_id].SetState(blind_state);
-				build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
+				souleaters[room_id].m_lock.lock();
+				souleaters[room_id].SetHp(souleaters[room_id].GetHp() - 150);
+				souleaters[room_id].m_lock.unlock();
 			}
 			else if (packet->throw_type == 1) {	// ¼¶±¤
-
+				std::cout << "¼¶±¤ ¸ÂÀ½" << std::endl;
+				souleaters[room_id].SetState(blind_state);
+				build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 			}
 		}
 
