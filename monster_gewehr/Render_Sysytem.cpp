@@ -941,13 +941,16 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					}
 
 					else {
-						// if() 수류탄 보유 중일때만 출력하도록
-						// 투척무기 아이콘 출력
-						sRect = { FRAME_BUFFER_WIDTH * 28 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
+						float opacity = 1.0f;
+						if (player->grenade_amount < 1) {
+							opacity = 0.5f;
+						}
+
+						sRect = { FRAME_BUFFER_WIDTH * 28 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 26, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 26 };
 						m_d2dDeviceContext->DrawBitmap(
 							m_bitmaps[m_scene->GetEquipments()[2] + 3],
 							sRect,
-							1.0f,
+							opacity,
 							D2D1_INTERPOLATION_MODE_LINEAR,
 							imageRect
 						);
