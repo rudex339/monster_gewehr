@@ -282,6 +282,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 				if (Player->id == pk->player_data.id) {
 					Position->Position = pk->player_data.pos;
 					Rotation->mfYaw = pk->player_data.yaw;
+					Player->m_velocity = pk->player_data.vel;
 				}
 				else
 					return;
