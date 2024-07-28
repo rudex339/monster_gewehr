@@ -293,10 +293,12 @@ struct Grande_Component {
 	float range;
 	bool Boom = false;
 	float coolTime = 0.f;
+
+	int m_type;
 	Grande_Component() = default;
 
-	Grande_Component(const UINT& property,float range, bool damage)
-		: property(property), range(range), damage(damage)
+	Grande_Component(const UINT& property,float range, bool damage, int type = 0)
+		: property(property), range(range), damage(damage), m_type(type)
 	{
 		sphere.Radius = range;
 	}

@@ -49,9 +49,9 @@ Entity* AddSoldierObject(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3
 	controller->m_AnimationController->SetBlendingSpeed(2, 8.0f);
 	controller->m_AnimationController->SetBlendingSpeed(6, 8.0f);
 
-	controller->m_AnimationController->SetCallbackKeys(7, 1);
 
-	controller->m_AnimationController->SetCallbackKey(7, 0, 0.2f, ent);////18프레임에 던져야함
+	controller->m_AnimationController->SetCallbackKeys(7, 1);
+	controller->m_AnimationController->SetCallbackKey(7, 0, 0.6f, ent);////18프레임에 던져야함
 
 	controller->m_AnimationController;
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new ThrowCallbackHandler(world);
@@ -561,6 +561,7 @@ void SoldierAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel
 				m_pAnimationTracks[k].HandleCallback();
 			}
 		}
+		//cout << m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[7].m_nAnimationSet]->m_fLength << endl;
 
 		pRootGameObject->UpdateTransform(NULL);
 
@@ -586,6 +587,7 @@ void ThrowCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosit
 	Entity* ent = (Entity*)pCallbackData;
 	ComponentHandle<Model_Component> model = ent->get<Model_Component>();
 	ComponentHandle<Rotation_Component> rotation = ent->get<Rotation_Component>();
+	ComponentHandle<player_Component> player = ent->get<player_Component>();
 
 	float pitch = rotation->mfPitch;
 	float yaw = rotation->mfYaw;
@@ -607,7 +609,7 @@ void ThrowCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosit
 	XMFLOAT3 direction_vector;
 	XMStoreFloat3(&direction_vector, rotatedVec);
 
-	m_pWorld->emit<CreateObject_Event>({ granade,ent->get<player_Component>()->id,
+	m_pWorld->emit<CreateObject_Event>({ player->grenade_type,ent->get<player_Component>()->id,
 					XMFLOAT3(model->blankSocketList["Granade"].second._41,
 						model->blankSocketList["Granade"].second._42,
 						model->blankSocketList["Granade"].second._43),
