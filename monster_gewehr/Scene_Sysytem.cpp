@@ -131,6 +131,24 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			regist.Activate();
 		}
 		ent->assign<Button_Component>(regist);
+
+		if (login_fail) {
+			ent = world->create();
+			TextUI_Component text = TextUI_Component(DEFAULT_FONT, L"아이디와 비밀번호를 다시 확인해 주세요", FRAME_BUFFER_HEIGHT / 2, 0, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH / 2);
+			ent->assign<TextUI_Component>(text);
+		}
+
+		if (regist_fail) {
+			ent = world->create();
+			TextUI_Component text = TextUI_Component(DEFAULT_FONT, L"아이디가 이미 존재합니다.", FRAME_BUFFER_HEIGHT / 2, 0, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH / 2);
+			ent->assign<TextUI_Component>(text);
+		}
+
+		if (regist_succ) {
+			ent = world->create();
+			TextUI_Component text = TextUI_Component(DEFAULT_FONT, L"회원가입 성공", FRAME_BUFFER_HEIGHT / 2, 0, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH / 2);
+			ent->assign<TextUI_Component>(text);
+		}
 	}
 	break;
 

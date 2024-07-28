@@ -235,8 +235,11 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		break;
 	}
 	case SC_PACKET_LOGIN_FAIL: {
-		// 로그인 실패 했다는 메시지
+		m_scene->SetRegistSuccess(false);
+		m_scene->SetLoginFail(true);
+		m_scene->SetRegistFail(false);
 		cout << "로그인 실패" << endl;
+		world->emit<Refresh_Scene>({ LOGIN });
 		break;
 	}
 	case SC_PACKET_GAME_START: {
@@ -521,12 +524,20 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 		break;
 	}
 	case SC_PACKET_REGISTER_SUCC: {
-		// 여기에 회원가입 성공했다는 메시지
+		m_scene->SetRegistSuccess(true);
+		m_scene->SetLoginFail(false);
+		m_scene->SetRegistFail(false);
+		world->emit<Refresh_Scene>({ LOGIN });
+
 		cout << "회원가입 성공" << endl;
 		break;
 	}
 	case SC_PACKET_REGISTER_FAIL: {
-		// 여기에 회원가입 실패했다는 메시지
+		m_scene->SetRegistSuccess(false);
+		m_scene->SetLoginFail(false);
+		m_scene->SetRegistFail(true);
+		world->emit<Refresh_Scene>({ LOGIN });
+
 		cout << "회원가입 실패" << endl;
 		break;
 	}

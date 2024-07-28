@@ -175,6 +175,9 @@ private:
 	int m_id = -1;
 	bool m_ready = false;
 
+	bool login_fail = false;
+	bool regist_fail = false;
+	bool regist_succ = false;
 
 	// ¹æ ¸ñ·Ï
 	vector<Button_Component> Rooms;
@@ -267,4 +270,7 @@ public:
 	void SetName(wstring name) { m_name = name; }
 	UINT GetState() { return m_State; }
 	int getID() { return m_id; };
+	void SetLoginFail(bool fail) { login_fail = fail; }
+	void SetRegistFail(bool fail) { regist_fail = fail; }
+	void SetRegistSuccess(bool success) { regist_succ = success; }
 };
