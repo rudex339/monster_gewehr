@@ -567,3 +567,10 @@ void SoldierAnimationController::Animate(float fElapsedTime)
 		velocityXZ = Vector3::Length(velocity);
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////
+void ThrowCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosition) {
+	Entity* ent = (Entity*)pCallbackData;
+
+	
+}

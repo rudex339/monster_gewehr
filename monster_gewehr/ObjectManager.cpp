@@ -35,7 +35,7 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,48+5); //사용되는 텍스쳐 갯수 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,49+5); //사용되는 텍스쳐 갯수 
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -53,6 +53,11 @@ void ObjectManager::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	m_ModelList.insert({"Soldier",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
 		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Soldier.bin", NULL) });
+
+	m_ModelList.insert({ "Amoor",
+		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
+		 (pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/equip_heavy.bin", NULL) });
+
 
 	m_ModelList.insert({ "benelliM4",
 		 (std::shared_ptr<CLoadedModelInfo>)GameObjectModel::LoadGeometryAndAnimationFromFile
