@@ -247,6 +247,7 @@ public:
 	int home = 0;
 	int prev_home = 0;
 	std::mutex m_lock;
+	float prev_max_hp = m_max_hp;
 protected:
 	bool isUserArround[MAX_CLIENT_ROOM];
 
