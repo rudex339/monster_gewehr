@@ -268,9 +268,9 @@ protected:
 
 	FLOAT m_pitch;
 
-	FLOAT m_hp;
-	FLOAT m_max_hp;
-	FLOAT m_runaway_hp;
+	FLOAT m_hp = 1000.0f;
+	FLOAT m_max_hp = 1000.0f;
+	FLOAT m_runaway_hp = 800.0f;
 	FLOAT m_atk;
 	FLOAT m_def;
 
