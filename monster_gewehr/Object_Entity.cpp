@@ -31,8 +31,8 @@ Entity* AddSoldierObject(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3
 	Mcomponent.get().addChildComponent(temp_mComponet);
 	temp_mComponet->draw = false;
 
-	temp_mComponet = new Model_Component(OM->Get_ModelInfo("Amoor")->m_pModelRootObject,
-		OM->Get_ModelInfo("Amoor")->m_pModelRootObject->m_pstrFrameName);
+	temp_mComponet = new Model_Component(OM->Get_ModelInfo("Armor")->m_pModelRootObject,
+		OM->Get_ModelInfo("Armor")->m_pModelRootObject->m_pstrFrameName);
 	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_Spine1");
 	Mcomponent.get().addChildComponent(temp_mComponet);
 
@@ -586,13 +586,32 @@ void ThrowCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosit
 	Entity* ent = (Entity*)pCallbackData;
 	ComponentHandle<Model_Component> model = ent->get<Model_Component>();
 	ComponentHandle<Rotation_Component> rotation = ent->get<Rotation_Component>();
-	ComponentHandle<EulerAngle_Component> model_vector = ent->get<EulerAngle_Component>();
+
+	float pitch = rotation->mfPitch;
+	float yaw = rotation->mfYaw;
+	float roll = rotation->mfRoll;
+
+	// 모델 벡터
+	XMFLOAT3 model_vector = XMFLOAT3(0.f, 0.f, 1.f);
+
+	// 모델 벡터를 XMVECTOR로 변환
+	XMVECTOR modelVec = XMLoadFloat3(&model_vector);
+
+	// 회전 행렬 생성
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+
+	// 모델 벡터 회전 적용
+	XMVECTOR rotatedVec = XMVector3TransformNormal(modelVec, rotationMatrix);
+
+	// 결과 벡터를 XMFLOAT3로 변환
+	XMFLOAT3 direction_vector;
+	XMStoreFloat3(&direction_vector, rotatedVec);
 
 	m_pWorld->emit<CreateObject_Event>({ granade,ent->get<player_Component>()->id,
 					XMFLOAT3(model->blankSocketList["Granade"].second._41,
 						model->blankSocketList["Granade"].second._42,
 						model->blankSocketList["Granade"].second._43),
 					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
-					model_vector->m_xmf3Look });
+					direction_vector});
 	
 }
