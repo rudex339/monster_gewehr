@@ -264,11 +264,19 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					Player->m_weapon = pk->weapon;
 
 					auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
-					for (int i = 0; i < 3; ++i) {
-						if (i == pk->weapon) {
-							weapon[i]->draw = true;
+					for (int i = 0; i < 4; ++i) {
+						if (i < 3) {
+							if (i == pk->weapon) {
+								weapon[i]->draw = true;
+							}
+							else weapon[i]->draw = false;
 						}
-						else weapon[i]->draw = false;
+						else {
+							if (pk->armor == 4) {
+								weapon[i]->draw = true;
+							}
+							else weapon[i]->draw = false;
+						}
 					}
 					cout << Player->id << "번 추가, 무기 : " << Player->m_weapon << endl;
 					pk->player_data.id = -1;

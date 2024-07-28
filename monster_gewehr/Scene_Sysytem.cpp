@@ -588,11 +588,18 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			ent->get<player_Component>()->id = 1;
 
 			auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin(); 
-			for (int i = 0; i < 3; ++i) {
-				if (i == equipments[0]) {
-					weapon[i]->draw = true;
+			for (int i = 0; i < 4; ++i) {
+				if (i < 3) {
+					if (i == equipments[0]) {
+						weapon[i]->draw = true;
+					}
+					else weapon[i]->draw = false;
 				}
-				else weapon[i]->draw = false;
+				else {
+					if (equipments[1] == 4)
+						weapon[i]->draw = true;
+					else weapon[i]->draw = false;
+				}
 			}
 			
 
@@ -819,6 +826,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		break;
 	case END:
 		::ReleaseCapture();
+		initSelect();
 		Entity* ent = world->create();
 		money += event.score;
 		D2D1_RECT_F imageRect, screenRect, sRect;
@@ -925,12 +933,19 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 
 		ent->get<player_Component>()->id = m_id;
 
-		auto& my_weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
-		for (int i = 0; i < 3; ++i) {
-			if (i == equipments[0]) {
-				my_weapon[i]->draw = true;
+		auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
+		for (int i = 0; i < 4; ++i) {
+			if (i < 3) {
+				if (i == equipments[0]) {
+					weapon[i]->draw = true;
+				}
+				else weapon[i]->draw = false;
 			}
-			else my_weapon[i]->draw = false;
+			else {
+				if (equipments[1] == 4)
+					weapon[i]->draw = true;
+				else weapon[i]->draw = false;
+			}
 		}
 
 		// // 이름 및 레디 상태 출력
@@ -975,11 +990,20 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 			ent->get<player_Component>()->id = InRoomPlayers[i].id;
 
 			auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
-			for (int j = 0; j < 3; ++j) {
-				if (j == InRoomPlayers[i].weapon) {
-					weapon[j]->draw = true;
+			for (int j = 0; j < 4; ++j) {
+				if (j < 3) {
+					if (j == InRoomPlayers[i].weapon) {
+						weapon[j]->draw = true;
+					}
+					else weapon[j]->draw = false;
 				}
-				else weapon[j]->draw = false;
+				else {
+					if (InRoomPlayers[i].armor == 4)
+						weapon[j]->draw = true;
+					else weapon[j]->draw = false;
+				}
+
+
 			}
 
 			if (InRoomPlayers[i].host) {
@@ -1189,12 +1213,20 @@ void Scene_Sysytem::receive(World* world, const StartRoom_Event& event)
 				if (ent->has<Camera_Component>()) {
 					Player->id = event.ply_id;
 					auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
-					for (int i = 0; i < 3; ++i) {
-						if (i == equipments[0]) {
-							weapon[i]->draw = true;
+					for (int i = 0; i < 4; ++i) {
+						if (i < 3) {
+							if (i == equipments[0]) {
+								weapon[i]->draw = true;
+							}
+							else weapon[i]->draw = false;
 						}
-						else weapon[i]->draw = false;
+						else {
+							if (equipments[1] == 4)
+								weapon[i]->draw = true;
+							else weapon[i]->draw = false;
+						}
 					}
+
 					Player->m_weapon = equipments[0];
 					Player->m_armor = equipments[1];
 					Player->ammo = weapon_ammo[Player->m_weapon];
