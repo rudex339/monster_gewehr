@@ -31,6 +31,12 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	Mcomponent.get().addChildComponent(temp_mComponet);
 	temp_mComponet->draw = false;
 
+	temp_mComponet = new Model_Component(OM->Get_ModelInfo("Armor")->m_pModelRootObject,
+		OM->Get_ModelInfo("Armor")->m_pModelRootObject->m_pstrFrameName);
+	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_Pelvis");
+	Mcomponent.get().addChildComponent(temp_mComponet);
+	temp_mComponet->draw = false;
+
 	auto controller = ent->assign<AnimationController_Component>(
 		new SoldierAnimationController(pd3dDevice, pd3dCommandList, 9, model, ent), 0);
 	for (int i = 0; i < 9; i++) {
