@@ -408,3 +408,15 @@ public:
 	virtual void AdvanceTime(float fElapsedTime, GameObjectModel* pRootGameObject);
 	virtual void Animate(float fElapsedTime);
 };
+
+class ThrowCallbackHandler : public CAnimationCallbackHandler
+{
+private:
+	World* m_pWorld;
+public:
+	ThrowCallbackHandler(World* world): m_pWorld(world){ }
+	~ThrowCallbackHandler() { }
+
+public:
+	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
+};

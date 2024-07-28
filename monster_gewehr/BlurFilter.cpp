@@ -47,8 +47,8 @@ BlurFilter::BlurFilter(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	BuildResource();
 	BuildDescriptors(
-		CD3DX12_CPU_DESCRIPTOR_HANDLE(ObjectManager::m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), 48, mCbvSrvUavDescriptorSize),
-		CD3DX12_GPU_DESCRIPTOR_HANDLE(ObjectManager::m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart(), 48, mCbvSrvUavDescriptorSize),
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(ObjectManager::m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), 49, mCbvSrvUavDescriptorSize),
+		CD3DX12_GPU_DESCRIPTOR_HANDLE(ObjectManager::m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart(), 49, mCbvSrvUavDescriptorSize),
 		mCbvSrvUavDescriptorSize);
 	
 	
