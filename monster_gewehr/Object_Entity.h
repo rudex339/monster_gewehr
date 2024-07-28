@@ -313,11 +313,22 @@ struct Emitter_Componet {
 	int m_nRows = 1;
 	int m_nCols = 1;
 
+
+	ID3D12Resource* m_pd3dcbtexture = NULL;
+	cbTextureInfo* m_pcbMappedtexture = NULL;
+
 	Emitter_Componet() = default;
 
 	Emitter_Componet(float coolTime = 100.f, float speed=0.1f, int rows = 1, int cols = 1)
 		: coolTime(coolTime), m_nRows(rows),m_nCols(cols),speed(speed)
 	{
+	}
+
+	~Emitter_Componet() {
+		if (m_pd3dcbtexture) {
+			m_pd3dcbtexture->Unmap(0, NULL);
+			m_pd3dcbtexture->Release();
+		}
 	}
 };
 
