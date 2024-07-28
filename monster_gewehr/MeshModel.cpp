@@ -1671,3 +1671,44 @@ void MultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	SetLookAt(pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	GameObjectModel::Render(pd3dCommandList, pCamera);
 }
+
+void MultiSpriteObject2::Animate(float fTimeElapsed)
+{
+	if (m_ppMaterials[0] && m_ppMaterials[0]->m_ppTextures[0])
+	{
+		//((TextureRectMesh*)m_pMesh)->changeRowCol(0,0,8,8);
+	}
+}
+
+MultiSpriteObject2::MultiSpriteObject2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : GameObjectModel(1)
+{
+	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 100);
+	SetMesh(pMesh);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CTexture* Texture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	Texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"image/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
+
+	EmitterShader* pShader = new EmitterShader();
+	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+
+	ObjectManager::CreateShaderResourceViews(pd3dDevice, Texture, 0, 13);
+
+
+	CMaterial* pBoxMaterial = new CMaterial(1);
+	//m_ppMaterials = new CMaterial * [m_nMaterials];
+	pBoxMaterial->SetTexture(Texture);
+	pBoxMaterial->SetShader(CMaterial::m_pEmitterShader);
+	pBoxMaterial->SetMaterialType(MATERIAL_ALBEDO_MAP);
+
+	SetMaterial(0, pBoxMaterial);
+}
+
+void MultiSpriteObject2::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	SetLookAt(pCamera->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	GameObjectModel::Render(pd3dCommandList, pCamera);
+}

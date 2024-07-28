@@ -1176,12 +1176,12 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		ent->assign<Rotation_Component>(0.f, 0.f, 0.f);
 		ent->assign<Scale_Component>(1.f, 1.f, 1.f);
 
-		string pstrGameObjectName = "explosion";
+		string pstrGameObjectName = "blood";
 		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
 		//ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
-		ent->assign<Emitter_Componet>(3.2f, 0.05f, 8, 8);
+		ent->assign<Emitter_Componet>(3.2f, 0.05f, 6, 6);
 	}
 		break;
 	case flash:
