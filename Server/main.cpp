@@ -133,7 +133,9 @@ void ProcessClient(SOCKET sock)
 	}
 
 #ifdef DATABASE
-	database.Update(&players[id]);
+	if (players[id].GetState() != S_STATE::LOG_IN) {
+		database.Update(&players[id]);
+	}
 #endif
 	Disconnect(id);
 
