@@ -1195,7 +1195,7 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
 		//ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
-		ent->assign<Emitter_Componet>(3.2f, 0.05f, 2, 2);
+		ent->assign<Emitter_Componet>(0.9f, 0.1f, 3, 3);
 
 		auto light = ent->assign<Light_Component>();
 		light->m_pLight = new LIGHT;

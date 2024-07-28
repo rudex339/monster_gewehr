@@ -1716,13 +1716,13 @@ void MultiSpriteObject3::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 MultiSpriteObject2::MultiSpriteObject2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : GameObjectModel(1)
 {
 
-	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 50, 50, 50);
+	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 100);
 	SetMesh(pMesh);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CTexture* Texture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	Texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"image/Flare_Sparks_TexS-removebg-preview.dds", RESOURCE_TEXTURE2D, 0);
+	Texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"image/Flash.dds", RESOURCE_TEXTURE2D, 0);
 
 	EmitterShader* pShader = new EmitterShader();
 	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
