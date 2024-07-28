@@ -730,7 +730,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
 		auto box = m_pPawn->assign<BoundingBox_Component>(2.f, 6.f, 2.f);
-		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+		//box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 		world->emit<AddObjectlayer_Event>({"Player",m_pPawn});
 
 		Entity* ent = world->create();
@@ -746,7 +746,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 			MONSTER);
 		auto monster_id = ent->get<player_Component>();
 		box = ent->assign<BoundingBox_Component>(15.f, 20.f, 20.f);
-		box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+		//box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 		world->emit<AddObjectlayer_Event>({ "Monster",ent });
 
 		monster_id->id = -2;
@@ -1552,7 +1552,7 @@ void Scene_Sysytem::BuildScene(World* world, char* pstrFileName)
 				
 				world->emit<AddObjectlayer_Event>({ "Object",ent });
 
-				box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
+				//box->m_pMesh = new CBoxMesh(m_pd3dDevice, m_pd3dCommandList, &box->m_bounding_box);
 			}
 			//box->m_bounding_box.Extents *= m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
 
