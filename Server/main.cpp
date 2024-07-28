@@ -762,6 +762,7 @@ void Disconnect(int id)
 
 		gamerooms[room_num].DeletePlayerId(id);
 		if (gamerooms[room_num].IsRoomEmpty()) {
+			std::cout << room_num << "번 방 종료" << std::endl;
 			if (gamerooms[room_num].GetState() == G_INGAME) {
 				souleaters[room_num].InitMonster();
 			}

@@ -237,6 +237,12 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			if (player->aim_mode) {
 				speed *= 0.5f;
 			}
+			if (player->reload) {
+				speed *= 0.5;
+			}
+			if (heal_on) {
+				speed *= 0.5;
+			}
 
 			bool run_on = false; // 달리기 상태인지 아닌지 확인해 주는거
 			bool shift_key_press = false;
@@ -256,7 +262,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 구르기 키는 space바로 했음
-			if ((pKeysBuffer[VK_SPACE] & 0xF0) && roll_timer == 0 && !player->reload && player->stamina >= 25 && !heal_on) {
+			if ((pKeysBuffer[VK_SPACE] & 0xF0) && roll_timer == 0 && !player->reload && player->stamina >= 25 && !heal_on && grenade_ani_time <= 0) {
 				xmf3Shift_roll = XMFLOAT3(0, 0, 0);
 				roll_timer = 0.2f;
 				roll_on = 1;
@@ -264,7 +270,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Dash);
 			}
 			// 달리기 키는 shift
-			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on  && !heal_on && !player->reload) {
+			if (pKeysBuffer[VK_LSHIFT] & 0xF0 && !roll_on  && !heal_on && !player->reload && grenade_ani_time <= 0) {
 				shift_key_press = true;
 				if (!stamina_empty && player->stamina > 0) {
 					run_on = true;
@@ -275,7 +281,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 힐키 (1 : 붕대, 2 : 구상, 3 : 주사기)
-			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on && !supply_on) {
+			if (pKeysBuffer[0x31] & 0xF0 && !roll_on && !player->reload && player->heal_item[0] > 0 && !heal_on && !supply_on && grenade_ani_time <= 0) {
 				heal_on = true;
 				player->heal_timer = healtime[0];
 				player->heal_all_time = healtime[0];
@@ -283,7 +289,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				AnimationController->next_State = (UINT)HEAL;
 			}
 
-			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on && !supply_on) {
+			if (pKeysBuffer[0x32] & 0xF0 && !roll_on && !player->reload && player->heal_item[1] > 0 && !heal_on && !supply_on && grenade_ani_time <= 0) {
 				heal_on = true;
 				player->heal_timer = healtime[1];
 				player->heal_all_time = healtime[1];
@@ -291,7 +297,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				AnimationController->next_State = (UINT)HEAL;
 			}
 
-			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on && !supply_on) {
+			if (pKeysBuffer[0x33] & 0xF0 && !roll_on && !player->reload && player->heal_item[2] > 0 && !heal_on && !supply_on && grenade_ani_time <= 0) {
 				heal_on = true;
 				player->heal_timer = healtime[2];
 				player->heal_all_time = healtime[2];
@@ -310,7 +316,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 				if (player->near_supply) {
 					// 보급이 가능한지 여부 체크(힐중이거나 보급 시간이 안되면 실행x)
-					if (player->can_supply < 0.f && !heal_on) {
+					if (player->can_supply < 0.f && !heal_on && grenade_ani_time <= 0) {
 						supply_on = true;
 						player->supply_timer = player->supply_time;
 					}
@@ -324,7 +330,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				if (roll_on == 1) { // 구르기 키를 처음 눌렀으면 어디로 굴러야 하는지 방향을 정해줌
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, speed * 3);					
 				}
-				if (!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode)
+				if (!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode && grenade_ani_time <= 0)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if ((pKeysBuffer[0x53] & 0xF0)) {
@@ -332,7 +338,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				if (roll_on == 1) {
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Look, -speed * 3);
 				}
-				if (!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode)
+				if (!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode && grenade_ani_time <= 0)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x41] & 0xF0) {
@@ -340,7 +346,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				if (roll_on == 1) {
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, -speed * 3);
 				}
-				if (!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode)
+				if (!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode && grenade_ani_time <= 0)
 					AnimationController->next_State = (UINT)RUN;
 			}
 			if (pKeysBuffer[0x44] & 0xF0) {
@@ -348,7 +354,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				if (roll_on == 1) {
 					xmf3Shift_roll = Vector3::Add(xmf3Shift_roll, controller_vector->m_xmf3Right, speed * 3);					
 				}
-				if(!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode)
+				if(!player->reload && !run_on && !heal_on && !player->reload && !player->aim_mode && grenade_ani_time <= 0)
 					AnimationController->next_State = (UINT)RUN;
 			}
 
@@ -369,7 +375,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 
 			float fLength = sqrtf(velocity->m_velocity.x * velocity->m_velocity.x + velocity->m_velocity.z * velocity->m_velocity.z);
 			// 만약 속도가 없으면 idle애니, 아니면 달리기나 걷기소리 내기 속도만 있으면
-			if (::IsZero(fLength) && !player->reload && !heal_on && !player->aim_mode)
+			if (::IsZero(fLength) && !player->reload && !heal_on && !player->aim_mode && grenade_ani_time <= 0)
 			{
 				AnimationController->next_State = (UINT)IDLE;
 			}
@@ -389,7 +395,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 구르기 중이거나 달리는 중에는 총발사 금지해놓음
-			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && player->ammo > 0 && !heal_on) {				
+			if ((pKeysBuffer[VK_LBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && player->ammo > 0 && !heal_on && grenade_ani_time <= 0) {
 				if (shot_cooltime <= 0) {
 					AnimationController->next_State = (UINT)SHOOT;
 					shot_cooltime = shot_cooltime_list[player->m_weapon];					
@@ -408,7 +414,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				}
 			}
 			// 우클릭 조준
-			else if ((pKeysBuffer[VK_RBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && !heal_on) {	
+			else if ((pKeysBuffer[VK_RBUTTON] & 0xF0) && !run_on && !roll_on && !player->reload && !heal_on && grenade_ani_time <= 0) {
 				AnimationController->next_State = (UINT)AIM;
 				player->aim_mode = true;
 				shot_cooltime -= deltaTime;
@@ -456,7 +462,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			
 
 			// r키로 재장전
-			if (pKeysBuffer[0x52] & 0xF0 && !player->reload && player->mag > 0 && !roll_on && !heal_on ) {
+			if (pKeysBuffer[0x52] & 0xF0 && !player->reload && player->mag > 0 && !roll_on && !heal_on && grenade_ani_time <= 0) {
 				AnimationController->next_State = (UINT)RELOAD;
 				Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Reload);
 				if (!player->reload) {
@@ -473,16 +479,15 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->stamina += 0.1;
 			}
 
-			if (pKeysBuffer[0x47] & 0xF0 && player->grenade_amount) {
+			if (grenade_ani_time > 0) {
+				grenade_ani_time -= deltaTime;
+			}
+
+			if (pKeysBuffer[0x47] & 0xF0 && player->grenade_amount && !heal_on) {
 				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
 				AnimationController->next_State = (UINT)GRANADE;
-				/*world->emit<CreateObject_Event>({ granade, player->id,
-					XMFLOAT3(model->blankSocketList["Granade"].second._41,
-						model->blankSocketList["Granade"].second._42,
-						model->blankSocketList["Granade"].second._43),
-					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
-					model_vector->m_xmf3Look});
-				player->grenade_amount -= 1;*/
+				grenade_ani_time = 0.8;
+				//player->grenade_amount -= 1;
 			}
 #ifdef DEMO_VER
 			if (pKeysBuffer[VK_F1] & 0xF0) {

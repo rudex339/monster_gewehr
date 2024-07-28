@@ -51,7 +51,7 @@ Entity* AddSoldierObject(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3
 
 	controller->m_AnimationController->SetCallbackKeys(7, 1);
 
-	controller->m_AnimationController->SetCallbackKey(7, 0, 0.2f, ent);////18프레임에 던져야함
+	controller->m_AnimationController->SetCallbackKey(7, 0, 0.5f, ent);////18프레임에 던져야함
 
 	controller->m_AnimationController;
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new ThrowCallbackHandler(world);

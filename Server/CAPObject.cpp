@@ -327,7 +327,7 @@ void Monster::InitMonster()
 
 	turnning_speed = 0.3f;
 	move_speed = 0.08f;
-	fly_up_speed = 0.05f;
+	fly_up_speed = 0.1f;
 
 	m_yaw = 0.0f;
 

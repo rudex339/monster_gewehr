@@ -63,6 +63,8 @@ private:
 
 	float player_speed[2] = { 50.25f, 40.25f };
 
+	float grenade_ani_time = 0.0f;
+
 public:
 	PlayerControl_System() = default;
 
