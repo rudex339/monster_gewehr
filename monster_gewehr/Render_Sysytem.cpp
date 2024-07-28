@@ -440,8 +440,31 @@ void Render_System::tick(World* world, float deltaTime)
 					if (ent->has<Emitter_Componet>()) {
 						ComponentHandle<Emitter_Componet> emiiter = ent->get<Emitter_Componet>();
 						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(emiiter->m_nRow, emiiter->m_nCol, emiiter->m_nRows, emiiter->m_nCols);
+						if (!emiiter->m_pd3dcbtexture) {
+							UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255); //256ÀÇ ¹è¼ö
+							emiiter->m_pd3dcbtexture = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+							//m_pcbMappedtexture = new cbTextureInfo;
+							emiiter->m_pd3dcbtexture->Map(0, NULL, (void**)&emiiter->m_pcbMappedtexture);
 
-						
+							//UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
+							//D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = ObjectManager::GetCbvSrvDescriptorHeap()->m_d3dCbvGPUDescriptorNextHandle;
+
+							ObjectManager::CreateConstantBufferViews(m_pd3dDevice, 1, emiiter->m_pd3dcbtexture, ncbElementBytes).ptr;
+						}
+
+						float height = 1.0f / float(emiiter->m_nRows);
+						float lenght = 1.0f / float(emiiter->m_nCols);
+						float y = float(emiiter->m_nRow) / float(emiiter->m_nRows);
+						float x = float(emiiter->m_nCol) / float(emiiter->m_nCols);
+						XMFLOAT4X4						m_xmf4x4Texture = Matrix4x4::Identity();
+						m_xmf4x4Texture._11 = height;
+						m_xmf4x4Texture._22 = lenght;
+						m_xmf4x4Texture._31 = x;
+						m_xmf4x4Texture._32 = y;
+
+						XMStoreFloat4x4(&emiiter->m_pcbMappedtexture->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+
+						m_pd3dCommandList->SetGraphicsRootConstantBufferView(15, emiiter->m_pd3dcbtexture->GetGPUVirtualAddress());
 					}
 					
 					if (Model->draw) {
