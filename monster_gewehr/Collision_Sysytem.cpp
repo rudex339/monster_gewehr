@@ -53,6 +53,7 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                 if (Granade->get<Grande_Component>()->damage)
                     world->emit<ThrowWeapon_Event>({ (CHAR)Granade->get<Grande_Component>()->m_type, Granade->get<Position_Component>()->Position });
                 GranadeDelete = true;
+                Sound_Componet::GetInstance().Play3DSound(position, Sound_Componet::TDSound::TDGrenade);
             }
 
             else {
@@ -61,7 +62,7 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                         Entity* object = *object_it;
 
                         if (boundingBox.Intersects(object->get<BoundingBox_Component>()->m_bounding_box)) {
-
+                            Sound_Componet::GetInstance().Play3DSound(position, Sound_Componet::TDSound::TDGrenade);
                             cout << "Boom" << endl;
                             //Granade->get<Scale_Component>()->mx = 5.f;
                             //Granade->get<Scale_Component>()->my = 5.f;
@@ -90,7 +91,7 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                         Entity* object = *object_it;
 
                         if (boundingBox.Intersects(object->get<BoundingBox_Component>()->m_bounding_box)) {
-
+                            Sound_Componet::GetInstance().Play3DSound(position, Sound_Componet::TDSound::TDGrenade);
                             cout << "Boom" << endl;
                             Granade->get<Scale_Component>()->mx = 200.f;
                             Granade->get<Scale_Component>()->my = 200.f;

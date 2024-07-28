@@ -364,6 +364,10 @@ Sound_Componet::Sound_Componet()
 	m_result = m_system->createSound("Sound/Effect/sniper.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDSniper]);
 	m_result = m_3dsound[TDSound::TDSniper]->set3DMinMaxDistance(100.f, 5000.f);
 	m_result = m_3dsound[TDSound::TDSniper]->setMode(FMOD_LOOP_OFF);
+
+	m_result = m_system->createSound("Sound/Effect/grenade.mp3", FMOD_3D, 0, &m_3dsound[TDSound::TDGrenade]);
+	m_result = m_3dsound[TDSound::TDGrenade]->set3DMinMaxDistance(100.f, 5000.f);
+	m_result = m_3dsound[TDSound::TDGrenade]->setMode(FMOD_LOOP_OFF);
 	
 	m_musicChannel->setVolume(3.0f);
 }

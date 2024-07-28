@@ -352,6 +352,7 @@ struct Sound_Componet {
 		TDRifle,
 		TDShotGun,
 		TDSniper,
+		TDGrenade,
 		TDSoundCount
 	};
 
