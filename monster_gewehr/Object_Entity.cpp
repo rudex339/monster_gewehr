@@ -12,7 +12,7 @@ Entity* AddSoldierObject(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3
 {
 	CLoadedModelInfo* model = OM->Get_ModelInfo("Soldier");
 	auto Mcomponent = ent->assign<Model_Component>(model->m_pModelRootObject, model->m_pModelRootObject->m_pstrFrameName);
-	Mcomponent->SetSocket("Granade", "Bip001_R_Hand");
+	Mcomponent->SetSocket("Granade", "Bip001_L_Hand");
 
 	Model_Component* temp_mComponet = new Model_Component(OM->Get_ModelInfo("M4A1")->m_pModelRootObject,
 		OM->Get_ModelInfo("M4A1")->m_pModelRootObject->m_pstrFrameName);
@@ -31,6 +31,11 @@ Entity* AddSoldierObject(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3
 	Mcomponent.get().addChildComponent(temp_mComponet);
 	temp_mComponet->draw = false;
 
+	temp_mComponet = new Model_Component(OM->Get_ModelInfo("Amoor")->m_pModelRootObject,
+		OM->Get_ModelInfo("Amoor")->m_pModelRootObject->m_pstrFrameName);
+	temp_mComponet->SetSocket(model->m_pModelRootObject, "Bip001_Spine1");
+	Mcomponent.get().addChildComponent(temp_mComponet);
+
 	auto controller = ent->assign<AnimationController_Component>(
 		new SoldierAnimationController(pd3dDevice, pd3dCommandList, 9, model, ent), 0);
 	for (int i = 0; i < 9; i++) {
@@ -46,7 +51,9 @@ Entity* AddSoldierObject(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3
 
 	controller->m_AnimationController->SetCallbackKeys(7, 1);
 
-	controller->m_AnimationController->SetCallbackKey(7, 0, 0.2f, ent);
+	controller->m_AnimationController->SetCallbackKey(7, 0, 0.2f, ent);////18프레임에 던져야함
+
+	controller->m_AnimationController;
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new ThrowCallbackHandler(world);
 	controller->m_AnimationController->SetAnimationCallbackHandler(7, pAnimationCallbackHandler);
 	
