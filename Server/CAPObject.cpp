@@ -377,6 +377,9 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		if (hp >= 300.0f) {
 			monster->SetRAHp(hp * 0.5f);
 		}
+		else {
+			monster->SetRAHp(-10);
+		}
 		build_bt(monster, players, room);
 	}
 }
@@ -901,7 +904,17 @@ int change_ani_to_charge(Monster* monster) {
 }
 
 int charging_dash(Monster* monster) {
-	return BehaviorTree::SUCCESS;
+	monster->SetTargetPos(monster->GetTarget()->GetPosition());
+	SetFaceDirection(monster);
+
+	static float chargingTime = 0.0f;
+	if (chargingTime >= 2000.0f) {
+		chargingTime = 0;
+		monster->SetAnimation(idle_ani);
+		return BehaviorTree::SUCCESS;
+	}
+	chargingTime += monster->GetElapsedTime();
+	return BehaviorTree::RUNNING;
 }
 
 int dash(Monster* monster) {
@@ -994,6 +1007,7 @@ int wait_next_attack(Monster* monster) {
 /////////// runaway
 int set_runaway_point(Monster* monster) {
 	int point = 0;
+	monster->prev_max_hp = monster->GetHp();
 	while (1) {
 		point = rand_runaway_point(gen);
 		if (point != monster->home) {
@@ -1086,6 +1100,9 @@ int move_to_home(Monster* monster) {
 
 	monster->SetTargetPos(runaway_point[monster->home]);
 
+	monster->prev_max_hp -= (monster->prev_max_hp - monster->GetHp()) * 0.5;
+	monster->SetHp(monster->prev_max_hp);
+
 	if (Distance(monster->GetPosition(), monster->GetTargetPos()) <= 5.0f) {
 		monster->SetAnimation(idle_ani);
 		return BehaviorTree::SUCCESS;
@@ -1125,7 +1142,11 @@ int die(Monster* monster)
 
 	return BehaviorTree::RUNNING;
 }
-
+Leaf nothing_node;
+TimeLimiter wait;
+Leaf wait_growling_node;
+TimeLimiter wait_growling_dec;
+Selector irontail_sel;
 
 void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom* room)
 {
@@ -1142,7 +1163,10 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		growling_node = Leaf("Growling", std::bind(growling, monster));
 		sleep_node = Leaf("Sleeping... Zzz", std::bind(sleeping, monster));
 
-		random_action = RandomNode("Random Idle Action", { &patrol_seq, &growling_node, &sleep_node });
+		nothing_node = Leaf("do nothing", success);
+		wait = TimeLimiter(&nothing_node, 3s); // 아무것도 안하는 노드
+
+		random_action = RandomNode("Random Idle Action", { &patrol_seq, &growling_node, &wait /*&sleep_node*/ });
 
 		set_idle_ani_node = Leaf("Change Animation to idle", std::bind(setAnimIdle, monster));
 		action_seq = Sequence("Action Sequence", { &random_action, &set_idle_ani_node, &wait_next_idle_dec });
@@ -1189,19 +1213,14 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 		
 		change_ani_node = Leaf("change ani", std::bind(change_ani_to_charge, monster));
 
-		irontail_seq = Sequence("IronTail Sequence", { &change_ani_node, &irontail_dec, &irontail_node });
-		user_distance_dec = ConditionChecker(&irontail_seq, [monster]() {
-			if (tail_attack_check(monster))
-				return true;
-			else
-				return false;
-			});
+		
 
 		dash_attack_node = Leaf("DASH", std::bind(dash, monster));
 		charging_dash_node = Leaf("charging irontail", std::bind(charging_dash, monster));
+		
 		dash_attack_dec = TimeLimiter(&charging_dash_node, CHARGING_DASH_TIME);
 
-		dash_seq = Sequence("Dash Sequence", { &change_ani_node, &dash_attack_dec, &dash_attack_node });
+		dash_seq = Sequence("Dash Sequence", { &change_ani_node, &charging_dash_node, &dash_attack_node });
 
 		fireball_node = Leaf("FIREBALL", std::bind(fire_ball, monster));
 
@@ -1216,7 +1235,17 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 
 		bite_attack_check_sel = Selector("bite check", { &bite_timeout_dash_seq, &move_to_bite_seq });
 
-		attack_randomnode = RandomNode("Random Attack", { &fireball_node, &dash_seq, &bite_attack_check_sel, &user_distance_dec });
+		irontail_seq = Sequence("IronTail Sequence", { &move_to_bite_node, /*&change_ani_node, &irontail_dec,*/ &irontail_node });
+		/*user_distance_dec = ConditionChecker(&irontail_seq, [monster]() {
+			if (tail_attack_check(monster))
+				return true;
+			else
+				return false;
+			});*/
+
+		irontail_sel = Selector("tailatk check", { &bite_timeout_dash_seq, &irontail_seq });
+
+		attack_randomnode = RandomNode("Random Attack", { /*&fireball_node,*/ &dash_seq, &bite_attack_check_sel, &irontail_sel /*&user_distance_dec*/ });
 
 		fight_to_go2home_node = Leaf("go to home", std::bind(fight_to_home, monster, players, room));
 		fight_to_home_dec = ConditionChecker(&fight_to_go2home_node, [monster]() {
@@ -1259,7 +1288,10 @@ void build_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 
 		set_runaway_point_node = Leaf("Set RunAway Point", std::bind(set_runaway_point, monster));
 
-		runaway_sequence = Sequence("RUN AWAY Sequence", { &set_runaway_point_node, &growling_node, &wait_next_idle_dec ,&take_off_node, &fly_up_node, &fly_to_point_node,
+		wait_growling_node = Leaf("TimeOut", std::bind(wait_next_idle, monster));
+		wait_growling_dec = TimeLimiter(&wait_growling_node, 4.6s);
+
+		runaway_sequence = Sequence("RUN AWAY Sequence", { &set_runaway_point_node, &growling_node,/* &wait_growling_dec*/ &take_off_node, &fly_up_node, &fly_to_point_node,
 			&fly_down_node, &landing_node, &wait_change_to_idle_dec });
 	}
 
