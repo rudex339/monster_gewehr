@@ -1103,7 +1103,7 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
-		ent->assign<Emitter_Componet>(3.4f, 0.5f,8,8);
+		ent->assign<Emitter_Componet>(3.2f, 0.05f, 8, 8);
 
 		//world->emit<AddObjectlayer_Event>({ "Granade", ent });
 	}
@@ -1118,7 +1118,9 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		ent->assign<Model_Component>(m_pObjectManager->m_EmitterList[pstrGameObjectName].get(),
 			m_pObjectManager->m_EmitterList[pstrGameObjectName]->m_pstrFrameName);
 
-		ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
+		//ent->assign<Emitter_Componet>(0.5f, 0.2f, 8, 8);
+		ent->assign<Emitter_Componet>(3.2f, 0.05f, 8, 8);
+
 		break;
 
 	}

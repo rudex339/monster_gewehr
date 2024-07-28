@@ -39,24 +39,17 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
 
             bool GranadeDelete = false;
 
-            if (granade->Boom) {
-                granade->sphere.Center = position;
-                if (layers.find("Monster") != layers.end()) {
-                    for (auto object_it = layers["Monster"].begin(); object_it != layers["Monster"].end(); /* no increment */) {
-                        Entity* object = *object_it;
-                        
-                        if (granade->sphere.Intersects(object->get<BoundingBox_Component>()->m_bounding_box)) {
+            if (position.y <= 5.0f) {
+                granade->Boom = true;
+                Granade->get<Velocity_Component>()->gravity = false;
+                Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
+                world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
+                                ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
 
-                            cout << "HIT" << endl;
-                            GranadeDelete = true;
-                            break;
-                        }
-                        else {
-                            ++object_it;
-                        }
-                    }
-                }
+                world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
+                GranadeDelete = true;
             }
+
             else {
                 if (layers.find("Object") != layers.end()) {
                     for (auto object_it = layers["Object"].begin(); object_it != layers["Object"].end(); ++object_it) {
@@ -72,8 +65,9 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                             Granade->get<Velocity_Component>()->gravity = false;
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
 
-                            world->emit<CreateObject_Event>({ blood,Granade->get<Position_Component>()->Position
+                            world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
                                 ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+                            GranadeDelete = true;
 
                             world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
                             break;
@@ -96,14 +90,16 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
                             world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
                                 ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
+                            GranadeDelete = true;
 
                             world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
                             break;
                         }
-
                     }
                 }
+                
             }
+
             granade->coolTime -= deltaTime;
             if (granade->coolTime <= 0.f) {
                 GranadeDelete = true;
