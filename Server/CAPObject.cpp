@@ -215,6 +215,7 @@ Monster::Monster()
 
 	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
+	prev_max_hp = m_hp;
 	m_runaway_hp = 900; // m_max_hp * 0.9;
 	m_atk = 0;
 	m_def = 0;
@@ -332,7 +333,8 @@ void Monster::InitMonster()
 
 	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
-	m_runaway_hp = 600; // m_max_hp * 0.9;
+	prev_max_hp = m_hp;
+	m_runaway_hp = 900; // m_max_hp * 0.9;
 	m_atk = 0;
 	m_def = 0;
 
@@ -1130,7 +1132,8 @@ int blind_to_fight(Monster* monster, std::unordered_map<INT, Player>* players, G
 }
 
 int play_blind_ani(Monster* monster) {
-	monster->home = monster->prev_home;
+	if(monster->prev_state == runaway_state)
+		monster->home = monster->prev_home;
 	monster->SetAnimation(blind_ani);
 	return BehaviorTree::SUCCESS;
 }
@@ -1362,5 +1365,9 @@ void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom
 	monster->ElapsedTime();
 	check_hp(monster, players, room);
 	monster->RunBT();
-	//std::cout << (int)monster->GetAnimation() << std::endl;
+
+	
+	std::cout << "전투 전 체력 : " << monster->prev_max_hp << std::endl;
+	std::cout << "현재 체력 : " << monster->GetHp() << std::endl;
+
 }
