@@ -344,7 +344,7 @@ void Monster::InitMonster()
 	m_position.z = 3100.f;
 
 	std::cout << "¸ó½ºÅÍ ÀÌ´Ö ÁÂÇ¥ :  " << m_position.x << ", " << m_position.z << std::endl;
-	//m_animation = idle_ani;
+	m_animation = idle_ani;
 	m_state = idle_state;
 	prev_state = curr_state = idle_state;
 

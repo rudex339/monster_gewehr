@@ -66,33 +66,31 @@ void GameRoom::DeletePlayerId(int c_id)
 
 BOOL GameRoom::SetStartGame()
 {
-	/*{
-		std::lock_guard<std::mutex> lock{ m_state_lock };
-		if (m_state == G_CREATE) {
-			m_state = G_INGAME;
-			return true;
-		}
-	}*/
-	std::cout << "인게임 상태 준비" << std::endl;
+	std::lock_guard<std::mutex> lock{ m_state_lock };
 	if (m_state == G_CREATE) {
 		m_state = G_INGAME;
 		return true;
 	}
-	std::cout << "인게임 상태 완료" << std::endl;
+
+	/*std::cout << "인게임 상태 준비" << std::endl;
+	if (m_state == G_CREATE) {
+		m_state = G_INGAME;
+		return true;
+	}
+	std::cout << "인게임 상태 완료" << std::endl;*/
 	return false;
 }
 
 void GameRoom::SetCreateRoom()
 {
-	/*std::cout << "방만들기 락" << std::endl;
-	{
-		std::lock_guard<std::mutex> lock{ m_state_lock };
-		m_state = G_CREATE;
-	}
-	std::cout << "방만들기 언락" << std::endl;*/
-	std::cout << "create 준비" << std::endl;
+	std::cout << "방만들기 락" << std::endl;
+	std::lock_guard<std::mutex> lock{ m_state_lock };
 	m_state = G_CREATE;
-	std::cout << "create 완료" << std::endl;
+	std::cout << "방만들기 언락" << std::endl;
+
+	/*std::cout << "create 준비" << std::endl;
+	m_state = G_CREATE;
+	std::cout << "create 완료" << std::endl;*/
 	for (auto& id : m_player_ids) {
 		id = -1;
 	}
@@ -101,15 +99,13 @@ void GameRoom::SetCreateRoom()
 
 void GameRoom::SetFreeRoom()
 {
-	/*std::cout << "게임 FREE 락" << std::endl;
-	{
-		std::lock_guard<std::mutex> lock{ m_state_lock };
-		m_state = G_FREE;
-	}
-	std::cout << "게임 FREE 언락111" << std::endl;*/
-
-	std::cout << "free 준비" << std::endl;
+	std::cout << "게임 FREE 락" << std::endl;
+	std::lock_guard<std::mutex> lock{ m_state_lock };
 	m_state = G_FREE;
-	std::cout << "free 완료" << std::endl;
+	std::cout << "게임 FREE 언락111" << std::endl;
+
+	/*std::cout << "free 준비" << std::endl;
+	m_state = G_FREE;
+	std::cout << "free 완료" << std::endl;*/
 	
 }

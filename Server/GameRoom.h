@@ -24,12 +24,14 @@ public:
 	void SetHostName(std::string name) { m_host_name = name; }
 	std::string GetHostName() { return m_host_name; }
 
+	std::mutex& GetMutex() { return m_state_lock; }
+
 	std::array<INT, MAX_CLIENT_ROOM> GetPlyId() { return m_player_ids; }
 
 	GameRoomState GetState() { return m_state; }
 
 	int m_all_life;
-	std::mutex m_state_lock;
+	
 
 private:
 	std::array<INT, MAX_CLIENT_ROOM> m_player_ids;
@@ -37,6 +39,7 @@ private:
 	std::string m_host_name;
 
 	std::mutex m_player_lock;
+	std::mutex m_state_lock;
 	
 
 };

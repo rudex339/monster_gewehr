@@ -351,11 +351,10 @@ void ProcessPacket(int id, char* p)
 			if (!players[ply_id].GetReady()) return;
 		}
 		SHORT room_id = players[id].GetRoomID();
+		SendStartGame(id);
 		if (gamerooms[room_id].SetStartGame()) {
 			build_bt(&souleaters[room_id], &players, &gamerooms[room_id]);
 		}
-
-		SendStartGame(id);
 		break;
 	}
 	case CS_PACKET_PLAYER_MOVE: {
@@ -408,18 +407,30 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_CREATE_ROOM: {
 		std::cout << "아이디 : " << id << std::endl;
 		for (int i = 0; i < MAX_GAME_ROOM; i++) {
-			//gamerooms[i].m_state_lock.lock();
-			if (gamerooms[i].GetState() == G_FREE) {
-				//gamerooms[i].m_state_lock.unlock();
-				gamerooms[i].SetCreateRoom();
-				gamerooms[i].SetPlayerId(id);
-				gamerooms[i].SetHostName(players[id].GetName());
-				players[id].SetRoomID(i);
-				players[id].SetHost(true);
-				SendRoomCreate(id, i);
-				break;
+			{
+				std::lock_guard<std::mutex> lock{ gamerooms[i].GetMutex() };
+				if (gamerooms[i].GetState() != G_FREE) continue;
 			}
-			//gamerooms[i].m_state_lock.unlock();
+			//if (gamerooms[i].GetState() == G_FREE) {
+			//	//gamerooms[i].m_state_lock.unlock();
+			//	souleaters[i].InitMonster();
+			//	gamerooms[i].SetCreateRoom();
+			//	gamerooms[i].SetPlayerId(id);
+			//	gamerooms[i].SetHostName(players[id].GetName());
+			//	players[id].SetRoomID(i);
+			//	players[id].SetHost(true);
+			//	SendRoomCreate(id, i);
+			//	break;
+			//}
+
+			souleaters[i].InitMonster();
+			gamerooms[i].SetCreateRoom();
+			gamerooms[i].SetPlayerId(id);
+			gamerooms[i].SetHostName(players[id].GetName());
+			players[id].SetRoomID(i);
+			players[id].SetHost(true);
+			SendRoomCreate(id, i);
+			break;
 		}
 		break;
 	}
@@ -655,7 +666,7 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 
 		players[send_id].SetState(S_STATE::IN_GAME);
 	}
-
+	std::cout << "게임룸 스타트 몬스터 위치 : " << souleaters[gameroom_id].GetPosition().x << ", " << souleaters[gameroom_id].GetPosition().y << std::endl;
 	
 }
 
@@ -813,6 +824,7 @@ void SendRoomList(int id)
 	int retval;
 	for (int i = 0; i < MAX_GAME_ROOM; i++) {
 		//gamerooms[i].m_state_lock.lock();
+		std::lock_guard<std::mutex> lock{ gamerooms[i].GetMutex()};
 		if (gamerooms[i].GetState() != G_FREE) {
 			//gamerooms[i].m_state_lock.unlock();
 			SC_ADD_ROOM_PACKET sub_packet;
