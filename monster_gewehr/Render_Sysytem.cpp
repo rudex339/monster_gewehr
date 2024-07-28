@@ -383,6 +383,7 @@ void Render_System::tick(World* world, float deltaTime)
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
 						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel);
 						Model->m_MeshModel->Animate(deltaTime);
+
 					}
 
 					XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
@@ -444,7 +445,7 @@ void Render_System::tick(World* world, float deltaTime)
 					}
 					
 					if (Model->draw) {
-						Model->m_MeshModel->Animate(deltaTime);
+						//Model->m_MeshModel->Animate(deltaTime);
 						Model->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 					}
 
@@ -458,6 +459,11 @@ void Render_System::tick(World* world, float deltaTime)
 						if (child->draw)
 							child->m_MeshModel->Render(m_pd3dCommandList, m_pCamera);
 					}
+					{
+						Model->blankSocketList["Granade"].second = Model->m_MeshModel->FindFrame(Model->blankSocketList["Granade"].first.c_str())->m_xmf4x4World;
+						
+					}
+
 
 
 				}

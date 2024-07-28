@@ -811,7 +811,7 @@ void GameObjectModel::FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int*
 	if (m_pChild) m_pChild->FindAndSetSkinnedMesh(ppSkinnedMeshes, pnSkinnedMesh);
 }
 
-GameObjectModel* GameObjectModel::FindFrame(char* pstrFrameName)
+GameObjectModel* GameObjectModel::FindFrame(const char* pstrFrameName)
 {
 	GameObjectModel* pFrameObject = NULL;
 	if (!strncmp(m_pstrFrameName, pstrFrameName, strlen(pstrFrameName))) return(this);
