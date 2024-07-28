@@ -331,7 +331,7 @@ public:
 	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler *pCallbackHandler);
 	void SetBlendingSpeed(int nAnimationTrack, float speed);
 
-	void AdvanceTime(float fElapsedTime, GameObjectModel *pRootGameObject);
+	virtual void AdvanceTime(float fElapsedTime, GameObjectModel *pRootGameObject);
 
 public:
 	bool							m_bRootMotion = false;

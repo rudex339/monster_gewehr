@@ -83,6 +83,8 @@ struct player_Component {
 	INT grenade_type;
 	INT grenade_amount = 1;
 
+	XMFLOAT3 m_velocity = XMFLOAT3(0, 0, 0);
+
 	player_Component() = default;
 };
 

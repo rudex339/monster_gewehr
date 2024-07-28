@@ -1,6 +1,7 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Object_Entity.h"
 #include "ObjectManager.h"
+#include "Player_Entity.h"
 
 
 Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -30,7 +31,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	temp_mComponet->draw = false;
 
 	auto controller = ent->assign<AnimationController_Component>(
-		new CAnimationController(pd3dDevice, pd3dCommandList, 9, model), 0);
+		new SoldierAnimationController(pd3dDevice, pd3dCommandList, 9, model, ent), 0);
 	for (int i = 0; i < 9; i++) {
 		controller->m_AnimationController->SetTrackAnimationSet(i, i);
 		//controller->m_AnimationController->SetTrackEnable(i, false);
@@ -66,7 +67,7 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		//controller->m_AnimationController->SetTrackType(i, ANIMATION_TYPE_ONCE);
 	}
 
-	// ÇÑ¹ø¸¸ Àç»ýÇÏµµ·Ï ¼öÁ¤
+	// í•œë²ˆë§Œ ìž¬ìƒí•˜ë„ë¡ ìˆ˜ì •
 	controller->m_AnimationController->SetTrackType(1, ANIMATION_TYPE_ONCE);
 	controller->m_AnimationController->SetTrackType(6, ANIMATION_TYPE_ONCE);
 	controller->m_AnimationController->SetTrackType(9, ANIMATION_TYPE_ONCE);
@@ -86,13 +87,13 @@ Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	8 HIT,
 	9 DIE,
 	10 TailAttack,
-	11 Blind(Â÷Â¡),
+	11 Blind(ì°¨ì§•),
 	12 FLYIDLE,
 	13 SLEEP,
 	14 FIREBALL 
 	*/
 
-	// ¸ó½ºÅÍ ¾Ö´Ï¸ÞÀÌ¼Ç ¼Óµµ Á¶Àý
+	// ëª¬ìŠ¤í„° ì• ë‹ˆë©”ì´ì…˜ ì†ë„ ì¡°ì ˆ
 	controller->m_AnimationController->SetTrackSpeed(1, 0.5f);
 	controller->m_AnimationController->SetTrackSpeed(3, 0.7f);
 	controller->m_AnimationController->SetTrackSpeed(5, 0.7f);
@@ -400,7 +401,7 @@ void Sound_Componet::PlayMoveSound(Sound tag)
 	}
 }
 
-// ÀÌ¹ØºÎÅÍ´Â ´Ù¸¥»ç¶÷ ¼Ò¸® µéÀ»¶§ 3d È¿°ú ³Ö´Â ÇÔ¼öµé
+// ì´ë°‘ë¶€í„°ëŠ” ë‹¤ë¥¸ì‚¬ëžŒ ì†Œë¦¬ ë“¤ì„ë•Œ 3d íš¨ê³¼ ë„£ëŠ” í•¨ìˆ˜ë“¤
 void Sound_Componet::Play3DSound(XMFLOAT3 sound, TDSound tag)
 {
 	FMOD_VECTOR soundPos = { sound.x, sound.y, sound.z };
@@ -433,5 +434,130 @@ void Sound_Componet::ListenerUpdate(XMFLOAT3 pos, XMFLOAT3 vel, XMFLOAT3 front, 
 	m_result = m_system->update();
 	if (m_result != FMOD_OK) {
 		std::cerr << "Failed to update system: " << "\n";
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+SoldierAnimationController::SoldierAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel, Entity* owner) :
+	CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel), m_owner(owner)
+{
+	weight_Under[0] = 1.f;
+}
+
+SoldierAnimationController::~SoldierAnimationController()
+{
+}
+
+void SoldierAnimationController::AdvanceTime(float fTimeElapsed, GameObjectModel* pRootGameObject)
+{
+	m_fTime += fTimeElapsed;
+	XMFLOAT3 velocity = m_owner->get<player_Component>()->m_velocity;
+	velocityXZ = Vector3::Length(velocity);
+	//float player_speed[2] = { 50.25f, 40.25f };
+	//entï¿½ï¿½ xz ï¿½Óµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ñµï¿½ ï¿½ï¿½ ï¿½Óµï¿½ï¿½ï¿½ 0ï¿½Ì¸ï¿½ idle 0ï¿½Ì»ï¿½ï¿½Ì¸ï¿½ run run ï¿½Óµï¿½ ï¿½Ì»ï¿½ï¿½Ì¸ï¿½ fastrun
+
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ï¿½ï¿½ 40.25*deltatime ï¿½Ì»ï¿½ï¿½Î°ï¿½? runï¿½ï¿½ fastrun
+	for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++) m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
+
+	if (velocityXZ > 45.f * fTimeElapsed) {
+		weight_Under[0] = 0.f;
+
+		weight_Under[8] += m_pAnimationTracks[8].m_blendingSpeed * fTimeElapsed;
+		weight_Under[1] = 1.0 - weight_Under[8];
+	}
+	//elseï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ï¿½ï¿½ 0 ï¿½Ì»ï¿½ï¿½Î°ï¿½? idleï¿½ï¿½ run
+	else if (velocityXZ > 0)
+	{
+		weight_Under[8] = 0.f;
+
+		weight_Under[1] += m_pAnimationTracks[1].m_blendingSpeed * fTimeElapsed;
+		weight_Under[0] = 1.0 - weight_Under[1];
+	}
+	else {
+		weight_Under[8] = 0.f;
+
+		weight_Under[0] += m_pAnimationTracks[0].m_blendingSpeed * fTimeElapsed;
+		weight_Under[1] = 1.0 - weight_Under[0];
+
+		// weight_Under ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½ 1 ï¿½ï¿½ï¿½Ì·ï¿½ ï¿½ï¿½ï¿½ï¿½
+
+	}
+	for (int i = 0; i < 10; ++i) {
+		if (weight_Under[i] < 0.0f) {
+			weight_Under[i] = 0.0f;
+		}
+		else if (weight_Under[i] > 1.0f) {
+			weight_Under[i] = 1.0f;
+		}
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	if (m_pAnimationTracks)
+	{
+		for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++) m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
+		float blendingSpeed = 0.f;
+		for (int k = 0; k < m_nAnimationTracks; k++) {
+			if (m_pAnimationTracks[k].m_bEnable) {
+				blendingSpeed = m_pAnimationTracks[k].m_blendingSpeed;
+			}
+		}
+		for (int k = 0; k < m_nAnimationTracks; k++) {
+			if (m_pAnimationTracks[k].m_bEnable) {
+				m_pAnimationTracks[k].m_fWeight += blendingSpeed * fTimeElapsed;
+				if (m_pAnimationTracks[k].m_fWeight > 1.f) {
+					m_pAnimationTracks[k].m_fWeight = 1.f;
+				}
+			}
+			else {
+				m_pAnimationTracks[k].m_fWeight -= blendingSpeed * fTimeElapsed;
+				if (m_pAnimationTracks[k].m_fWeight < 0.f) {
+					m_pAnimationTracks[k].m_fWeight = 0.f;
+				}
+			}
+		}
+
+		for (int k = 0; k < m_nAnimationTracks; k++)
+		{
+
+			if (m_pAnimationTracks[k].m_fWeight > 0.f || weight_Under[k] > 0.f)
+			{
+				bool up = false;
+				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+				float fPosition = m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+				for (int j = 0; j < m_pAnimationSets->m_nBoneFrames; j++)//ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				{
+					XMFLOAT4X4 xmf4x4Transform = m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent;
+					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j, fPosition);//ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+					if (up) {
+						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
+					}
+					else {
+						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, weight_Under[k]));
+						if (!strcmp(m_pAnimationSets->m_ppBoneFrameCaches[j]->m_pstrFrameName, "Bip001_Spine")) {
+							up = true;
+						}
+					}
+					m_pAnimationSets->m_ppBoneFrameCaches[j]->m_xmf4x4ToParent = xmf4x4Transform;
+				}
+				m_pAnimationTracks[k].HandleCallback();
+			}
+		}
+
+		pRootGameObject->UpdateTransform(NULL);
+
+		OnRootMotion(pRootGameObject);
+		OnAnimationIK(pRootGameObject);
+	}
+}
+
+void SoldierAnimationController::Animate(float fElapsedTime)
+{
+	if (m_owner->has<Velocity_Component>()) {
+		XMFLOAT3 velocity = m_owner->get<Velocity_Component>()->m_velocity;
+		velocityXZ = Vector3::Length(velocity);
+	}
+	else {
+		XMFLOAT3 velocity = m_owner->get<player_Component>()->m_velocity;
+		velocityXZ = Vector3::Length(velocity);
 	}
 }
