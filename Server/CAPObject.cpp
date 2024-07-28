@@ -338,15 +338,13 @@ void Monster::InitMonster()
 	m_atk = 0;
 	m_def = 0;
 
-	/*m_position.x = 1014.f;
-	m_position.y = 1024.f;
-	m_position.z = 1429.f;*/
 
 	m_position.x = 2200.f;
 	m_position.y = 0.f;
 	m_position.z = 3100.f;
 
-	m_animation = idle_ani;
+	std::cout << "몬스터 이닛 좌표 :  " << m_position.x << ", " << m_position.z << std::endl;
+	//m_animation = idle_ani;
 	m_state = idle_state;
 	prev_state = curr_state = idle_state;
 
@@ -1365,9 +1363,5 @@ void run_bt(Monster* monster, std::unordered_map<INT, Player>* players, GameRoom
 	monster->ElapsedTime();
 	check_hp(monster, players, room);
 	monster->RunBT();
-
-	
-	std::cout << "전투 전 체력 : " << monster->prev_max_hp << std::endl;
-	std::cout << "현재 체력 : " << monster->GetHp() << std::endl;
 
 }
