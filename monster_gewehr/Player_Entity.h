@@ -31,14 +31,14 @@ enum Armor_State {
 	HEAVY_ARMOR
 };
 
-Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+Entity* AddPlayerEntity(World* world, Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,
 	float sx, float sy, float sz,
 	UINT model);
 
-Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+Entity* AddAnotherEntity(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,

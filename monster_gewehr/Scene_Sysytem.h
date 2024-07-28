@@ -88,7 +88,7 @@ struct ChoiceItem_Event {
 
 struct CreateObject_Event {
 	int object = 0;
-
+	int id = 0;
 	XMFLOAT3 Position, Rotate, direct;
 };
 struct Refresh_Scene {

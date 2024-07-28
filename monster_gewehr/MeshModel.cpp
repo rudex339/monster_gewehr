@@ -459,7 +459,7 @@ void CAnimationTrack::SetAnimationCallbackHandler(CAnimationCallbackHandler* pCa
 	m_pAnimationCallbackHandler = pCallbackHandler;
 }
 
-void CAnimationTrack::HandleCallback()
+void CAnimationTrack::	HandleCallback()
 {
 	if (m_pAnimationCallbackHandler)
 	{

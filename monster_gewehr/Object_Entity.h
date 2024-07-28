@@ -133,13 +133,13 @@ struct Scale_Component {
 
 
 
-Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+Entity* AddSoldierObject(World* world, Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,
 	float sx, float sy, float sz);
 
-Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+Entity* AddMonsterObject(World* world, Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,
@@ -289,13 +289,13 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 struct Grande_Component {
 	UINT property = 0;
 	DirectX::BoundingSphere sphere;
-	float damage;
+	bool damage;
 	float range;
 	bool Boom = false;
 	float coolTime = 0.f;
 	Grande_Component() = default;
 
-	Grande_Component(const UINT& property,float range, float damage)
+	Grande_Component(const UINT& property,float range, bool damage)
 		: property(property), range(range), damage(damage)
 	{
 		sphere.Radius = range;

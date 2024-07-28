@@ -5,18 +5,18 @@
 #include "Camera.h"
 
 
-Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ObjectManager* OM, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, UINT model)
+Entity* AddPlayerEntity(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ObjectManager* OM, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, UINT model)
 {
 	switch (model) {
 	case MONSTER:
-		AddMonsterObject(ent, pd3dDevice, pd3dCommandList,
+		AddMonsterObject(world, ent, pd3dDevice, pd3dCommandList,
 			OM,
 			x, y, z,
 			rx, ry, rz,
 			sx, sy, sz);
 		break;
 	case SOLDIER:
-		AddSoldierObject(ent, pd3dDevice, pd3dCommandList,
+		AddSoldierObject(world, ent, pd3dDevice, pd3dCommandList,
 			OM,
 			x, y, z,
 			rx, ry, rz,
@@ -32,18 +32,18 @@ Entity* AddPlayerEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	return ent;
 }
 
-Entity* AddAnotherEntity(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ObjectManager* OM, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, UINT model)
+Entity* AddAnotherEntity(World* world, Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ObjectManager* OM, float x, float y, float z, float rx, float ry, float rz, float sx, float sy, float sz, UINT model)
 {
 	switch (model) {
 	case MONSTER:
-		AddMonsterObject(ent, pd3dDevice, pd3dCommandList,
+		AddMonsterObject(world, ent, pd3dDevice, pd3dCommandList,
 			OM,
 			x, y, z,
 			rx, ry, rz,
 			sx, sy, sz);
 		break;
 	case SOLDIER:
-		AddSoldierObject(ent, pd3dDevice, pd3dCommandList,
+		AddSoldierObject(world, ent, pd3dDevice, pd3dCommandList,
 			OM,
 			x, y, z,
 			rx, ry, rz,

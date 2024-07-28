@@ -43,10 +43,10 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                 granade->Boom = true;
                 Granade->get<Velocity_Component>()->gravity = false;
                 Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
-                world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
+                world->emit<CreateObject_Event>({ explotion,0,Granade->get<Position_Component>()->Position
                                 ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
-
-                world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
+                if (Granade->get<Grande_Component>()->damage)
+                    world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
                 GranadeDelete = true;
             }
 
@@ -65,11 +65,11 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                             Granade->get<Velocity_Component>()->gravity = false;
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
 
-                            world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
+                            world->emit<CreateObject_Event>({ explotion,0,Granade->get<Position_Component>()->Position
                                 ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
                             GranadeDelete = true;
-
-                            world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
+                            if(Granade->get<Grande_Component>()->damage)
+                                world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
                             break;
                         }
 
@@ -88,11 +88,11 @@ void Collision_Sysytem::tick(World* world, float deltaTime)
                             granade->Boom = true;
                             Granade->get<Velocity_Component>()->gravity = false;
                             Granade->get<Velocity_Component>()->m_velocity = XMFLOAT3(0.f, 0.f, 0.f);
-                            world->emit<CreateObject_Event>({ explotion,Granade->get<Position_Component>()->Position
+                            world->emit<CreateObject_Event>({ explotion,0,Granade->get<Position_Component>()->Position
                                 ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
                             GranadeDelete = true;
-
-                            world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
+                            if (Granade->get<Grande_Component>()->damage)
+                                world->emit<ThrowWeapon_Event>({ 0, Granade->get<Position_Component>()->Position });
                             break;
                         }
                     }
@@ -266,7 +266,7 @@ void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
                             XMFLOAT3 intersection;
                             XMStoreFloat3(&intersection, intersectionPoint);
 
-                            world->emit<CreateObject_Event>({ explotion,intersection
+                            world->emit<CreateObject_Event>({ explotion,0,intersection
                                         ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
                             hit_count += 1;
                         }
@@ -278,7 +278,7 @@ void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
                         XMFLOAT3 intersection;
                         XMStoreFloat3(&intersection, intersectionPoint);
 
-                        world->emit<CreateObject_Event>({ explotion,intersection
+                        world->emit<CreateObject_Event>({ explotion,0,intersection
                                     ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
                         hit_count += 1;
                     }

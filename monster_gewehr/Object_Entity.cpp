@@ -4,7 +4,7 @@
 #include "Player_Entity.h"
 
 
-Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+Entity* AddSoldierObject(World* world,Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,
@@ -43,6 +43,12 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	controller->m_AnimationController->SetTrackWeight(0, 1.f);
 	controller->m_AnimationController->SetBlendingSpeed(2, 8.0f);
 	controller->m_AnimationController->SetBlendingSpeed(6, 8.0f);
+
+	controller->m_AnimationController->SetCallbackKeys(7, 1);
+
+	controller->m_AnimationController->SetCallbackKey(7, 0, 0.2f, ent);
+	CAnimationCallbackHandler* pAnimationCallbackHandler = new ThrowCallbackHandler(world);
+	controller->m_AnimationController->SetAnimationCallbackHandler(7, pAnimationCallbackHandler);
 	
 	ent->assign<Position_Component>(x, y, z);
 	ent->assign<Rotation_Component>(rx, ry, rz);
@@ -51,7 +57,7 @@ Entity* AddSoldierObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	return ent;
 }
 
-Entity* AddMonsterObject(Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+Entity* AddMonsterObject(World* world, Entity* ent, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ObjectManager* OM,
 	float x, float y, float z,
 	float rx, float ry, float rz,
@@ -571,6 +577,15 @@ void SoldierAnimationController::Animate(float fElapsedTime)
 ///////////////////////////////////////////////////////////////////////////////
 void ThrowCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosition) {
 	Entity* ent = (Entity*)pCallbackData;
+	ComponentHandle<Model_Component> model = ent->get<Model_Component>();
+	ComponentHandle<Rotation_Component> rotation = ent->get<Rotation_Component>();
+	ComponentHandle<EulerAngle_Component> model_vector = ent->get<EulerAngle_Component>();
 
+	m_pWorld->emit<CreateObject_Event>({ granade,ent->get<player_Component>()->id,
+					XMFLOAT3(model->blankSocketList["Granade"].second._41,
+						model->blankSocketList["Granade"].second._42,
+						model->blankSocketList["Granade"].second._43),
+					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
+					model_vector->m_xmf3Look });
 	
 }

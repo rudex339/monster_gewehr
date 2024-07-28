@@ -357,17 +357,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 
 			// 투척 g키
-			if (pKeysBuffer[0x47] & 0xF0 && player->grenade_amount) {
-				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
-				
-				world->emit<CreateObject_Event>({ granade, 
-					XMFLOAT3(model->blankSocketList["Granade"].second._41,
-						model->blankSocketList["Granade"].second._42,
-						model->blankSocketList["Granade"].second._43),
-					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
-					model_vector->m_xmf3Look});
-				//player->grenade_amount -= 1;
-			}
+			
 
 			// 구르기가 아닐때는 그냥 일반 이동을 더하고 구르기 일때는 구르기 전용을 더함
 			if (roll_on == 0) {
@@ -483,7 +473,17 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				player->stamina += 0.1;
 			}
 
-
+			if (pKeysBuffer[0x47] & 0xF0 && player->grenade_amount) {
+				//투척물에 필요한것, 그려아하니까 위치, 회전, scale, 모델, 수류탄 컴포넌트
+				AnimationController->next_State = (UINT)GRANADE;
+				/*world->emit<CreateObject_Event>({ granade, player->id,
+					XMFLOAT3(model->blankSocketList["Granade"].second._41,
+						model->blankSocketList["Granade"].second._42,
+						model->blankSocketList["Granade"].second._43),
+					XMFLOAT3(rotation->mfPitch,rotation->mfYaw,rotation->mfRoll),
+					model_vector->m_xmf3Look});
+				player->grenade_amount -= 1;*/
+			}
 #ifdef DEMO_VER
 			if (pKeysBuffer[VK_F1] & 0xF0) {
 				world->emit<Demo_Event>({ CS_DEMO_MONSTER_SETPOS });

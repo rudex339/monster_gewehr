@@ -578,7 +578,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		{ // 플레이어를 그린다
 
-			ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+			ent = AddAnotherEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 				m_pObjectManager,
 				-12.f, -8.0f, 20.0f,
 				0.f, 145.f, 0.f,
@@ -723,7 +723,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::Ingame);
 		world->reset();
 		//
-		m_pPawn = AddPlayerEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		m_pPawn = AddPlayerEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			2465.0f, m_pObjectManager->m_pTerrain->GetHeight(1014.0f, 1429.f) + 10.f/*2000.f*/ - 8.0f , 826.0f,
 			0.f, 0.f, 0.f,
@@ -738,7 +738,7 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 
 		BuildScene(world, (char*)"Scene/Scene.bin");
 		//
-		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		ent = AddAnotherEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			1014.f, m_pObjectManager->m_pTerrain->GetHeight(1014.f, 1429.f), 1429.0f,
 			0.f, 90.f, 0.f,
@@ -785,21 +785,21 @@ void Scene_Sysytem::receive(World* world, const ChangeScene_Event& event)
 		light->m_pLight->m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 1.0f);
 
 
-		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		AddAnotherEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
 
-		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		AddAnotherEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 			0.f, 0.f, 0.f,
 			6.0f, 6.0f, 6.0f,
 			SOLDIER);
 
-		AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		AddAnotherEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			310.0f, m_pObjectManager->m_pTerrain->GetHeight(310.0f, 600.0f), 600.0f,
 			0.f, 0.f, 0.f,
@@ -916,7 +916,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 
 	{ // 플레이어를 그린다
 		// 나 자신 그리기
-		ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+		ent = AddAnotherEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 			m_pObjectManager,
 			-12.f, -8.0f, 20.0f,
 			0.f, 145.f, 0.f,
@@ -966,7 +966,7 @@ void Scene_Sysytem::receive(World* world, const EnterRoom_Event& event)
 		ent->assign<TextUI_Component>(text);
 
 		for (int i = 0; i < InRoomPlayers.size(); i++) {
-			ent = AddAnotherEntity(world->create(), m_pd3dDevice, m_pd3dCommandList,
+			ent = AddAnotherEntity(world, world->create(), m_pd3dDevice, m_pd3dCommandList,
 				m_pObjectManager,
 				roomPlayerAngle[i][0], roomPlayerAngle[i][1], roomPlayerAngle[i][2],
 				0.f, roomPlayerSet[i], 0.f,
@@ -1087,8 +1087,10 @@ void Scene_Sysytem::receive(World* world, const CreateObject_Event& event)
 		ComponentHandle<BoundingBox_Component> box = ent->assign<BoundingBox_Component>(
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents,
 			m_pObjectManager->Get_ModelInfo(pstrGameObjectName)->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter);
-		ent->assign<Grande_Component>(event.object, 20.f, 100.f)->coolTime = 100.f;
-
+		if(event.id == m_id)
+		ent->assign<Grande_Component>(event.object, 20.f, true)->coolTime = 10.f;
+		else
+			ent->assign<Grande_Component>(event.object, 20.f, false)->coolTime = 10.f;
 		world->emit<AddObjectlayer_Event>({ "Granade", ent });
 	}
 		break;
