@@ -821,6 +821,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					image.m_mode,
 					image.m_imageRect
 				);
+				image.m_bitmap->Release();
 
 				// HP ÅØ½ºÆ®
 				TextUI_Component hp = TextUI_Component(DEFAULT_FONT, L"HP " + to_wstring((int)player->hp),
@@ -1079,6 +1080,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					image.m_mode,
 					image.m_imageRect
 				);
+				image.m_bitmap->Release();
 
 				float MapX, MapZ;
 
