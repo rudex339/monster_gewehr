@@ -7,7 +7,7 @@
 #include <string>
 #include <chrono>
 
-#define PrintNode
+//#define PrintNode
 
 class Node {
 public:

@@ -685,6 +685,10 @@ void GameFramework::InitServer()
 
 	g_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
 
+	DWORD optval2 = 1;
+	setsockopt(g_socket, IPPROTO_TCP, TCP_NODELAY,
+		(const char*)&optval2, sizeof(optval2));
+
 	ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
