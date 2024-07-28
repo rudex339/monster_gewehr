@@ -262,6 +262,7 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 					Position->Position = pk->player_data.pos;
 					Rotation->mfYaw = pk->player_data.yaw;
 					Player->m_weapon = pk->weapon;
+					Player->grenade_type = pk->grenade - 5;
 
 					auto& weapon = ent->get<Model_Component>().get().m_pchildObjects.begin();
 					for (int i = 0; i < 4; ++i) {
