@@ -288,8 +288,8 @@ VS_TERRAIN_OUTPUT VSEmitter(VS_TERRAIN_INPUT input)
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     //output.color = float4(0.f,0.f,0.f,0.f);
 	
-    output.uv0 = mul(float3(input.uv0, 1.0f), (float3x3) (gmtxTexture)).xy;
-    //output.uv0 = input.uv0;
+    //output.uv0 = mul(float3(input.uv0, 1.0f), (float3x3) (gmtxTexture)).xy;
+    output.uv0 = input.uv0;
     output.uv1 = input.uv1;
 
     return (output);
