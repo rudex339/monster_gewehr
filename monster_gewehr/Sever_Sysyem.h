@@ -64,13 +64,17 @@ struct ThrowWeapon_Event {
 	DirectX::XMFLOAT3 pos;
 };
 
+struct Blood_Event {
+	XMFLOAT3 blood_point;
+};
+
 struct Demo_Event {
 	CHAR type;
 };
 
 class Sever_System : public EntitySystem,
 	public EventSubscriber<PacketSend_Event>,
-	public EventSubscriber<Shoot_Event>,
+	public EventSubscriber<Shoot_Event>,	
 	public EventSubscriber<Account_Event>,
 	public EventSubscriber<Game_Start>,
 	public EventSubscriber<Create_Room>,
@@ -82,6 +86,7 @@ class Sever_System : public EntitySystem,
 	public EventSubscriber<Heal_Event>,
 	public EventSubscriber<Buy_Item>,
 	public EventSubscriber<ThrowWeapon_Event>,
+	public EventSubscriber<Blood_Event>,
 	public EventSubscriber<Demo_Event>
 {
 private:
@@ -99,7 +104,7 @@ public:
 	virtual void unconfigure(class World* world) {};
 	virtual void tick(class World* world, float deltaTime);
 	virtual void receive(class World* world, const PacketSend_Event& event);
-	virtual void receive(class World* world, const Shoot_Event& event);
+	virtual void receive(class World* world, const Shoot_Event& event);	
 	virtual void receive(class World* world, const Account_Event& event);
 	virtual void receive(class World* world, const Game_Start& event);
 	virtual void receive(class World* world, const Create_Room& event);
@@ -111,6 +116,7 @@ public:
 	virtual void receive(class World* world, const Heal_Event& event);
 	virtual void receive(class World* world, const Buy_Item& event);
 	virtual void receive(class World* world, const ThrowWeapon_Event& event);
+	virtual void receive(class World* world, const Blood_Event& event);
 	virtual void receive(class World* world, const Demo_Event& event);
 	void PacketReassembly(World* world, char* recv_buf, size_t recv_size);
 	void ProcessPacket(World* world, char* packet);

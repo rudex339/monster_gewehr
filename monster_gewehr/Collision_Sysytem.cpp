@@ -282,6 +282,7 @@ void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
                             XMVECTOR intersectionPoint = positionVec + ray_dis * finaldir;
                             XMFLOAT3 intersection;
                             XMStoreFloat3(&intersection, intersectionPoint);
+                            world->emit<Blood_Event>({ intersection });
 
                             world->emit<CreateObject_Event>({ blood,0,intersection
                                         ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
@@ -294,6 +295,7 @@ void Collision_Sysytem::receive(World* world, const ShootGun_Event& event)
                         XMVECTOR intersectionPoint = positionVec + ray_dis * directionVec;
                         XMFLOAT3 intersection;
                         XMStoreFloat3(&intersection, intersectionPoint);
+                        world->emit<Blood_Event>({ intersection });
 
                         world->emit<CreateObject_Event>({ blood,0,intersection
                                     ,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });

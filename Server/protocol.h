@@ -61,6 +61,7 @@ constexpr char CS_PACKET_BUY = 12;
 constexpr char CS_PACKET_HEAL = 13;
 constexpr char CS_PACKET_THROW_WEAPON = 14;
 constexpr char CS_PACKET_REGISTER = 15;
+constexpr char CS_PACKET_BLOOD = 16;	// 피 튀는 위치 공유
 
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
@@ -93,6 +94,7 @@ constexpr char SC_PACKET_SHOT = 23;
 constexpr char SC_PACKET_THROW_WEAPON = 24;
 constexpr char SC_PACKET_REGISTER_SUCC = 25;
 constexpr char SC_PACKET_REGISTER_FAIL = 26;
+constexpr char SC_PACKET_BLOOD = 27;
 
 enum class S_STATE { LOG_IN, LOBBY, SHOP, UPGRADE, ROOM, IN_ROOM, IN_GAME, LOG_OUT };
 
@@ -241,6 +243,12 @@ struct CS_DEMO_PACKET
 	UCHAR type;
 };
 
+struct CS_BLOOD_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	DirectX::XMFLOAT3 pos;
+};
 
 // 패킷 타입 서버->클라
 
@@ -429,5 +437,12 @@ struct SC_REGISTER_PACKET
 {
 	UCHAR size;
 	UCHAR type;
+};
+
+struct SC_BLOOD_PACKET
+{
+	UCHAR size;
+	UCHAR type;
+	DirectX::XMFLOAT3 pos;
 };
 #pragma pack (pop)

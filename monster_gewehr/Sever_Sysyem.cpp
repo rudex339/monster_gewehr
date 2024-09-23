@@ -9,10 +9,9 @@
 void Sever_System::configure(World* world)
 {
 	world->subscribe<PacketSend_Event>(this);
-	world->subscribe<Shoot_Event>(this);
+	world->subscribe<Shoot_Event>(this);	
 	world->subscribe<Account_Event>(this);
-	world->subscribe<Game_Start>(this);
-	world->subscribe<Demo_Event>(this);
+	world->subscribe<Game_Start>(this);	
 	world->subscribe<Create_Room>(this);
 	world->subscribe<Join_Room>(this);
 	world->subscribe<Quit_Room>(this);
@@ -22,6 +21,8 @@ void Sever_System::configure(World* world)
 	world->subscribe<Heal_Event>(this);
 	world->subscribe<Buy_Item>(this);
 	world->subscribe<ThrowWeapon_Event>(this);
+	world->subscribe<Blood_Event>(this);
+	world->subscribe<Demo_Event>(this);
 }
 
 void Sever_System::tick(World* world, float deltaTime)
@@ -184,6 +185,17 @@ void Sever_System::receive(World* world, const ThrowWeapon_Event& event)
 
 	send(g_socket, (char*)&p, p.size, 0);
 }
+
+void Sever_System::receive(class World* world, const Blood_Event& event)
+{
+	CS_BLOOD_PACKET packet;
+	packet.size = sizeof(packet);
+	packet.type = CS_PACKET_BLOOD;
+	packet.pos = event.blood_point;
+
+	send(g_socket, (char*)&packet, packet.size, 0);
+}
+
 
 void Sever_System::receive(World* world, const Demo_Event& event)
 {
@@ -549,6 +561,12 @@ void Sever_System::ProcessPacket(World* world, char* packet)
 
 		cout << "회원가입 실패" << endl;
 		break;
+	}
+	case SC_PACKET_BLOOD: {
+		SC_BLOOD_PACKET* pk = reinterpret_cast<SC_BLOOD_PACKET*>(packet);
+
+		world->emit<CreateObject_Event>({ blood,0,pk->pos
+										,XMFLOAT3(0.f,0.f,0.f),XMFLOAT3(0.f,0.f,0.f) });
 	}
 	} // switch문 마지막
 

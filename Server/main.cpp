@@ -561,6 +561,22 @@ void ProcessPacket(int id, char* p)
 #endif
 		break;
 	}
+	case CS_PACKET_BLOOD: {
+		CS_BLOOD_PACKET* cs_packet = reinterpret_cast<CS_BLOOD_PACKET*>(p);
+
+		SC_BLOOD_PACKET sc_packet;
+		sc_packet.size = sizeof(sc_packet);
+		sc_packet.type = SC_PACKET_BLOOD;
+		sc_packet.pos = cs_packet->pos;
+
+		for (int ply_id : gamerooms[players[id].GetRoomID()].GetPlyId()) {
+			if (ply_id < 0) continue;
+			if (ply_id == id) continue;
+			if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+			players[ply_id].DoSend(&sc_packet, sc_packet.size);
+		}
+		break;
+	}
 	case CS_DEMO_MONSTER_SETPOS: {
 		int room_id = players[id].GetRoomID();
 		souleaters[room_id].m_lock.lock();
