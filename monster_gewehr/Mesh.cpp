@@ -1007,17 +1007,23 @@ TextureRectMesh::~TextureRectMesh()
 bool TextureRectMesh::changeRowCol(int row, int col, int rows, int cols)
 {
 	//float 
-	/*float height = 1.0f / float(rows);
+	float height = 1.0f / float(rows);
 	float lenght = 1.0f / float(cols);
 	float y = float(row) / float(rows);
 	float x = float(col) / float(cols);
 
-	m_xmf4x4Texture._11 = height;
-	m_xmf4x4Texture._22 = lenght;
-	m_xmf4x4Texture._31 = x ;
-	m_xmf4x4Texture._32 = y ;
+	//m_xmf4x4Texture._11 = height;
+	//m_xmf4x4Texture._22 = lenght;
+	//m_xmf4x4Texture._31 = x ;
+	//m_xmf4x4Texture._32 = y ;
 
-	XMStoreFloat4x4(&m_pcbMappedtexture->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));*/
+	//XMStoreFloat4x4(&m_pcbMappedtexture->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	m_pxmf2TextureCoords0[0] = XMFLOAT2(x, y);
+	m_pxmf2TextureCoords0[1] = XMFLOAT2(x, y+height);
+	m_pxmf2TextureCoords0[2] = XMFLOAT2(x+lenght, y);
+	m_pxmf2TextureCoords0[3] = XMFLOAT2(x, y + height);
+	m_pxmf2TextureCoords0[4] = XMFLOAT2(x + lenght, y + height);
+	m_pxmf2TextureCoords0[5] = XMFLOAT2(x + lenght, y);
 	return false;
 }
 

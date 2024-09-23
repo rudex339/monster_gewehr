@@ -526,7 +526,7 @@ public:
 	MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature
 		, float x = 1.0f, float y = 1.0f, float z = 1.0f);
 	virtual void Animate(float fTimeElapsed);
-
+	
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
 
