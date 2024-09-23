@@ -249,7 +249,7 @@ struct ImageUI_Component {
 	
 	ID2D1DeviceContext2* m_d2dDeviceContext;
 	ID2D1Factory3* m_d2dFactory;
-	ID2D1Bitmap* m_bitmap;
+	ComPtr<ID2D1Bitmap> m_bitmap;
 
 	float m_opacity;
 	D2D1_INTERPOLATION_MODE m_mode;
@@ -257,7 +257,7 @@ struct ImageUI_Component {
 	D2D1_RECT_F m_Rect, m_imageRect;
 
 	ImageUI_Component() = default;
-	ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect);
+	ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ComPtr<ID2D1Bitmap> bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect);
 
 };
 
@@ -278,7 +278,7 @@ struct Button_Component : public ImageUI_Component, TextUI_Component {
 	UINT Curr_Scene;
 
 	Button_Component() = default;
-	Button_Component(int id, const wchar_t* imagePath, int fontType, wstring m_text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int num = -1);
+	Button_Component(int id, const wchar_t* imagePath, int fontType, wstring m_text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ComPtr<ID2D1Bitmap> bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int num = -1);
 
 	void CursorOn(POINT cursor, ComPtr<IDWriteTextFormat> pTextFormat, ComPtr<IDWriteTextFormat> small_font);
 	void Disable();

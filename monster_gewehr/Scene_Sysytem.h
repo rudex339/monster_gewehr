@@ -166,7 +166,7 @@ private:
 
 	ID2D1DeviceContext2* m_d2dDeviceContext;
 	ID2D1Factory3* m_d2dFactory;
-	ID2D1Bitmap* m_bitmap;
+	ComPtr<ID2D1Bitmap> m_bitmap;
 
 	Entity* m_pPawn;
 

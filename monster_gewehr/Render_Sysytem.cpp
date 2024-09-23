@@ -529,7 +529,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		ComponentHandle<ImageUI_Component> imageUI
 		) -> void {
 			m_d2dDeviceContext->DrawBitmap(
-				imageUI->m_bitmap,
+				imageUI->m_bitmap.Get(),
 				imageUI->m_Rect,
 				imageUI->m_opacity,
 				imageUI->m_mode,
@@ -695,7 +695,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			{
 				button->CursorOn(m_cursorPos, button->m_textFormats[1], button->m_textFormats[0]);
 				m_d2dDeviceContext->DrawBitmap(
-					button->m_bitmap,
+					button->m_bitmap.Get(),
 					button->m_Rect,
 					button->m_opacity,
 					button->m_mode,
@@ -1100,7 +1100,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 				m_d2dDeviceContext->DrawBitmap(
-					image.m_bitmap,
+					image.m_bitmap.Get(),
 					image.m_Rect,
 					image.m_opacity,
 					image.m_mode,

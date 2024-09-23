@@ -215,7 +215,7 @@ TextUI_Component::TextUI_Component(int fontType, wstring text, float top, float 
 	m_text_alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
 }
 
-ImageUI_Component::ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)
+ImageUI_Component::ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ComPtr<ID2D1Bitmap> bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect)
 {
 	m_d2dDeviceContext = deviceContext;
 	m_d2dFactory = factory;
@@ -225,7 +225,7 @@ ImageUI_Component::ImageUI_Component(const wchar_t* imagePath, ID2D1DeviceContex
 	m_mode = mode;
 	m_opacity = opacity;
 
-	LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
+	LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, m_bitmap.GetAddressOf());
 }
 
 TextBoxUI_Component::TextBoxUI_Component(float layoutX, float layoutY, float width, float height, int num)
@@ -247,7 +247,7 @@ bool TextBoxUI_Component::CursorInBox(POINT cursor)
 	return false;
 }
 
-Button_Component::Button_Component(int id, const wchar_t* imagePath, int fontType, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ID2D1Bitmap* bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int num)
+Button_Component::Button_Component(int id, const wchar_t* imagePath, int fontType, wstring text, ID2D1DeviceContext2* deviceContext, ID2D1Factory3* factory, ComPtr<ID2D1Bitmap> bitmap, D2D1_RECT_F posrect, float opacity, D2D1_INTERPOLATION_MODE mode, D2D1_RECT_F imagerect, int num)
 {
 	button_id = id;
 	m_text = text;
@@ -275,7 +275,7 @@ Button_Component::Button_Component(int id, const wchar_t* imagePath, int fontTyp
 	}
 
 	if (imagePath != NULL) {
-		LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, &m_bitmap);
+		LoadBitmapFromFiles(imagePath, m_d2dDeviceContext, m_d2dFactory, m_bitmap.GetAddressOf());
 	}
 }
 
