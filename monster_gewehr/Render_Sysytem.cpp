@@ -258,6 +258,7 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 
 
 	LoadBitmapFromFile(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[0]);
+	LoadBitmapFromFile(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[1]);
 	LoadBitmapFromFile(L"image/icons/m4.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[2]);
 	LoadBitmapFromFile(L"image/icons/Benelli.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[3]);
 	LoadBitmapFromFile(L"image/icons/sr.png", m_d2dDeviceContext, m_d2dFactory, &m_bitmaps[4]);
@@ -836,15 +837,13 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				// 초상화
 				D2D1_RECT_F sRect = { 10, 10, FRAME_BUFFER_WIDTH / 13, FRAME_BUFFER_HEIGHT / 7 };
-				ImageUI_Component image = ImageUI_Component(L"image/soldierFace.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[0], sRect, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 				m_d2dDeviceContext->DrawBitmap(
 					m_bitmaps[0],
-					image.m_Rect,
-					image.m_opacity,
-					image.m_mode,
-					image.m_imageRect
+					sRect,
+					1.0f,
+					D2D1_INTERPOLATION_MODE_LINEAR,
+					imageRect
 				);
-				image.m_bitmap->Release();
 
 				// HP 텍스트
 				TextUI_Component hp = TextUI_Component(DEFAULT_FONT, L"HP " + to_wstring((int)player->hp),
@@ -1098,15 +1097,14 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 18 / 20 - margin, margin, FRAME_BUFFER_WIDTH - margin, FRAME_BUFFER_WIDTH * 2 / 20 + margin };
 				imageRect = { x - FRAME_BUFFER_WIDTH / 20, y - FRAME_BUFFER_WIDTH / 20 , x + FRAME_BUFFER_WIDTH / 20, y + FRAME_BUFFER_WIDTH / 20 };
 
-				ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
+				//ImageUI_Component image = ImageUI_Component(L"image/minimap.png", m_d2dDeviceContext, m_d2dFactory, m_bitmaps[1], sRect, 0.8f, D2D1_INTERPOLATION_MODE_LINEAR, imageRect);
 				m_d2dDeviceContext->DrawBitmap(
-					image.m_bitmap.Get(),
-					image.m_Rect,
-					image.m_opacity,
-					image.m_mode,
-					image.m_imageRect
+					m_bitmaps[1],
+					sRect,
+					0.8f,
+					D2D1_INTERPOLATION_MODE_LINEAR,
+					imageRect
 				);
-				image.m_bitmap->Release();
 
 				float MapX, MapZ;
 
@@ -1157,7 +1155,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 				}
 			}
-			ClearUserInfo(); // 방의 유저들 좌표를 저장하던 map 초기화
+		ClearUserInfo(); // 방의 유저들 좌표를 저장하던 map 초기화
 		}
 	);
 
