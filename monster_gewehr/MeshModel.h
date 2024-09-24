@@ -517,7 +517,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-class MultiSpriteObject : public GameObjectModel
+class MultiSpriteObject : public GameObjectModel//8, 8
 {
 public:
 	float m_fSpeed = 0.1f;
@@ -530,7 +530,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
 
-class MultiSpriteObject3 : public GameObjectModel
+class MultiSpriteObject3 : public GameObjectModel//3*3
 {
 public:
 	float m_fSpeed = 0.1f;
@@ -544,7 +544,7 @@ public:
 };
 
 
-class MultiSpriteObject2 : public GameObjectModel
+class MultiSpriteObject2 : public GameObjectModel//3, 3
 {
 public:
 	float m_fSpeed = 0.1f;

@@ -912,7 +912,7 @@ CBoxMesh::~CBoxMesh()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-TextureRectMesh::TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CStandardMesh(pd3dDevice, pd3dCommandList)
+TextureRectMesh::TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, int n_x, int n_y) : CStandardMesh(pd3dDevice, pd3dCommandList)
 {
 	{
 		m_nVertices = 6;
@@ -941,25 +941,33 @@ TextureRectMesh::TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
-
+		m_pd3dTextureCoord0Buffers = new ID3D12Resource* [n_x * n_y];
+		m_d3dTextureCoord0BufferViews = new D3D12_VERTEX_BUFFER_VIEW[n_x * n_y];
 
 		m_pxmf2TextureCoords0 = new XMFLOAT2[m_nVertices];
+		float height = 1.0f / float(n_y);
+		float lenght = 1.0f / float(n_x);
+		
 		//요기에 저장
-		m_pxmf2TextureCoords0[0] = XMFLOAT2(0.0f, 0.0f);
-		m_pxmf2TextureCoords0[1] = XMFLOAT2(0.0f, 1.0f);
-		m_pxmf2TextureCoords0[2] = XMFLOAT2(1.0f, 0.0f);
-		m_pxmf2TextureCoords0[3] = XMFLOAT2(0.0f, 1.0f);
-		m_pxmf2TextureCoords0[4] = XMFLOAT2(1.0f, 1.0f);
-		m_pxmf2TextureCoords0[5] = XMFLOAT2(1.0f, 0.0f);
+		for (int i = 0; i < n_y; i++) {
+			for (int j = 0; j < n_x; j++) {
+				float y = float(i) / float(n_y);
+				float x = float(j) / float(n_x);
+				m_pxmf2TextureCoords0[0] = XMFLOAT2(x, y);
+				m_pxmf2TextureCoords0[1] = XMFLOAT2(x, y + height);
+				m_pxmf2TextureCoords0[2] = XMFLOAT2(x + lenght, y);
+				m_pxmf2TextureCoords0[3] = XMFLOAT2(x, y + height);
+				m_pxmf2TextureCoords0[4] = XMFLOAT2(x + lenght, y + height);
+				m_pxmf2TextureCoords0[5] = XMFLOAT2(x + lenght, y);
 
-		// Add missing texture coordinate
+				m_pd3dTextureCoord0Buffers[n_x * i + j] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
 
-
-		m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
-
-		m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
-		m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
-		m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+				m_d3dTextureCoord0BufferViews[n_x*i+j].BufferLocation = m_pd3dTextureCoord0Buffers[n_x * i + j]->GetGPUVirtualAddress();
+				m_d3dTextureCoord0BufferViews[n_x * i + j].StrideInBytes = sizeof(XMFLOAT2);
+				m_d3dTextureCoord0BufferViews[n_x * i + j].SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+			}
+		}
+		
 
 		m_pxmf2TextureCoords1 = new XMFLOAT2[m_nVertices];
 		//요기에 저장
@@ -1016,14 +1024,7 @@ bool TextureRectMesh::changeRowCol(int row, int col, int rows, int cols)
 	//m_xmf4x4Texture._22 = lenght;
 	//m_xmf4x4Texture._31 = x ;
 	//m_xmf4x4Texture._32 = y ;
-
-	//XMStoreFloat4x4(&m_pcbMappedtexture->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
-	m_pxmf2TextureCoords0[0] = XMFLOAT2(x, y);
-	m_pxmf2TextureCoords0[1] = XMFLOAT2(x, y+height);
-	m_pxmf2TextureCoords0[2] = XMFLOAT2(x+lenght, y);
-	m_pxmf2TextureCoords0[3] = XMFLOAT2(x, y + height);
-	m_pxmf2TextureCoords0[4] = XMFLOAT2(x + lenght, y + height);
-	m_pxmf2TextureCoords0[5] = XMFLOAT2(x + lenght, y);
+	cur_Frame = col + row * cols;
 	return false;
 }
 

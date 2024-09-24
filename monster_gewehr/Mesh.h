@@ -239,15 +239,22 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dColorBufferView;
 	XMFLOAT4X4						m_xmf4x4Texture = Matrix4x4::Identity();
 
+	ID3D12Resource** m_pd3dTextureCoord0Buffers = NULL;
+	D3D12_VERTEX_BUFFER_VIEW*		m_d3dTextureCoord0BufferViews = NULL;
+
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle;
+
+	int cur_Frame = 0;
 public:
-	TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f);
+	TextureRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f,
+		int n_x=1, int n_y=1);
 	virtual ~TextureRectMesh();
 	bool changeRowCol(int row, int col, int rows, int cols);
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 	{
 
-		D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[4] = { m_d3dPositionBufferView, m_d3dColorBufferView, m_d3dTextureCoord0BufferView, m_d3dTextureCoord1BufferView };
+		D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[4] = { m_d3dPositionBufferView, m_d3dColorBufferView, m_d3dTextureCoord0BufferViews[cur_Frame], m_d3dTextureCoord1BufferView};
 		pd3dCommandList->IASetVertexBuffers(m_nSlot, 4, pVertexBufferViews);
 	}
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

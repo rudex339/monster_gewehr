@@ -1641,7 +1641,7 @@ void MultiSpriteObject::Animate(float fTimeElapsed)
 
 MultiSpriteObject::MultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : GameObjectModel(1)
 {
-	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 100);
+	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 100, 8, 8);
 	SetMesh(pMesh);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1682,7 +1682,7 @@ void MultiSpriteObject3::Animate(float fTimeElapsed)
 
 MultiSpriteObject3::MultiSpriteObject3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : GameObjectModel(1)
 {
-	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 50, 50, 50);
+	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 50, 50, 50, 3, 3);
 	SetMesh(pMesh);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1716,7 +1716,7 @@ void MultiSpriteObject3::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 MultiSpriteObject2::MultiSpriteObject2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float z) : GameObjectModel(1)
 {
 
-	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 100);
+	TextureRectMesh* pMesh = new TextureRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 100, 3, 3);
 	SetMesh(pMesh);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
