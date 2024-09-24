@@ -41,7 +41,7 @@ constexpr float L_ARMOR_UP = 0.5f;
 constexpr float H_ARMOR_UP = 1.0f;
 
 // 몬스터 데이터
-constexpr float MONSTER_MAX_HP = 1000;
+constexpr float MONSTER_MAX_HP = 2000;
 
 // 패킷 타입
 constexpr char CS_PACKET_LOGIN = 1;

@@ -65,6 +65,10 @@ private:
 
 	float grenade_ani_time = 0.0f;
 
+	bool cheat_no_damage = false;
+	bool cheat_infinite_ammo = false;
+	bool cheat_super_fast = false;
+
 public:
 	PlayerControl_System() = default;
 

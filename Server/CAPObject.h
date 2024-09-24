@@ -110,6 +110,8 @@ public:
 
 	SHORT death_count = 0;	// 이것도 나중에 게임룸 클래스에 넣어서 모든 유저의 죽음 횟수를 세서 게임오버나 점수 깎는걸 만들거임
 
+	BOOL cheat_no_damage = false;
+
 protected:
 	SOCKET m_socket;
 

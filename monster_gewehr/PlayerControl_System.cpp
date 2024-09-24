@@ -232,7 +232,10 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 		if (GetKeyboardState(pKeysBuffer)) {
 			
 			float speed = player_speed[player->m_armor - 3] * deltaTime;
-			//float speed = 1050.25f * deltaTime;
+
+			if (cheat_super_fast) {
+				speed = 1050.25f * deltaTime;
+			}
 
 			if (player->aim_mode) {
 				speed *= 0.5f;
@@ -402,7 +405,10 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 					world->emit<ShootGun_Event>({ (int)player->m_weapon, camera->m_pCamera->GetPosition(), camera->m_pCamera->GetLookVector() }); //  이건 콜리전 시스템
 
 					Sound_Componet::GetInstance().PlaySound(player->m_weapon+3);
-					player->ammo--;
+					
+					if(!cheat_infinite_ammo)
+						player->ammo--;
+
 					if (player->ammo <= 0 && player->mag > 0) {
 						AnimationController->next_State = (UINT)RELOAD;
 						player->reload = true;
@@ -497,7 +503,19 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 				world->emit<Demo_Event>({ CS_DEMO_MONSTER_SETHP });
 			}
 			if (pKeysBuffer[VK_F3] & 0xF0) {
+				cheat_infinite_ammo = !cheat_infinite_ammo;
+				player->ammo = 30;
+				if (cheat_infinite_ammo) {
+					player->ammo = 99;
+				}
+			}
+			if (pKeysBuffer[VK_F4] & 0xF0) {
+				cheat_no_damage = !cheat_no_damage;
 				world->emit<Demo_Event>({ CS_DEMO_MONSTER_BEHAVIOR });
+			}
+
+			if (pKeysBuffer[VK_F5] & 0xF0) {
+				cheat_super_fast = !cheat_super_fast;
 			}
 #endif
 			m_Pawn->get<player_Component>()->m_velocity = velocity->m_velocity;

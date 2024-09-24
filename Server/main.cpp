@@ -173,9 +173,11 @@ void BossThread()
 						if (players[ply_id].hit_on) continue;
 
 						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
-							players[ply_id].hit_on = 1;
-							players[ply_id].HitPlayer(50);
-							SendHitPlayer(players[ply_id].GetID());
+							if (!players[ply_id].cheat_no_damage) {
+								players[ply_id].hit_on = 1;
+								players[ply_id].HitPlayer(50);
+								SendHitPlayer(players[ply_id].GetID());
+							}
 						}						
 					}
 				}
@@ -189,10 +191,12 @@ void BossThread()
 							if (players[ply_id].hit_on) continue;
 
 							if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
-								players[ply_id].hit_on = 1;
-								players[ply_id].HitPlayer(25);
-								SendHitPlayer(players[ply_id].GetID());
-							}							
+								if (!players[ply_id].cheat_no_damage) {
+									players[ply_id].hit_on = 1;
+									players[ply_id].HitPlayer(25);
+									SendHitPlayer(players[ply_id].GetID());
+								}
+							}
 						}
 					}
 					else {
@@ -220,11 +224,11 @@ void BossThread()
 							float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
 							std::cout << "거리 : " << distance << std::endl;
 							if (distance < 70.f) {
-								players[ply_id].hit_on = 1;
-								//players[ply_id].SetHp(players[ply_id].GetHp() - 25);
-								players[ply_id].HitPlayer(25);
-								SendHitPlayer(players[ply_id].GetID());
-								std::cout << "실행" << std::endl;
+								if (!players[ply_id].cheat_no_damage) {
+									players[ply_id].hit_on = 1;
+									players[ply_id].HitPlayer(25);
+									SendHitPlayer(players[ply_id].GetID());
+								}
 							}
 						}
 					}
@@ -580,10 +584,12 @@ void ProcessPacket(int id, char* p)
 	case CS_DEMO_MONSTER_SETPOS: {
 		int room_id = players[id].GetRoomID();
 		souleaters[room_id].m_lock.lock();
-		souleaters[room_id].SetPostion(XMFLOAT3(2465.f, 0.f, 826.f));
+		souleaters[room_id].SetPostion(XMFLOAT3(2200.f, 0.f, 3100.f));
 		souleaters[room_id].SetBoundingBox();
 		souleaters[room_id].m_lock.unlock();
 		souleaters[room_id].SetState(idle_state);
+		souleaters[room_id].home = 0;
+		souleaters[room_id].prev_home = 0;
 		build_bt(&souleaters[room_id], &players, &gamerooms[players[id].GetRoomID()]);
 		break;
 	}
@@ -597,6 +603,13 @@ void ProcessPacket(int id, char* p)
 	}
 	case CS_DEMO_MONSTER_BEHAVIOR: {
 		int room_id = players[id].GetRoomID();
+		players[id].cheat_no_damage = !players[id].cheat_no_damage;
+		if (players[id].cheat_no_damage) {
+			players[id].SetHp(101);
+		}
+		else
+			players[id].SetHp(100);
+		SendHitPlayer(id);
 		//souleaters[room_id].dash(7500.f);
 		break;
 	}

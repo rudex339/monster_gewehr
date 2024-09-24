@@ -216,7 +216,7 @@ Monster::Monster()
 	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
 	prev_max_hp = m_hp;
-	m_runaway_hp = 900; // m_max_hp * 0.9;
+	m_runaway_hp = m_max_hp * 0.7;
 	m_atk = 0;
 	m_def = 0;
 
@@ -334,7 +334,7 @@ void Monster::InitMonster()
 	m_max_hp = MONSTER_MAX_HP;
 	m_hp = m_max_hp;
 	prev_max_hp = m_hp;
-	m_runaway_hp = 900; // m_max_hp * 0.9;
+	m_runaway_hp = m_max_hp * 0.7;
 	m_atk = 0;
 	m_def = 0;
 
@@ -374,7 +374,7 @@ void check_hp(Monster* monster, std::unordered_map<INT, Player>* players, GameRo
 
 	else if (hp <= monster->GetRAHp()) {
 		monster->SetState(runaway_state);
-		if (hp >= 300.0f) {
+		if (hp >= 1000.0f) {
 			monster->SetRAHp(hp * 0.5f);
 		}
 		else {
