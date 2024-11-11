@@ -2,7 +2,7 @@
 //
 
 //#ifdef _DEBUG
-#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
+//#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
 //#endif
 
 #include "stdafx.h"
