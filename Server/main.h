@@ -31,6 +31,8 @@ void SendItemInfo(int id);
 void SendRegisterSucc(int id);
 void SendRegisterFail(int id);
 
+SOCKET listen_sock;
+HANDLE iocp_handle;
 
 std::unordered_map<INT, Player> players;
 std::array<Monster, MAX_GAME_ROOM> souleaters;

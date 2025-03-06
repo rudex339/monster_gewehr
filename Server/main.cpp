@@ -9,13 +9,8 @@ int main(int argc, char* argv[])
 		return 1;
 
 	// 소켓 생성
-	SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, 0);
+	listen_sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (listen_sock == INVALID_SOCKET) err_quit("socket()");
-
-	// 리시브 타임아웃
-	DWORD optval = 10;
-	retval = setsockopt(listen_sock, SOL_SOCKET, SO_RCVTIMEO,
-		(const char*)&optval, sizeof(optval));
 
 	// nagle off
 	/*DWORD optval2 = 1;
@@ -28,12 +23,17 @@ int main(int argc, char* argv[])
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serveraddr.sin_port = htons(SERVER_PORT);
-	retval = bind(listen_sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
+
+	retval = bind(listen_sock, reinterpret_cast<sockaddr*>(&serveraddr), sizeof(serveraddr));
 	if (retval == SOCKET_ERROR) err_quit("bind()");
 
 	// listen()
 	retval = listen(listen_sock, SOMAXCONN);
 	if (retval == SOCKET_ERROR) err_quit("listen()");
+
+	//iocp 핸들
+	iocp_handle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
+
 
 	// 데이터 통신에 사용할 변수
 	SOCKET client_sock;
@@ -157,7 +157,7 @@ void BossThread()
 	int bite_cooltime = 13;
 	int tail_cooltime = 6;
 
-	frame fps{}, frame_count{};
+	frame fps{};
 	while (1) {
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 		if (fps.count() < 1) continue; // 1/MAX_FRAME

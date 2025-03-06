@@ -13,7 +13,22 @@ std::uniform_real_distribution<double> minus(-1.0f, 1.0f);
 std::uniform_int_distribution<int> rand_runaway_point(0, RUNAWAY_POINT-1);
 std::uniform_int_distribution<int> random_0_to_100(0, 100);
 
+OVER_EXP::OVER_EXP()
+{
+	_wsa_buf.len = BUF_SIZE;
+	_wsa_buf.buf = _send_buf;
+	_comp_type = OP_RECV;
+	ZeroMemory(&_wsa_over, sizeof(_wsa_over));
+}
 
+OVER_EXP::OVER_EXP(char* packet)
+{
+	_wsa_buf.len = BUF_SIZE;
+	_wsa_buf.buf = _send_buf;
+	_comp_type = OP_SEND;
+	ZeroMemory(&_wsa_over, sizeof(_wsa_over));
+	memcpy(_send_buf, packet, packet[0]);
+}
 
 CAPObject::CAPObject()
 {
