@@ -31,272 +31,323 @@ int main(int argc, char* argv[])
 	retval = listen(listen_sock, SOMAXCONN);
 	if (retval == SOCKET_ERROR) err_quit("listen()");
 
-	//iocp 핸들
+	//iocp 객체 생성, 소켓 연결
 	iocp_handle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(listen_sock), iocp_handle, 0, 0);
+	
+	SOCKET client_sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
+	EXP_OVER accept_over;
+	memcpy(&accept_over._send_buf, &client_sock, sizeof(SOCKET));
+	ZeroMemory(&accept_over._wsa_over, sizeof(accept_over._wsa_over));
+	accept_over._comp_type = OP_ACCEPT;
 
-	// 데이터 통신에 사용할 변수
-	SOCKET client_sock;
-	struct sockaddr_in clientaddr;
-	int addrlen;
+	retval = AcceptEx(listen_sock, client_sock, accept_over._send_buf + sizeof(SOCKET), 0,
+		sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, 0, &accept_over._wsa_over);
 
-	std::thread B_Thread{ &BossThread };
-	B_Thread.detach();
+	if (retval == FALSE) {
+		int error_num = WSAGetLastError();
+		if (ERROR_IO_PENDING != error_num) {
+			err_quit("AcceptEx()");
+		}
+	}
+
+	std::vector<std::thread> worker_threads;
+	int thread_amount = std::thread::hardware_concurrency();
+	for (int i = 0; i < thread_amount; ++i) {
+		worker_threads.emplace_back(WorkerThread);
+	}
+	for (auto& th : worker_threads) {
+		th.detach();
+	}
 
 	while (1) {
-		addrlen = sizeof(clientaddr);
-
-		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
-		if (client_sock == INVALID_SOCKET) {
-			break;
-		}
-
-		// 접속한 클라이언트 정보 출력
-		char addr[INET_ADDRSTRLEN];
-		inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
-		printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
-			addr, ntohs(clientaddr.sin_port));
-
-		/*hThread = CreateThread(NULL, 0, ProcessClient,
-			(LPVOID)client_sock, 0, NULL);*/
-		std::thread hThread{ &ProcessClient, client_sock };
-		hThread.detach();
-
-		/*if (hThread == NULL) { closesocket(client_sock); }
-		else { CloseHandle(hThread); }*/
 
 	}
+
+	//--------------------------------------tcp의 잔재들-------------------------------------------
+	/*struct sockaddr_in clientaddr;
+	int addrlen;*/
+
+	/*std::thread B_Thread{ &BossThread };
+	B_Thread.detach();*/
+
+	//while (1) {
+	//	addrlen = sizeof(clientaddr);
+
+	//	client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
+	//	if (client_sock == INVALID_SOCKET) {
+	//		break;
+	//	}
+
+	//	// 접속한 클라이언트 정보 출력
+	//	char addr[INET_ADDRSTRLEN];
+	//	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
+	//	printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
+	//		addr, ntohs(clientaddr.sin_port));
+
+	//	/*hThread = CreateThread(NULL, 0, ProcessClient,
+	//		(LPVOID)client_sock, 0, NULL);*/
+	//	std::thread hThread{ &ProcessClient, client_sock };
+	//	hThread.detach();
+
+	//	/*if (hThread == NULL) { closesocket(client_sock); }
+	//	else { CloseHandle(hThread); }*/
+
+	//}
+	//--------------------------------------tcp의 잔재들-------------------------------------------
 
 	closesocket(listen_sock);
 }
 
-void ProcessClient(SOCKET sock)
+void WorkerThread()
 {
-	int retval;
-	SOCKET client_sock = sock;
-	struct sockaddr_in clientaddr;
-	char addr[INET_ADDRSTRLEN];
-	int addrlen;
-	
-	int id = global_id++;
-
-	constexpr int MAX_FRAME = 60;
-	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
-	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
-	
-	// 총 발사 관련 변수들인데 추후 묶어서 관리할 예정
-	int hit_timer = MAX_FRAME * 5;
-
-	// 클라이언트 정보 얻기
-	addrlen = sizeof(clientaddr);
-	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
-	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
-
-	players.try_emplace(id, id, client_sock);
-
-	frame fps{}, frame_count{};
-	//std::cout << id << std::endl;
-
-	while (players[id].GetState() != S_STATE::LOG_OUT) {
-		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
-
-		if (fps.count() < 1) continue; // 1/MAX_FRAME
-
-		// 데이터를 받아서
-		retval = players[id].RecvData();
-		
-		if (retval > 0) {
-			PacketReassembly(id, retval);
-		}
-		else if (retval == -1) {
-			std::cout << "나감" << std::endl;
-			break;
-		}
-		
-		if (players[id].GetState() == S_STATE::IN_GAME) {
-			if (players[id].hit_on) {
-				if (hit_timer <= 0) {
-					hit_timer = MAX_FRAME * 3;
-					players[id].hit_on = 0;
-				}
-				else {
-					hit_timer -= 1;
-				}
-			}
-
-			if (players[id].GetHp() <= 0) {
-				players[id].death_count += 1;
-				players[id].SetHp(100);
-			}
-		}
-		fps_timer = std::chrono::steady_clock::now();
-	}
-
-#ifdef DATABASE
-	if (players[id].GetState() != S_STATE::LOG_IN) {
-		database.Update(&players[id]);
-	}
-#endif
-	Disconnect(id);
-
-	// 소켓 닫기
-	closesocket(client_sock);
-	players[id].closesock();
-	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
-		addr, ntohs(clientaddr.sin_port));
-	return;
-}
-
-void BossThread()
-{
-	constexpr int MAX_FRAME = 60;
-	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
-	using ms = std::chrono::duration<float, std::milli>;
-	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
-
-	int bite_cooltime = 13;
-	int tail_cooltime = 6;
-
-	frame fps{};
 	while (1) {
-		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
-		if (fps.count() < 1) continue; // 1/MAX_FRAME
+		DWORD num_bytes{};
+		ULONG_PTR key{};
+		WSAOVERLAPPED* over{};
 
-		for (int i = 0; i < MAX_GAME_ROOM; i++) {
-			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
-				run_bt(&souleaters[i], &players, &gamerooms[i]);
+		BOOL retval = GetQueuedCompletionStatus(iocp_handle, &num_bytes, &key, &over, INFINITE);
+		EXP_OVER* exp_over = reinterpret_cast<EXP_OVER*>(over);
 
-				if (souleaters[i].GetAnimation() == dash_ani) {
-					for (int ply_id : gamerooms[i].GetPlyId()) {
-						if (ply_id == -1) continue;
-						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-						if (players[ply_id].hit_on) continue;
-
-						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
-							if (!players[ply_id].cheat_no_damage) {
-								players[ply_id].hit_on = 1;
-								players[ply_id].HitPlayer(50);
-								SendHitPlayer(players[ply_id].GetID());
-							}
-						}						
-					}
-				}
-
-				if (souleaters[i].GetAnimation() == bite_ani) {
-					if (!bite_cooltime) {
-						bite_cooltime = 13;
-						for (int ply_id : gamerooms[i].GetPlyId()) {
-							if (ply_id == -1) continue;
-							if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-							if (players[ply_id].hit_on) continue;
-
-							if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
-								if (!players[ply_id].cheat_no_damage) {
-									players[ply_id].hit_on = 1;
-									players[ply_id].HitPlayer(25);
-									SendHitPlayer(players[ply_id].GetID());
-								}
-							}
-						}
-					}
-					else {
-						bite_cooltime -= 1;
-					}
-				}
-				else {
-					bite_cooltime = 13;
-				}
-
-				if (souleaters[i].GetAnimation() == tail_ani) {
-					if (!tail_cooltime) {
-						tail_cooltime = 6;
-						for (int ply_id : gamerooms[i].GetPlyId()) {
-							if (ply_id == -1) continue;
-							if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-							if (players[ply_id].hit_on) continue;
-							XMFLOAT3 ply_pos = players[ply_id].GetPosition();
-							XMFLOAT3 soul_pos = souleaters[i].GetPosition();
-
-							DirectX::XMVECTOR ply_vec = XMLoadFloat3(&ply_pos);
-							DirectX::XMVECTOR soul_vec = XMLoadFloat3(&soul_pos);
-
-							DirectX::XMVECTOR distanceVec = ply_vec - soul_vec;
-							float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
-							std::cout << "거리 : " << distance << std::endl;
-							if (distance < 70.f) {
-								if (!players[ply_id].cheat_no_damage) {
-									players[ply_id].hit_on = 1;
-									players[ply_id].HitPlayer(25);
-									SendHitPlayer(players[ply_id].GetID());
-								}
-							}
-						}
-					}
-					else {
-						tail_cooltime -= 1;
-					}
-				}
-				else {
-					tail_cooltime = 6;
-				}
-
-				SC_UPDATE_MONSTER_PACKET monster_packet;
-				monster_packet.size = sizeof(monster_packet);
-				monster_packet.type = SC_PACKET_UPDATE_MONSTER;
-				monster_packet.monster = souleaters[i].GetData();
-				monster_packet.animation = souleaters[i].GetAnimation();
-
-				for (int ply_id : gamerooms[i].GetPlyId()) {
-					if (ply_id == -1) continue;
-					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-					players[ply_id].DoSend(&monster_packet, monster_packet.size);
-				}
-
-				// 몬스터가 죽으면 클리어
-				if (souleaters[i].GetHp() <= 0 && monster_packet.animation == die_ani) {
-					for (int ply_id : gamerooms[i].GetPlyId()) {
-						if (ply_id == -1) continue;
-						//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-						SendEndGame(ply_id, true);
-						std::cout << "게임 끝난거 보냄 id : " << ply_id << std::endl;
-#ifdef DATABASE
-						database.Update(&players[ply_id]);
-#endif
-						players[ply_id].PlayerInit();
-						players[ply_id].SetRoomID(-1);
-						std::cout << "게임방 리셋 id : " << ply_id << "방번호 : " << players[ply_id].GetRoomID() << std::endl;
-					}
-					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
-					gamerooms[i].InitGameRoom();
-					SendDeleteRoom(i);
-					std::cout << "게임 클리어 : " << i << std::endl;
-				}
-				// 방에서 3번 죽어서 게임오버
-				else if (gamerooms[i].m_all_life <= 0) {
-					for (int ply_id : gamerooms[i].GetPlyId()) {
-						if (ply_id == -1) continue;
-						//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-						SendEndGame(ply_id, false);
-#ifdef DATABASE
-						database.Update(&players[ply_id]);
-#endif
-						players[ply_id].PlayerInit();
-						players[ply_id].SetRoomID(-1);
-					}
-					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
-					gamerooms[i].InitGameRoom();
-					SendDeleteRoom(i);
-					std::cout << "게임 졌음 : " << i << std::endl;
-				}
-
+		if (retval == FALSE) {
+			std::cout << "GQCS Error on client[" << static_cast<int>(key) << "]" << std::endl;
+			Disconnect(static_cast<int>(key));
+			if (OP_SEND == exp_over->_comp_type) {
+				delete exp_over;
 			}
+			continue;
 		}
-
-
-		fps_timer = std::chrono::steady_clock::now();
 	}
-
 }
+
+//void ProcessClient(SOCKET sock)
+//{
+//	int retval;
+//	SOCKET client_sock = sock;
+//	struct sockaddr_in clientaddr;
+//	char addr[INET_ADDRSTRLEN];
+//	int addrlen;
+//	
+//	int id = global_id++;
+//
+//	constexpr int MAX_FRAME = 60;
+//	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
+//	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
+//	
+//	// 총 발사 관련 변수들인데 추후 묶어서 관리할 예정
+//	int hit_timer = MAX_FRAME * 5;
+//
+//	// 클라이언트 정보 얻기
+//	addrlen = sizeof(clientaddr);
+//	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
+//	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
+//
+//	players.try_emplace(id, id, client_sock);
+//
+//	frame fps{}, frame_count{};
+//	//std::cout << id << std::endl;
+//
+//	while (players[id].GetState() != S_STATE::LOG_OUT) {
+//		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
+//
+//		if (fps.count() < 1) continue; // 1/MAX_FRAME
+//
+//		// 데이터를 받아서
+//		retval = players[id].RecvData();
+//		
+//		if (retval > 0) {
+//			PacketReassembly(id, retval);
+//		}
+//		else if (retval == -1) {
+//			std::cout << "나감" << std::endl;
+//			break;
+//		}
+//		
+//		if (players[id].GetState() == S_STATE::IN_GAME) {
+//			if (players[id].hit_on) {
+//				if (hit_timer <= 0) {
+//					hit_timer = MAX_FRAME * 3;
+//					players[id].hit_on = 0;
+//				}
+//				else {
+//					hit_timer -= 1;
+//				}
+//			}
+//
+//			if (players[id].GetHp() <= 0) {
+//				players[id].death_count += 1;
+//				players[id].SetHp(100);
+//			}
+//		}
+//		fps_timer = std::chrono::steady_clock::now();
+//	}
+//
+//#ifdef DATABASE
+//	if (players[id].GetState() != S_STATE::LOG_IN) {
+//		database.Update(&players[id]);
+//	}
+//#endif
+//	Disconnect(id);
+//
+//	// 소켓 닫기
+//	closesocket(client_sock);
+//	players[id].closesock();
+//	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
+//		addr, ntohs(clientaddr.sin_port));
+//	return;
+//}
+//
+//void BossThread()
+//{
+//	constexpr int MAX_FRAME = 60;
+//	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
+//	using ms = std::chrono::duration<float, std::milli>;
+//	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
+//
+//	int bite_cooltime = 13;
+//	int tail_cooltime = 6;
+//
+//	frame fps{};
+//	while (1) {
+//		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
+//		if (fps.count() < 1) continue; // 1/MAX_FRAME
+//
+//		for (int i = 0; i < MAX_GAME_ROOM; i++) {
+//			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
+//				run_bt(&souleaters[i], &players, &gamerooms[i]);
+//
+//				if (souleaters[i].GetAnimation() == dash_ani) {
+//					for (int ply_id : gamerooms[i].GetPlyId()) {
+//						if (ply_id == -1) continue;
+//						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//						if (players[ply_id].hit_on) continue;
+//
+//						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
+//							if (!players[ply_id].cheat_no_damage) {
+//								players[ply_id].hit_on = 1;
+//								players[ply_id].HitPlayer(50);
+//								SendHitPlayer(players[ply_id].GetID());
+//							}
+//						}						
+//					}
+//				}
+//
+//				if (souleaters[i].GetAnimation() == bite_ani) {
+//					if (!bite_cooltime) {
+//						bite_cooltime = 13;
+//						for (int ply_id : gamerooms[i].GetPlyId()) {
+//							if (ply_id == -1) continue;
+//							if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//							if (players[ply_id].hit_on) continue;
+//
+//							if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
+//								if (!players[ply_id].cheat_no_damage) {
+//									players[ply_id].hit_on = 1;
+//									players[ply_id].HitPlayer(25);
+//									SendHitPlayer(players[ply_id].GetID());
+//								}
+//							}
+//						}
+//					}
+//					else {
+//						bite_cooltime -= 1;
+//					}
+//				}
+//				else {
+//					bite_cooltime = 13;
+//				}
+//
+//				if (souleaters[i].GetAnimation() == tail_ani) {
+//					if (!tail_cooltime) {
+//						tail_cooltime = 6;
+//						for (int ply_id : gamerooms[i].GetPlyId()) {
+//							if (ply_id == -1) continue;
+//							if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//							if (players[ply_id].hit_on) continue;
+//							XMFLOAT3 ply_pos = players[ply_id].GetPosition();
+//							XMFLOAT3 soul_pos = souleaters[i].GetPosition();
+//
+//							DirectX::XMVECTOR ply_vec = XMLoadFloat3(&ply_pos);
+//							DirectX::XMVECTOR soul_vec = XMLoadFloat3(&soul_pos);
+//
+//							DirectX::XMVECTOR distanceVec = ply_vec - soul_vec;
+//							float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
+//							std::cout << "거리 : " << distance << std::endl;
+//							if (distance < 70.f) {
+//								if (!players[ply_id].cheat_no_damage) {
+//									players[ply_id].hit_on = 1;
+//									players[ply_id].HitPlayer(25);
+//									SendHitPlayer(players[ply_id].GetID());
+//								}
+//							}
+//						}
+//					}
+//					else {
+//						tail_cooltime -= 1;
+//					}
+//				}
+//				else {
+//					tail_cooltime = 6;
+//				}
+//
+//				SC_UPDATE_MONSTER_PACKET monster_packet;
+//				monster_packet.size = sizeof(monster_packet);
+//				monster_packet.type = SC_PACKET_UPDATE_MONSTER;
+//				monster_packet.monster = souleaters[i].GetData();
+//				monster_packet.animation = souleaters[i].GetAnimation();
+//
+//				for (int ply_id : gamerooms[i].GetPlyId()) {
+//					if (ply_id == -1) continue;
+//					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//					players[ply_id].DoSend(&monster_packet, monster_packet.size);
+//				}
+//
+//				// 몬스터가 죽으면 클리어
+//				if (souleaters[i].GetHp() <= 0 && monster_packet.animation == die_ani) {
+//					for (int ply_id : gamerooms[i].GetPlyId()) {
+//						if (ply_id == -1) continue;
+//						//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//						SendEndGame(ply_id, true);
+//						std::cout << "게임 끝난거 보냄 id : " << ply_id << std::endl;
+//#ifdef DATABASE
+//						database.Update(&players[ply_id]);
+//#endif
+//						players[ply_id].PlayerInit();
+//						players[ply_id].SetRoomID(-1);
+//						std::cout << "게임방 리셋 id : " << ply_id << "방번호 : " << players[ply_id].GetRoomID() << std::endl;
+//					}
+//					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+//					gamerooms[i].InitGameRoom();
+//					SendDeleteRoom(i);
+//					std::cout << "게임 클리어 : " << i << std::endl;
+//				}
+//				// 방에서 3번 죽어서 게임오버
+//				else if (gamerooms[i].m_all_life <= 0) {
+//					for (int ply_id : gamerooms[i].GetPlyId()) {
+//						if (ply_id == -1) continue;
+//						//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//						SendEndGame(ply_id, false);
+//#ifdef DATABASE
+//						database.Update(&players[ply_id]);
+//#endif
+//						players[ply_id].PlayerInit();
+//						players[ply_id].SetRoomID(-1);
+//					}
+//					souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+//					gamerooms[i].InitGameRoom();
+//					SendDeleteRoom(i);
+//					std::cout << "게임 졌음 : " << i << std::endl;
+//				}
+//
+//			}
+//		}
+//
+//
+//		fps_timer = std::chrono::steady_clock::now();
+//	}
+//
+//}
 
 void PacketReassembly(int id, size_t recv_size)
 {

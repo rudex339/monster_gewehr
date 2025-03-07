@@ -13,7 +13,7 @@ std::uniform_real_distribution<double> minus(-1.0f, 1.0f);
 std::uniform_int_distribution<int> rand_runaway_point(0, RUNAWAY_POINT-1);
 std::uniform_int_distribution<int> random_0_to_100(0, 100);
 
-OVER_EXP::OVER_EXP()
+EXP_OVER::EXP_OVER()
 {
 	_wsa_buf.len = BUF_SIZE;
 	_wsa_buf.buf = _send_buf;
@@ -21,7 +21,7 @@ OVER_EXP::OVER_EXP()
 	ZeroMemory(&_wsa_over, sizeof(_wsa_over));
 }
 
-OVER_EXP::OVER_EXP(char* packet)
+EXP_OVER::EXP_OVER(char* packet)
 {
 	_wsa_buf.len = BUF_SIZE;
 	_wsa_buf.buf = _send_buf;

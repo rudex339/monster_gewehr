@@ -30,6 +30,12 @@
 #include <locale.h>
 #include <format>
 #include "protocol.h"
+#include <WS2tcpip.h>
+#include <MSWSock.h>
+#include <thread>
+
+#pragma comment (lib, "WS2_32.LIB")
+#pragma comment (lib, "MSWSock.LIB")
 
 using namespace DirectX;
 

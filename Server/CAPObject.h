@@ -8,16 +8,16 @@
 class GameRoom;
 
 enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, };
-class OVER_EXP {
+class EXP_OVER {
 public:
 	WSAOVERLAPPED _wsa_over;
 	WSABUF _wsa_buf;
 	char _send_buf[BUF_SIZE];
 	COMP_TYPE _comp_type;
 
-	OVER_EXP();
-	OVER_EXP(char* packet);
-	~OVER_EXP() = default;
+	EXP_OVER();
+	EXP_OVER(char* packet);
+	~EXP_OVER() = default;
 };
 
 

@@ -4,6 +4,7 @@
 #include "GameRoom.h"
 #include "database.h"
 
+void WorkerThread();
 void ProcessClient(SOCKET sock);
 void BossThread();
 
