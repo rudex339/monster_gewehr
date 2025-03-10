@@ -110,14 +110,15 @@ public:
 	int GetMoney() { return m_money; }
 	int GetItem(int type) { return m_item_info[type]; }
 
-	int RecvData();
+	void DoRecv();
+	//int RecvData();
 	int DoSend(void* p, size_t size);
 
 	void HitPlayer(int damage) { m_hp -= (damage - m_def); }
 
 	void closesock() { closesocket(m_socket); }
 
-	CHAR m_recv_buf[BUF_SIZE];
+	//CHAR m_recv_buf[BUF_SIZE];
 	BOOL hit_on = 0;	// 이건 나중에 피격 애니메이션으로 판정할거임 지금은 피격애니메이션 없어서 임시로 사용
 
 	SHORT death_count = 0;	// 이것도 나중에 게임룸 클래스에 넣어서 모든 유저의 죽음 횟수를 세서 게임오버나 점수 깎는걸 만들거임
@@ -126,7 +127,14 @@ public:
 
 protected:
 	SOCKET m_socket;
+	EXP_OVER m_recv_over;
 
+	INT m_remain_size;
+
+	BOOL m_is_host;
+
+	BOOL m_is_ready;
+	//------------------------
 	ITEM_DATA items;
 
 	std::string m_name;
@@ -157,12 +165,7 @@ protected:
 	INT m_money;
 
 	INT m_item_info[10];	// 아이템 정보들, 0라이플 시작, 강화율이나 소지율
-	//------------------------
-	INT m_remain_size;
-
-	BOOL m_is_host;
-
-	BOOL m_is_ready;
+	
 };
 
 

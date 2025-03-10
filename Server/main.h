@@ -4,11 +4,12 @@
 #include "GameRoom.h"
 #include "database.h"
 
-void WorkerThread();
-void ProcessClient(SOCKET sock);
-void BossThread();
+// tcp¿« ¿‹¿ÁµÈ
+//void ProcessClient(SOCKET sock);
+//void BossThread();
+//void PacketReassembly(int id, size_t recv_size);
 
-void PacketReassembly(int id, size_t recv_size);
+void WorkerThread();
 void ProcessPacket(int id, char* p);
 
 

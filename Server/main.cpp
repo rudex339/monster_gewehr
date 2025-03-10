@@ -100,27 +100,6 @@ int main(int argc, char* argv[])
 	closesocket(listen_sock);
 }
 
-void WorkerThread()
-{
-	while (1) {
-		DWORD num_bytes{};
-		ULONG_PTR key{};
-		WSAOVERLAPPED* over{};
-
-		BOOL retval = GetQueuedCompletionStatus(iocp_handle, &num_bytes, &key, &over, INFINITE);
-		EXP_OVER* exp_over = reinterpret_cast<EXP_OVER*>(over);
-
-		if (retval == FALSE) {
-			std::cout << "GQCS Error on client[" << static_cast<int>(key) << "]" << std::endl;
-			Disconnect(static_cast<int>(key));
-			if (OP_SEND == exp_over->_comp_type) {
-				delete exp_over;
-			}
-			continue;
-		}
-	}
-}
-
 //void ProcessClient(SOCKET sock)
 //{
 //	int retval;
@@ -349,24 +328,99 @@ void WorkerThread()
 //
 //}
 
-void PacketReassembly(int id, size_t recv_size)
+void WorkerThread()
 {
-	int remain_size = recv_size + players[id].GetRemainSize();
-	char* p = players[id].m_recv_buf;
-	while (remain_size > 0) {
-		int packet_size = p[0];
-		if (packet_size <= remain_size) {
-			ProcessPacket(id, p);
-			p = p + packet_size;
-			remain_size -= packet_size;
+	while (1) {
+		DWORD num_bytes;
+		ULONG_PTR key;
+		WSAOVERLAPPED* over = nullptr;
+
+		BOOL retval = GetQueuedCompletionStatus(iocp_handle, &num_bytes, &key, &over, INFINITE);
+		EXP_OVER* exp_over = reinterpret_cast<EXP_OVER*>(over);
+
+		if (retval == FALSE) {
+			if (exp_over->_comp_type == OP_ACCEPT) {
+				std::cout << "Accept Error" << std::endl;
+				closesocket(*reinterpret_cast<SOCKET*>(exp_over->_send_buf));
+				delete exp_over;
+			}
+			else if (exp_over->_comp_type == OP_SEND) {
+				std::cout << "Send Error" << std::endl;
+				delete exp_over;
+			}
+			else if (exp_over->_comp_type == OP_RECV) {
+				std::cout << "Recv Error" << std::endl;
+				Disconnect(static_cast<int>(key));
+				delete exp_over;
+			}
+			std::cout << "GQCS Error on client[" << static_cast<int>(key) << "]" << std::endl;
+			continue;
 		}
-		else break;
-	}
-	if (remain_size > 0) {
-		players[id].SetRemainSize(remain_size);
-		memcpy(players[id].m_recv_buf, p, remain_size);
+
+		switch (exp_over->_comp_type) {
+		case OP_ACCEPT: {
+			SOCKET client_sock;
+			memcpy(&client_sock, &exp_over->_send_buf, sizeof(SOCKET));
+			int client_id = global_id++;
+
+			players.try_emplace(client_id, client_id, client_sock);
+
+			CreateIoCompletionPort(reinterpret_cast<HANDLE>(client_sock), iocp_handle, client_id, 0);
+			players[client_id].DoRecv();
+
+			client_sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+			ZeroMemory(&exp_over->_wsa_over, sizeof(exp_over->_wsa_over));
+			memcpy(&exp_over->_send_buf, &client_sock, sizeof(SOCKET));
+			AcceptEx(listen_sock, client_sock, exp_over->_send_buf + sizeof(SOCKET), 0,
+				sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, 0, &exp_over->_wsa_over);
+			break;
+		}
+		case OP_RECV: {
+			int remain_size = num_bytes + players[key].GetRemainSize();
+			char* p = exp_over->_send_buf;
+			while (remain_size > 0) {
+				int packet_size = p[0];
+				if (packet_size <= remain_size) {
+					ProcessPacket(key, p);
+					p = p + packet_size;
+					remain_size -= packet_size;
+				}
+				else break;
+			}
+			if (remain_size > 0) {
+				players[key].SetRemainSize(remain_size);
+				memcpy(&exp_over->_send_buf, p, remain_size);
+			}
+			players[key].DoRecv();
+			break;
+		}
+		case OP_SEND: {
+			delete exp_over;
+			break;
+		}
+		}
 	}
 }
+//------------------tcpÀÇ ÀÜÀç 3---------------------
+//void PacketReassembly(int id, size_t recv_size)
+//{
+//	int remain_size = recv_size + players[id].GetRemainSize();
+//	char* p = players[id].m_recv_buf;
+//	while (remain_size > 0) {
+//		int packet_size = p[0];
+//		if (packet_size <= remain_size) {
+//			ProcessPacket(id, p);
+//			p = p + packet_size;
+//			remain_size -= packet_size;
+//		}
+//		else break;
+//	}
+//	if (remain_size > 0) {
+//		players[id].SetRemainSize(remain_size);
+//		memcpy(players[id].m_recv_buf, p, remain_size);
+//	}
+//}
 
 void ProcessPacket(int id, char* p)
 {

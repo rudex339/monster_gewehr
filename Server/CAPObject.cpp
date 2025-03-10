@@ -185,18 +185,34 @@ void Player::SetArmor(char armor)
 	}
 }
 
-int Player::RecvData()
-{
-	int retval = recv(m_socket, m_recv_buf + m_remain_size, BUF_SIZE - m_remain_size, 0);
-	if (retval <= 0) {
-		if (WSAGetLastError() == WSAETIMEDOUT)
-			return 0;
-		else
-			return -1;
-	}
-	else {
-		return retval;
+//int Player::RecvData()
+//{
+//	int retval = recv(m_socket, m_recv_buf + m_remain_size, BUF_SIZE - m_remain_size, 0);
+//	if (retval <= 0) {
+//		if (WSAGetLastError() == WSAETIMEDOUT)
+//			return 0;
+//		else
+//			return -1;
+//	}
+//	else {
+//		return retval;
+//
+//	}
+//}
 
+void Player::DoRecv()
+{
+	DWORD flag = 0;
+	ZeroMemory(&m_recv_over._wsa_over, sizeof(m_recv_over._wsa_over));
+	m_recv_over._wsa_buf.len = BUF_SIZE - m_remain_size;
+	m_recv_over._wsa_buf.buf = m_recv_over._send_buf + m_remain_size;
+	int retval = WSARecv(m_socket, &m_recv_over._wsa_buf, 1, NULL, &flag, &m_recv_over._wsa_over, NULL);
+	if (retval == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			std::cout << "WSARecv() failed with error " << WSAGetLastError() << std::endl;
+		}
 	}
 }
 
