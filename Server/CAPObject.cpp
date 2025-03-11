@@ -23,10 +23,10 @@ EXP_OVER::EXP_OVER()
 
 EXP_OVER::EXP_OVER(char* packet)
 {
-	_wsa_buf.len = BUF_SIZE;
+	ZeroMemory(&_wsa_over, sizeof(_wsa_over));
+	_wsa_buf.len = packet[0];
 	_wsa_buf.buf = _send_buf;
 	_comp_type = OP_SEND;
-	ZeroMemory(&_wsa_over, sizeof(_wsa_over));
 	memcpy(_send_buf, packet, packet[0]);
 }
 
@@ -218,9 +218,22 @@ void Player::DoRecv()
 
 int Player::DoSend(void* p, size_t size)
 {
-	int retval = send(m_socket, (char*)p, size, 0);
+	EXP_OVER* send_over = new EXP_OVER(reinterpret_cast<char*>(p));
+	int retval = WSASend(m_socket, &send_over->_wsa_buf, 1, 0, 0, &send_over->_wsa_over, nullptr);
+	std::cout << "send size : " << size << std::endl;
+	if (retval == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			std::cout << "WSASend() failed with error " << WSAGetLastError() << std::endl;
+		}
+	}
 	return retval;
 }
+//{
+//	int retval = send(m_socket, (char*)p, size, 0);
+//	return retval;
+//}
 
 //-------------------------------------------------------------------------------------------------
 // Monster
