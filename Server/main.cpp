@@ -342,7 +342,6 @@ void WorkerThread()
 			if (exp_over->_comp_type == OP_ACCEPT) {
 				std::cout << "Accept Error" << std::endl;
 				closesocket(*reinterpret_cast<SOCKET*>(exp_over->_send_buf));
-				delete exp_over;
 			}
 			else if (exp_over->_comp_type == OP_SEND) {
 				std::cout << "Send Error" << std::endl;
@@ -351,7 +350,6 @@ void WorkerThread()
 			else if (exp_over->_comp_type == OP_RECV) {
 				std::cout << "Recv Error" << std::endl;
 				Disconnect(static_cast<int>(key));
-				delete exp_over;
 			}
 			std::cout << "GQCS Error on client[" << static_cast<int>(key) << "]" << std::endl;
 			continue;
@@ -592,7 +590,7 @@ void ProcessPacket(int id, char* p)
 		for (int ply_id : gamerooms[players[id].GetRoomID()].GetPlyId()) {
 			if (ply_id == -1) continue;
 			if (ply_id == id) continue;
-			players[ply_id].DoSend(&packet, packet.size);
+			players[ply_id].DoSend(&packet);
 		}
 		break;
 	}
@@ -682,7 +680,7 @@ void ProcessPacket(int id, char* p)
 			if (ply_id < 0) continue;
 			if (ply_id == id) continue;
 			if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-			players[ply_id].DoSend(&sc_packet, sc_packet.size);
+			players[ply_id].DoSend(&sc_packet);
 		}
 		break;
 	}
@@ -721,6 +719,38 @@ void ProcessPacket(int id, char* p)
 	}
 }
 
+void Disconnect(int id)
+{
+	players[id].closesock();
+	players[id].PlayerInit();
+	players[id].SetState(S_STATE::LOG_OUT);
+
+	short room_num = players[id].GetRoomID();
+
+	if (room_num > -1) {
+		SC_LOGOUT_PACKET packet;
+		packet.size = sizeof(packet);
+		packet.type = SC_PACKET_LOGOUT;
+		packet.id = id;
+		for (int i : gamerooms[room_num].GetPlyId()) {
+			if (i < 0) continue;
+			if (players[i].GetID() == id) continue;
+			players[i].DoSend(&packet);
+		}
+
+		gamerooms[room_num].DeletePlayerId(id);
+		if (gamerooms[room_num].IsRoomEmpty()) {
+			std::cout << room_num << "번 방 종료" << std::endl;
+			if (gamerooms[room_num].GetState() == G_INGAME) {
+				souleaters[room_num].InitMonster();
+			}
+			gamerooms[room_num].InitGameRoom();
+			SendDeleteRoom(room_num);
+		}
+	}
+
+}
+
 void SendLoginInfo(int id)
 {
 	int retval;
@@ -728,10 +758,7 @@ void SendLoginInfo(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_INFO;
 	packet.id = id;
-	retval = players[id].DoSend(&packet, packet.size);
-	if (retval == SOCKET_ERROR) {
-		players[id].SetState(S_STATE::LOG_OUT);
-	}
+	players[id].DoSend(&packet);
 
 	players[id].SetState(S_STATE::LOBBY);
 }
@@ -743,11 +770,7 @@ void SendLoginFail(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_LOGIN_FAIL;
 	packet.id = -1;
-	retval = players[id].DoSend(&packet, packet.size);
-	if (retval == SOCKET_ERROR) {
-		players[id].SetState(S_STATE::LOG_OUT);
-	}
-
+	players[id].DoSend(&packet);
 }
 
 void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 사람들한테도 모두 게임이 시작이 되었다는 신호가 먼저 가야함
@@ -763,10 +786,7 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 	start_p.room_num = (SHORT)gameroom_id;
 	for (auto& ply : players) {
 		if (ply.second.GetID() == -1) continue;
-		retval = ply.second.DoSend(&start_p, start_p.size);
-		if (retval == SOCKET_ERROR) {
-			ply.second.SetState(S_STATE::LOG_OUT);
-		}
+		ply.second.DoSend(&start_p);		
 	}
 
 	// 이것은 서버에서 플레이어 첫 위치를 설정해서 내 자신에게도 첫 시작지점이 어디인지 보내줄 것임
@@ -786,20 +806,15 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 		for (int recv_id : plys_id) {
 			if (recv_id == -1) continue;
 			if (recv_id == send_id) continue;
-			retval = players[recv_id].DoSend(&add_p, add_p.size);
-			if (retval == SOCKET_ERROR) {
-				players[recv_id].SetState(S_STATE::LOG_OUT);
-			}
+			players[recv_id].DoSend(&add_p);
+			
 		}
 		SC_ADD_MONSTER_PACKET monster_p;
 		monster_p.size = sizeof(monster_p);
 		monster_p.type = SC_PACKET_ADD_MONSTER;
 		monster_p.monster = souleaters[gameroom_id].GetData();
 
-		retval = players[send_id].DoSend(&monster_p, monster_p.size);
-		if (retval == SOCKET_ERROR) {
-			players[send_id].SetState(S_STATE::LOG_OUT);
-		}
+		players[send_id].DoSend(&monster_p);
 
 		players[send_id].SetState(S_STATE::IN_GAME);
 	}
@@ -822,10 +837,7 @@ void SendPlayerMove(int id)
 		if (ply_id < 0) continue;
 		if (ply_id == id) continue;
 		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-		retval = players[ply_id].DoSend(&packet, packet.size);
-		if (retval == SOCKET_ERROR) {
-			players[ply_id].SetState(S_STATE::LOG_OUT);
-		}
+		players[ply_id].DoSend(&packet);
 	}
 }
 
@@ -845,10 +857,8 @@ void SendAnimaition(int id)
 		if (ply_id < 0) continue;
 		if (ply_id == id) continue;
 		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-		retval = players[ply_id].DoSend(&packet, packet.size);
-		if (retval == SOCKET_ERROR) {
-			players[ply_id].SetState(S_STATE::LOG_OUT);
-		}
+		players[ply_id].DoSend(&packet);
+		
 	}
 }
 
@@ -868,47 +878,11 @@ void SendShot(int id)
 		if (ply_id < 0) continue;
 		if (ply_id == id) continue;
 		if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-		retval = players[ply_id].DoSend(&packet, packet.size);
-		if (retval == SOCKET_ERROR) {
-			players[ply_id].SetState(S_STATE::LOG_OUT);
-		}
+		players[ply_id].DoSend(&packet);
 	}
 }
 
-void Disconnect(int id)
-{
-	int retval;
-	players[id].PlayerInit();
-	players[id].SetState(S_STATE::LOG_OUT);
 
-	short room_num = players[id].GetRoomID();
-
-	if (room_num > -1) {
-		SC_LOGOUT_PACKET packet;
-		packet.size = sizeof(packet);
-		packet.type = SC_PACKET_LOGOUT;
-		packet.id = id;
-		for (int i : gamerooms[room_num].GetPlyId()) {
-			if (i < 0) continue;
-			if (players[i].GetID() == id) continue;
-			retval = players[i].DoSend(&packet, packet.size);
-			if (retval == SOCKET_ERROR) {
-				players[i].SetState(S_STATE::LOG_OUT);
-			}
-		}
-
-		gamerooms[room_num].DeletePlayerId(id);
-		if (gamerooms[room_num].IsRoomEmpty()) {
-			std::cout << room_num << "번 방 종료" << std::endl;
-			if (gamerooms[room_num].GetState() == G_INGAME) {
-				souleaters[room_num].InitMonster();
-			}
-			gamerooms[room_num].InitGameRoom();
-			SendDeleteRoom(room_num);
-		}
-	}
-
-}
 
 void SendHitPlayer(int id)
 {
@@ -923,10 +897,8 @@ void SendHitPlayer(int id)
 	if (packet.hp <= 0) {
 		gamerooms[room_id].m_all_life -= 1;
 	}
-	retval = players[id].DoSend(&packet, packet.size);
-	if (retval == SOCKET_ERROR) {
-		players[id].SetState(S_STATE::LOG_OUT);
-	}
+	players[id].DoSend(&packet);
+	
 
 	/*for (int ply_id : gamerooms[room_id].GetPlyId()) {
 		if (ply_id < 0) continue;
@@ -951,10 +923,8 @@ void SendEndGame(int id, bool clear)
 
 	players[id].SetMoney(players[id].GetMoney() + packet.score);
 
-	retval = players[id].DoSend(&packet, packet.size);
-	if (retval == SOCKET_ERROR) {
-		players[id].SetState(S_STATE::LOG_OUT);
-	}
+	players[id].DoSend(&packet);
+	
 }
 
 void SendRoomList(int id)
@@ -974,10 +944,8 @@ void SendRoomList(int id)
 			if (gamerooms[i].GetState() == G_INGAME)
 				sub_packet.start = true;
 			
-			retval = players[id].DoSend(&sub_packet, sub_packet.size);
-			if (retval == SOCKET_ERROR) {
-				players[id].SetState(S_STATE::LOG_OUT);
-			}
+			players[id].DoSend(&sub_packet);
+			
 		}
 		//gamerooms[i].m_state_lock.unlock();
 	}
@@ -990,7 +958,7 @@ void SendRoomCreate(int ply_id, int room_num)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_CREATE_ROOM;
 	packet.room_num = room_num;
-	players[ply_id].DoSend(&packet, packet.size);
+	players[ply_id].DoSend(&packet);
 
 	SC_ADD_ROOM_PACKET sub_packet;
 	sub_packet.size = sizeof(sub_packet);
@@ -1002,10 +970,8 @@ void SendRoomCreate(int ply_id, int room_num)
 	for (auto& client : players) {
 		if (client.second.GetID() == ply_id) continue;
 		if (client.second.GetState() == S_STATE::LOG_OUT) continue;
-		retval = client.second.DoSend(&sub_packet, sub_packet.size);
-		if (retval == SOCKET_ERROR) {
-			client.second.SetState(S_STATE::LOG_OUT);
-		}
+		client.second.DoSend(&sub_packet);
+		
 	}
 }
 
@@ -1023,11 +989,7 @@ void SendRoomSelect(int id, short room_num)
 		packet.weapon = players[ply_id].GetWeapon();
 		packet.armor = players[ply_id].GetArmor();
 		// 이제 위의 방에 있는 플레이어 정보들을 선택한 놈한테 다시 보냄
-		retval = players[id].DoSend(&packet, packet.size);
-		if (retval == SOCKET_ERROR) {
-			players[id].SetState(S_STATE::LOG_OUT);
-			return;
-		}
+		players[id].DoSend(&packet);
 	}
 }
 
@@ -1043,7 +1005,7 @@ void SendBreakRoom(int id)
 		if (ply_id == id) continue;
 		players[ply_id].SetRoomID(-1);
 		players[ply_id].SetReady(false);
-		players[ply_id].DoSend(&packet, packet.size);
+		players[ply_id].DoSend(&packet);
 	}
 
 	gamerooms[room_num].InitGameRoom();
@@ -1060,10 +1022,8 @@ void SendDeleteRoom(short room_num)
 
 	for (auto& client : players) {
 		if (client.second.GetState() == S_STATE::LOG_OUT) continue;
-		retval = client.second.DoSend(&packet, packet.size);
-		if (retval == SOCKET_ERROR) {
-			client.second.SetState(S_STATE::LOG_OUT);
-		}
+		client.second.DoSend(&packet);
+		
 	}
 }
 
@@ -1077,7 +1037,7 @@ void SendRoomJoin(int id)
 	join_p.size = sizeof(join_p);
 	join_p.type = SC_PACKET_JOIN_ROOM;
 
-	players[id].DoSend(&join_p, join_p.size);
+	players[id].DoSend(&join_p);
 
 
 	// 내가 방에 들어와서 기존에 들어와있던 애들한테 신병왔다고 알려주는 패킷
@@ -1094,7 +1054,7 @@ void SendRoomJoin(int id)
 	for (int ply_id : gamerooms[room_num].GetPlyId()) {
 		if (ply_id == -1) continue;
 		if (ply_id == id) continue;
-		players[ply_id].DoSend(&add_p, add_p.size);
+		players[ply_id].DoSend(&add_p);
 
 		// 신병한테 고참들 정보 알려주는 패킷
 		SC_ADD_ROOM_PLAYER_PACKET add_p2;
@@ -1107,7 +1067,7 @@ void SendRoomJoin(int id)
 		add_p2.host = players[ply_id].GetHost();
 		add_p2.ready = players[ply_id].GetReady();
 
-		players[id].DoSend(&add_p2, add_p2.size);
+		players[id].DoSend(&add_p2);
 	}
 }
 
@@ -1123,7 +1083,7 @@ void SendRoomQuit(int id)
 	for (int ply_id : gamerooms[room_num].GetPlyId()) {
 		if (ply_id == -1) continue;
 		if (ply_id == id) continue;
-		players[ply_id].DoSend(&packet, packet.size);
+		players[ply_id].DoSend(&packet);
 	}
 
 }
@@ -1138,7 +1098,7 @@ void SendItemInfo(int id)
 		packet.item_info[i] = players[id].GetItem(i);
 	}
 
-	players[id].DoSend(&packet, packet.size);
+	players[id].DoSend(&packet);
 }
 
 void SendRegisterSucc(int id)
@@ -1147,7 +1107,7 @@ void SendRegisterSucc(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_REGISTER_SUCC;
 
-	players[id].DoSend(&packet, packet.size);
+	players[id].DoSend(&packet);
 }
 void SendRegisterFail(int id)
 {
@@ -1155,5 +1115,5 @@ void SendRegisterFail(int id)
 	packet.size = sizeof(packet);
 	packet.type = SC_PACKET_REGISTER_FAIL;
 
-	players[id].DoSend(&packet, packet.size);
+	players[id].DoSend(&packet);
 }

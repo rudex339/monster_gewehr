@@ -112,7 +112,7 @@ public:
 
 	void DoRecv();
 	//int RecvData();
-	int DoSend(void* p, size_t size);
+	void DoSend(void* p);
 
 	void HitPlayer(int damage) { m_hp -= (damage - m_def); }
 

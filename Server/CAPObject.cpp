@@ -216,11 +216,10 @@ void Player::DoRecv()
 	}
 }
 
-int Player::DoSend(void* p, size_t size)
+void Player::DoSend(void* p)
 {
 	EXP_OVER* send_over = new EXP_OVER(reinterpret_cast<char*>(p));
 	int retval = WSASend(m_socket, &send_over->_wsa_buf, 1, 0, 0, &send_over->_wsa_over, nullptr);
-	std::cout << "send size : " << size << std::endl;
 	if (retval == SOCKET_ERROR)
 	{
 		if (WSAGetLastError() != WSA_IO_PENDING)
@@ -228,12 +227,7 @@ int Player::DoSend(void* p, size_t size)
 			std::cout << "WSASend() failed with error " << WSAGetLastError() << std::endl;
 		}
 	}
-	return retval;
 }
-//{
-//	int retval = send(m_socket, (char*)p, size, 0);
-//	return retval;
-//}
 
 //-------------------------------------------------------------------------------------------------
 // Monster
