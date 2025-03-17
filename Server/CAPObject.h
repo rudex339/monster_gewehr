@@ -7,7 +7,7 @@
 
 class GameRoom;
 
-enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_HIT, OP_BITE, OP_DASH, OP_TAIL, OP_ };
+enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_HIT, OP_CLEAR, OP_GAMEOVER };
 class EXP_OVER {
 public:
 	WSAOVERLAPPED _wsa_over;

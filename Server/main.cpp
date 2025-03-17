@@ -60,12 +60,15 @@ int main(int argc, char* argv[])
 	for (auto& th : worker_threads) {
 		th.detach();
 	}
+	std::thread timer_thread{ TimerThread };
+	timer_thread.detach();
 
 	constexpr int MAX_FRAME = 60;
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
 	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 
 	frame fps{};
+	using namespace std;
 	while (1) {
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 		if (fps.count() < 1) continue; // 1/MAX_FRAME
@@ -85,6 +88,30 @@ int main(int argc, char* argv[])
 					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 					players[ply_id].DoSend(&monster_packet);
 				}
+
+				// 대쉬 공격	판정
+				if (souleaters[i].GetAnimation() == dash_ani) {
+					for (int ply_id : gamerooms[i].GetPlyId()) {
+						if (ply_id == -1) continue;
+						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+						if (players[ply_id].hit_on) continue;
+
+						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
+							if (!players[ply_id].cheat_no_damage) {
+								std::cout << "대쉬 맞음" << std::endl;
+								// 여기에 타이머 큐를 넣어서 1초간 무적상태로 만들어야함
+								TIMER_EVENT event{ std::chrono::system_clock::now(), EV_HIT, ply_id };
+								timer_queue.push(event);
+
+								players[ply_id].HitPlayer(50);
+								EXP_OVER* over = new EXP_OVER;
+								over->_comp_type = OP_HIT;
+								PostQueuedCompletionStatus(iocp_handle, 1, ply_id, &over->_wsa_over); // 피격 후 클라에게 알리는건 worker thread에서 처리
+							}
+						}
+					}
+				}
+
 			}
 		}
 		fps_timer = std::chrono::steady_clock::now();
@@ -221,21 +248,21 @@ int main(int argc, char* argv[])
 //			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
 //				run_bt(&souleaters[i], &players, &gamerooms[i]);
 //
-//				if (souleaters[i].GetAnimation() == dash_ani) {
-//					for (int ply_id : gamerooms[i].GetPlyId()) {
-//						if (ply_id == -1) continue;
-//						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-//						if (players[ply_id].hit_on) continue;
-//
-//						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
-//							if (!players[ply_id].cheat_no_damage) {
-//								players[ply_id].hit_on = 1;
-//								players[ply_id].HitPlayer(50);
-//								SendHitPlayer(players[ply_id].GetID());
-//							}
-//						}						
-//					}
-//				}
+				/*if (souleaters[i].GetAnimation() == dash_ani) {
+					for (int ply_id : gamerooms[i].GetPlyId()) {
+						if (ply_id == -1) continue;
+						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+						if (players[ply_id].hit_on) continue;
+
+						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
+							if (!players[ply_id].cheat_no_damage) {
+								players[ply_id].hit_on = 1;
+								players[ply_id].HitPlayer(50);
+								SendHitPlayer(players[ply_id].GetID());
+							}
+						}						
+					}
+				}*/
 //
 //				if (souleaters[i].GetAnimation() == bite_ani) {
 //					if (!bite_cooltime) {
@@ -420,6 +447,17 @@ void WorkerThread()
 		}
 		case OP_SEND: {
 			delete exp_over;
+			break;
+		}
+		case OP_HIT: {
+			SendHitPlayer(players[key].GetID());
+			delete exp_over;
+			break;
+		}
+		case OP_CLEAR: {
+			break;
+		}
+		case OP_GAMEOVER: {
 			break;
 		}
 		}
@@ -1145,5 +1183,56 @@ void SendRegisterFail(int id)
 
 void TimerThread()
 {
+	using namespace std;
+	std::priority_queue<TIMER_EVENT> local_timer_queue;
 
+	
+
+	while (true) {
+		auto current_time = chrono::system_clock::now();
+		TIMER_EVENT event;
+
+		if (!local_timer_queue.empty()) {			
+			event = local_timer_queue.top();
+			if (event.time_point <= current_time) {
+				local_timer_queue.pop();
+				ProcessEvent(event);
+			}
+		}
+
+		if (timer_queue.try_pop(event)) {
+			if (event.time_point > current_time) {
+				local_timer_queue.push(event);
+				this_thread::sleep_for(1ms);
+				cout << "이거 실행됨222 : " << event.id << endl;
+				continue;
+			}
+			else {
+				cout << "이거 실행됨" << endl;
+				ProcessEvent(event);
+			}
+
+		}
+	}
+}
+
+void ProcessEvent(TIMER_EVENT& event)
+{
+	using namespace std;
+	switch (event.type) {
+	case EVENT_TYPE::EV_HIT: {
+		if (players[event.id].hit_on) {
+			players[event.id].hit_on = 0;
+			cout << "무적풀림 " << event.id << endl;
+		}
+		else {
+			players[event.id].hit_on = 1;
+			cout << "무적됨" << event.id << endl;
+			TIMER_EVENT ev{ chrono::system_clock::now() + 1s, EVENT_TYPE::EV_HIT, event.id };
+
+			timer_queue.push(ev);
+		}
+		break;
+	}
+	}
 }
