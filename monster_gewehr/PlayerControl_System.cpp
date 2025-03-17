@@ -511,7 +511,7 @@ void PlayerControl_System::tick(World* world, float deltaTime)
 			}
 			if (pKeysBuffer[VK_F4] & 0xF0) {
 				cheat_no_damage = !cheat_no_damage;
-				world->emit<Demo_Event>({ CS_DEMO_MONSTER_BEHAVIOR });
+				world->emit<Demo_Event>({ CS_DEMO_PLAYER_NO_DAMAGE });
 			}
 
 			if (pKeysBuffer[VK_F5] & 0xF0) {

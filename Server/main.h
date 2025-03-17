@@ -9,6 +9,11 @@
 //void BossThread();
 //void PacketReassembly(int id, size_t recv_size);
 
+enum EVENT_TYPE
+{
+	EV_HIT,
+};
+
 void WorkerThread();
 void ProcessPacket(int id, char* p);
 
@@ -32,6 +37,8 @@ void SendRoomQuit(int id);
 void SendItemInfo(int id);
 void SendRegisterSucc(int id);
 void SendRegisterFail(int id);
+
+void TimerThread();
 
 SOCKET listen_sock;
 HANDLE iocp_handle;

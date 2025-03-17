@@ -66,7 +66,7 @@ constexpr char CS_PACKET_BLOOD = 16;	// 피 튀는 위치 공유
 // 데모버젼용 패킷
 constexpr char CS_DEMO_MONSTER_SETPOS = 100;
 constexpr char CS_DEMO_MONSTER_SETHP = 101;
-constexpr char CS_DEMO_MONSTER_BEHAVIOR = 102;
+constexpr char CS_DEMO_PLAYER_NO_DAMAGE = 102;
 
 constexpr char SC_PACKET_LOGIN_INFO = 1;
 constexpr char SC_PACKET_ADD_PLAYER = 2;

@@ -61,8 +61,33 @@ int main(int argc, char* argv[])
 		th.detach();
 	}
 
-	while (1) {
+	constexpr int MAX_FRAME = 60;
+	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
+	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 
+	frame fps{};
+	while (1) {
+		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
+		if (fps.count() < 1) continue; // 1/MAX_FRAME
+
+		for (int i = 0; i < MAX_GAME_ROOM; i++) {
+			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
+				run_bt(&souleaters[i], &players, &gamerooms[i]);
+
+				SC_UPDATE_MONSTER_PACKET monster_packet;
+				monster_packet.size = sizeof(monster_packet);
+				monster_packet.type = SC_PACKET_UPDATE_MONSTER;
+				monster_packet.monster = souleaters[i].GetData();
+				monster_packet.animation = souleaters[i].GetAnimation();
+
+				for (int ply_id : gamerooms[i].GetPlyId()) {
+					if (ply_id == -1) continue;
+					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+					players[ply_id].DoSend(&monster_packet);
+				}
+			}
+		}
+		fps_timer = std::chrono::steady_clock::now();
 	}
 
 	//--------------------------------------tcpÀÇ ÀÜÀçµé-------------------------------------------
@@ -179,10 +204,10 @@ int main(int argc, char* argv[])
 //
 //void BossThread()
 //{
-//	constexpr int MAX_FRAME = 60;
-//	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
-//	using ms = std::chrono::duration<float, std::milli>;
-//	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
+	/*constexpr int MAX_FRAME = 60;
+	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
+	using ms = std::chrono::duration<float, std::milli>;
+	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };*/
 //
 //	int bite_cooltime = 13;
 //	int tail_cooltime = 6;
@@ -491,9 +516,9 @@ void ProcessPacket(int id, char* p)
 
 			}
 			else {
-				souleaters[room_id].m_lock.lock();
+				std::unique_lock<std::mutex> l{ souleaters[room_id].m_lock };
 				souleaters[room_id].SetHp(souleaters[room_id].GetHp() - players[id].GetAtk() * packet->hit_count);
-				souleaters[room_id].m_lock.unlock();
+				l.unlock();
 
 				// Çàµ¿Æ®¸® ¼³Á¤ ---------------
 				souleaters[room_id].SetLatestAttackPlayer(&players[id]);
@@ -643,9 +668,9 @@ void ProcessPacket(int id, char* p)
 		if (distance < 100) {
 			if (packet->throw_type == 0) {	// ½´·ùÅº
 				std::cout << "½´·ùÅº ¸ÂÀ½" << std::endl;
-				souleaters[room_id].m_lock.lock();
+				std::unique_lock<std::mutex> l{ souleaters[room_id].m_lock };
 				souleaters[room_id].SetHp(souleaters[room_id].GetHp() - 150);
-				souleaters[room_id].m_lock.unlock();
+				l.unlock();
 			}
 			else if (packet->throw_type == 1) {	// ¼¶±¤
 				std::cout << "¼¶±¤ ¸ÂÀ½" << std::endl;
@@ -704,7 +729,7 @@ void ProcessPacket(int id, char* p)
 		souleaters[room_id].m_lock.unlock();
 		break;
 	}
-	case CS_DEMO_MONSTER_BEHAVIOR: {
+	case CS_DEMO_PLAYER_NO_DAMAGE: {
 		int room_id = players[id].GetRoomID();
 		players[id].cheat_no_damage = !players[id].cheat_no_damage;
 		if (players[id].cheat_no_damage) {
@@ -1116,4 +1141,9 @@ void SendRegisterFail(int id)
 	packet.type = SC_PACKET_REGISTER_FAIL;
 
 	players[id].DoSend(&packet);
+}
+
+void TimerThread()
+{
+
 }
