@@ -42,6 +42,8 @@ constexpr float H_ARMOR_UP = 1.0f;
 
 // 몬스터 데이터
 constexpr float MONSTER_MAX_HP = 2000;
+constexpr int MONSTER_BITE_COOLTIME = 26;
+constexpr int MONSTER_TAIL_COOLTIME = 12;
 
 // 패킷 타입
 constexpr char CS_PACKET_LOGIN = 1;

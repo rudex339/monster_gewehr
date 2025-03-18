@@ -27,6 +27,7 @@ struct TIMER_EVENT
 
 void WorkerThread();
 void ProcessPacket(int id, char* p);
+void InGameWorker();
 
 
 void SendLoginInfo(int id);

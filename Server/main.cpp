@@ -73,47 +73,7 @@ int main(int argc, char* argv[])
 		fps = std::chrono::duration_cast<frame>(std::chrono::steady_clock::now() - fps_timer);
 		if (fps.count() < 1) continue; // 1/MAX_FRAME
 
-		for (int i = 0; i < MAX_GAME_ROOM; i++) {
-			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
-				run_bt(&souleaters[i], &players, &gamerooms[i]);
-
-				SC_UPDATE_MONSTER_PACKET monster_packet;
-				monster_packet.size = sizeof(monster_packet);
-				monster_packet.type = SC_PACKET_UPDATE_MONSTER;
-				monster_packet.monster = souleaters[i].GetData();
-				monster_packet.animation = souleaters[i].GetAnimation();
-
-				for (int ply_id : gamerooms[i].GetPlyId()) {
-					if (ply_id == -1) continue;
-					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-					players[ply_id].DoSend(&monster_packet);
-				}
-
-				// 대쉬 공격	판정
-				if (souleaters[i].GetAnimation() == dash_ani) {
-					for (int ply_id : gamerooms[i].GetPlyId()) {
-						if (ply_id == -1) continue;
-						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-						if (players[ply_id].hit_on) continue;
-
-						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
-							if (!players[ply_id].cheat_no_damage) {
-								std::cout << "대쉬 맞음" << std::endl;
-								// 여기에 타이머 큐를 넣어서 1초간 무적상태로 만들어야함
-								TIMER_EVENT event{ std::chrono::system_clock::now(), EV_HIT, ply_id };
-								timer_queue.push(event);
-
-								players[ply_id].HitPlayer(50);
-								EXP_OVER* over = new EXP_OVER;
-								over->_comp_type = OP_HIT;
-								PostQueuedCompletionStatus(iocp_handle, 1, ply_id, &over->_wsa_over); // 피격 후 클라에게 알리는건 worker thread에서 처리
-							}
-						}
-					}
-				}
-
-			}
-		}
+		InGameWorker();
 		fps_timer = std::chrono::steady_clock::now();
 	}
 
@@ -152,6 +112,129 @@ int main(int argc, char* argv[])
 	closesocket(listen_sock);
 }
 
+void InGameWorker()
+{
+	// 물기 꼬리치기
+	int bite_cooltime = 13;
+	int tail_cooltime = 6;
+
+	for (int i = 0; i < MAX_GAME_ROOM; i++) {
+		if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
+			//보스 행동트리 동작 부분
+			run_bt(&souleaters[i], &players, &gamerooms[i]);
+
+			// 보스 행동할때마다 방안의 유저들에게 패킷 보내기
+			SC_UPDATE_MONSTER_PACKET monster_packet;
+			monster_packet.size = sizeof(monster_packet);
+			monster_packet.type = SC_PACKET_UPDATE_MONSTER;
+			monster_packet.monster = souleaters[i].GetData();
+			monster_packet.animation = souleaters[i].GetAnimation();
+
+			for (int ply_id : gamerooms[i].GetPlyId()) {
+				if (ply_id == -1) continue;
+				if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+				players[ply_id].DoSend(&monster_packet);
+			}
+
+			// 대쉬 공격	판정
+			if (souleaters[i].GetAnimation() == dash_ani) {
+				for (int ply_id : gamerooms[i].GetPlyId()) {
+					if (ply_id == -1) continue;
+					if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+					if (players[ply_id].hit_on) continue;
+
+					if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
+						if (!players[ply_id].cheat_no_damage) {
+							// 타이머 큐를 이용해서 피격 판정을 딜레이 시킴
+							TIMER_EVENT event{ std::chrono::system_clock::now(), EV_HIT, ply_id };
+							timer_queue.push(event);
+
+							players[ply_id].HitPlayer(50);
+							EXP_OVER* over = new EXP_OVER;
+							over->_comp_type = OP_HIT;
+							PostQueuedCompletionStatus(iocp_handle, 1, ply_id, &over->_wsa_over); // 피격 후 클라에게 알리는건 worker thread에서 처리
+						}
+					}
+				}
+			}
+
+			// 물어뜯기 공격 판정
+			// 지금 공격할때 애니메이션 중간에	판정을 넣어서 피격이 늦게 하게 하고 싶은데 어캐할지 고민중
+			// 현재는 클래스 내부에 쿨타임을 만들어서 여기서 1씩빼서 0이되면 판정을 넣는 방식으로 구현
+			// 지금 플레이어가 공격을 받고 죽으면 체력이 마이너스가 되는데 이건 나중에 수정해야함
+			if (souleaters[i].GetAnimation() == bite_ani) {
+				if (!souleaters[i].bite_cooltime) {
+					
+					for (int ply_id : gamerooms[i].GetPlyId()) {
+						if (ply_id == -1) continue;
+						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+						if (players[ply_id].hit_on) continue;
+
+						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
+							if (!players[ply_id].cheat_no_damage) {
+								// 타이머 큐를 이용해서 피격 판정을 딜레이 시킴
+								TIMER_EVENT event{ std::chrono::system_clock::now(), EV_HIT, ply_id };
+								timer_queue.push(event);
+
+								players[ply_id].HitPlayer(25);
+								EXP_OVER* over = new EXP_OVER;
+								over->_comp_type = OP_HIT;
+								PostQueuedCompletionStatus(iocp_handle, 1, ply_id, &over->_wsa_over); // 피격 후 클라에게 알리는건 worker thread에서 처리
+							}
+						}
+					}
+				}
+				else {
+					std::cout << "물어뜯기 쿨타임 : " << souleaters[i].bite_cooltime << std::endl;
+					souleaters[i].bite_cooltime -= 1;
+				}
+			}
+			else {
+				souleaters[i].bite_cooltime = MONSTER_BITE_COOLTIME;
+			}
+
+			// 꼬리 공격 판정
+			// 지금 공격할때 애니메이션 중간에	판정을 넣어서 피격이 늦게 하게 하고 싶은데 어캐할지 고민중
+			// 현재는 클래스 내부에 쿨타임을 만들어서 여기서 1씩빼서 0이되면 판정을 넣는 방식으로 구현
+			if (souleaters[i].GetAnimation() == tail_ani) {
+				if (!souleaters[i].tail_cooltime) {
+					for (int ply_id : gamerooms[i].GetPlyId()) {
+						if (ply_id == -1) continue;
+						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+						if (players[ply_id].hit_on) continue;
+						XMFLOAT3 ply_pos = players[ply_id].GetPosition();
+						XMFLOAT3 soul_pos = souleaters[i].GetPosition();
+
+						DirectX::XMVECTOR ply_vec = XMLoadFloat3(&ply_pos);
+						DirectX::XMVECTOR soul_vec = XMLoadFloat3(&soul_pos);
+
+						DirectX::XMVECTOR distanceVec = ply_vec - soul_vec;
+						float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
+
+						if (distance < 70.f) {
+							if (!players[ply_id].cheat_no_damage) {
+								// 타이머 큐를 이용해서 피격 판정을 딜레이 시킴
+								TIMER_EVENT event{ std::chrono::system_clock::now(), EV_HIT, ply_id };
+								timer_queue.push(event);
+								players[ply_id].HitPlayer(25);
+								EXP_OVER* over = new EXP_OVER;
+								over->_comp_type = OP_HIT;
+								PostQueuedCompletionStatus(iocp_handle, 1, ply_id, &over->_wsa_over); // 피격 후 클라에게 알리는건 worker thread에서 처리
+							}
+						}
+					}
+				}
+				else {
+					souleaters[i].tail_cooltime -= 1;
+				}
+
+			}
+			else {
+				souleaters[i].tail_cooltime = MONSTER_TAIL_COOLTIME;
+			}
+		}
+	}
+}
 //void ProcessClient(SOCKET sock)
 //{
 //	int retval;
@@ -231,13 +314,13 @@ int main(int argc, char* argv[])
 //
 //void BossThread()
 //{
-	/*constexpr int MAX_FRAME = 60;
-	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
-	using ms = std::chrono::duration<float, std::milli>;
-	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };*/
+//	constexpr int MAX_FRAME = 60;
+//	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
+//	using ms = std::chrono::duration<float, std::milli>;
+//	std::chrono::time_point<std::chrono::steady_clock> fps_timer{ std::chrono::steady_clock::now() };
 //
-//	int bite_cooltime = 13;
-//	int tail_cooltime = 6;
+	/*int bite_cooltime = 13;
+	int tail_cooltime = 6;*/
 //
 //	frame fps{};
 //	while (1) {
@@ -248,21 +331,21 @@ int main(int argc, char* argv[])
 //			if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
 //				run_bt(&souleaters[i], &players, &gamerooms[i]);
 //
-				/*if (souleaters[i].GetAnimation() == dash_ani) {
-					for (int ply_id : gamerooms[i].GetPlyId()) {
-						if (ply_id == -1) continue;
-						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-						if (players[ply_id].hit_on) continue;
-
-						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
-							if (!players[ply_id].cheat_no_damage) {
-								players[ply_id].hit_on = 1;
-								players[ply_id].HitPlayer(50);
-								SendHitPlayer(players[ply_id].GetID());
-							}
-						}						
-					}
-				}*/
+//				if (souleaters[i].GetAnimation() == dash_ani) {
+//					for (int ply_id : gamerooms[i].GetPlyId()) {
+//						if (ply_id == -1) continue;
+//						if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+//						if (players[ply_id].hit_on) continue;
+//
+//						if (players[ply_id].GetBoundingBox().Intersects(souleaters[i].GetBoundingBox())) {
+//							if (!players[ply_id].cheat_no_damage) {
+//								players[ply_id].hit_on = 1;
+//								players[ply_id].HitPlayer(50);
+//								SendHitPlayer(players[ply_id].GetID());
+//							}
+//						}						
+//					}
+//				}
 //
 //				if (souleaters[i].GetAnimation() == bite_ani) {
 //					if (!bite_cooltime) {
@@ -1228,7 +1311,7 @@ void ProcessEvent(TIMER_EVENT& event)
 		else {
 			players[event.id].hit_on = 1;
 			cout << "무적됨" << event.id << endl;
-			TIMER_EVENT ev{ chrono::system_clock::now() + 1s, EVENT_TYPE::EV_HIT, event.id };
+			TIMER_EVENT ev{ chrono::system_clock::now() + 3s, EVENT_TYPE::EV_HIT, event.id };
 
 			timer_queue.push(ev);
 		}
