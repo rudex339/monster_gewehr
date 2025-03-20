@@ -1042,6 +1042,8 @@ void SendHitPlayer(int id)
 	int room_id = players[id].GetRoomID();
 	if (packet.hp <= 0) {
 		gamerooms[room_id].m_all_life -= 1;
+		players[id].death_count += 1;
+		players[id].SetHp(100);
 	}
 	players[id].DoSend(&packet);
 	
@@ -1314,6 +1316,7 @@ void ProcessEvent(TIMER_EVENT& event)
 			TIMER_EVENT ev{ chrono::system_clock::now() + 3s, EVENT_TYPE::EV_HIT, event.id };
 
 			timer_queue.push(ev);
+
 		}
 		break;
 	}
