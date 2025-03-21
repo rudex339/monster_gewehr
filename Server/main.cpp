@@ -115,8 +115,6 @@ int main(int argc, char* argv[])
 void InGameWorker()
 {
 	// 물기 꼬리치기
-	int bite_cooltime = 13;
-	int tail_cooltime = 6;
 
 	for (int i = 0; i < MAX_GAME_ROOM; i++) {
 		if (gamerooms[i].GetState() == GameRoomState::G_INGAME) {
@@ -231,6 +229,42 @@ void InGameWorker()
 			}
 			else {
 				souleaters[i].tail_cooltime = MONSTER_TAIL_COOLTIME;
+			}
+
+			if (souleaters[i].GetHp() <= 0 && monster_packet.animation == die_ani) {
+				for (int ply_id : gamerooms[i].GetPlyId()) {
+					if (ply_id == -1) continue;
+					//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+					SendEndGame(ply_id, true);
+					std::cout << "게임 끝난거 보냄 id : " << ply_id << std::endl;
+#ifdef DATABASE
+					database.Update(&players[ply_id]);
+#endif
+					players[ply_id].PlayerInit();
+					players[ply_id].SetRoomID(-1);
+					std::cout << "게임방 리셋 id : " << ply_id << "방번호 : " << players[ply_id].GetRoomID() << std::endl;
+				}
+				souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+				gamerooms[i].InitGameRoom();
+				SendDeleteRoom(i);
+				std::cout << "게임 클리어 : " << i << std::endl;
+			}
+			// 방에서 3번 죽어서 게임오버
+			else if (gamerooms[i].m_all_life <= 0) {
+				for (int ply_id : gamerooms[i].GetPlyId()) {
+					if (ply_id == -1) continue;
+					//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+					SendEndGame(ply_id, false);
+#ifdef DATABASE
+					database.Update(&players[ply_id]);
+#endif
+					players[ply_id].PlayerInit();
+					players[ply_id].SetRoomID(-1);
+				}
+				souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
+				gamerooms[i].InitGameRoom();
+				SendDeleteRoom(i);
+				std::cout << "게임 졌음 : " << i << std::endl;
 			}
 		}
 	}
@@ -1170,8 +1204,7 @@ void SendDeleteRoom(short room_num)
 
 	for (auto& client : players) {
 		if (client.second.GetState() == S_STATE::LOG_OUT) continue;
-		client.second.DoSend(&packet);
-		
+		client.second.DoSend(&packet);		
 	}
 }
 
@@ -1316,7 +1349,6 @@ void ProcessEvent(TIMER_EVENT& event)
 			TIMER_EVENT ev{ chrono::system_clock::now() + 3s, EVENT_TYPE::EV_HIT, event.id };
 
 			timer_queue.push(ev);
-
 		}
 		break;
 	}
