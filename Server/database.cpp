@@ -43,7 +43,7 @@ DataBase::DataBase() : m_hdbc{}, m_henv{}, m_hstmt{}
 				if (!(SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode)) {
 					std::cout << "실패함" << std::endl;
 				}
-				std::cout << "데이터베이스 연결 칸료" << std::endl;
+				std::cout << "데이터베이스 연결 완료" << std::endl;
 			}
 			else {
 				std::cout << "실패함" << std::endl;

@@ -232,38 +232,20 @@ void InGameWorker()
 			}
 
 			if (souleaters[i].GetHp() <= 0 && monster_packet.animation == die_ani) {
-				for (int ply_id : gamerooms[i].GetPlyId()) {
-					if (ply_id == -1) continue;
-					//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-					SendEndGame(ply_id, true);
-					std::cout << "게임 끝난거 보냄 id : " << ply_id << std::endl;
-#ifdef DATABASE
-					database.Update(&players[ply_id]);
-#endif
-					players[ply_id].PlayerInit();
-					players[ply_id].SetRoomID(-1);
-					std::cout << "게임방 리셋 id : " << ply_id << "방번호 : " << players[ply_id].GetRoomID() << std::endl;
-				}
+				EXP_OVER* over = new EXP_OVER;
+				over->_comp_type = OP_CLEAR;
+				PostQueuedCompletionStatus(iocp_handle, 1, i, &over->_wsa_over);
 				souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
-				gamerooms[i].InitGameRoom();
-				SendDeleteRoom(i);
+				gamerooms[i].InitGameRoom();				
 				std::cout << "게임 클리어 : " << i << std::endl;
 			}
 			// 방에서 3번 죽어서 게임오버
 			else if (gamerooms[i].m_all_life <= 0) {
-				for (int ply_id : gamerooms[i].GetPlyId()) {
-					if (ply_id == -1) continue;
-					//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
-					SendEndGame(ply_id, false);
-#ifdef DATABASE
-					database.Update(&players[ply_id]);
-#endif
-					players[ply_id].PlayerInit();
-					players[ply_id].SetRoomID(-1);
-				}
+				EXP_OVER* over = new EXP_OVER;
+				over->_comp_type = OP_GAMEOVER;
+				PostQueuedCompletionStatus(iocp_handle, 1, i, &over->_wsa_over);
 				souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
 				gamerooms[i].InitGameRoom();
-				SendDeleteRoom(i);
 				std::cout << "게임 졌음 : " << i << std::endl;
 			}
 		}
@@ -572,9 +554,34 @@ void WorkerThread()
 			break;
 		}
 		case OP_CLEAR: {
+			for (int ply_id : gamerooms[key].GetPlyId()) {
+				if (ply_id == -1) continue;
+				//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+				SendEndGame(ply_id, true);
+				std::cout << "게임 끝난거 보냄 id : " << ply_id << std::endl;
+#ifdef DATABASE
+				database.Update(&players[ply_id]);
+#endif
+				players[ply_id].PlayerInit();
+				players[ply_id].SetRoomID(-1);
+				std::cout << "게임방 리셋 id : " << ply_id << "방번호 : " << players[ply_id].GetRoomID() << std::endl;
+			}
+			SendDeleteRoom(key);
+			delete exp_over;
 			break;
 		}
 		case OP_GAMEOVER: {
+			for (int ply_id : gamerooms[key].GetPlyId()) {
+				if (ply_id == -1) continue;
+				//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
+				SendEndGame(ply_id, false);
+#ifdef DATABASE
+				database.Update(&players[ply_id]);
+#endif
+				players[ply_id].PlayerInit();
+				players[ply_id].SetRoomID(-1);
+			}
+			SendDeleteRoom(key);
 			break;
 		}
 		}
@@ -605,6 +612,10 @@ void ProcessPacket(int id, char* p)
 	switch (p[1]) {
 	case CS_PACKET_LOGIN: {
 		CS_ACCOUNT_PACKET* packet = reinterpret_cast<CS_ACCOUNT_PACKET*>(p);
+
+		std::wstring user_id{ packet->name, packet->name + strlen(packet->name) };
+		std::wstring user_password{ packet->password, packet->password + strlen(packet->password) };
+
 		players[id].SetName(packet->name);
 		players[id].SetPassword(packet->password);
 		players[id].SetWeapon(0);
@@ -612,18 +623,24 @@ void ProcessPacket(int id, char* p)
 		players[id].SetRoomID(-1);
 
 		std::cout << "입장 : " << id << ", " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
-
-
+		
 #ifdef DATABASE
 		// 데이터 베이스 연동시 사용
-		if (database.Login(&players[id])) {
+		DB_EVNET event{};
+		event.data.user_id = user_id;
+		event.data.user_password = user_password;
+		event.id = id;
+		event.time_point = std::chrono::system_clock::now();
+		event.type = DB_LOGIN;
+		db_queue.push(event);
+		/*if (database.Login(&players[id])) {
 			SendLoginInfo(id);
 			SendRoomList(id);
 			SendItemInfo(id);
 		}
 		else {
 			SendLoginFail(id);
-		}
+		}*/
 #else  
 		SendLoginInfo(id);
 		SendRoomList(id);
@@ -1302,34 +1319,33 @@ void SendRegisterFail(int id)
 void TimerThread()
 {
 	using namespace std;
-	std::priority_queue<TIMER_EVENT> local_timer_queue;
-
-	
+	std::priority_queue<TIMER_EVENT> local_timer_queue;	
 
 	while (true) {
 		auto current_time = chrono::system_clock::now();
 		TIMER_EVENT event;
+		bool event_processed = false;
 
-		if (!local_timer_queue.empty()) {			
+		if (!local_timer_queue.empty() && local_timer_queue.top().time_point <= current_time) {
 			event = local_timer_queue.top();
-			if (event.time_point <= current_time) {
-				local_timer_queue.pop();
-				ProcessEvent(event);
-			}
+			local_timer_queue.pop();
+			ProcessEvent(event);
+			event_processed = true;
 		}
 
 		if (timer_queue.try_pop(event)) {
 			if (event.time_point > current_time) {
 				local_timer_queue.push(event);
-				this_thread::sleep_for(1ms);
-				cout << "이거 실행됨222 : " << event.id << endl;
-				continue;
 			}
 			else {
-				cout << "이거 실행됨" << endl;
 				ProcessEvent(event);
+				continue;
 			}
+			event_processed = true;
+		}
 
+		if (!event_processed) {
+			this_thread::sleep_for(1ms);
 		}
 	}
 }
@@ -1353,4 +1369,16 @@ void ProcessEvent(TIMER_EVENT& event)
 		break;
 	}
 	}
+}
+
+void DBThread()
+{
+	using namespace std;
+	std::priority_queue<TIMER_EVENT> local_db_queue;
+
+	while (true) {
+		auto current_time = chrono::system_clock::now();
+
+	}
+
 }

@@ -22,6 +22,16 @@ struct PLAYER_TABLE
 		cb_bandage = 0, cb_fat = 0, cb_reject = 0;
 };
 
+struct DB_PLAYER_DATA
+{
+	std::wstring user_id;
+	std::wstring user_password;
+
+	int money, rifle, shotgun, sniper, l_armor, h_armor, grenade, flashbang,
+		bandage, fak, injector;
+
+};
+
 class DataBase
 {
 public:
