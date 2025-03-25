@@ -21,8 +21,8 @@ public:
 	void SetCreateRoom();
 	void SetFreeRoom();
 
-	void SetHostName(std::string name) { m_host_name = name; }
-	std::string GetHostName() { return m_host_name; }
+	void SetHostName(std::wstring name) { m_host_name = name; }
+	std::wstring GetHostName() { return m_host_name; }
 
 	std::mutex& GetMutex() { return m_state_lock; }
 
@@ -36,7 +36,7 @@ public:
 private:
 	std::array<INT, MAX_CLIENT_ROOM> m_player_ids;
 	GameRoomState m_state;
-	std::string m_host_name;
+	std::wstring m_host_name;
 
 	std::mutex m_player_lock;
 	std::mutex m_state_lock;

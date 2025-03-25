@@ -584,6 +584,19 @@ void WorkerThread()
 			SendDeleteRoom(key);
 			break;
 		}
+
+		case OP_LOGIN: {
+			break;
+		}
+		case OP_LOGIN_FAIL: {
+			break;
+		}
+		case OP_REGISTER: {
+			break;
+		}
+		case OP_REGISTER_FAIL: {
+			break;
+		}
 		}
 	}
 }
@@ -616,17 +629,14 @@ void ProcessPacket(int id, char* p)
 		std::wstring user_id{ packet->name, packet->name + strlen(packet->name) };
 		std::wstring user_password{ packet->password, packet->password + strlen(packet->password) };
 
-		players[id].SetName(packet->name);
-		players[id].SetPassword(packet->password);
 		players[id].SetWeapon(0);
 		players[id].SetArmor(3);
 		players[id].SetRoomID(-1);
 
-		std::cout << "입장 : " << id << ", " << players[id].GetName().c_str() << ", " << players[id].GetPassword().c_str() << std::endl;
 		
 #ifdef DATABASE
 		// 데이터 베이스 연동시 사용
-		DB_EVNET event{};
+		DB_EVENT event{};
 		event.data.user_id = user_id;
 		event.data.user_password = user_password;
 		event.id = id;
@@ -642,10 +652,14 @@ void ProcessPacket(int id, char* p)
 			SendLoginFail(id);
 		}*/
 #else  
+		players[id].SetName(user_id);
+		players[id].SetPassword(user_password);
 		SendLoginInfo(id);
 		SendRoomList(id);
 		SendItemInfo(id);
 #endif
+
+		std::wcout << L"입장 : " << id << L", " << players[id].GetName().c_str() << L", " << players[id].GetPassword().c_str() << std::endl;
 		break;
 	}
 	case CS_PACKET_START_GAME: {
@@ -715,17 +729,6 @@ void ProcessPacket(int id, char* p)
 				std::lock_guard<std::mutex> lock{ gamerooms[i].GetMutex() };
 				if (gamerooms[i].GetState() != G_FREE) continue;
 			}
-			//if (gamerooms[i].GetState() == G_FREE) {
-			//	//gamerooms[i].m_state_lock.unlock();
-			//	souleaters[i].InitMonster();
-			//	gamerooms[i].SetCreateRoom();
-			//	gamerooms[i].SetPlayerId(id);
-			//	gamerooms[i].SetHostName(players[id].GetName());
-			//	players[id].SetRoomID(i);
-			//	players[id].SetHost(true);
-			//	SendRoomCreate(id, i);
-			//	break;
-			//}
 
 			souleaters[i].InitMonster();
 			gamerooms[i].SetCreateRoom();
@@ -995,7 +998,10 @@ void SendStartGame(int id) // 이건 방으로 시작을 하면 방장이 시작을 누르면 다른 
 		SC_ADD_PLAYER_PACKET add_p;
 		add_p.size = sizeof(add_p);
 		add_p.type = SC_PACKET_ADD_PLAYER;
-		strcpy(add_p.name, players[send_id].GetName().c_str());
+
+		std::string s = WStringToString(players[send_id].GetName());
+		strcpy_s(add_p.name, s.c_str());
+
 		add_p.player_data = players[send_id].GetPlayerData();
 		add_p.weapon = players[send_id].GetWeapon();
 		add_p.armor = players[send_id].GetArmor();
@@ -1139,7 +1145,10 @@ void SendRoomList(int id)
 			sub_packet.type = SC_PACKET_ADD_ROOM;
 			sub_packet.room_num = i;
 			sub_packet.start = false;
-			strcpy(sub_packet.name, gamerooms[i].GetHostName().c_str());
+
+			std::string s = WStringToString(gamerooms[i].GetHostName());
+			strcpy_s(sub_packet.name, s.c_str());
+
 			if (gamerooms[i].GetState() == G_INGAME)
 				sub_packet.start = true;
 			
@@ -1164,7 +1173,9 @@ void SendRoomCreate(int ply_id, int room_num)
 	sub_packet.type = SC_PACKET_ADD_ROOM;
 	sub_packet.room_num = room_num;
 	sub_packet.start = false;
-	strcpy(sub_packet.name, players[ply_id].GetName().c_str());
+
+	std::string s = WStringToString(players[ply_id].GetName());
+	strcpy_s(sub_packet.name, s.c_str());
 
 	for (auto& client : players) {
 		if (client.second.GetID() == ply_id) continue;
@@ -1184,7 +1195,10 @@ void SendRoomSelect(int id, short room_num)
 		packet.size = sizeof(packet);
 		packet.type = SC_PACKET_SELECT_ROOM;
 		packet.id = ply_id;
-		strcpy_s(packet.name, players[ply_id].GetName().c_str());
+
+		std::string s = WStringToString(players[ply_id].GetName());
+		strcpy_s(packet.name, s.c_str());
+
 		packet.weapon = players[ply_id].GetWeapon();
 		packet.armor = players[ply_id].GetArmor();
 		// 이제 위의 방에 있는 플레이어 정보들을 선택한 놈한테 다시 보냄
@@ -1243,7 +1257,10 @@ void SendRoomJoin(int id)
 	add_p.size = sizeof(add_p);
 	add_p.type = SC_PACKET_ADD_ROOM_PLAYER;
 	add_p.id = id;	
-	strcpy_s(add_p.name, players[id].GetName().c_str());
+
+	std::string s = WStringToString(players[id].GetName());
+	strcpy_s(add_p.name, s.c_str());
+
 	add_p.weapon = players[id].GetWeapon();
 	add_p.armor = players[id].GetArmor();
 	add_p.host = players[id].GetHost();
@@ -1259,7 +1276,10 @@ void SendRoomJoin(int id)
 		add_p2.size = sizeof(add_p2);
 		add_p2.type = SC_PACKET_ADD_ROOM_PLAYER;
 		add_p2.id = ply_id;
-		strcpy_s(add_p2.name, players[ply_id].GetName().c_str());
+
+		std::string s2 = WStringToString(players[ply_id].GetName());
+		strcpy_s(add_p2.name, s2.c_str());
+
 		add_p2.weapon = players[ply_id].GetWeapon();
 		add_p2.armor = players[ply_id].GetArmor();
 		add_p2.host = players[ply_id].GetHost();
@@ -1329,7 +1349,7 @@ void TimerThread()
 		if (!local_timer_queue.empty() && local_timer_queue.top().time_point <= current_time) {
 			event = local_timer_queue.top();
 			local_timer_queue.pop();
-			ProcessEvent(event);
+			ProcessTimerEvent(event);
 			event_processed = true;
 		}
 
@@ -1338,7 +1358,7 @@ void TimerThread()
 				local_timer_queue.push(event);
 			}
 			else {
-				ProcessEvent(event);
+				ProcessTimerEvent(event);
 				continue;
 			}
 			event_processed = true;
@@ -1350,7 +1370,7 @@ void TimerThread()
 	}
 }
 
-void ProcessEvent(TIMER_EVENT& event)
+void ProcessTimerEvent(TIMER_EVENT& event)
 {
 	using namespace std;
 	switch (event.type) {
@@ -1374,11 +1394,54 @@ void ProcessEvent(TIMER_EVENT& event)
 void DBThread()
 {
 	using namespace std;
-	std::priority_queue<TIMER_EVENT> local_db_queue;
+	std::priority_queue<DB_EVENT> local_db_queue;
 
 	while (true) {
 		auto current_time = chrono::system_clock::now();
+		DB_EVENT event;
+		bool event_processed = false;
 
+		if (!local_db_queue.empty() && local_db_queue.top().time_point <= current_time) {
+			event = local_db_queue.top();
+			local_db_queue.pop();
+			ProcessDBEvent(event);
+			event_processed = true;
+		}
+
+		if (db_queue.try_pop(event)) {
+			if (event.time_point > current_time) {
+				local_db_queue.push(event);
+			}
+			else {
+				ProcessDBEvent(event);
+				continue;
+			}
+			event_processed = true;
+		}
+
+		if (!event_processed) {
+			this_thread::sleep_for(5ms);
+		}
 	}
 
+}
+
+void ProcessDBEvent(DB_EVENT& event)
+{
+	using namespace std;
+	switch (event.type) {
+	case DB_EVENT_TYPE::DB_LOGIN: {
+		PLAYER_INFO p_info;
+		p_info.user_id = event.data.user_id;
+		p_info.user_password = event.data.user_password;
+
+		if (database.Login(p_info, players[event.id])) {
+			//성공하면 성공한 over_type을 적어서 postqueued를 하고 worker쓰레드에서 로그인 완료되면 보내야 하는 정보들을 보내줌
+		}
+		else {
+
+		}
+		break;
+	}
+	}
 }

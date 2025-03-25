@@ -7,7 +7,7 @@
 
 class GameRoom;
 
-enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_HIT, OP_CLEAR, OP_GAMEOVER };
+enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_HIT, OP_CLEAR, OP_GAMEOVER, OP_LOGIN, OP_LOGIN_FAIL, OP_REGISTER, OP_REGISTER_FAIL, OP_UPDATE };
 class EXP_OVER {
 public:
 	WSAOVERLAPPED _wsa_over;
@@ -67,8 +67,8 @@ public:
 	void PlayerInit();
 
 	void SetSocket(SOCKET& sock) { m_socket = sock; }
-	void SetName(std::string name) { m_name = name; }
-	void SetPassword(std::string password) { m_password = password; }
+	void SetName(std::wstring name) { m_name = name; }
+	void SetPassword(std::wstring password) { m_password = password; }
 	void SetHp(float hp) { m_hp = hp; }
 	void SetMaxHp(float max_hp) { m_max_hp = max_hp; }
 	void SetAtk(float atk) { m_atk = atk; }
@@ -97,8 +97,8 @@ public:
 	char GetThrowWp() { return m_throw_wp; }
 	char GetAnimaition() { return m_animation; }
 	S_STATE GetState() { return m_state; }
-	std::string GetName() { return m_name; }
-	std::string GetPassword() { return m_password; }
+	std::wstring GetName() { return m_name; }
+	std::wstring GetPassword() { return m_password; }
 	PLAYER_DATA GetPlayerData() { return { m_id, m_position, m_velocity, m_yaw, m_hp }; }
 	DirectX::XMFLOAT3 GetAtkDir() { return m_atk_dir; }
 	DirectX::XMFLOAT3 GetAtkPos() { return m_atk_pos; }
@@ -137,8 +137,8 @@ protected:
 	//------------------------
 	ITEM_DATA items;
 
-	std::string m_name;
-	std::string m_password;
+	std::wstring m_name;
+	std::wstring m_password;
 
 	std::mutex m_lock;
 

@@ -95,3 +95,5 @@ namespace Vector3
 void err_quit(const char* msg);
 void err_display(const char* msg);
 void err_display(int errnum);
+
+std::string WStringToString(const std::wstring& wstr);

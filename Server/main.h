@@ -30,12 +30,17 @@ enum DB_EVENT_TYPE
 	DB_REGISTER, DB_LOGIN, DB_UPDATE
 };
 
-struct DB_EVNET
+struct DB_EVENT
 {
 	std::chrono::system_clock::time_point time_point;
 	DB_EVENT_TYPE type;
 	int id;
 	DB_PLAYER_DATA data;
+
+	constexpr bool operator<(const DB_EVENT& rhs) const
+	{
+		return time_point > rhs.time_point;
+	}
 };
 
 void WorkerThread();
@@ -64,9 +69,10 @@ void SendRegisterSucc(int id);
 void SendRegisterFail(int id);
 
 void TimerThread();
-void ProcessEvent(TIMER_EVENT& event);
+void ProcessTimerEvent(TIMER_EVENT& event);
 
 void DBThread();
+void ProcessDBEvent(DB_EVENT& event);
 
 SOCKET listen_sock;
 HANDLE iocp_handle;
@@ -77,7 +83,7 @@ std::array<Monster, MAX_GAME_ROOM> souleaters;
 std::array<GameRoom, MAX_GAME_ROOM> gamerooms;
 
 concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
-concurrency::concurrent_priority_queue<DB_EVNET> db_queue;
+concurrency::concurrent_priority_queue<DB_EVENT> db_queue;
 
 DataBase database;
 

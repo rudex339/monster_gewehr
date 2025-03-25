@@ -39,8 +39,9 @@ public:
 	~DataBase();
 
 	bool Createaccount(const char* id, const char* password);
-	bool Login(Player* player);
-	void Update(Player* player);
+	bool Login(Player& player);
+	bool Login(PLAYER_INFO& player_info, Player& player);
+	void Update(Player& player);
 
 private:
 	
