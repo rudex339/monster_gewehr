@@ -586,15 +586,21 @@ void WorkerThread()
 		}
 
 		case OP_LOGIN: {
+			SendLoginInfo(key);
+			SendRoomList(key);
+			SendItemInfo(key);
 			break;
 		}
 		case OP_LOGIN_FAIL: {
+			SendLoginFail(key);
 			break;
 		}
 		case OP_REGISTER: {
+			SendRegisterSucc(key);
 			break;
 		}
 		case OP_REGISTER_FAIL: {
+			SendRegisterFail(key);
 			break;
 		}
 		}
@@ -642,15 +648,7 @@ void ProcessPacket(int id, char* p)
 		event.id = id;
 		event.time_point = std::chrono::system_clock::now();
 		event.type = DB_LOGIN;
-		db_queue.push(event);
-		/*if (database.Login(&players[id])) {
-			SendLoginInfo(id);
-			SendRoomList(id);
-			SendItemInfo(id);
-		}
-		else {
-			SendLoginFail(id);
-		}*/
+		db_queue.push(event);		
 #else  
 		players[id].SetName(user_id);
 		players[id].SetPassword(user_password);
@@ -859,12 +857,23 @@ void ProcessPacket(int id, char* p)
 	case CS_PACKET_REGISTER: {
 		CS_ACCOUNT_PACKET* packet = reinterpret_cast<CS_ACCOUNT_PACKET*>(p);
 #ifdef DATABASE
-		if (database.Createaccount(packet->name, packet->password)) {
+		std::wstring user_id{ packet->name, packet->name + strlen(packet->name) };
+		std::wstring user_password{ packet->password, packet->password + strlen(packet->password) };
+
+		DB_EVENT event{};
+		event.data.user_id = user_id;
+		event.data.user_password = user_password;
+		event.id = id;
+		event.time_point = std::chrono::system_clock::now();
+		event.type = DB_REGISTER;
+		db_queue.push(event);
+
+		/*if (database.Createaccount(packet->name, packet->password)) {
 			SendRegisterSucc(id);
 		}
 		else {
 			SendRegisterFail(id);
-		}
+		}*/
 #endif
 		break;
 	}
@@ -1437,11 +1446,37 @@ void ProcessDBEvent(DB_EVENT& event)
 
 		if (database.Login(p_info, players[event.id])) {
 			//성공하면 성공한 over_type을 적어서 postqueued를 하고 worker쓰레드에서 로그인 완료되면 보내야 하는 정보들을 보내줌
+			EXP_OVER over;
+			over._comp_type = OP_LOGIN;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
 		}
 		else {
-
+			EXP_OVER over;
+			over._comp_type = OP_LOGIN_FAIL;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
 		}
 		break;
 	}
+	case DB_EVENT_TYPE::DB_REGISTER: {
+		PLAYER_INFO p_info;
+		p_info.user_id = event.data.user_id;
+		p_info.user_password = event.data.user_password;
+
+		if (database.Createaccount(p_info)) {
+			EXP_OVER over;
+			over._comp_type = OP_REGISTER;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
+		}
+		else {
+			EXP_OVER over;
+			over._comp_type = OP_REGISTER_FAIL;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
+		}
+		break;
+	}
+	case DB_EVENT_TYPE::DB_UPDATE: {
+		break;
+	}
+
 	}
 }

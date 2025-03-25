@@ -39,6 +39,7 @@ public:
 	~DataBase();
 
 	bool Createaccount(const char* id, const char* password);
+	bool Createaccount(PLAYER_INFO& player_info);
 	bool Login(Player& player);
 	bool Login(PLAYER_INFO& player_info, Player& player);
 	void Update(Player& player);

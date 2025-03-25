@@ -95,12 +95,38 @@ bool DataBase::Createaccount(const char* id, const char* password)
 	return true;
 }
 
+bool DataBase::Createaccount(PLAYER_INFO& player_info)
+{
+	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
+	
+	std::wcout << player_info.user_id << " " << player_info.user_password << std::endl;
+
+	/*std::wstring query = std::format(L"INSERT INTO user_data (user_id, user_password, user_level, possion, grenade) VALUES ('{0}', '{1}', 1, 10, 10)",
+		c_id, c_password);*/
+
+	std::wstring query = std::format(L"CALL register_user ('{0}', '{1}')",
+		player_info.user_id, player_info.user_password);
+
+	retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
+	if (!(SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode)) {
+		std::cout << "½ÇÆÐÇÔ" << std::endl;
+		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
+		SQLCancel(m_hstmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+		return false;
+	}
+
+	SQLCancel(m_hstmt);
+	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+	return true;
+}
+
 bool DataBase::Login(Player& player)
 {
 	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
 
-	std::wstring c_id;
-	std::wstring c_password;
+	std::wstring c_id = player.GetName();
+	std::wstring c_password = player.GetPassword();
 
 
 
