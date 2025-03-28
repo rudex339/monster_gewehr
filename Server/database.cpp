@@ -307,3 +307,30 @@ void DataBase::Update(Player& player)
 	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
 	return;
 }
+
+void DataBase::Update(DB_PLAYER_DATA& data)
+{
+	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
+
+	std::wstring c_id = data.user_id;
+
+
+	std::wstring query = std::format(L"CALL update_data ('{0}', {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11})",
+		c_id, data.money, data.rifle, data.shotgun, data.sniper,
+		data.l_armor, data.h_armor, data.grenade, data.flashbang,
+		data.bandage, data.fak, data.injector);
+
+	std::wcout << L"업데이트됨 : " << data.user_id << std::endl;
+	retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
+	if (!(SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode)) {
+		std::cout << "실패함" << std::endl;
+		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
+		SQLCancel(m_hstmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+		return;
+	}
+
+	SQLCancel(m_hstmt);
+	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+	return;
+}

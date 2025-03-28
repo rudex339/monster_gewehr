@@ -43,6 +43,7 @@ public:
 	bool Login(Player& player);
 	bool Login(PLAYER_INFO& player_info, Player& player);
 	void Update(Player& player);
+	void Update(DB_PLAYER_DATA& data);
 
 private:
 	

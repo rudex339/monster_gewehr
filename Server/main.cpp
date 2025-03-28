@@ -560,7 +560,29 @@ void WorkerThread()
 				SendEndGame(ply_id, true);
 				std::cout << "게임 끝난거 보냄 id : " << ply_id << std::endl;
 #ifdef DATABASE
-				database.Update(&players[ply_id]);
+				// DB 이벤트 기본 정보들
+				DB_EVENT event;
+				event.id = ply_id;
+				event.type = DB_UPDATE;
+				event.time_point = std::chrono::system_clock::now();
+				// 유저 데이터 넣는곳
+				event.data.user_id = players[ply_id].GetName();
+				event.data.user_password = players[ply_id].GetPassword();
+				event.data.money = players[ply_id].GetMoney();
+				event.data.rifle = players[ply_id].GetItem(S_RIFLE);
+				event.data.shotgun = players[ply_id].GetItem(S_SHOT_GUN);
+				event.data.sniper = players[ply_id].GetItem(S_SNIPER);
+				event.data.l_armor = players[ply_id].GetItem(S_L_ARMOR);
+				event.data.h_armor = players[ply_id].GetItem(S_H_ARMOR);
+				event.data.grenade = players[ply_id].GetItem(S_GRENADE);
+				event.data.flashbang = players[ply_id].GetItem(S_FLASH_BANG);
+				event.data.bandage = players[ply_id].GetItem(S_BANDAGE);
+				event.data.fak = players[ply_id].GetItem(S_FAK);
+				event.data.injector = players[ply_id].GetItem(S_INJECTOR);
+
+				db_queue.push(event);
+
+				//database.Update(&players[ply_id]);
 #endif
 				players[ply_id].PlayerInit();
 				players[ply_id].SetRoomID(-1);
@@ -576,7 +598,29 @@ void WorkerThread()
 				//if (players[ply_id].GetState() != S_STATE::IN_GAME) continue;
 				SendEndGame(ply_id, false);
 #ifdef DATABASE
-				database.Update(&players[ply_id]);
+				// DB 이벤트 기본 정보들
+				DB_EVENT event;
+				event.id = ply_id;
+				event.type = DB_UPDATE;
+				event.time_point = std::chrono::system_clock::now();
+				// 유저 데이터 넣는곳
+				event.data.user_id = players[ply_id].GetName();
+				event.data.user_password = players[ply_id].GetPassword();
+				event.data.money = players[ply_id].GetMoney();
+				event.data.rifle = players[ply_id].GetItem(S_RIFLE);
+				event.data.shotgun = players[ply_id].GetItem(S_SHOT_GUN);
+				event.data.sniper = players[ply_id].GetItem(S_SNIPER);
+				event.data.l_armor = players[ply_id].GetItem(S_L_ARMOR);
+				event.data.h_armor = players[ply_id].GetItem(S_H_ARMOR);
+				event.data.grenade = players[ply_id].GetItem(S_GRENADE);
+				event.data.flashbang = players[ply_id].GetItem(S_FLASH_BANG);
+				event.data.bandage = players[ply_id].GetItem(S_BANDAGE);
+				event.data.fak = players[ply_id].GetItem(S_FAK);
+				event.data.injector = players[ply_id].GetItem(S_INJECTOR);
+
+				db_queue.push(event);
+
+				//database.Update(&players[ply_id]);
 #endif
 				players[ply_id].PlayerInit();
 				players[ply_id].SetRoomID(-1);
@@ -809,7 +853,27 @@ void ProcessPacket(int id, char* p)
 		std::cout << "돈 : " << players[id].GetMoney() << std::endl;
 		std::cout << "구매한 아이템 : " << players[id].GetItem(packet->item_type) << std::endl;
 #ifdef DATABASE
-		database.Update(&players[id]);
+		// DB 이벤트 기본 정보들
+		DB_EVENT event;
+		event.id = ply_id;
+		event.type = DB_UPDATE;
+		event.time_point = std::chrono::system_clock::now();
+		// 유저 데이터 넣는곳
+		event.data.user_id = players[ply_id].GetName();
+		event.data.user_password = players[ply_id].GetPassword();
+		event.data.money = players[ply_id].GetMoney();
+		event.data.rifle = players[ply_id].GetItem(S_RIFLE);
+		event.data.shotgun = players[ply_id].GetItem(S_SHOT_GUN);
+		event.data.sniper = players[ply_id].GetItem(S_SNIPER);
+		event.data.l_armor = players[ply_id].GetItem(S_L_ARMOR);
+		event.data.h_armor = players[ply_id].GetItem(S_H_ARMOR);
+		event.data.grenade = players[ply_id].GetItem(S_GRENADE);
+		event.data.flashbang = players[ply_id].GetItem(S_FLASH_BANG);
+		event.data.bandage = players[ply_id].GetItem(S_BANDAGE);
+		event.data.fak = players[ply_id].GetItem(S_FAK);
+		event.data.injector = players[ply_id].GetItem(S_INJECTOR);
+
+		//database.Update(&players[id]);
 #endif
 		break;
 	}
@@ -1475,6 +1539,7 @@ void ProcessDBEvent(DB_EVENT& event)
 		break;
 	}
 	case DB_EVENT_TYPE::DB_UPDATE: {
+		database.Update(event.data);
 		break;
 	}
 
