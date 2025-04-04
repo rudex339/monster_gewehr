@@ -209,6 +209,9 @@ bool DataBase::Login(PLAYER_INFO& player_info, Player& player)
 	std::wstring c_id;
 	std::wstring c_password;
 
+	c_id = player_info.user_id;
+	c_password = player_info.user_password;
+
 	std::wstring query = std::format(L"CALL try_login ('{0}', '{1}')",
 		c_id, c_password);
 

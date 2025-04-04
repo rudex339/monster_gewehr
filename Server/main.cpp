@@ -52,6 +52,12 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	std::thread timer_thread{ TimerThread };
+	timer_thread.detach();
+
+	std::thread db_thread{ DBThread };
+	db_thread.detach();
+
 	std::vector<std::thread> worker_threads;
 	int thread_amount = std::thread::hardware_concurrency();
 	for (int i = 0; i < thread_amount; ++i) {
@@ -60,8 +66,7 @@ int main(int argc, char* argv[])
 	for (auto& th : worker_threads) {
 		th.detach();
 	}
-	std::thread timer_thread{ TimerThread };
-	timer_thread.detach();
+	
 
 	constexpr int MAX_FRAME = 60;
 	using frame = std::chrono::duration<int32_t, std::ratio<1, MAX_FRAME>>;
@@ -233,6 +238,7 @@ void InGameWorker()
 
 			if (souleaters[i].GetHp() <= 0 && monster_packet.animation == die_ani) {
 				EXP_OVER* over = new EXP_OVER;
+
 				over->_comp_type = OP_CLEAR;
 				PostQueuedCompletionStatus(iocp_handle, 1, i, &over->_wsa_over);
 				souleaters[i].InitMonster(); // 이게 data_race가 되서 죽으면 2번째 플레이어는 죽는 위치가 원래 위치가 아닌 이상한 위치로 옮겨짐
@@ -592,6 +598,14 @@ void WorkerThread()
 			delete exp_over;
 			break;
 		}
+		case OP_LOGIN: {
+			std::cout << "로그인 성공" << std::endl;
+			SendLoginInfo(key);
+			SendRoomList(key);
+			SendItemInfo(key);
+			delete exp_over;
+			break;
+		}
 		case OP_GAMEOVER: {
 			for (int ply_id : gamerooms[key].GetPlyId()) {
 				if (ply_id == -1) continue;
@@ -626,25 +640,25 @@ void WorkerThread()
 				players[ply_id].SetRoomID(-1);
 			}
 			SendDeleteRoom(key);
+			delete exp_over;
 			break;
 		}
 
-		case OP_LOGIN: {
-			SendLoginInfo(key);
-			SendRoomList(key);
-			SendItemInfo(key);
-			break;
-		}
+		
 		case OP_LOGIN_FAIL: {
+			std::cout << "로그인 실패" << std::endl;
 			SendLoginFail(key);
+			delete exp_over;
 			break;
 		}
 		case OP_REGISTER: {
 			SendRegisterSucc(key);
+			delete exp_over;
 			break;
 		}
 		case OP_REGISTER_FAIL: {
 			SendRegisterFail(key);
+			delete exp_over;
 			break;
 		}
 		}
@@ -855,24 +869,25 @@ void ProcessPacket(int id, char* p)
 #ifdef DATABASE
 		// DB 이벤트 기본 정보들
 		DB_EVENT event;
-		event.id = ply_id;
+		event.id = id;
 		event.type = DB_UPDATE;
 		event.time_point = std::chrono::system_clock::now();
 		// 유저 데이터 넣는곳
-		event.data.user_id = players[ply_id].GetName();
-		event.data.user_password = players[ply_id].GetPassword();
-		event.data.money = players[ply_id].GetMoney();
-		event.data.rifle = players[ply_id].GetItem(S_RIFLE);
-		event.data.shotgun = players[ply_id].GetItem(S_SHOT_GUN);
-		event.data.sniper = players[ply_id].GetItem(S_SNIPER);
-		event.data.l_armor = players[ply_id].GetItem(S_L_ARMOR);
-		event.data.h_armor = players[ply_id].GetItem(S_H_ARMOR);
-		event.data.grenade = players[ply_id].GetItem(S_GRENADE);
-		event.data.flashbang = players[ply_id].GetItem(S_FLASH_BANG);
-		event.data.bandage = players[ply_id].GetItem(S_BANDAGE);
-		event.data.fak = players[ply_id].GetItem(S_FAK);
-		event.data.injector = players[ply_id].GetItem(S_INJECTOR);
+		event.data.user_id = players[id].GetName();
+		event.data.user_password = players[id].GetPassword();
+		event.data.money = players[id].GetMoney();
+		event.data.rifle = players[id].GetItem(S_RIFLE);
+		event.data.shotgun = players[id].GetItem(S_SHOT_GUN);
+		event.data.sniper = players[id].GetItem(S_SNIPER);
+		event.data.l_armor = players[id].GetItem(S_L_ARMOR);
+		event.data.h_armor = players[id].GetItem(S_H_ARMOR);
+		event.data.grenade = players[id].GetItem(S_GRENADE);
+		event.data.flashbang = players[id].GetItem(S_FLASH_BANG);
+		event.data.bandage = players[id].GetItem(S_BANDAGE);
+		event.data.fak = players[id].GetItem(S_FAK);
+		event.data.injector = players[id].GetItem(S_INJECTOR);
 
+		db_queue.push(event);
 		//database.Update(&players[id]);
 #endif
 		break;
@@ -1509,15 +1524,15 @@ void ProcessDBEvent(DB_EVENT& event)
 		p_info.user_password = event.data.user_password;
 
 		if (database.Login(p_info, players[event.id])) {
-			//성공하면 성공한 over_type을 적어서 postqueued를 하고 worker쓰레드에서 로그인 완료되면 보내야 하는 정보들을 보내줌
-			EXP_OVER over;
-			over._comp_type = OP_LOGIN;
-			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
+			//성공하면 성공한 over_type을 적어서 postqueued를 하고 worker쓰레드에서 로그인 완료되면 보내야 하는 정보들을 보내줌				
+			EXP_OVER* over = new EXP_OVER;
+			over->_comp_type = OP_LOGIN;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over->_wsa_over);
 		}
 		else {
-			EXP_OVER over;
-			over._comp_type = OP_LOGIN_FAIL;
-			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
+			EXP_OVER* over = new EXP_OVER;
+			over->_comp_type = OP_LOGIN_FAIL;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over->_wsa_over);
 		}
 		break;
 	}
@@ -1527,14 +1542,14 @@ void ProcessDBEvent(DB_EVENT& event)
 		p_info.user_password = event.data.user_password;
 
 		if (database.Createaccount(p_info)) {
-			EXP_OVER over;
-			over._comp_type = OP_REGISTER;
-			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
+			EXP_OVER* over = new EXP_OVER;
+			over->_comp_type = OP_REGISTER;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over->_wsa_over);
 		}
 		else {
-			EXP_OVER over;
-			over._comp_type = OP_REGISTER_FAIL;
-			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over._wsa_over);
+			EXP_OVER* over = new EXP_OVER;
+			over->_comp_type = OP_REGISTER_FAIL;
+			PostQueuedCompletionStatus(iocp_handle, 1, event.id, &over->_wsa_over);
 		}
 		break;
 	}
