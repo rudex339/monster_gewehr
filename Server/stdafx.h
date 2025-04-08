@@ -36,6 +36,7 @@
 #include <thread>
 #include <concurrent_priority_queue.h>
 #include <queue>
+#include <atomic>
 
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment (lib, "MSWSock.LIB")

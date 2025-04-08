@@ -87,4 +87,4 @@ concurrency::concurrent_priority_queue<DB_EVENT> db_queue;
 
 DataBase database;
 
-int global_id = 0;
+std::atomic_int global_id = 0;

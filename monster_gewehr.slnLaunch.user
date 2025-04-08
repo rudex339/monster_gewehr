@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "새 프로필",
+    "Projects": [
+      {
+        "Path": "Server\\Server.vcxproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "..\\dummy_client\\dummy_client.vcxproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

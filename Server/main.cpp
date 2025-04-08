@@ -516,7 +516,7 @@ void WorkerThread()
 		case OP_ACCEPT: {
 			SOCKET client_sock;
 			memcpy(&client_sock, &exp_over->_send_buf, sizeof(SOCKET));
-			int client_id = global_id++;
+			std::atomic_int client_id = global_id++;
 
 			players.try_emplace(client_id, client_id, client_sock);
 
@@ -529,6 +529,8 @@ void WorkerThread()
 			memcpy(&exp_over->_send_buf, &client_sock, sizeof(SOCKET));
 			AcceptEx(listen_sock, client_sock, exp_over->_send_buf + sizeof(SOCKET), 0,
 				sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, 0, &exp_over->_wsa_over);
+
+			std::cout << "클라이언트 접속 : " << client_id << std::endl;
 			break;
 		}
 		case OP_RECV: {
@@ -1014,6 +1016,7 @@ void Disconnect(int id)
 	players[id].SetState(S_STATE::LOG_OUT);
 
 	short room_num = players[id].GetRoomID();
+	std::cout << "연결 끊김 : " << id << std::endl;
 
 	if (room_num > -1) {
 		SC_LOGOUT_PACKET packet;
