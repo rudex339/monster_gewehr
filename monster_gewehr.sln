@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "Server\Server.vcx
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MonsterGewehr_Setup", "MonsterGewehr_Setup.vdproj", "{2C74C0F0-9000-4483-A0E2-05BD3C3CA291}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dummy_client", "..\dummy_client\dummy_client.vcxproj", "{9165470A-2E6F-4809-AE75-98B7411367C6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dummy_client", "dummy_client\dummy_client.vcxproj", "{9165470A-2E6F-4809-AE75-98B7411367C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
