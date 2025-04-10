@@ -20,7 +20,7 @@ using namespace std;
 using namespace chrono;
 
 constexpr int MAX_CLIENTS = 500;
-constexpr const char* SERVER_IP = "127.0.0.1";
+string SERVER_IP{ "127.0.0.1" };
 constexpr int SERVER_PORT = 8000;
 constexpr int BUF_SIZE = 500;
 
@@ -98,7 +98,21 @@ int main() {
 		worker_threads.emplace_back(WorkerThread);
 
 	for (auto& thread : worker_threads)
-		thread.join();
+		thread.detach();
+
+	while (1) {
+		clients[connected_clients].socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+		struct sockaddr_in serveraddr;
+		memset(&serveraddr, 0, sizeof(serveraddr));
+		serveraddr.sin_family = AF_INET;
+		serveraddr.sin_port = htons(SERVER_PORT);
+		inet_pton(AF_INET, SERVER_IP.c_str(), &serveraddr.sin_addr);
+
+		int ret = WSAConnect(clients[connected_clients].socket, (sockaddr*)&serveraddr, sizeof(serveraddr), NULL, NULL, NULL, NULL);
+
+		connected_clients += 1;
+	}
 
     WSACleanup();
     return 0;
