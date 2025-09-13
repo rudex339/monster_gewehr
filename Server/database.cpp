@@ -75,9 +75,6 @@ bool DataBase::Createaccount(const char* id, const char* password)
 
 	std::wcout << c_id << " " << c_password << std::endl;
 
-	/*std::wstring query = std::format(L"INSERT INTO user_data (user_id, user_password, user_level, possion, grenade) VALUES ('{0}', '{1}', 1, 10, 10)",
-		c_id, c_password);*/
-
 	std::wstring query = std::format(L"CALL register_user ('{0}', '{1}')",
 		c_id, c_password);
 
@@ -95,21 +92,53 @@ bool DataBase::Createaccount(const char* id, const char* password)
 	return true;
 }
 
+// 기존방식 (보안에 취약함)
+//bool DataBase::Createaccount(PLAYER_INFO& player_info)
+//{
+//	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
+//	
+//	std::wcout << player_info.user_id << " " << player_info.user_password << std::endl;
+//
+//	/*std::wstring query = std::format(L"INSERT INTO user_data (user_id, user_password, user_level, possion, grenade) VALUES ('{0}', '{1}', 1, 10, 10)",
+//		c_id, c_password);*/
+//
+//	std::wstring query = std::format(L"CALL register_user ('{0}', '{1}')",
+//		player_info.user_id, player_info.user_password);
+//
+//	retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
+//	if (!(SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode)) {
+//		std::cout << "실패함" << std::endl;
+//		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
+//		SQLCancel(m_hstmt);
+//		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+//		return false;
+//	}
+//
+//	SQLCancel(m_hstmt);
+//	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+//	return true;
+//}
+
 bool DataBase::Createaccount(PLAYER_INFO& player_info)
 {
 	SQLRETURN retcode = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
-	
-	std::wcout << player_info.user_id << " " << player_info.user_password << std::endl;
+	if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO) {
+		return false;
+	}
 
-	/*std::wstring query = std::format(L"INSERT INTO user_data (user_id, user_password, user_level, possion, grenade) VALUES ('{0}', '{1}', 1, 10, 10)",
-		c_id, c_password);*/
+	const wchar_t* sql_query = L"CALL register_user(?, ?)";
+	retcode = SQLPrepare(m_hstmt, (SQLWCHAR*)sql_query, SQL_NTS);
+	if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO) {
+		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
+		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+		return false;
+	}
 
-	std::wstring query = std::format(L"CALL register_user ('{0}', '{1}')",
-		player_info.user_id, player_info.user_password);
+	SQLBindParameter(m_hstmt, 1, SQL_PARAM_INPUT, SQL_C_WCHAR, SQL_WVARCHAR, player_info.user_id.length(), 0, (SQLPOINTER)player_info.user_id.c_str(), 0, NULL);
+	SQLBindParameter(m_hstmt, 2, SQL_PARAM_INPUT, SQL_C_WCHAR, SQL_WVARCHAR, player_info.user_password.length(), 0, (SQLPOINTER)player_info.user_password.c_str(), 0, NULL);
 
-	retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
-	if (!(SQL_SUCCESS == retcode || SQL_SUCCESS_WITH_INFO == retcode)) {
-		std::cout << "실패함" << std::endl;
+	retcode = SQLExecute(m_hstmt);
+	if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO) {
 		show_error(m_hstmt, SQL_HANDLE_STMT, retcode);
 		SQLCancel(m_hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
@@ -118,6 +147,7 @@ bool DataBase::Createaccount(PLAYER_INFO& player_info)
 
 	SQLCancel(m_hstmt);
 	SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+
 	return true;
 }
 
