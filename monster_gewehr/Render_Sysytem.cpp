@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Render_Sysytem.h"
 #include "Object_Entity.h"
 #include "ObjectManager.h"
@@ -117,14 +117,14 @@ Render_System::Render_System(ObjectManager* manager, ID3D12Device* pd3dDevice, I
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.50f, 0.50f, 0.50f, 1.0f);
 
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
 	//boundingbox
 	m_pBox = NULL;
-	////////////////////¹Ù¿îµù ¹Ú½º¸¦ ±×¸®Áö ¾ÊÀ¸·Á¸é ÀÌºÎºĞ¸¸ ÁÖ¼®Ã³¸®ÇÏ¸é µÊ
+	////////////////////ë°”ìš´ë”© ë°•ìŠ¤ë¥¼ ê·¸ë¦¬ì§€ ì•Šìœ¼ë ¤ë©´ ì´ë¶€ë¶„ë§Œ ì£¼ì„ì²˜ë¦¬í•˜ë©´ ë¨
 	if (manager->m_pBox != NULL) {
 		m_pBox = manager->m_pBox;
 	}
@@ -380,7 +380,7 @@ void Render_System::tick(World* world, float deltaTime)
 					ComponentHandle<Rotation_Component> rotation = ent->get<Rotation_Component>();
 					ComponentHandle<Scale_Component> Scale = ent->get<Scale_Component>();
 					if (ent->has<AnimationController_Component>()) {
-						// ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà ½ÃÅ°´Â ºÎºĞ
+						// ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ ì‹œí‚¤ëŠ” ë¶€ë¶„
 						ComponentHandle<AnimationController_Component> AnimationController = ent->get<AnimationController_Component>();
 						AnimationController->m_AnimationController->AdvanceTime(deltaTime, Model->m_MeshModel);
 						Model->m_MeshModel->Animate(deltaTime);
@@ -442,7 +442,7 @@ void Render_System::tick(World* world, float deltaTime)
 						ComponentHandle<Emitter_Componet> emiiter = ent->get<Emitter_Componet>();
 						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(emiiter->m_nRow, emiiter->m_nCol, emiiter->m_nRows, emiiter->m_nCols);
 						if (!emiiter->m_pd3dcbtexture) {
-							UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255); //256ÀÇ ¹è¼ö
+							UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 							emiiter->m_pd3dcbtexture = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 							//m_pcbMappedtexture = new cbTextureInfo;
 							emiiter->m_pd3dcbtexture->Map(0, NULL, (void**)&emiiter->m_pcbMappedtexture);
@@ -588,7 +588,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				textIndex = editBox->index;
 			}
 
-			// ÅØ½ºÆ® ÀÔ·Â ¹Ú½º
+			// í…ìŠ¤íŠ¸ ì…ë ¥ ë°•ìŠ¤
 			m_textBrush.Get()->SetOpacity(1.0f);
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 			m_d2dDeviceContext->FillRectangle(
@@ -602,7 +602,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					Invisile_password[i] = '*';
 				}
 
-				// ÅØ½ºÆ® ·¹ÀÌ¾Æ¿ô
+				// í…ìŠ¤íŠ¸ ë ˆì´ì•„ì›ƒ
 				m_dwriteFactory->CreateTextLayout(
 					Invisile_password.c_str(),
 					static_cast<UINT32>(Invisile_password.length()),
@@ -613,7 +613,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				);
 			}
 			else {
-				// ÅØ½ºÆ® ·¹ÀÌ¾Æ¿ô
+				// í…ìŠ¤íŠ¸ ë ˆì´ì•„ì›ƒ
 				m_dwriteFactory->CreateTextLayout(
 					text[editBox->index].c_str(),
 					static_cast<UINT32>(text[editBox->index].length()),
@@ -625,7 +625,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			}
 
 
-			// ÅØ½ºÆ®
+			// í…ìŠ¤íŠ¸
 			m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 
 
@@ -636,24 +636,24 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				D2D1_DRAW_TEXT_OPTIONS_NONE
 			);
 
-			// Ä¿¼­ 
+			// ì»¤ì„œ 
 			if (cursorPosition[textIndex] <= text[textIndex].length() && textIndex == editBox->index)
 			{
-				// Ä¿¼­ À§Ä¡¸¦ ±âÁØÀ¸·Î ÅØ½ºÆ® Æø °è»ê
+				// ì»¤ì„œ ìœ„ì¹˜ë¥¼ ê¸°ì¤€ìœ¼ë¡œ í…ìŠ¤íŠ¸ í­ ê³„ì‚°
 				DWRITE_HIT_TEST_METRICS hitTestMetrics;
 				float cursorX, cursorY;
 
 				pTextLayout[textIndex]->HitTestTextPosition(
-					static_cast<UINT32>(cursorPosition[textIndex]), // Ä¿¼­ À§Ä¡ ÀÎµ¦½º
-					FALSE, // Ä¿¼­°¡ ¹®ÀÚ ¾Õ¿¡ ÀÖ´ÂÁö ¿©ºÎ
-					&cursorX, // Ä¿¼­ÀÇ X ÁÂÇ¥
-					&cursorY, // Ä¿¼­ÀÇ Y ÁÂÇ¥
-					&hitTestMetrics // Ä¿¼­ À§Ä¡ÀÇ ÅØ½ºÆ® ¸ŞÆ®¸¯½º
+					static_cast<UINT32>(cursorPosition[textIndex]), // ì»¤ì„œ ìœ„ì¹˜ ì¸ë±ìŠ¤
+					FALSE, // ì»¤ì„œê°€ ë¬¸ì ì•ì— ìˆëŠ”ì§€ ì—¬ë¶€
+					&cursorX, // ì»¤ì„œì˜ X ì¢Œí‘œ
+					&cursorY, // ì»¤ì„œì˜ Y ì¢Œí‘œ
+					&hitTestMetrics // ì»¤ì„œ ìœ„ì¹˜ì˜ í…ìŠ¤íŠ¸ ë©”íŠ¸ë¦­ìŠ¤
 				);
 
-				cursorX += editBox->x; // editBoxÀÇ x ÁÂÇ¥¸¦ ´õÇÏ¿© Ä¿¼­ÀÇ Àı´ë ÁÂÇ¥ °è»ê
+				cursorX += editBox->x; // editBoxì˜ x ì¢Œí‘œë¥¼ ë”í•˜ì—¬ ì»¤ì„œì˜ ì ˆëŒ€ ì¢Œí‘œ ê³„ì‚°
 
-				// Ä¿¼­¸¦ °è»êµÈ À§Ä¡¿¡ ±×¸®±â
+				// ì»¤ì„œë¥¼ ê³„ì‚°ëœ ìœ„ì¹˜ì— ê·¸ë¦¬ê¸°
 				m_d2dDeviceContext->DrawLine(
 					D2D1::Point2F(cursorX, editBox->y + 4.0f),
 					D2D1::Point2F(cursorX, editBox->y + hitTestMetrics.height - 1.0f),
@@ -708,8 +708,8 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				button->m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
 				button->m_textBrush.Get()->SetOpacity(button->m_opacity);
 
-				button->m_textFormat.Get()->SetParagraphAlignment(button->m_paragraph_alignment);	// ÅØ½ºÆ®¸¦ »óÇÏÀÇ °¡¿îµ¥¿¡ À§Ä¡
-				button->m_textFormat.Get()->SetTextAlignment(button->m_text_alignment);			// ÅØ½ºÆ®¸¦ ÁÂ¿ìÀÇ °¡¿îµ¥¿¡ À§Ä¡
+				button->m_textFormat.Get()->SetParagraphAlignment(button->m_paragraph_alignment);	// í…ìŠ¤íŠ¸ë¥¼ ìƒí•˜ì˜ ê°€ìš´ë°ì— ìœ„ì¹˜
+				button->m_textFormat.Get()->SetTextAlignment(button->m_text_alignment);			// í…ìŠ¤íŠ¸ë¥¼ ì¢Œìš°ì˜ ê°€ìš´ë°ì— ìœ„ì¹˜
 
 				m_d2dDeviceContext->DrawTextW(
 					button->m_text.data(),
@@ -730,13 +730,13 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					break;
 
 				case LoginBtn:
-					// ¿©±â¼­ ¾ÆÀÌµğ ºñ±³ÇÏ°í, ¼º°øÇÏ¸é ·Îºñ·Î ÀÌµ¿
+					// ì—¬ê¸°ì„œ ì•„ì´ë”” ë¹„êµí•˜ê³ , ì„±ê³µí•˜ë©´ ë¡œë¹„ë¡œ ì´ë™
 					m_scene->SetName(text[0]);
 					world->emit<InputId_Event>({0});
 					break;
 
 				case RegisterBtn:
-					// ¿©±â¼­ ¾ÆÀÌµğ¶û ºñ¹Ğ¹øÈ£¸¦ DB¿¡ ÀúÀå ¹× ·Îºñ·Î ÀÌµ¿
+					// ì—¬ê¸°ì„œ ì•„ì´ë””ë‘ ë¹„ë°€ë²ˆí˜¸ë¥¼ DBì— ì €ì¥ ë° ë¡œë¹„ë¡œ ì´ë™
 					world->emit<InputId_Event>({ 1 });
 					break;
 
@@ -766,7 +766,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					world->emit<ChoiceItem_Event>({ button->item_num });
 					break;
 				case BuyBtn:
-					cout << "±¸¸Å/°­È­" << endl;
+					cout << "êµ¬ë§¤/ê°•í™”" << endl;
 					world->emit<Purchase_Event>({});
 					world->emit<Refresh_Scene>({ SHOP });
 					Sound_Componet::GetInstance().PlaySound(Sound_Componet::Sound::Purchase);
@@ -798,10 +798,10 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					Sound_Componet::GetInstance().PlayMusic(Sound_Componet::Music::Title);
 					break;
 				default:
-					cout << "µğÆúÆ®" << endl;
+					cout << "ë””í´íŠ¸" << endl;
 					break;
 				}
-				Clicked(); // ¹öÆ°ÀÌ ´­¸®°í ³ª¸é clicked¸¦ false·Î º¯°æ(¿ø·¡ ¸¶¿ì½º¸¦ ¿òÁ÷¿©¾ß¸¸ false·Î ¹Ù²î±â ¶§¹®¿¡ »ı±â´Â ¹ö±× ÇØ°á¿ë)
+				Clicked(); // ë²„íŠ¼ì´ ëˆŒë¦¬ê³  ë‚˜ë©´ clickedë¥¼ falseë¡œ ë³€ê²½(ì›ë˜ ë§ˆìš°ìŠ¤ë¥¼ ì›€ì§ì—¬ì•¼ë§Œ falseë¡œ ë°”ë€Œê¸° ë•Œë¬¸ì— ìƒê¸°ëŠ” ë²„ê·¸ í•´ê²°ìš©)
 			}
 		}
 	);
@@ -829,13 +829,13 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 		) -> void {
 			{
 				if (m_scene->GetState() == END) { return; }
-				// ÇÃ·¹ÀÌ¾î Á¤º¸ UI
-				// Å×µÎ¸®
+				// í”Œë ˆì´ì–´ ì •ë³´ UI
+				// í…Œë‘ë¦¬
 				textRect = D2D1::RectF(0, 0, FRAME_BUFFER_WIDTH / 3.2 + 20, FRAME_BUFFER_HEIGHT / 7 + 20);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 				m_d2dDeviceContext->DrawRectangle(&textRect, m_textBrush.Get());
 
-				// ÃÊ»óÈ­
+				// ì´ˆìƒí™”
 				D2D1_RECT_F sRect = { 10, 10, FRAME_BUFFER_WIDTH / 13, FRAME_BUFFER_HEIGHT / 7 };
 				m_d2dDeviceContext->DrawBitmap(
 					m_bitmaps[0],
@@ -845,7 +845,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					imageRect
 				);
 
-				// HP ÅØ½ºÆ®
+				// HP í…ìŠ¤íŠ¸
 				TextUI_Component hp = TextUI_Component(DEFAULT_FONT, L"HP " + to_wstring((int)player->hp),
 					FRAME_BUFFER_HEIGHT / 35, FRAME_BUFFER_WIDTH / 13 + 5, FRAME_BUFFER_HEIGHT * 2 / 35 ,FRAME_BUFFER_WIDTH / 3.2);
 
@@ -857,7 +857,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					m_textBrush.Get()
 				);
 
-				// HP ¹Ù
+				// HP ë°”
 				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT / 35, FRAME_BUFFER_WIDTH / 3.2, FRAME_BUFFER_HEIGHT * 2 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
@@ -868,7 +868,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 
-				// SP ÅØ½ºÆ®
+				// SP í…ìŠ¤íŠ¸
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 				TextUI_Component sp = TextUI_Component(DEFAULT_FONT, L"SP " + to_wstring((int)player->stamina),
 					FRAME_BUFFER_HEIGHT * 3 / 35, FRAME_BUFFER_WIDTH / 13 + 5, FRAME_BUFFER_HEIGHT * 4 / 35, FRAME_BUFFER_WIDTH / 3.2);
@@ -881,7 +881,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					m_textBrush.Get()
 				);
 
-				// SP ¹Ù
+				// SP ë°”
 				textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 5 / 36, FRAME_BUFFER_HEIGHT * 3 / 35, FRAME_BUFFER_WIDTH / 3.2, FRAME_BUFFER_HEIGHT * 4 / 35);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 				m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
@@ -892,9 +892,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 			}
 
-			// ¹«±â Á¾·ù¿Í ÅºÃ¢ Ç¥½Ã
+			// ë¬´ê¸° ì¢…ë¥˜ì™€ íƒ„ì°½ í‘œì‹œ
 			{
-				// ¹«±â ¾ÆÀÌÄÜ
+				// ë¬´ê¸° ì•„ì´ì½˜
 				D2D1_RECT_F sRect = {  FRAME_BUFFER_WIDTH * 25 / 30, FRAME_BUFFER_HEIGHT * 19 / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * 21 / 24 };
 				imageRect = {0,0,450,150};
 				m_d2dDeviceContext->DrawBitmap(
@@ -905,7 +905,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 					imageRect
 				);
 
-				// ÅºÃ¢
+				// íƒ„ì°½
 				TextUI_Component ammo = TextUI_Component(DEFAULT_FONT, to_wstring((int)player->ammo) + L"/" + to_wstring((int)player->mag),
 					FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 13 / 15, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH);
 				m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
@@ -919,7 +919,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				);
 			}
 
-			// Èú ¾ÆÀÌÅÛ ¾ÆÀÌÄÜ ¹× º¸À¯·®
+			// í ì•„ì´í…œ ì•„ì´ì½˜ ë° ë³´ìœ ëŸ‰
 			{
 				D2D1_RECT_F sRect = { FRAME_BUFFER_WIDTH * 25 / 30, FRAME_BUFFER_HEIGHT * 19 / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * 21 / 24 };
 				imageRect = { 0,0,200,200 };
@@ -927,7 +927,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				for (int i = 0; i < 4; ++i) {
 					if (i < 3) {
 						float opacity = m_scene->GetHealItems()[i] > 0 ? 1.0f : 0.4f;
-						// ¾ÆÀÌÅÛ »ç¿ë Å° ¾ÆÀÌÄÜ Ãâ·Â
+						// ì•„ì´í…œ ì‚¬ìš© í‚¤ ì•„ì´ì½˜ ì¶œë ¥
 						sRect = { FRAME_BUFFER_WIDTH * 26.7 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 27.7 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
 						m_d2dDeviceContext->DrawBitmap(
 							m_bitmaps[10+i],
@@ -937,7 +937,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 							imageRect
 						);
 
-						// ¾ÆÀÌÅÛ ¾ÆÀÌÄÜ Ãâ·Â
+						// ì•„ì´í…œ ì•„ì´ì½˜ ì¶œë ¥
 						sRect = { FRAME_BUFFER_WIDTH * 28 / 30, FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24 };
 						m_d2dDeviceContext->DrawBitmap(
 							m_bitmaps[i + 5],
@@ -947,7 +947,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 							imageRect
 						);
 
-						// ¾ÆÀÌÅÛ º¸À¯ °³¼ö Ãâ·Â
+						// ì•„ì´í…œ ë³´ìœ  ê°œìˆ˜ ì¶œë ¥
 						TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, to_wstring(m_scene->GetHealItems()[i]),
 							FRAME_BUFFER_HEIGHT * (16.5f - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 29.2 / 30, FRAME_BUFFER_HEIGHT * (18 - i * 1.5f) / 24, FRAME_BUFFER_WIDTH * 30 / 30);
 						m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
@@ -980,10 +980,10 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
-			// È¸º¹ Ç¥½Ã
+			// íšŒë³µ í‘œì‹œ
 			{
 				if (player->heal_timer > 0) {
-					TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"È¸º¹Áß",
+					TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"íšŒë³µì¤‘",
 						FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 
@@ -997,7 +997,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 					float width = (FRAME_BUFFER_WIDTH * 70 / 100 - FRAME_BUFFER_WIDTH * 30 / 100) / 100 ;
 
-					// È¸º¹ ÁøÇà ¹Ù
+					// íšŒë³µ ì§„í–‰ ë°”
 					textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 30 / 100, FRAME_BUFFER_HEIGHT * 43 / 48, FRAME_BUFFER_WIDTH * 70 / 100, FRAME_BUFFER_HEIGHT * 45 / 48);
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
 					m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
@@ -1012,7 +1012,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 			}
 
 
-			// º¸±Ş»óÀÚ ±ÙÃ³¿¡ °¡¸é º¸±Ş °¡´É ¿©ºÎ ¹× ³²Àº ½Ã°£ Ãâ·Â
+			// ë³´ê¸‰ìƒì ê·¼ì²˜ì— ê°€ë©´ ë³´ê¸‰ ê°€ëŠ¥ ì—¬ë¶€ ë° ë‚¨ì€ ì‹œê°„ ì¶œë ¥
 			player->near_supply = false;
 			{
 				for (int i = 0; i < 5; ++i) {
@@ -1020,9 +1020,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 						player->near_supply = true;
 						
 						
-						// º¸±Ş ÁßÀÏ¶§
+						// ë³´ê¸‰ ì¤‘ì¼ë•Œ
 						if (player->is_suppling) {
-							TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"º¸±ŞÁß",
+							TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"ë³´ê¸‰ì¤‘",
 								FRAME_BUFFER_HEIGHT * 20 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 21 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
 							m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 
@@ -1036,7 +1036,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 							float width = (FRAME_BUFFER_WIDTH * 70 / 100 - FRAME_BUFFER_WIDTH * 30 / 100) / 100;
 
-							// º¸±Ş ÁøÇà ¹Ù
+							// ë³´ê¸‰ ì§„í–‰ ë°”
 							textRect = D2D1::RectF(FRAME_BUFFER_WIDTH * 30 / 100, FRAME_BUFFER_HEIGHT * 43 / 48, FRAME_BUFFER_WIDTH * 70 / 100, FRAME_BUFFER_HEIGHT * 45 / 48);
 							m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
 							m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
@@ -1048,11 +1048,11 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 							m_d2dDeviceContext->FillRectangle(&textRect, m_textBrush.Get());
 						}
 
-						// º¸±Ş ÁßÀÌ ¾Æ´Ò¶§ º¸±ŞÇÏ¶ó´Â Ç¥½Ã 
+						// ë³´ê¸‰ ì¤‘ì´ ì•„ë‹ë•Œ ë³´ê¸‰í•˜ë¼ëŠ” í‘œì‹œ 
 						else {
-							// º¸±Ş °¡´É ¿©ºÎ Ã¼Å©
+							// ë³´ê¸‰ ê°€ëŠ¥ ì—¬ë¶€ ì²´í¬
 							if (player->can_supply < 0.f) {
-								TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"FÅ°¸¦ ´­·¯ º¸±Ş",
+								TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"Fí‚¤ë¥¼ ëˆŒëŸ¬ ë³´ê¸‰",
 									FRAME_BUFFER_HEIGHT * 15 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 16 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
 								m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 
@@ -1066,7 +1066,7 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 							}
 
 							else {
-								TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"º¸±Ş ÄğÅ¸ÀÓ Áß (" + to_wstring((int)player->can_supply) + L"ÃÊ)",
+								TextUI_Component heal_text = TextUI_Component(DEFAULT_FONT, L"ë³´ê¸‰ ì¿¨íƒ€ì„ ì¤‘ (" + to_wstring((int)player->can_supply) + L"ì´ˆ)",
 									FRAME_BUFFER_HEIGHT * 15 / 24, FRAME_BUFFER_WIDTH * 47 / 100, FRAME_BUFFER_HEIGHT * 16 / 24, FRAME_BUFFER_WIDTH * 58 / 100);
 								m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 
@@ -1085,9 +1085,9 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 				}
 			}
 
-			// ¹Ì´Ï¸Ê
+			// ë¯¸ë‹ˆë§µ
 			{
-				// ¿À¸¥ÂÊ°¡¸é zÁõ°¡ ¾ÕÀ¸·Î °¡¸é x°¨¼Ò
+				// ì˜¤ë¥¸ìª½ê°€ë©´ zì¦ê°€ ì•ìœ¼ë¡œ ê°€ë©´ xê°ì†Œ
 				float mapscale = 3960 / 396;
 				int margin = 54 / 2;
 				float x = margin + (int)(position->Position.z / mapscale);
@@ -1148,18 +1148,18 @@ void Render_System::receive(World* world, const DrawUI_Event& event)
 
 
 			{
-				// Á¶ÁØ Å©·Î½ºÇì¾î
+				// ì¡°ì¤€ í¬ë¡œìŠ¤í—¤ì–´
 				if (player->aim_mode) {
 					m_textBrush.Get()->SetColor(D2D1::ColorF(D2D1::ColorF::Blue));
 					m_d2dDeviceContext->FillEllipse(&ellipse, m_textBrush.Get());
 
 				}
 			}
-		ClearUserInfo(); // ¹æÀÇ À¯Àúµé ÁÂÇ¥¸¦ ÀúÀåÇÏ´ø map ÃÊ±âÈ­
+		ClearUserInfo(); // ë°©ì˜ ìœ ì €ë“¤ ì¢Œí‘œë¥¼ ì €ì¥í•˜ë˜ map ì´ˆê¸°í™”
 		}
 	);
 
-	// ¹«±â ¹ß»ç¼Óµµ ÁöÁ¤
+	// ë¬´ê¸° ë°œì‚¬ì†ë„ ì§€ì •
 	world->each<player_Component, AnimationController_Component>([&](
 		Entity* ent,
 		ComponentHandle<player_Component> player,

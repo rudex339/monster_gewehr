@@ -25,7 +25,7 @@ class PlayerControl_System : public EntitySystem,
 	public EventSubscriber<GetPlayerPtr_Event>
 {
 private:
-	Entity* m_Pawn;
+	Entity* m_Pawn = NULL;
 	POINT m_OldCursorPos;
 	bool Capture = false;
 	bool R_btn = false;

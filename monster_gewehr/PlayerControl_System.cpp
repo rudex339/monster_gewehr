@@ -523,7 +523,6 @@ void PlayerControl_System::receive(World* world, const CursorPos_Event& event)
 void PlayerControl_System::receive(World* world, const GetPlayerPtr_Event& event)
 {
 	if (event.enable) {
-		world->enableSystem(this);
 		m_Pawn = event.Pawn;
 		//ComponentHandle<EulerAngle_Component> eulerangle =
 		//	m_Pawn->get<EulerAngle_Component>();
@@ -537,6 +536,5 @@ void PlayerControl_System::receive(World* world, const GetPlayerPtr_Event& event
 	}
 	else {
 		m_Pawn = NULL;
-		world->disableSystem(this);
 	}
 }
