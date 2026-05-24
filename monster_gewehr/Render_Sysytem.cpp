@@ -443,14 +443,12 @@ void Render_System::tick(World* world, float deltaTime)
 						((TextureRectMesh*)Model->m_MeshModel->m_pMesh)->changeRowCol(emiiter->m_nRow, emiiter->m_nCol, emiiter->m_nRows, emiiter->m_nCols);
 						if (!emiiter->m_pd3dcbtexture) {
 							UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255); //256의 배수
-							emiiter->m_pd3dcbtexture = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-							//m_pcbMappedtexture = new cbTextureInfo;
+							emiiter->m_pd3dcbtexture = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, 
+								D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 							emiiter->m_pd3dcbtexture->Map(0, NULL, (void**)&emiiter->m_pcbMappedtexture);
 
-							//UINT ncbElementBytes = ((sizeof(cbTextureInfo) + 255) & ~255);
-							//D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = ObjectManager::GetCbvSrvDescriptorHeap()->m_d3dCbvGPUDescriptorNextHandle;
-
-							ObjectManager::CreateConstantBufferViews(m_pd3dDevice, 1, emiiter->m_pd3dcbtexture, ncbElementBytes).ptr;
+							//문제 코드 주석처리
+							//ObjectManager::CreateConstantBufferViews(m_pd3dDevice, 1, emiiter->m_pd3dcbtexture, ncbElementBytes).ptr;
 						}
 
 						float height = 1.0f / float(emiiter->m_nRows);
